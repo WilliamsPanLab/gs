@@ -128,17 +128,20 @@ for(s in 1:length(unique(data1$site_num))){
 }
 data1$site_num = site_num; rm(site_num)
 
-#+++ AP - ask for clarification on this
+#+++ AP - code changed to only ascribe family ID values where famililial representation in the data >1 due to multiple siblings, not multiple visits from one sibling
 data1$id_fam = 0
 data1$fam_size = 0
+# initialize family ID ind
 ind=0
 for(s in 1:length(unique(data1$site_num))){
   data_s = data1[data1$site_num == s, ]
   for(f in 1:length(unique(data_s$rel_family_id))){
     data_s$fam_size[data_s$rel_family_id == unique(data_s$rel_family_id)[f]] = 
-      sum(data_s$rel_family_id == unique(data_s$rel_family_id)[f])
-    if(sum(data_s$fam_size[data_s$rel_family_id == unique(data_s$rel_family_id)[f]])>1){	
+      sum(data_s$rel_family_id == unique(data_s$rel_family_id)[f])/2 #+++ changed to /2 for two-timepoint data
+    if(sum(data_s$fam_size[data_s$rel_family_id == unique(data_s$rel_family_id)[f]])>2){ #++++ changed to /2 for two-timepoint data. family size is corrected, by family size is still getting counter once per tpt rather than per subj
+      # update family ID ind
       ind=ind+1	
+      # assign curent family ID ind to this family
       data_s$id_fam[data_s$rel_family_id == unique(data_s$rel_family_id)[f]] = ind
     }	
   }
@@ -159,18 +162,20 @@ for(s in 1:ns){
 }
 nf = sum(nf_s)
 
+print(nf)
 
 # Setup for BPCA (code and model file from Thompson et al. 2019)
 Y = (as.matrix(scale(data1[,ind_Y]))); summary(Y)
+#+++ N needs to be n subj not nrows +++#
 N = nrow(Y)
 P = ncol(Y)
 Nsamples = 1000
 Nchains = 3
-model_file = "/oak/stanford/groups/leanew1/users/apines/data/gp/bppca.stan"
+model_file = "/oak/stanford/groups/leanew1/users/apines/scripts/gp/bppca.stan"
 smod = stan_model(model_file)
 
 
-nf=4829 # Arielle added this line -- necessary to make sure the number of families with more than 1 individual is correct (note that since every individual is repeated twice here, indivdiuals are considered "siblings" with themselves)
+#+++ nf=4829 # Arielle added this line -- necessary to make sure the number of families with more than 1 individual is correct (note that since every individual is repeated twice here, indivdiuals are considered "siblings" with themselves)
 
 
 # Run BPCA
@@ -180,16 +185,15 @@ log_lik.list = list()
 looic.list = list()
 for(d in 1:D_max){
   print(d)
-  pca_data <- list(Y = Y, N = N, P = P, D = d, Fam =  Fam, Site = Site, ns = ns, nf = nf)
+  #+++ added subj ID and nsubj
+  pca_data <- list(Y = Y, N = N, P = P, D = d, subj = subj, Fam =  Fam, Site = Site, ns = ns, nf = nf, nsubj = nsubj)
   set.seed(314)
   sa.list[[d]] = sampling(smod, data= pca_data, iter=Nsamples, chains=Nchains,init="random")
   #log_lik.list[[d]] <- extract_log_lik(sa.list[[d]])
   log_lik.list[[d]] <- extract(sa.list[[d]],"log_lik_marg")[[1]]
   looic.list[[d]] = loo(log_lik.list[[d]])
   save(sa.list,log_lik.list,looic.list,file="/oak/stanford/groups/leanew1/users/apines/data/gp/bppca_results.RData")
-  print("###############################")
+  print("############•••••••••••••############")
 }	
-
-
 
 
