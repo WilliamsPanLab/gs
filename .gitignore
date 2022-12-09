@@ -1,1 +1,3 @@
+slurm*.err
+slurm*.out
 main*
