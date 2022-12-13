@@ -9,5 +9,9 @@
 #SBATCH --mail-user=apines@stanford.edu
 #SBATCH --mail-type=ALL
 # ------------------------------------------
-module load R/4.1.0
-Rscript gp_Fits.R
+module load R/4.1
+Rscript gp_DevExplainedBoots.R 
+#Rscript gExt_Fits.R
+#Rscript gInt_Fits.R
+#Rscript gp_Fits.R
+#Rscript gp_gausVnb_qq.R
