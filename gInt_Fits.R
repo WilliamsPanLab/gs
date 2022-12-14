@@ -7,7 +7,7 @@ masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rd
 ### internalizing
 mixedEfModel<-gam(cbcl_scr_syn_internal_r~te(interview_age,g)+s(subjectkey,bs='re'),data=masterdf,family=nb())
 # save
-rdata_file = file("/oak/stanford/groups/leanew1/users/apines/data/gp/g_int_Age_te.rds", blocking = TRUE)
+rdata_file = file("/scratch/users/apines/gp/g_int_Age_te.rds", blocking = TRUE)
 saveRDS(mixedEfModel, file=rdata_file)
 close(rdata_file)
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gIntAge_te.png',width=1500,height=1500)
@@ -18,7 +18,7 @@ dev.off()
 # FIT WITH CBCL61
 mixedEfModel<-gam(cbcl_scr_syn_internal_r~te(interview_age,g)+cbcl_q61_p+s(subjectkey,bs='re'),data=masterdf,family=nb())
 # save
-rdata_file = file("/oak/stanford/groups/leanew1/users/apines/data/gp/g_int_Age_te_cbcl61.rds", blocking = TRUE)
+rdata_file = file("/scratch/users/apines/gp/g_int_Age_te_cbcl61.rds", blocking = TRUE)
 saveRDS(mixedEfModel, file=rdata_file)
 close(rdata_file)
 # print png of tensor

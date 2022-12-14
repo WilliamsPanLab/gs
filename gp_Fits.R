@@ -139,7 +139,7 @@ masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rd
 #### gpAge_te
 gpAge_te<-gam(cbcl_scr_syn_totprob_r~te(interview_age,g)+s(subjectkey,bs='re'),data=masterdf,family=nb())
 # resilient version
-rdata_file = file("/oak/stanford/groups/leanew1/users/apines/data/gp/gpAge_te.rds", blocking = TRUE)
+rdata_file = file("/scratch/users/apines/gp/gpAge_te.rds", blocking = TRUE)
 saveRDS(gpAge_te, file=rdata_file)
 close(rdata_file)
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te.png',width=1500,height=1500)
@@ -149,7 +149,7 @@ dev.off()
 
 #### gpAge_independent splines
 gpAge<-gam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re'),data=masterdf,family=nb())
-rdata_file = file("/oak/stanford/groups/leanew1/users/apines/data/gp/gpAge.rds", blocking = TRUE)
+rdata_file = file("/scratch/users/apines/gp/gpAge.rds", blocking = TRUE)
 saveRDS(gpAge, file=rdata_file)
 close(rdata_file)
 ####### plot derivs
@@ -181,8 +181,7 @@ png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te_cbcl61.png',widt
 gg_tensor(mixedEfModel)
 dev.off()
 # save
-rdata_file = file("/oak/stanford/groups/leanew1/users/apines/data/gp/gpAge_te_cbcl61.rds", blocking = TRUE)
+rdata_file = file("/scratch/users/apines/gp/gpAge_te_cbcl61.rds", blocking = TRUE)
 saveRDS(mixedEfModel, file=rdata_file)
 close(rdata_file)
 
-# good job!

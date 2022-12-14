@@ -6,7 +6,7 @@ masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rd
 ### externalizing
 mixedEfModel<-gam(cbcl_scr_syn_external_r~te(interview_age,g)+s(subjectkey,bs='re'),data=masterdf,family=nb())
 # save
-rdata_file = file("/oak/stanford/groups/leanew1/users/apines/data/gp/g_ext_Age_te.rds", blocking = TRUE)
+rdata_file = file("/scratch/users/apines/gp/g_ext_Age_te.rds", blocking = TRUE)
 saveRDS(mixedEfModel, file=rdata_file)
 close(rdata_file)
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gExtAge_te.png',width=1500,height=1500)
@@ -17,7 +17,7 @@ dev.off()
 # with cbcl61
 mixedEfModel<-gam(cbcl_scr_syn_external_r~te(interview_age,g)+cbcl_q61_p+s(subjectkey,bs='re'),data=masterdf)
 # save
-rdata_file = file("/oak/stanford/groups/leanew1/users/apines/data/gp/g_ext_Age_te_cbcl61.rds", blocking = TRUE)
+rdata_file = file("/scratch/users/apines/gp/g_ext_Age_te_cbcl61.rds", blocking = TRUE)
 saveRDS(mixedEfModel, file=rdata_file)
 close(rdata_file)
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gExtAge_te_cbcl61.png',width=1500,height=1500)
