@@ -14,10 +14,10 @@ for (b in 1:5000){
 	# bootstrap sample
 	bootSamp=masterdf[BootInd,]
 	#### gpAge_independent splines
-	gpAge_full<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+cbcl_q61_p,data=bootSamp)
+	gpAge_full<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age)+cbcl_q61_p,data=bootSamp)
 	devExplained_full[b]<-summary(gpAge_full)$dev.expl
 	# fit version with cbcl 61
-	gpAge_nocbcl61<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=bootSamp)
+	gpAge_nocbcl61<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age),data=bootSamp)
 	devExplained_NoCbcl61[b]<-summary(gpAge_nocbcl61)$dev.expl
 	# fit version with just cbcl61
 	gpAge_noTotProbs<-bam(g~cbcl_q61_p+s(interview_age),data=bootSamp)
@@ -26,5 +26,5 @@ for (b in 1:5000){
 
 # saveout df of dev explained for plotting
 outdf=data.frame(devExplained_full,devExplained_NoCbcl61,devExplained_NoTot)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/DevExplained.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/DevExplained_Int.rds')
 

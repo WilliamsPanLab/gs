@@ -1,11 +1,15 @@
 library(mgcv)
 library(pammtools)
+library(visreg)
 
 masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rds')
 # convert family id to factor
 masterdf$rel_family_id=as.factor(masterdf$rel_family_id)
 
 ### externalizing
+
+#### LOAD IN THE MODEL FROM RDS INSTEAD
+
 mixedEfModel<-bam(cbcl_scr_syn_external_r~te(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 # save
 rdata_file = file("/scratch/users/apines/gp/g_ext_Age_te.rds", blocking = TRUE)
@@ -43,3 +47,11 @@ anovaP<-anovaRes$`Pr(>Chi)`
 anovaP2<-unlist(anovaP)
 print('chi-sq p value: g vs. no g in externalizing model')
 print(anovaP2[2])
+
+### SCATTER OF EXTERNAL ALONG G after controlling for age
+# fit model only controlling for age to scatterplot g~ext on the residuals of
+# use no g gam to control for age in scatterplot of g~ext (scatter on residuals)
+png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gExt_ageRegressed.png',width=700,height=700)
+# prinout gg_tensor
+visreg(gGam,'g')
+dev.off()
