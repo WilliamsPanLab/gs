@@ -1,0 +1,553 @@
+---
+title: "gp_figs"
+output: html_document
+date: "2022-11-22"
+---
+
+```{r}
+# libraries
+library(mvtnorm)
+library(tableone)
+library(parallel)
+library(rstan)
+library(loo)
+library(gamm4)
+library(Hmisc)
+library(FactoMineR)
+library(nFactors)
+library(reshape2)
+library(psych)
+library(data.table)
+library(mice)
+library(abind)
+library(cvTools)
+library(rapportools)
+library(MASS)
+# load data
+cbcl=read.delim('~/Downloads/Package_1205735/abcd_cbcl01.txt')
+nihCog=read.delim('~/Downloads/Package_1206930/abcd_tbss01.txt')
+othCog=read.delim('~/Downloads/Package_1206930/abcd_ps01.txt')
+littleMan=read.delim('~/Downloads/Package_1206931/lmtp201.txt')
+```
+
+```{r}
+# organize
+# subset timepoints
+cbclBV=subset(cbcl,eventname=='baseline_year_1_arm_1')
+cbcl2=subset(cbcl,eventname=='2_year_follow_up_y_arm_1')
+# nih toolbox
+nihCogBV=subset(nihCog,eventname=='baseline_year_1_arm_1')
+nihCog2=subset(nihCog,eventname=='2_year_follow_up_y_arm_1')
+# other cog
+othCogBV=subset(othCog,eventname=='baseline_year_1_arm_1')
+othCog2=subset(othCog,eventname=='2_year_follow_up_y_arm_1')
+# little man
+littleManBV=subset(littleMan,eventname=='baseline_year_1_arm_1')
+littleMan2=subset(littleMan,eventname=='2_year_follow_up_y_arm_1')
+
+# for mixed effect modeling
+masterdf<-merge(cbcl,nihCog,by=c('subjectkey','eventname','interview_age'))
+masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age'))
+masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age'))
+```
+
+```{r}
+# use thompson 2019 recreation of non nih-tb measures
+ind_pea_ravlt = c(which(names(masterdf)=="pea_ravlt_sd_trial_i_tc"),which(names(masterdf)=="pea_ravlt_sd_trial_ii_tc"),
+	which(names(masterdf)=="pea_ravlt_sd_trial_iii_tc"),which(names(masterdf)=="pea_ravlt_sd_trial_iv_tc"),
+	which(names(masterdf)=="pea_ravlt_sd_trial_v_tc")); names(masterdf)[ind_pea_ravlt];
+
+# set numbers to numeric
+masterdf$pea_ravlt_sd_trial_i_tc=as.numeric(masterdf$pea_ravlt_sd_trial_i_tc)
+masterdf$pea_ravlt_sd_trial_ii_tc=as.numeric(masterdf$pea_ravlt_sd_trial_ii_tc)
+masterdf$pea_ravlt_sd_trial_iii_tc=as.numeric(masterdf$pea_ravlt_sd_trial_iii_tc)
+masterdf$pea_ravlt_sd_trial_iv_tc=as.numeric(masterdf$pea_ravlt_sd_trial_vi_tc)
+masterdf$pea_ravlt_sd_trial_v_tc=as.numeric(masterdf$pea_ravlt_sd_trial_v_tc)
+
+# total correct across trials
+masterdf$pea_ravlt_ld = masterdf$pea_ravlt_sd_trial_i_tc + masterdf$pea_ravlt_sd_trial_ii_tc + masterdf$pea_ravlt_sd_trial_iii_tc + masterdf$pea_ravlt_sd_trial_iv_tc + masterdf$pea_ravlt_sd_trial_v_tc
+
+```
+
+```{r}
+#### calculate PCs
+
+# change to numeric
+masterdf$nihtbx_picvocab_uncorrected<-as.numeric(masterdf$nihtbx_picvocab_uncorrected)
+masterdf$nihtbx_flanker_uncorrected<-as.numeric(masterdf$nihtbx_flanker_uncorrected)
+masterdf$nihtbx_list_uncorrected<-as.numeric(masterdf$nihtbx_list_uncorrected)
+masterdf$nihtbx_cardsort_uncorrected<-as.numeric(masterdf$nihtbx_cardsort_uncorrected)
+masterdf$nihtbx_pattern_uncorrected<-as.numeric(masterdf$nihtbx_pattern_uncorrected)
+masterdf$nihtbx_picture_uncorrected<-as.numeric(masterdf$nihtbx_picture_uncorrected)
+masterdf$nihtbx_reading_uncorrected<-as.numeric(masterdf$nihtbx_reading_uncorrected)
+masterdf$pea_wiscv_tss<-as.numeric(masterdf$pea_wiscv_tss)
+masterdf$lmt_scr_perc_correct<-as.numeric(masterdf$lmt_scr_perc_correct)
+
+# isolate PCA df
+pcVars=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct")
+
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two compelte cases of the pca variables
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,pcVars]))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+# convert masterdf to df with complete observations for cognition
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
+pcaDf<-masterdf[,pcVars]
+# derive pcs
+Y = as.matrix(scale(pcaDf[complete.cases(pcaDf[,pcVars]),pcVars]))
+# equiv for binding scores to IDs and eventnames
+pcVarsAndIDs=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","subjectkey","eventname")
+Yextended=masterdf[complete.cases(masterdf[,pcVarsAndIDs]),pcVarsAndIDs]
+ev = eigen(cor(Y))
+ap = parallel(subject=nrow(Y),var=ncol(Y),rep=100,cent=.05)
+nS = nScree(x=ev$values,aparallel=ap$eigen$qevpea)
+plotnScree(nS)
+ncomp = 3
+y.pca = psych::principal(Y, rotate="varimax", nfactors=ncomp, scores=TRUE)
+y.pca$loadings
+# assign scores to subjs
+Yextended$g<-y.pca$scores[,1]
+```
+
+```{r}
+# load in additional data
+cbcls=read.delim('/Users/panlab/Downloads/Package_1205735/abcd_cbcls01.txt')
+# subset timepoints
+cbclsBV=subset(cbcls,eventname=='baseline_year_1_arm_1')
+cbcls2=subset(cbcls,eventname=='2_year_follow_up_y_arm_1')
+#### add non summary items to cbcl for schoolwork q
+# subset timepoints
+cbclBV=subset(cbcl,eventname=='baseline_year_1_arm_1')
+cbcl2=subset(cbcl,eventname=='2_year_follow_up_y_arm_1')
+# merge with other cbcl
+cbclsBV=merge(cbclsBV,cbclBV,by=c('subjectkey','eventname'))
+cbcls2=merge(cbcls2,cbcl2,by=c('subjectkey','eventname'))
+
+# load in clinicalish data
+clinc1=read.delim('/Users/panlab/Downloads/Package_1205908/abcd_ksad501.txt')
+kBV=subset(clinc1,eventname=='baseline_year_1_arm_1')
+k1=subset(clinc1,eventname=='1_year_follow_up_y_arm_1')
+k2=subset(clinc1,eventname=='2_year_follow_up_y_arm_1')
+clinc1_p=read.delim('/Users/panlab/Downloads/Package_1205908/abcd_ksad01.txt')
+
+# read in grades
+gradesInfo=readRDS('~/Downloads/DEAP-data-download-13.rds')
+# correct column names for equivalence
+colnames(gradesInfo)[1]<-'subjectkey'
+colnames(gradesInfo)[10]<-'eventname'
+gradesInfo$ksads_back_grades_in_school_p[gradesInfo$ksads_back_grades_in_school_p==-1]=NA
+# -1 = N/A, 1 = A, 2 = B, etc.
+
+# for mixed effect modeling
+masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id'))
+masterdf<-merge(masterdf,clinc1,by=c('subjectkey','eventname','interview_age','src_subject_id'))
+masterdf<-merge(masterdf,clinc1_p,by=c('subjectkey','eventname','interview_age','src_subject_id'))
+masterdf<-merge(masterdf,Yextended,by=c('subjectkey','eventname'))
+masterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
+# for within-timepoint measurements
+# merge BV
+bv=merge(cbclsBV,tbBV,by='subjectkey')
+bv=merge(bv,kBV,by='subjectkey')
+# merge one year
+y1=merge(cbcls1,tb1,by='subjectkey')
+y1=merge(y1,k1,by='subjectkey')
+# merge two year
+y2=merge(cbcls2,tb2,by='subjectkey')
+y2=merge(y2,k2,by='subjectkey')
+# three year
+y3=merge(cbcls3,tb3,by='subjectkey')
+y3=merge(y3,k3,by='subjectkey')
+
+```
+
+```{r}
+#### clean data
+
+# convert to numeric
+masterdf$interview_age<-as.numeric(masterdf$interview_age)
+# cbcl sum indep. of the q of interest
+masterdf$cbcl_scr_syn_totprob_r<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)-as.numeric(masterdf$cbcl_q61_p)
+masterdf$cbcl_q61_p<-as.ordered(masterdf$cbcl_q61_p)
+masterdf$subjectkey<-as.factor(masterdf$subjectkey)
+# save rds out
+#### saveRDS(masterdf,'~/subjGvalues_fullcbcl.rds')
+# clean data
+masterdf$interview_age<-as.numeric(masterdf$interview_age)/12
+masterdf$cbcl_scr_syn_totprob_r<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)
+masterdf$cbcl_scr_syn_internal_r<-as.numeric(masterdf$cbcl_scr_syn_internal_r)
+masterdf$cbcl_scr_syn_external_r<-as.numeric(masterdf$cbcl_scr_syn_external_r)
+masterdf$subjectkey<-as.factor(masterdf$subjectkey)
+masterdf$cbcl_q61_p<-as.ordered(masterdf$cbcl_q61_p)
+masterdf$ksads_back_grades_in_school_p<-as.ordered(masterdf$ksads_back_grades_in_school_p)
+# remove instances of NA tot probs
+masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_totprob_r),]
+# and for q61
+#masterdf=masterdf[!is.na(masterdf$cbcl_q61_p),]=
+# and for is empty
+masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_totprob_r),]
+#masterdf=masterdf[!is.empty(masterdf$cbcl_q61_p),]
+# r being fucking stubborn
+masterdf=masterdf[!masterdf$cbcl_scr_syn_totprob_r=='',]
+#masterdf=masterdf[!masterdf$cbcl_q61_p=='',]
+```
+
+```{r}
+### ANALYSIS 1: TEMPORAL PRECEDENCE
+# check for timepoint 1 -> 2 prediction for temporal precedence
+yearBV=subset(masterdf,eventname=='baseline_year_1_arm_1')
+year2=subset(masterdf,eventname=='2_year_follow_up_y_arm_1')
+
+# merge back - .x is tp1, .y is tp2
+crossTPdf<-merge(yearBV,year2,by='subjectkey')
+crossTPdf$cbcl_scr_syn_totprob_r.x<-as.numeric(crossTPdf$cbcl_scr_syn_totprob_r.x)
+crossTPdf$cbcl_scr_syn_totprob_r.y<-as.numeric(crossTPdf$cbcl_scr_syn_totprob_r.y)
+crossTPdf$cbcl_q61_p.x<-as.ordered(crossTPdf$cbcl_q61_p.x)
+crossTPdf$cbcl_q61_p.y<-as.ordered(crossTPdf$cbcl_q61_p.y)
+
+# make some gams with nb, revert to glms if linear
+pPredg<-gam(cbcl_scr_syn_totprob_r.x~s(g.y)+s(g.x),data=crossTPdf,family=nb())
+gPredp<-gam(cbcl_scr_syn_totprob_r.y~s(g.x)+s(cbcl_scr_syn_totprob_r.x),data=crossTPdf,family = nb())
+
+pPredg2<-gam(g.y~s(cbcl_scr_syn_totprob_r.x)+s(g.x),data=crossTPdf)
+gPredp2<-gam(g.x~s(cbcl_scr_syn_totprob_r.y)+s(cbcl_scr_syn_totprob_r.x),data=crossTPdf)
+
+# temporal precedence of school perf
+scPredp<-glm.nb(cbcl_scr_syn_totprob_r.y~cbcl_q61_p.x+cbcl_scr_syn_totprob_r.x,data=crossTPdf)
+pPredsc<-glm.nb(cbcl_scr_syn_totprob_r.x~cbcl_q61_p.y+cbcl_q61_p.x,data=crossTPdf)
+
+scPredg<-glm(g.y~cbcl_q61_p.x+g.x,data=crossTPdf)
+gPredsc<-glm(g.x~cbcl_q61_p.y+cbcl_q61_p.x,data=crossTPdf)
+```
+
+```{r}
+### ANALYSIS 2: g~p NON-LINEAR
+fixedEfModel<-gam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+cbcl_q61_p,data=masterdf,family=nb())
+
+# deviance explained w/o age
+fixedEfModel_full<-gam(cbcl_scr_syn_totprob_r~s(g)+cbcl_q61_p,data=masterdf)
+fixedEfModel_reduced<-gam(cbcl_scr_syn_totprob_r~cbcl_q61_p,data=masterdf)
+fixedEfModel_empty<-gam(cbcl_scr_syn_totprob_r~1,data=masterdf)
+fixedEfModel_reduced_no61<-gam(cbcl_scr_syn_totprob_r~s(g),sp=fixedEfModel_full$sp[1],data=masterdf)
+
+## deviance explained
+dev.1<- (deviance(fixedEfModel_reduced)-deviance(fixedEfModel_full))/deviance(fixedEfModel_empty) ## prop expl by s(g)
+dev.2<- (deviance(fixedEfModel_empty)-deviance(fixedEfModel_reduced))/deviance(fixedEfModel_empty) ## prop expl by cbcl61
+
+## reduce it the other way...
+dev.2[2]<- (deviance(fixedEfModel_reduced_no61)-deviance(fixedEfModel_full))/deviance(fixedEfModel_empty) ## prop expl by s(x2)
+dev.1[2]<- (deviance(fixedEfModel_empty)-deviance(fixedEfModel_reduced_no61))/deviance(fixedEfModel_empty) # prop expl by s(x1)
+
+## average the alternatives
+dev.1 <- mean(dev.1)
+dev.2 <- mean(dev.2)
+
+## so now explained deviance adds up...
+dev.1+dev.2
+summary(fixedEfModel_full)$dev.expl
+
+```
+
+```{r}
+#### ANALYSIS 3: VARIANCE EXPLAINED W/ + WITHOUT CBCL 61
+fixedEfModel<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
+deviance_without61<-summary(fixedEfModel)$dev.expl
+# model with 61
+fixedEfModel<-gam(g~s(interview_age)+s(cbcl_scr_syn_totprob_r)+cbcl_q61_p,data=masterdf)
+deviance_with61<-summary(fixedEfModel)$dev.expl
+# model without cbcl total
+fixedEfModel<-gam(g~s(interview_age)+cbcl_q61_p,data=masterdf)
+deviance_withoutTot<-summary(fixedEfModel)$dev.expl
+# model with q61 subtracted from cbcl total
+masterdf$cbcl_scr_syn_totprob_r_min61<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)-(as.numeric(masterdf$cbcl_q61_p)-1)
+fixedEfModel<-gam(g~s(interview_age)+s(cbcl_scr_syn_totprob_r_min61),data=masterdf)
+deviance_withTot_sub61<-summary(fixedEfModel)$dev.expl
+# barplot
+barplot_df<-melt(data.frame(deviance_with61,deviance_withoutTot,deviance_without61,deviance_withTot_sub61))
+ggplot(aes(x=variable,y=value),data=barplot_df)+geom_bar(stat='identity')+theme(axis.text.x=element_text(angle=45,vjust=.5))
+
+
+# load in bootstrapped data from sherlock
+boots<-readRDS('~/Desktop/g_p/DevExplained.rds')
+boot_barplot_df<-melt(boots)
+ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme(axis.text.x=element_text(angle=45,vjust=.5))+theme_classic()
+```
+
+```{r}
+library(pammtools)
+#### ANALYSIS 4: TENSOR SMOOTHS WITH AND WITHOUT CONTROLLING FOR SCHOOL PERFORMANCE
+fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_totprob_r),data=masterdf)
+gg_tensor(fixedEfModel)
+fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_totprob_r)+cbcl_q61_p,data=masterdf)
+gg_tensor(fixedEfModel)
+# internalizing
+fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_internal_r),data=masterdf)
+gg_tensor(fixedEfModel)
+fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_internal_r)+cbcl_q61_p,data=masterdf)
+gg_tensor(fixedEfModel)
+# internalizing and externalizing components
+fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_external_r),data=masterdf)
+gg_tensor(fixedEfModel)
+fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_external_r)+cbcl_q61_p,data=masterdf)
+gg_tensor(fixedEfModel)
+
+################
+### with psychopathology as response variable
+#########
+fixedEfModel<-gam(cbcl_scr_syn_totprob_r~te(interview_age,g),data=masterdf,family=nb())
+gg_tensor(fixedEfModel)
+fixedEfModel<-gam(cbcl_scr_syn_totprob_r~te(interview_age,g)+cbcl_q61_p,data=masterdf,family=nb())
+gg_tensor(fixedEfModel)
+# internalizing
+fixedEfModel<-gam(cbcl_scr_syn_internal_r~te(interview_age,g),data=masterdf,family=nb())
+gg_tensor(fixedEfModel)
+fixedEfModel<-gam(cbcl_scr_syn_internal_r~te(interview_age,g)+cbcl_q61_p,data=masterdf,family=nb())
+gg_tensor(fixedEfModel)
+# internalizing and externalizing components
+fixedEfModel<-gam(cbcl_scr_syn_external_r~te(interview_age,g),data=masterdf,family=nb())
+gg_tensor(fixedEfModel)
+fixedEfModel<-gam(cbcl_scr_syn_external_r~te(interview_age,g)+cbcl_q61_p,data=masterdf)
+gg_tensor(fixedEfModel)
+
+```
+```{r}
+# finish cleaning data for sherlock runs: use thompson 2019 approach to family ID
+masterdf$id_fam = NULL
+masterdf$fam_size = 0
+ind=0
+for(f in 1:length(unique(masterdf$rel_family_id))){
+  masterdf$fam_size[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = 
+  sum(masterdf$rel_family_id == unique(masterdf$rel_family_id)[f])
+  if(sum(masterdf$fam_size[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]])>1){	
+    ind=ind+1	
+    masterdf$id_fam[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = ind
+  }	
+}
+
+masterdf$rel_family_id=masterdf$id_fam
+
+# save out model for cluster mixed-effect fittinga
+saveRDS(masterdf,'~/mixedEfDf.rds')
+```
+
+```{r}
+#### ANALYSIS 5A: KSADS BASELINE 
+# loop through ksads questions for timepoint 1
+ksadsqs=grep('ksads_',colnames(masterdf))
+# initialize p and t vecs
+pvector=NULL
+tvector=NULL
+questionVec=NULL
+reporterVec=NULL
+# subset to YEAR1
+year1df=masterdf[masterdf$eventname=='baseline_year_1_arm_1',]
+# loop over ksads questions - CHILD REPORT
+for (question in 2:952){
+  # get column number
+  colNumber=ksadsqs[question]
+  # get item number in year1df
+  item=colnames(year1df)[colNumber]
+  # extract item
+  questionAnswers=year1df[,c(item,'g')]
+  # subset
+  ksadsPos=questionAnswers[questionAnswers[,1]==1,]
+  ksadsNeg=questionAnswers[questionAnswers[,1]==0,]
+  # dim pos
+  dimPos=dim(ksadsPos)
+  if (dimPos[1]>1){
+    # t-test
+    t.testRes=t.test(ksadsPos$g,ksadsNeg$g)
+    pvector=c(pvector,t.testRes$p.value)
+    tvector=c(tvector,t.testRes$statistic)
+    questionVec=c(questionVec,clinc1[1,item])
+    reporterVec=c(reporterVec,"Child")
+    if (t.testRes$statistic>0 && t.testRes$p.value < 0.01){
+      print(item)
+      print(t.testRes)
+      print(clinc1[1,item])
+    }
+  }
+}
+
+### PARENT REPORT
+for (question in 956:1907){
+  # get column number
+  colNumber=ksadsqs[question]
+  # get item number in year1df
+  item=colnames(year1df)[colNumber]
+  # extract item
+  questionAnswers=year1df[,c(item,'g')]
+  # subset
+  ksadsPos=questionAnswers[questionAnswers[,1]==1,]
+  ksadsNeg=questionAnswers[questionAnswers[,1]==0,]
+  # dim pos
+  dimPos=dim(ksadsPos)
+  if (dimPos[1]>1){
+    # t-test
+    t.testRes=t.test(ksadsPos$g,ksadsNeg$g)
+    pvector=c(pvector,t.testRes$p.value)
+    tvector=c(tvector,t.testRes$statistic)
+    questionVec=c(questionVec,clinc1_p[1,item])
+    reporterVec=c(reporterVec,"Parent")
+    if (t.testRes$statistic>0 && t.testRes$p.value < 0.01){
+      print(item)
+      print(t.testRes)
+      print(clinc1_p[1,item])
+    }
+  }
+}
+```
+
+
+```{r}
+library(ggplot2)
+library(forcats)
+# plot it
+plotdf<-data.frame(pvector,tvector,questionVec,reporterVec)
+# fdr correct
+plotdf$fdrP<-p.adjust(plotdf$pvector,metho='fdr')
+sigDf<-plotdf[plotdf$fdrP<0.05,]
+# order by t vector
+sigDf<-sigDf[order(sigDf$tvector),]
+# bar plot
+ggplot(aes(fct_reorder(questionVec,tvector),tvector,fill=reporterVec),data=sigDf)+geom_bar(stat = 'identity')+theme(axis.text=element_text(angle=90))+ggtitle('Baseline Visit')
+```
+
+```{r}
+#### ANALYSIS 5B: KSADS 2 YEAR
+# loop through ksads questions for timepoint 1
+ksadsqs=grep('ksads_',colnames(masterdf))
+# initialize p and t vecs
+pvector=NULL
+tvector=NULL
+questionVec=NULL
+reporterVec=NULL
+# subset to YEAR1
+year2df=masterdf[masterdf$eventname=='2_year_follow_up_y_arm_1',]
+# loop over ksads questions - CHILD REPORT
+for (question in 2:952){
+  # get column number
+  colNumber=ksadsqs[question]
+  # get item number in year2df
+  item=colnames(year2df)[colNumber]
+  # extract item
+  questionAnswers=year2df[,c(item,'g')]
+  # subset
+  ksadsPos=questionAnswers[questionAnswers[,1]==1,]
+  ksadsNeg=questionAnswers[questionAnswers[,1]==0,]
+  # dim pos
+  dimPos=dim(ksadsPos)
+  if (dimPos[1]>1){
+    # t-test
+    t.testRes=t.test(ksadsPos$g,ksadsNeg$g)
+    pvector=c(pvector,t.testRes$p.value)
+    tvector=c(tvector,t.testRes$statistic)
+    questionVec=c(questionVec,clinc1[1,item])
+    reporterVec=c(reporterVec,"Child")
+    if (t.testRes$statistic>0 && t.testRes$p.value < 0.01){
+      print(item)
+      print(t.testRes)
+      print(clinc1[1,item])
+    }
+  }
+}
+
+### PARENT REPORT
+for (question in 956:1907){
+  # get column number
+  colNumber=ksadsqs[question]
+  # get item number in year2df
+  item=colnames(year2df)[colNumber]
+  # extract item
+  questionAnswers=year2df[,c(item,'g')]
+  # subset
+  ksadsPos=questionAnswers[questionAnswers[,1]==1,]
+  ksadsNeg=questionAnswers[questionAnswers[,1]==0,]
+  # dim pos
+  dimPos=dim(ksadsPos)
+  if (dimPos[1]>1){
+    # t-test
+    t.testRes=t.test(ksadsPos$g,ksadsNeg$g)
+    pvector=c(pvector,t.testRes$p.value)
+    tvector=c(tvector,t.testRes$statistic)
+    questionVec=c(questionVec,clinc1_p[1,item])
+    reporterVec=c(reporterVec,"Parent")
+    if (t.testRes$statistic>0 && t.testRes$p.value < 0.01){
+      print(item)
+      print(t.testRes)
+      print(clinc1_p[1,item])
+    }
+  }
+}
+
+```
+
+```{r}
+# plot it
+plotdf<-data.frame(pvector,tvector,questionVec,reporterVec)
+# fdr correct
+plotdf$fdrP<-p.adjust(plotdf$pvector,metho='fdr')
+sigDf<-plotdf[plotdf$fdrP<0.01,]
+# order by t vector
+sigDf<-sigDf[order(sigDf$tvector),]
+# bar plot
+ggplot(aes(fct_reorder(questionVec,tvector),tvector,fill=reporterVec),data=sigDf)+geom_bar(stat = 'identity')+theme(axis.text=element_text(angle=90))+ggtitle('Two-Year Visit')
+```
+
+
+```{r}
+#### ANALYSIS 6: ADULT SELF-REPORT
+# load in asr
+asr=read.delim('~/Downloads/Package_1207917/pasr01.txt')
+masterdf=merge(asr,masterdf,by=c('subjectkey','eventname','src_subject_id'))
+# loop through ksads questions
+asr_qs=grep('asr_',colnames(masterdf))
+# initialize p and t vecs
+pvector=NULL
+tvector=NULL
+questionVec=NULL
+# loop over asr questions - might want to recode to incorp 124-126
+for (question in 2:133){
+  # get column number
+  colNumber=asr_qs[question]
+  # get item number in masterdf
+  item=colnames(masterdf)[colNumber]
+  # extract item
+  questionAnswers=masterdf[,c(item,'g')]
+  # subset
+  asrPos=questionAnswers[questionAnswers[,1]>0,]
+  asrNeg=questionAnswers[questionAnswers[,1]==0,]
+  # dim pos
+  dimPos=dim(asrPos)
+  if (dimPos[1]>1){
+    # t-test
+    t.testRes=t.test(asrPos$g,asrNeg$g)
+    pvector=c(pvector,t.testRes$p.value)
+    tvector=c(tvector,t.testRes$statistic)
+    questionVec=c(questionVec,asr[1,item])
+    if (t.testRes$statistic>0 && t.testRes$p.value < 0.01){
+      print(item)
+      print(t.testRes)
+      print(asr[1,item])
+    }
+  }
+}
+
+```
+
+```{r}
+library(ggplot2)
+library(forcats)
+# plot it
+plotdf<-data.frame(pvector,tvector,questionVec)
+sigDf<-plotdf[plotdf$pvector<0.01,]
+# order by t vector
+sigDf<-sigDf[order(sigDf$tvector),]
+# bar plot
+ggplot(aes(fct_reorder(questionVec,tvector),tvector),data=sigDf)+geom_bar(stat = 'identity')+theme(axis.text=element_text(angle=90))
+```

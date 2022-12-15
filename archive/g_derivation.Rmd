@@ -1,0 +1,200 @@
+---
+title: "g_derivation"
+output: html_document
+date: "2022-12-09"
+---
+
+```{r}
+# g derivation
+library(mvtnorm)
+library(tableone)
+library(parallel)
+library(rstan)
+library(loo)
+library(gamm4)
+library(Hmisc)
+library(FactoMineR)
+library(nFactors)
+library(reshape2)
+library(psych)
+library(data.table)
+library(mice)
+library(abind)
+library(cvTools)
+```
+
+```{r}
+# read in data
+cbcl=read.delim('~/Downloads/Package_1205735/abcd_cbcl01.txt')
+nihCog=read.delim('~/Downloads/Package_1206930/abcd_tbss01.txt')
+othCog=read.delim('~/Downloads/Package_1206930/abcd_ps01.txt')
+littleMan=read.delim('~/Downloads/Package_1206931/lmtp201.txt')
+# longitudinal parent demographics not downloaded yet
+```
+
+```{r}
+# clean and organize a bit
+# subset timepoints
+cbclBV=subset(cbcl,eventname=='baseline_year_1_arm_1')
+cbcl1=subset(cbcl,eventname=='1_year_follow_up_y_arm_1')
+cbcl2=subset(cbcl,eventname=='2_year_follow_up_y_arm_1')
+cbcl3=subset(cbcl,eventname=='3_year_follow_up_y_arm_1')
+# nih toolbox
+nihCogBV=subset(nihCog,eventname=='baseline_year_1_arm_1')
+nihCog1=subset(nihCog,eventname=='1_year_follow_up_y_arm_1')
+nihCog2=subset(nihCog,eventname=='2_year_follow_up_y_arm_1')
+nihCog3=subset(nihCog,eventname=='3_year_follow_up_y_arm_1')
+# other cog
+othCogBV=subset(othCog,eventname=='baseline_year_1_arm_1')
+othCog1=subset(othCog,eventname=='1_year_follow_up_y_arm_1')
+othCog2=subset(othCog,eventname=='2_year_follow_up_y_arm_1')
+othCog3=subset(othCog,eventname=='3_year_follow_up_y_arm_1')
+# fookin little man
+littleManBV=subset(littleMan,eventname=='baseline_year_1_arm_1')
+littleMan1=subset(littleMan,eventname=='1_year_follow_up_y_arm_1')
+littleMan2=subset(littleMan,eventname=='2_year_follow_up_y_arm_1')
+littleMan3=subset(littleMan,eventname=='3_year_follow_up_y_arm_1')
+
+# for mixed effect modeling
+masterdf<-merge(cbcl,nihCog,by=c('subjectkey','eventname','interview_age'))
+masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age'))
+masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age'))
+```
+
+```{r}
+# use thompson 2018 recreation of non nih-tb measures
+ind_pea_ravlt = c(which(names(masterdf)=="pea_ravlt_sd_trial_i_tc"),which(names(masterdf)=="pea_ravlt_sd_trial_ii_tc"),
+	which(names(masterdf)=="pea_ravlt_sd_trial_iii_tc"),which(names(masterdf)=="pea_ravlt_sd_trial_iv_tc"),
+	which(names(masterdf)=="pea_ravlt_sd_trial_v_tc")); names(masterdf)[ind_pea_ravlt];
+
+# set numbers to numeric
+masterdf$pea_ravlt_sd_trial_i_tc=as.numeric(masterdf$pea_ravlt_sd_trial_i_tc)
+masterdf$pea_ravlt_sd_trial_ii_tc=as.numeric(masterdf$pea_ravlt_sd_trial_ii_tc)
+masterdf$pea_ravlt_sd_trial_iii_tc=as.numeric(masterdf$pea_ravlt_sd_trial_iii_tc)
+masterdf$pea_ravlt_sd_trial_iv_tc=as.numeric(masterdf$pea_ravlt_sd_trial_vi_tc)
+masterdf$pea_ravlt_sd_trial_v_tc=as.numeric(masterdf$pea_ravlt_sd_trial_v_tc)
+
+# total correct across trials
+masterdf$pea_ravlt_ld = masterdf$pea_ravlt_sd_trial_i_tc + masterdf$pea_ravlt_sd_trial_ii_tc + masterdf$pea_ravlt_sd_trial_iii_tc + masterdf$pea_ravlt_sd_trial_iv_tc + masterdf$pea_ravlt_sd_trial_v_tc
+
+```
+
+```{r}
+# change to numeric
+masterdf$nihtbx_picvocab_uncorrected<-as.numeric(masterdf$nihtbx_picvocab_uncorrected)
+masterdf$nihtbx_flanker_uncorrected<-as.numeric(masterdf$nihtbx_flanker_uncorrected)
+masterdf$nihtbx_list_uncorrected<-as.numeric(masterdf$nihtbx_list_uncorrected)
+masterdf$nihtbx_cardsort_uncorrected<-as.numeric(masterdf$nihtbx_cardsort_uncorrected)
+masterdf$nihtbx_pattern_uncorrected<-as.numeric(masterdf$nihtbx_pattern_uncorrected)
+masterdf$nihtbx_picture_uncorrected<-as.numeric(masterdf$nihtbx_picture_uncorrected)
+masterdf$nihtbx_reading_uncorrected<-as.numeric(masterdf$nihtbx_reading_uncorrected)
+masterdf$pea_wiscv_tss<-as.numeric(masterdf$pea_wiscv_tss)
+masterdf$lmt_scr_perc_correct<-as.numeric(masterdf$lmt_scr_perc_correct)
+
+# isolate PCA df
+pcVars=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct")
+# pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
+
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two compelte cases of the pca variables
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,pcVars]))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+# convert masterdf to df with complete observations for cognition
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+# parse into just variables to run pca on
+pcaDf<-masterdf[,pcVars]
+# derive pcs
+Y = as.matrix(scale(pcaDf[complete.cases(pcaDf[,pcVars]),pcVars]))
+# equiv for binding scores to IDs and eventnames
+pcVarsAndIDs=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","subjectkey","eventname")
+Yextended=masterdf[complete.cases(masterdf[,pcVarsAndIDs]),pcVarsAndIDs]
+#ev = eigen(cor(Y))
+#ap = parallel(subject=nrow(Y),var=ncol(Y),rep=100,cent=.05)
+#nS = nScree(x=ev$values,aparallel=ap$eigen$qevpea)
+#plotnScree(nS)
+ncomp = 3
+#y.pca = psych::principal(Y, rotate="promax", nfactors=ncomp, scores=TRUE)
+#y.pca$loadings
+y.pca = psych::principal(Y, rotate="varimax", nfactors=ncomp, scores=TRUE)
+y.pca$loadings
+# assign scores to subjs
+Yextended$g<-y.pca$scores[,1]
+```
+
+```{r}
+# g is derived
+```
+
+```{r}
+# load in cbcl
+cbcl=read.delim('/Users/panlab/Downloads/Package_1205735/abcd_cbcl01.txt')
+cbcls=read.delim('/Users/panlab/Downloads/Package_1205735/abcd_cbcls01.txt')
+# subset timepoints
+cbclsBV=subset(cbcls,eventname=='baseline_year_1_arm_1')
+cbcls1=subset(cbcls,eventname=='1_year_follow_up_y_arm_1')
+cbcls2=subset(cbcls,eventname=='2_year_follow_up_y_arm_1')
+
+#### add non summary items to cbcl for schoolwork q
+# subset timepoints
+cbclBV=subset(cbcl,eventname=='baseline_year_1_arm_1')
+cbcl1=subset(cbcl,eventname=='1_year_follow_up_y_arm_1')
+cbcl2=subset(cbcl,eventname=='2_year_follow_up_y_arm_1')
+
+# merge with other cbcl
+cbclsBV=merge(cbclsBV,cbclBV,by=c('subjectkey','eventname'))
+cbcls1=merge(cbcls1,cbcl1,by=c('subjectkey','eventname'))
+cbcls2=merge(cbcls2,cbcl2,by=c('subjectkey','eventname'))
+
+# load in clinicalish data
+clinc1=read.delim('/Users/panlab/Downloads/Package_1205908/abcd_ksad501.txt')
+kBV=subset(clinc1,eventname=='baseline_year_1_arm_1')
+k1=subset(clinc1,eventname=='1_year_follow_up_y_arm_1')
+k2=subset(clinc1,eventname=='2_year_follow_up_y_arm_1')
+
+# for mixed effect modeling
+masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id'))
+masterdf<-merge(masterdf,clinc1,by=c('subjectkey','eventname','interview_age','src_subject_id'))
+masterdf<-merge(masterdf,subjPvalues,by=c('subjectkey','eventname'))
+masterdf<-merge(masterdf,Yextended,by=c('subjectkey','eventname'))
+```
+
+```{r}
+# clean data
+# convert to numeric
+masterdf$interview_age<-as.numeric(masterdf$interview_age)
+# cbcl sum indep. of the q of interest
+masterdf$cbcl_scr_syn_totprob_r<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)-as.numeric(masterdf$cbcl_q61_p)
+masterdf$cbcl_q61_p<-as.ordered(masterdf$cbcl_q61_p)
+masterdf$subjectkey<-as.factor(masterdf$subjectkey)
+
+# clean data
+masterdf$interview_age<-as.numeric(masterdf$interview_age)/12
+masterdf$cbcl_scr_syn_totprob_r<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)
+masterdf$cbcl_scr_syn_internal_r<-as.numeric(masterdf$cbcl_scr_syn_internal_r)
+masterdf$cbcl_scr_syn_external_r<-as.numeric(masterdf$cbcl_scr_syn_external_r)
+masterdf$subjectkey<-as.factor(masterdf$subjectkey)
+masterdf$cbcl_q61_p<-as.ordered(masterdf$cbcl_q61_p)
+
+# remove instances of NA tot probs
+masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_totprob_r),]
+# and for q61
+#masterdf=masterdf[!is.na(masterdf$cbcl_q61_p),]=
+# and for is empty
+masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_totprob_r),]
+#masterdf=masterdf[!is.empty(masterdf$cbcl_q61_p),]
+# r being fucking stubborn
+masterdf=masterdf[!masterdf$cbcl_scr_syn_totprob_r=='',]
+
+# save out rds for sherlock
+# conver to numeric
+masterdf$interview_age<-as.numeric(masterdf$interview_age)
+# cbcl sum indep. of the q of interest: as.numeric reverts 0 to 1, 1 to 2, etc.
+masterdf$cbcl_q61_p<-as.ordered(masterdf$cbcl_q61_p)
+masterdf$subjectkey<-as.factor(masterdf$subjectkey)
+# save rds out
+saveRDS(masterdf,'~/mixedEfDf.rds')
+```

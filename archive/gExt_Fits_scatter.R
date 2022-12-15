@@ -1,14 +1,15 @@
 library(mgcv)
 library(pammtools)
+library(visreg)
 
 masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rds')
 # convert family id to factor
 masterdf$rel_family_id=as.factor(masterdf$rel_family_id)
 
-# temp FYI
-dim(masterdf)
-
 ### externalizing
+
+#### LOAD IN THE MODEL FROM RDS INSTEAD
+
 mixedEfModel<-bam(cbcl_scr_syn_external_r~te(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 # save
 rdata_file = file("/scratch/users/apines/gp/g_ext_Age_te.rds", blocking = TRUE)
@@ -29,11 +30,6 @@ png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gExtAge_te_cbcl61.png',wi
 # prinout gg_tensor
 gg_tensor(mixedEfModel)
 dev.off()
-
-# interaction?
-gGam_intrxn<-bam(cbcl_scr_syn_external_r~s(g)+s(interview_age)+ti(g,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
-print('externalizing ~ ti(g,age) included model')
-summary(gGam_intrxn)
 
 ### FULL VS REDUCED P + DR2
 # fit as independent splines to get p and dr2 for Ext w/ and w/o g

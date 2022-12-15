@@ -1,5 +1,6 @@
 library(mgcv)
 library(pammtools)
+library(visreg)
 
 # load in data
 masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rds')
@@ -46,6 +47,13 @@ anovaP2<-unlist(anovaP)
 print('chi-sq p value: g vs. no g in internalizing model')
 print(anovaP2[2])
 
+### SCATTER OF INTERNAL ALONG G after controlling for age
+# use no g gam to control for age in scatterplot of g~ext (scatter on residuals)
+png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gInt_ageRegressed.png',width=700,height=700)
+# prinout gg_tensor
+visreg(gGam,'g')
+dev.off()
+
 
 # FIT AS INDEPENDENT SPLINES TO TEST FOR INTERACTION: try anova.gam with and without ti interaction (NOTE NO CBCL61)
 mixedEfModel<-bam(cbcl_scr_syn_internal_r~s(interview_age)+s(g)+ti(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
@@ -67,4 +75,3 @@ anovaP<-anovaRes$`Pr(>Chi)`
 anovaP2<-unlist(anovaP)
 print('chi-sq p value: ti vs. no ti(age,g) in internalizing model')
 print(anovaP2[2])
-

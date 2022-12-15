@@ -9,6 +9,7 @@ library(dplyr)
 library(data.table)
 library(stringr)
 library(ggplot2)
+library(visreg)
 
 ### add derivs and plot function
 font_size <- 16
@@ -139,30 +140,8 @@ masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rd
 # convert family id to factor
 masterdf$rel_family_id=as.factor(masterdf$rel_family_id)
 
-
-##### SCRATCH SPACE UNTIL I CAN GET SDEVS #########™££££££¡™¡™ˆ˙¡™∫∂å∂ß∂ß∂å∂
-
-dim(masterdf)
-
-masterdf$id_fam = NULL
-masterdf$fam_size = 0
-ind=0
-for(f in 1:length(unique(masterdf$rel_family_id))){
-  masterdf$fam_size[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = 
-  sum(masterdf$rel_family_id == unique(masterdf$rel_family_id)[f])
-  if(sum(masterdf$fam_size[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]])>1){	
-    ind=ind+1	
-    masterdf$id_fam[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = ind
-  }	
-}
-
-masterdf$rel_family_id=masterdf$id_fam
-
-######### ¡™§£®¡¶§™∞£¡¶§™∞£¶¡™∞£¶¡¢∞∞∞
-
-
 #### gpAge_te
-gpAge_te<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb(),chunk.size=82512)
+gpAge_te<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 # resilient version
 rdata_file = file("/scratch/users/apines/gp/gpAge_te.rds", blocking = TRUE)
 saveRDS(gpAge_te, file=rdata_file)
@@ -173,7 +152,7 @@ gg_tensor(gpAge_te)
 dev.off()
 
 #### gpAge_independent splines
-gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb(),chunk.size=82488)
+gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 rdata_file = file("/scratch/users/apines/gp/gpAge.rds", blocking = TRUE)
 saveRDS(gpAge, file=rdata_file)
 close(rdata_file)
@@ -182,6 +161,12 @@ png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_derivs_gp.png',widt
 # prinout gg_derivs
 get_derivs_and_plot(gpAge,'g')
 dev.off()
+
+### interaction?
+gpAge_intrxn<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+ti(g,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+print('model with interaction (ti) for age and g')
+summary(gpAge_intrxn)
+
 ###### FULL VS REDUCED ANOVA: P AND DR2
 no_g_Gam<-bam(cbcl_scr_syn_totprob_r~s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 no_g_Sum<-summary(no_g_Gam)
@@ -197,6 +182,13 @@ anovaP<-anovaRes$`Pr(>Chi)`
 anovaP2<-unlist(anovaP)
 print('chi-sq p value: g vs. no g in totprobs model')
 print(anovaP2[2])
+
+### SCATTER OF EXTERNAL ALONG G after controlling for age
+# use no g gam to control for age in scatterplot of g~ext (scatter on residuals)
+png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gp_ageRegressed.png',width=700,height=700)
+# prinout gg_tensor
+visreg(gGam,'g')
+dev.off()
 
 # fit version with cbcl 61
 mixedEfModel<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+cbcl_q61_p+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
