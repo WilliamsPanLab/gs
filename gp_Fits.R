@@ -165,7 +165,7 @@ dev.off()
 ### interaction?
 gpAge_intrxn<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+ti(g,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 print('model with interaction (ti) for age and g')
-summary(gpAge_intrxn)
+print(summary(gpAge_intrxn))
 
 ###### FULL VS REDUCED ANOVA: P AND DR2
 no_g_Gam<-bam(cbcl_scr_syn_totprob_r~s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
