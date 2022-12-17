@@ -505,7 +505,110 @@ ggplot(aes(fct_reorder(questionVec,tvector),tvector,fill=reporterVec),data=sigDf
 # load in asr
 asr=read.delim('~/Downloads/Package_1207917/pasr01.txt')
 masterdf=merge(asr,masterdf,by=c('subjectkey','eventname','src_subject_id'))
-# loop through ksads questions
+ASRcolnames=asr[1,]
+####### QUICK ASIDE TO TRY MICHELI APPROACH TO FACTOR DELINEATION OF ASR
+
+# composite creation
+
+
+
+# polycors to eval if tp1 vars still meet criterion
+library(polycor)
+# subset asr into timepoints
+asrBV=subset(asr,eventname=='baseline_year_1_arm_1')
+asr2=subset(asr,eventname=='2_year_follow_up_y_arm_1')
+# save subjIDs
+asrBVSubjs=asrBV$subjectkey
+asr2Subjs=asr2$subjectkey
+# isolate asr qs
+asrBV_qs=asrBV[,11:142]
+asr2_qs=asr2[,11:142]
+# fix character specification for variables
+asrBV_qs <- as.data.frame(lapply(asrBV_qs, as.ordered))
+asr2_qs <- as.data.frame(lapply(asr2_qs, as.ordered))
+# polycormat
+#asrBV_qs_cormat=hetcor(asrBV_qs)
+#asr2_qs_cormat=hetcor(asr2_qs)
+# ok piecemeal go through and find rows with >.75 cors
+for (i in 1:dim(asrBV_qs_cormat$correlations)[1]){
+  # a single 1 is expected for diagonal
+  if (sum(asrBV_qs_cormat$correlations[i,]>.75)>1){
+    # if it is > .75 in both tps
+    if (sum(asr2_qs_cormat$correlations[i,]>.75)>1){
+      print('Correlated Items:')
+      # + 10 because 11th col is first col
+      BVoverCorrelateds<-colnames(ASRcolnames[1,which(asrBV_qs_cormat$correlations[i,]>.75)+10])
+      year2overCorrelateds<-colnames(ASRcolnames[1,which(asr2_qs_cormat$correlations[i,]>.75)+10])
+      intersection=intersect(BVoverCorrelateds,year2overCorrelateds)
+      print(unlist(ASRcolnames[intersection]))
+      print('-------')
+      }
+    }
+}
+```
+
+```{r}
+#### composite creation
+#The following composites were created: Anxious (“I am nervous or tense”, “I am too fearful or anxious”); Destroys (“I damage or destroy my things”, “I damage or destroy things belonging to others”); Attacks/threatens (“I physically attack people”, “I threaten to hurt people”); Money management (“I have trouble managing my money or credit card”, “I fail to pay my debts or meet other financial responsibilities”); Nausea (“Nausea, feel sick”, “Vomiting, throwing up”); Suicidality (“I deliberately try to hurt or kill myself”, “I think about killing myself”); Mood swings (“My moods swing between elation and depression”, “My moods or feeling change suddenly”); Hallucinations (“I hear sounds and voices that other people think aren't there”, “I see things that other people think aren't there”); Oddness (“I do things that other people think are strange”, “I have thoughts that other people would think are strange”); Clumsiness (“I accidentally get hurt a lot, accident-prone”, “I am poorly coordinated or clumsy”)
+
+#### merge timepoints
+mergedTPs=rbind(asrBV_qs,asr2_qs)
+# retain subjsIDs and 
+mergedTPsSubjs<-c(asrBVSubjs,asr2Subjs)
+mergedTPsEventName<-rep()
+mergedTPs <- as.data.frame(lapply(mergedTPs, as.numeric))
+
+# clumsy composite
+mergedTPs$asr_clumsy=round((mergedTPs$asr_q36_p+mergedTPs$asr_q62_p)/2)
+# remove constituent variables
+mergedTPs=subset(mergedTPs, select = -c(`asr_q36_p`,`asr_q62_p`))
+
+# anxious composite
+mergedTPs$asr_anx=round((mergedTPs$asr_q45_p+mergedTPs$asr_q50_p)/2)
+# remove constituent variables
+mergedTPs=subset(mergedTPs, select = -c(`asr_q45_p`,`asr_q50_p`))
+
+# swinger composite
+mergedTPs$asr_swing=round((mergedTPs$asr_q55_p+mergedTPs$asr_q87_p)/2)
+# remove constituent variables
+mergedTPs=subset(mergedTPs, select = -c(`asr_q55_p`,`asr_q87_p`))
+
+# insolvent composite
+mergedTPs$asr_insolvent=round((mergedTPs$asr_q114_p+mergedTPs$asr_q117_p)/2)
+# remove constits
+mergedTPs=subset(mergedTPs, select = -c(`asr_q114_p`,`asr_q117_p`))
+#####################
+
+## run pca on asr
+pcaDf_p<-mergedTPs
+pcaDf_p$SubjsNames<-mergedTPsSubjs
+pcaDf_p$eventname<-c(rep('baseline_year_1_arm_1',dim(asrBV)[1]),rep('2_year_follow_up_y_arm_1',dim(asr2)[1]))
+# remove NA vars
+pcaDf_p_Complete<-pcaDf_p[complete.cases(pcaDf_p),]
+pcaDf_p_CompleteSubjs<-pcaDf_p_Complete$SubjsNames
+pcaDf_p_CompleteEventNames<-pcaDf_p_Complete$eventname
+pcaDf_p=subset(pcaDf_p, select = -c(`eventname`,`SubjsNames`))
+# isolate numeric
+pcaDf_p_num<-pcaDf_p_Complete[,1:128]
+# convert to numeric for pca
+pcaDf_p_num <- as.data.frame(lapply(pcaDf_p_num, as.numeric))
+# derive pcs
+pcaMat_p_complete = as.matrix(scale(pcaDf_p_num))
+ncomp = 1
+y.pca = psych::principal(pcaMat_p_complete, rotate="geomin", nfactors=ncomp, scores=TRUE)
+y.pca$loadings
+
+subjPvalues=data.frame(pcaDf_p_CompleteSubjs,pcaDf_p_CompleteEventNames,y.pca$scores[,1])
+colnames(subjPvalues)<-c('subjectkey','eventname','parentP')
+
+test=merge(data,subjPvalues,by=c('subjectkey','eventname'))
+```
+
+```{r}
+### FINISHED HERE 
+saveRDS(subjPvalues,'~/subjPvalues.rds')
+
+# loop through asr questions
 asr_qs=grep('asr_',colnames(masterdf))
 # initialize p and t vecs
 pvector=NULL
