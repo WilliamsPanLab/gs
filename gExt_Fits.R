@@ -1,5 +1,19 @@
+library(ppcor)
 library(mgcv)
 library(pammtools)
+library(cowplot)
+library(patchwork)
+library(gratia)
+library(scales)
+library(dplyr)
+library(data.table)
+library(stringr)
+library(ggplot2)
+library(visreg)
+library(ggExtra)
+
+# add derivatives plotting
+source(here::here('/oak/stanford/groups/leanew1/users/apines/scripts/gp', 'get_derivs_and_plot.R'))
 
 masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rds')
 # convert family id to factor
@@ -66,10 +80,3 @@ anovaP2<-unlist(anovaP)
 print('chi-sq p value: g vs. no g in externalizing model')
 print(anovaP2[2])
 
-### SCATTER OF EXTERNAL ALONG G after controlling for age
-print('printing scatterplot of externalizing ~ g')
-# use no g gam to control for age in scatterplot of g~ext (scatter on residuals)
-png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gExt_ageRegressed.png',width=700,height=700)
-# prinout gg_tensor
-visreg(gGam,'g')
-dev.off()

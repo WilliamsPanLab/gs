@@ -23,6 +23,14 @@ library(abind)
 library(cvTools)
 library(rapportools)
 library(MASS)
+library(cowplot)
+library(patchwork)
+library(gratia)
+library(scales)
+library(dplyr)
+library(data.table)
+library(stringr)
+library(ggplot2)
 # load data
 cbcl=read.delim('~/Downloads/Package_1205735/abcd_cbcl01.txt')
 nihCog=read.delim('~/Downloads/Package_1206930/abcd_tbss01.txt')
@@ -226,30 +234,58 @@ gPredsc<-glm(g.x~cbcl_q61_p.y+cbcl_q61_p.x,data=crossTPdf)
 ```
 
 ```{r}
-### ANALYSIS 2: g~p NON-LINEAR
-fixedEfModel<-gam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+cbcl_q61_p,data=masterdf,family=nb())
+###∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆#
+###∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆#
+###∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆
+# After determining whether or not to use ti() for p, int, and ext, use m=c(2,0) to test for significant non-linearity in the parsed-terms model of each
+# gam.predict
+fixedEfModel<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
+fixedEfModel_Int<-gam(g~s(cbcl_scr_syn_internal_r)+s(interview_age),data=masterdf)
+fixedEfModel_Ext<-gam(g~s(cbcl_scr_syn_external_r)+s(interview_age),data=masterdf)
+forSpline<-predict(fixedEfModel, data = masterdf)
+plotdf<-data.frame(masterdf$cbcl_scr_syn_totprob_r,forSpline,masterdf$g,as.factor(masterdf$eventname))
+colnames(plotdf)<-c('totprob','predicted','g','eventname')
+# cap at 95th percentile
+thePlot<-ggplot(plotdf,aes(totprob,g))+
+geom_point(alpha=.1,aes(color=eventname))+
+geom_smooth(aes(y=predicted),size=2,se=F,color='black')+
+theme_classic(base_size=24)+
+xlab('Total Problems Score')+
+scale_color_discrete(name="Vist",breaks=c("baseline_year_1_arm_1","2_year_follow_up_y_arm_1"),labels=c("Baseline","2 Years"))+
+guides(colour = guide_legend(override.aes = list(alpha = 1)))
+library(ggExtra)
+ggMarginal(thePlot,groupFill=T)
+get_derivs_and_plot(fixedEfModel,smooth='cbcl_scr_syn_totprob_r')
+######
+###∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆#
+###∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆#
+###∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆#
 
-# deviance explained w/o age
-fixedEfModel_full<-gam(cbcl_scr_syn_totprob_r~s(g)+cbcl_q61_p,data=masterdf)
-fixedEfModel_reduced<-gam(cbcl_scr_syn_totprob_r~cbcl_q61_p,data=masterdf)
-fixedEfModel_empty<-gam(cbcl_scr_syn_totprob_r~1,data=masterdf)
-fixedEfModel_reduced_no61<-gam(cbcl_scr_syn_totprob_r~s(g),sp=fixedEfModel_full$sp[1],data=masterdf)
 
-## deviance explained
-dev.1<- (deviance(fixedEfModel_reduced)-deviance(fixedEfModel_full))/deviance(fixedEfModel_empty) ## prop expl by s(g)
-dev.2<- (deviance(fixedEfModel_empty)-deviance(fixedEfModel_reduced))/deviance(fixedEfModel_empty) ## prop expl by cbcl61
+### ANALYSIS 2: g~p NON-LINEAR (migrated to cluster)
 
-## reduce it the other way...
-dev.2[2]<- (deviance(fixedEfModel_reduced_no61)-deviance(fixedEfModel_full))/deviance(fixedEfModel_empty) ## prop expl by s(x2)
-dev.1[2]<- (deviance(fixedEfModel_empty)-deviance(fixedEfModel_reduced_no61))/deviance(fixedEfModel_empty) # prop expl by s(x1)
-
-## average the alternatives
-dev.1 <- mean(dev.1)
-dev.2 <- mean(dev.2)
-
-## so now explained deviance adds up...
-dev.1+dev.2
-summary(fixedEfModel_full)$dev.expl
+#fixedEfModel<-gam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+cbcl_q61_p,data=masterdf,family=nb())
+## deviance explained w/o age
+#fixedEfModel_full<-gam(cbcl_scr_syn_totprob_r~s(g)+cbcl_q61_p,data=masterdf)
+#fixedEfModel_reduced<-gam(cbcl_scr_syn_totprob_r~cbcl_q61_p,data=masterdf)
+#fixedEfModel_empty<-gam(cbcl_scr_syn_totprob_r~1,data=masterdf)
+#fixedEfModel_reduced_no61<-gam(cbcl_scr_syn_totprob_r~s(g),sp=fixedEfModel_full$sp[1],data=masterdf)
+#
+### deviance explained
+#dev.1<- (deviance(fixedEfModel_reduced)-deviance(fixedEfModel_full))/deviance(fixedEfModel_empty) ## prop expl by s(g)
+#dev.2<- (deviance(fixedEfModel_empty)-deviance(fixedEfModel_reduced))/deviance(fixedEfModel_empty) ## prop expl by cbcl61
+#
+### reduce it the other way...
+#dev.2[2]<- (deviance(fixedEfModel_reduced_no61)-deviance(fixedEfModel_full))/deviance(fixedEfModel_empty) ## prop expl by s(x2)
+#dev.1[2]<- (deviance(fixedEfModel_empty)-deviance(fixedEfModel_reduced_no61))/deviance(fixedEfModel_empty) # prop expl by s(x1)
+#
+### average the alternatives
+#dev.1 <- mean(dev.1)
+#dev.2 <- mean(dev.2)
+#
+### so now explained deviance adds up...
+#dev.1+dev.2
+#summary(fixedEfModel_full)$dev.expl
 
 ```
 

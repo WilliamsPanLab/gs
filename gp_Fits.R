@@ -81,13 +81,26 @@ dev.off()
 pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
 summary(pgAge)
 ############################## USE THIS CHUNK ON ti() MODEL IF ti() FITS: OTHERWISE, KEEP ON NO-INTERACTIONS MODEL
+###
+### AND USE max(fixedEfModel$fitted.values) OF ALL CBCL61 TE FITS AND ALL NO CBCL61 TE FITS FOR SAME COLOR SCALE, AT LEAST CONISTENTLY ACROSS CBCL61-NOCBCL61 WITHIN SYMPTOM TYPE CATEGORIES
+### 
+### PLOT TENSORS WITH
+### low = muted("blue"), 
+#     mid = "white", 
+#     high = muted("red"), 
+#     midpoint = 0, limits=c(-2,2)
+#)
+####
 ############################## USE THIS CHUNK ON ti() MODEL IF ti() FITS: OTHERWISE, KEEP ON NO-INTERACTIONS MODEL
 
+print('testing for interaction between g and age on totprobs')
 ### interaction test
 gpAge_intrxn<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+ti(g,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 print('model with interaction (ti) for age and g')
 print(summary(gpAge_intrxn))
 
+
+print('full vs reduced model for effect size and anova of g~totprob')
 ###### FULL VS REDUCED ANOVA: P AND DR2
 no_g_Gam<-bam(cbcl_scr_syn_totprob_r~s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 no_g_Sum<-summary(no_g_Gam)
@@ -104,6 +117,7 @@ anovaP2<-unlist(anovaP)
 print('chi-sq p value: g vs. no g in totprobs model')
 print(anovaP2[2])
 
+print('generating scatter plot of externalizing ~ g (residualized)')
 ### SCATTER OF EXTERNAL ALONG G after controlling for age
 # use no g gam to control for age in scatterplot of g~ext (scatter on residuals)
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gp_ageRegressed.png',width=700,height=700)
@@ -111,6 +125,7 @@ png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gp_ageRegressed.png',widt
 visreg(gGam,'g')
 dev.off()
 
+print('fitting te() with cbcl61 included + visualizing')
 # fit version with cbcl 61
 mixedEfModel<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+cbcl_q61_p+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 ######## plot tensor 
