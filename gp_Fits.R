@@ -19,17 +19,20 @@ source(here::here('/oak/stanford/groups/leanew1/users/apines/scripts/gp', 'get_d
 masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rds')
 # convert family id to factor
 masterdf$rel_family_id=as.factor(masterdf$rel_family_id)
+# FYI
+print('dimensions of dataframe')
+dim(masterdf)
 
 #### gpAge_te
-if (~file.exists("/scratch/users/apines/gp/gpAge_te.rds")){
-gpAge_te<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
-# resilient version
-rdata_file = file("/scratch/users/apines/gp/gpAge_te.rds", blocking = TRUE)
-saveRDS(gpAge_te, file=rdata_file)
-close(rdata_file)
+if (!file.exists("/scratch/users/apines/gp/gpAge_te.rds")){
+	gpAge_te<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+	# resilient version
+	rdata_file = file("/scratch/users/apines/gp/gpAge_te.rds", blocking = TRUE)
+	saveRDS(gpAge_te, file=rdata_file)
+	close(rdata_file)
 } else {
-print('found gpAge_te.rds. Loading')
-gpAge_te=readRDS("/scratch/users/apines/gp/gpAge_te.rds")
+	print('found gpAge_te.rds. Loading')
+	gpAge_te=readRDS("/scratch/users/apines/gp/gpAge_te.rds")
 }
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te.png',width=800,height=800)
 # prinout gg_tensor
@@ -42,14 +45,14 @@ gg_tensor(gpAge_te,ci=T)
 dev.off()
 
 #### gpAge_independent splines
-if (~file.exists("/scratch/users/apines/gp/gpAge.rds")){
-gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
-rdata_file = file("/scratch/users/apines/gp/gpAge.rds", blocking = TRUE)
-saveRDS(gpAge, file=rdata_file)
-close(rdata_file)
+if (!file.exists("/scratch/users/apines/gp/gpAge.rds")){
+	gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+	rdata_file = file("/scratch/users/apines/gp/gpAge.rds", blocking = TRUE)
+	saveRDS(gpAge, file=rdata_file)
+	close(rdata_file)
 } else {
-print('found gpAge.rds. Loading')
-gpAge=readRDS("/scratch/users/apines/gp/gpAge.rds")
+	print('found gpAge.rds. Loading')
+	gpAge=readRDS("/scratch/users/apines/gp/gpAge.rds")
 }
 ####### plot derivs
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_derivs_gp.png',width=800,height=800)
@@ -60,15 +63,15 @@ dev.off()
 ##############################
 ######## I SCATTERPLOTS ON TWO VARIABLES OF INTEREST WITH THEIR FIT SPLINE
 #### g as response variable
-if (~file.exists("/scratch/users/apines/gp/pgAge.rds")){
-pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+ti(cbcl_scr_syn_totprob_r,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
-rdata_file = file("/scratch/users/apines/gp/pgAge.rds", blocking = TRUE)
-saveRDS(gpAge, file=rdata_file)
-close(rdata_file)
-} else {
-print(' found pgAge.rds. Loading.')
-pgAge=readRDS('/scratch/users/apines/gp/pgAge.rds')
-}
+#if (!file.exists("/scratch/users/apines/gp/pgAge.rds")){
+	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+ti(cbcl_scr_syn_totprob_r,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
+	rdata_file = file("/scratch/users/apines/gp/pgAge.rds", blocking = TRUE)
+	saveRDS(gpAge, file=rdata_file)
+	close(rdata_file)
+#} else {
+	print(' found pgAge.rds. Loading.')
+	pgAge=readRDS('/scratch/users/apines/gp/pgAge.rds')
+#}
 ####### plot derivs
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/pgAge_derivs_pg.png',width=800,height=800)
 # prinout gg_derivs
@@ -128,9 +131,19 @@ print(summary(gpAge_intrxn))
 
 
 print('full vs reduced model for effect size and anova of g~totprob')
+
 ###### FULL VS REDUCED ANOVA: P AND DR2
-no_g_Gam<-bam(cbcl_scr_syn_totprob_r~s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+if (!file.exists("/scratch/users/apines/gp/noG_Gam_p.rds")){
+        no_g_Gam<-bam(cbcl_scr_syn_totprob_r~s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+	rdata_file = file("/scratch/users/apines/gp/noG_Gam_p.rds", blocking = TRUE)
+        saveRDS(no_g_Gam, file=rdata_file)
+        close(rdata_file)
+} else {
+        print('found /scratch/users/apines/gp/noG_Gam_p.rds. Loading')
+        no_g_Gam=readRDS("/scratch/users/apines/gp/noG_Gam_p.rds")
+}
 no_g_Sum<-summary(no_g_Gam)
+
 # g-included model for measuring difference
 gGam<-gpAge
 gSum<-summary(gGam)
@@ -146,23 +159,24 @@ print(anovaP2[2])
 
 print('fitting te() with cbcl61 included + visualizing')
 # fit version with cbcl 61
-if (~file.exists("/scratch/users/apines/gp/gpAge_te_cbcl61.rds")){
-mixedEfModel<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+cbcl_q61_p+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+if (!file.exists("/scratch/users/apines/gp/gpAge_te_cbcl61.rds")){
+	mixedEfModel<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+cbcl_q61_p+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+	# save
+	rdata_file = file("/scratch/users/apines/gp/gpAge_te_cbcl61.rds", blocking = TRUE)
+        saveRDS(mixedEfModel, file=rdata_file)
+        close(rdata_file)
 } else {
-print('found gpAge_te_cbcl61.rds. Loading')
-mixedEfModel=readRDS('/scratch/users/apines/gp/gpAge_te_cbcl61.rds')
+	print('found gpAge_te_cbcl61.rds. Loading')
+	mixedEfModel=readRDS('/scratch/users/apines/gp/gpAge_te_cbcl61.rds')
 }
 ######## plot tensor 
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te_cbcl61.png',width=800,height=800)
 # prinout gg_tensor
 gg_tensor(mixedEfModel)
 dev.off()
-# save
-rdata_file = file("/scratch/users/apines/gp/gpAge_te_cbcl61.rds", blocking = TRUE)
-saveRDS(mixedEfModel, file=rdata_file)
-close(rdata_file)
 
 print('Max and Min of gpAge_te (with cbcl61) fitted values')
 print(max(mixedEfModel$fitted.values))
 print(min(mixedEfModel$fitted.values))
 
+print('done with g~p fits')

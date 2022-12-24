@@ -19,18 +19,27 @@ source(here::here('/oak/stanford/groups/leanew1/users/apines/scripts/gp', 'get_d
 masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rds')
 # convert family id to factor
 masterdf$rel_family_id=as.factor(masterdf$rel_family_id)
+# FYI
+print('dimensions of dataframe')
+dim(masterdf)
 
 print('data loaded, fitting te(age,g) for internalizing symptoms, REs for participant and family')
 ### internalizing
-mixedEfModel<-bam(cbcl_scr_syn_internal_r~te(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
-# save
-rdata_file = file("/scratch/users/apines/gp/g_int_Age_te.rds", blocking = TRUE)
-saveRDS(mixedEfModel, file=rdata_file)
-close(rdata_file)
+if (!file.exists("/scratch/users/apines/gp/g_int_Age_te.rds")){
+	mixedEfModel<-bam(cbcl_scr_syn_internal_r~te(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+	# save
+	rdata_file = file("/scratch/users/apines/gp/g_int_Age_te.rds", blocking = TRUE)
+	saveRDS(mixedEfModel, file=rdata_file)
+	close(rdata_file)
+} else {
+	print('found g_int_Age_te.rds. Loading')
+	mixedEfModel=readRDS("/scratch/users/apines/gp/g_int_Age_te.rds")
+}
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gIntAge_te.png',width=800,height=800)
 # prinout gg_tensor
 gg_tensor(mixedEfModel)
 dev.off()
+print('tensor printed. Printing confidence intervals')
 # print confidence intervals for supplemental figure
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gIntAge_te_ci.png',width=2400,height=800)
 # prinout gg_tensor
@@ -39,11 +48,16 @@ dev.off()
 
 print('fitting te(age,g) for internalizing symptoms with cbcl61 as covariate, REs for participant and family')
 # FIT WITH CBCL61
-mixedEfModel<-bam(cbcl_scr_syn_internal_r~te(interview_age,g)+cbcl_q61_p+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
-# save
-rdata_file = file("/scratch/users/apines/gp/g_int_Age_te_cbcl61.rds", blocking = TRUE)
-saveRDS(mixedEfModel, file=rdata_file)
-close(rdata_file)
+if (!file.exists("/scratch/users/apines/gp/g_int_Age_te_cbcl61.rds")){
+	mixedEfModel<-bam(cbcl_scr_syn_internal_r~te(interview_age,g)+cbcl_q61_p+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+	# save
+	rdata_file = file("/scratch/users/apines/gp/g_int_Age_te_cbcl61.rds", blocking = TRUE)
+	saveRDS(mixedEfModel, file=rdata_file)
+	close(rdata_file)
+} else {
+	print('found /scratch/users/apines/gp/g_int_Age_te_cbcl61.rds. Loading')
+	mixedEfModel=readRDS("/scratch/users/apines/gp/g_int_Age_te_cbcl61.rds")
+}
 # print png of tensor
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gIntAge_te_cbcl61.png',width=800,height=800)
 # prinout gg_tensor
@@ -54,10 +68,28 @@ print('calculating effect size for g within internalizing symptoms')
 
 # fit as independent splines to get p and dr2 for int w/ and without g
 ###### FULL VS REDUCED ANOVA: P AND DR2
-no_g_Gam<-bam(cbcl_scr_syn_internal_r~s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+
+if (!file.exists("/scratch/users/apines/gp/noG_Gam_int.rds")){
+	no_g_Gam<-bam(cbcl_scr_syn_internal_r~s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+	rdata_file = file("/scratch/users/apines/gp/noG_Gam_int.rds", blocking = TRUE)
+        saveRDS(no_g_Gam, file=rdata_file)
+	close(rdata_file)
+} else {
+	print('found /scratch/users/apines/gp/noG_Gam_int.rds. Loading')
+	no_g_Gam=readRDS("/scratch/users/apines/gp/noG_Gam_int.rds")
+}
 no_g_Sum<-summary(no_g_Gam)
-# g-included model for measuring difference
-gGam<-bam(cbcl_scr_syn_internal_r~s(g)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+# g-included model for measuring difference: note gGam gets used later for comparison with ti tensor
+if (!file.exists("/scratch/users/apines/gp/G_Gam_int.rds")){
+	gGam<-bam(cbcl_scr_syn_internal_r~s(g)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+	rdata_file = file("/scratch/users/apines/gp/G_Gam_int.rds", blocking = TRUE)
+        saveRDS(gGam, file=rdata_file)
+	close(rdata_file)}
+ else {
+	print('found /scratch/users/apines/gp/G_Gam_int.rds. Loading')
+	gGam=readRDS("/scratch/users/apines/gp/G_Gam_int.rds")
+}
+
 gSum<-summary(gGam)
 dif<-gSum$r.sq-no_g_Sum$r.sq
 print('difference in r^2: g vs. no g in internalizing model')
@@ -71,24 +103,31 @@ print(anovaP2[2])
 
 print('testing for interaction of age*g on internalizing symptoms')
 # FIT AS INDEPENDENT SPLINES TO TEST FOR INTERACTION: try anova.gam with and without ti interaction (NOTE NO CBCL61)
-mixedEfModel<-bam(cbcl_scr_syn_internal_r~s(interview_age)+s(g)+ti(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+if (!file.exists("/scratch/users/apines/gp/g_int_Age_ti.rds")){
+	mixedEfModel<-bam(cbcl_scr_syn_internal_r~s(interview_age)+s(g)+ti(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+	rdata_file=file("/scratch/users/apines/gp/g_int_Age_ti.rds", blocking = TRUE)
+	saveRDS(mixedEfModel,file=rdata_file)
+	close(rdata_file)
+} else {
+	print('found /scratch/users/apines/gp/g_int_Age_ti.rds. Loading')
+	mixedEfModel=readRDS("/scratch/users/apines/gp/g_int_Age_ti.rds")
+}
 # print png of tensor
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gIntAge_ti_nocbcl61.png',width=800,height=800)
 # prinout gg_tensor
 gg_tensor(mixedEfModel)
-dev.off() 
-reduced_mixedEfModel<-bam(cbcl_scr_syn_internal_r~s(interview_age)+s(g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+dev.off()
 # ti-included model for measuring difference
 tiSum<-summary(mixedEfModel)
-notiSum<-summary(reduced_mixedEfModel)
-dif<-tiSum$r.sq-reduced_mixedEfModel$r.sq
+notiSum<-summary(gGam)
+dif<-tiSum$r.sq-gGam$r.sq
 print('difference in r^2: ti vs. no ti(age,g) in internalizing model')
 print(dif)
 # test of dif with anova.gam
-anovaRes<-anova.gam(reduced_mixedEfModel,mixedEfModel,test='Chisq')
+anovaRes<-anova.gam(gGam,mixedEfModel,test='Chisq')
 anovaP<-anovaRes$`Pr(>Chi)`
 anovaP2<-unlist(anovaP)
 print('chi-sq p value: ti vs. no ti(age,g) in internalizing model')
 print(anovaP2[2])
 
-print('done')
+print('done with internalizing')
