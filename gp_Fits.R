@@ -21,11 +21,16 @@ masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rd
 masterdf$rel_family_id=as.factor(masterdf$rel_family_id)
 
 #### gpAge_te
+if (~file.exists("/scratch/users/apines/gp/gpAge_te.rds")){
 gpAge_te<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 # resilient version
 rdata_file = file("/scratch/users/apines/gp/gpAge_te.rds", blocking = TRUE)
 saveRDS(gpAge_te, file=rdata_file)
 close(rdata_file)
+} else {
+print('found gpAge_te.rds. Loading')
+gpAge_te=readRDS("/scratch/users/apines/gp/gpAge_te.rds")
+}
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te.png',width=800,height=800)
 # prinout gg_tensor
 gg_tensor(gpAge_te)
@@ -37,24 +42,33 @@ gg_tensor(gpAge_te,ci=T)
 dev.off()
 
 #### gpAge_independent splines
+if (~file.exists("/scratch/users/apines/gp/gpAge.rds")){
 gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 rdata_file = file("/scratch/users/apines/gp/gpAge.rds", blocking = TRUE)
 saveRDS(gpAge, file=rdata_file)
 close(rdata_file)
+} else {
+print('found gpAge.rds. Loading')
+gpAge=readRDS("/scratch/users/apines/gp/gpAge.rds")
+}
 ####### plot derivs
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_derivs_gp.png',width=800,height=800)
 # prinout gg_derivs
 get_derivs_and_plot(gpAge,'g')
 dev.off()
 
-############################## USE THIS CHUNK ON ti() MODEL IF ti() FITS: OTHERWISE, KEEP ON NO-INTERACTIONS MODEL
-############################## USE THIS CHUNK ON ti() MODEL IF ti() FITS: OTHERWISE, KEEP ON NO-INTERACTIONS MODEL
+##############################
 ######## I SCATTERPLOTS ON TWO VARIABLES OF INTEREST WITH THEIR FIT SPLINE
 #### g as response variable
-pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
+if (~file.exists("/scratch/users/apines/gp/pgAge.rds")){
+pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+ti(cbcl_scr_syn_totprob_r,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
 rdata_file = file("/scratch/users/apines/gp/pgAge.rds", blocking = TRUE)
 saveRDS(gpAge, file=rdata_file)
 close(rdata_file)
+} else {
+print(' found pgAge.rds. Loading.')
+pgAge=readRDS('/scratch/users/apines/gp/pgAge.rds')
+}
 ####### plot derivs
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/pgAge_derivs_pg.png',width=800,height=800)
 # prinout gg_derivs
@@ -73,14 +87,27 @@ xlab('Total Problems Score')+
 scale_color_discrete(name="Vist",breaks=c("baseline_year_1_arm_1","2_year_follow_up_y_arm_1"),labels=c("Baseline","2 Years"))+
 guides(colour = guide_legend(override.aes = list(alpha = 1)))
 # make the image to be printed
-png('/oak/stanford/groups/leanew1/users/apines/figs/gp/pgAge_Scater_pg.png',width=800,height=800)
+png('/oak/stanford/groups/leanew1/users/apines/figs/gp/pgAge_Scatter_pg.png',width=800,height=800)
 ggMarginal(thePlot,groupFill=T)
 dev.off()
-######## II FORMALLY TEST FOR NON-LINEARITY - SWITCH TO TI() IF THAT IS CHOSEN MODEL, KEEP HERE IF NOT
+######## II FORMALLY TEST FOR NON-LINEARITY
 #### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
-pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
+pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re')+ti(cbcl_scr_syn_totprob_r,interview_age),data=masterdf)
 summary(pgAge)
+
+
+
 ############################## USE THIS CHUNK ON ti() MODEL IF ti() FITS: OTHERWISE, KEEP ON NO-INTERACTIONS MODEL
+### step one: extract max fitted values for each tensor plot to prospectively set color range of plots
+print('Max and Min of gpAge_te (no cbcl61) fitted values')
+print(max(gpAge_te$fitted.values))
+print(min(gpAge_te$fitted.values))
+#gg_tensor(fixedEfModel)+scale_fill_gradient2(
+#    low = muted("blue"), 
+#    mid = "white", 
+#    high = muted("red"), 
+#    midpoint = 0, limits=c(-2,2)
+#)
 ###
 ### AND USE max(fixedEfModel$fitted.values) OF ALL CBCL61 TE FITS AND ALL NO CBCL61 TE FITS FOR SAME COLOR SCALE, AT LEAST CONISTENTLY ACROSS CBCL61-NOCBCL61 WITHIN SYMPTOM TYPE CATEGORIES
 ### 
@@ -117,17 +144,14 @@ anovaP2<-unlist(anovaP)
 print('chi-sq p value: g vs. no g in totprobs model')
 print(anovaP2[2])
 
-print('generating scatter plot of externalizing ~ g (residualized)')
-### SCATTER OF EXTERNAL ALONG G after controlling for age
-# use no g gam to control for age in scatterplot of g~ext (scatter on residuals)
-png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gp_ageRegressed.png',width=700,height=700)
-# prinout gg_tensor
-visreg(gGam,'g')
-dev.off()
-
 print('fitting te() with cbcl61 included + visualizing')
 # fit version with cbcl 61
+if (~file.exists("/scratch/users/apines/gp/gpAge_te_cbcl61.rds")){
 mixedEfModel<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+cbcl_q61_p+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
+} else {
+print('found gpAge_te_cbcl61.rds. Loading')
+mixedEfModel=readRDS('/scratch/users/apines/gp/gpAge_te_cbcl61.rds')
+}
 ######## plot tensor 
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te_cbcl61.png',width=800,height=800)
 # prinout gg_tensor
@@ -137,4 +161,8 @@ dev.off()
 rdata_file = file("/scratch/users/apines/gp/gpAge_te_cbcl61.rds", blocking = TRUE)
 saveRDS(mixedEfModel, file=rdata_file)
 close(rdata_file)
+
+print('Max and Min of gpAge_te (with cbcl61) fitted values')
+print(max(mixedEfModel$fitted.values))
+print(min(mixedEfModel$fitted.values))
 
