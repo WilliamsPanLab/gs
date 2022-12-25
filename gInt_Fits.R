@@ -23,6 +23,7 @@ masterdf$rel_family_id=as.factor(masterdf$rel_family_id)
 print('dimensions of dataframe')
 dim(masterdf)
 
+#### PRINT TENSORS
 print('data loaded, fitting te(age,g) for internalizing symptoms, REs for participant and family')
 ### internalizing
 if (!file.exists("/scratch/users/apines/gp/g_int_Age_te.rds")){
@@ -129,5 +130,10 @@ anovaP<-anovaRes$`Pr(>Chi)`
 anovaP2<-unlist(anovaP)
 print('chi-sq p value: ti vs. no ti(age,g) in internalizing model')
 print(anovaP2[2])
+
+############ II FORMALLY TEST FOR NON-LINEARITY
+#### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
+IntgAge<-bam(g~s(cbcl_scr_syn_internal_r,m=c(2,0))+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re')+ti(cbcl_scr_syn_internal_r,interview_age),data=masterdf)
+summary(IntgAge)
 
 print('done with internalizing')
