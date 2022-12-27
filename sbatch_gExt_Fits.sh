@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=sbatch_gExt_Fits
+#SBATCH --job-name=gExt_Fits
 #SBATCH --time=7-00:00:00
 #SBATCH -p leanew1  # Queue names you can submit to
 #SBATCH -n 1

@@ -351,20 +351,29 @@ fixedEfModel<-gam(cbcl_scr_syn_external_r~te(interview_age,g)+cbcl_q61_p,data=ma
 gg_tensor(fixedEfModel)
 
 ```
+
 ```{r}
 # finish cleaning data for sherlock runs: use thompson 2019 approach to family ID
 masterdf$id_fam = NULL
-masterdf$fam_size = 0
+# default value of family size (# of children in abcd study)
+masterdf$fam_size = 1
+
+# counter index
 ind=0
+
+# set each instance of multiple family members to a family ID, as ind
 for(f in 1:length(unique(masterdf$rel_family_id))){
   masterdf$fam_size[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = 
-  sum(masterdf$rel_family_id == unique(masterdf$rel_family_id)[f])
-  if(sum(masterdf$fam_size[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]])>1){	
+  sum(masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]) / 2
+  # note that each  person is represented twice at this point:
+  # divide by 2 to take number of visits to number of people, if there's more than 2x visits per family ID, izza family
+  if((sum(masterdf$fam_size[masterdf$rel_family_id == (unique(masterdf$rel_family_id)[f])])/2)>1){	
     ind=ind+1	
     masterdf$id_fam[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = ind
   }	
 }
 
+# make family ID for those with families represented in ABCD
 masterdf$rel_family_id=masterdf$id_fam
 
 # save out model for cluster mixed-effect fittinga

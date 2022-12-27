@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=sbatch_gp_DevExplainedBoots
+#SBATCH --job-name=DevExplainedBoots
 #SBATCH --time=7-00:00:00
 #SBATCH -p leanew1  # Queue names you can submit to
 #SBATCH -n 1

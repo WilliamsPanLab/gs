@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=gInt_fits
+#SBATCH --job-name=ExtDevExplainedBoots
 #SBATCH --time=7-00:00:00
 #SBATCH -p leanew1  # Queue names you can submit to
 #SBATCH -n 1
@@ -12,4 +12,4 @@
 module load R/4.1
 
 
-Rscript gInt_Fits.R
+Rscript gExt_DevExplainedBoots.R 

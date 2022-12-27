@@ -46,6 +46,9 @@ dev.off()
 
 #### gpAge_independent splines
 if (!file.exists("/scratch/users/apines/gp/gpAge.rds")){
+	# interrogate an error message, why are 12273 predictions coming out?
+	# looks like a bunch of familyIDs are missing: 467 of them.
+	print(dim(masterdf))
 	gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 	rdata_file = file("/scratch/users/apines/gp/gpAge.rds", blocking = TRUE)
 	saveRDS(gpAge, file=rdata_file)
@@ -63,22 +66,27 @@ dev.off()
 ##############################
 ######## I SCATTERPLOTS ON TWO VARIABLES OF INTEREST WITH THEIR FIT SPLINE
 #### g as response variable
-#if (!file.exists("/scratch/users/apines/gp/pgAge.rds")){
+if (!file.exists("/scratch/users/apines/gp/pgAge.rds")){
+	print('fitting p~g on masterdf')
+	print('master df dims')
+	print(dim(masterdf))
 	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+ti(cbcl_scr_syn_totprob_r,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
 	rdata_file = file("/scratch/users/apines/gp/pgAge.rds", blocking = TRUE)
-	saveRDS(gpAge, file=rdata_file)
+	saveRDS(pgAge, file=rdata_file)
 	close(rdata_file)
-#} else {
+} else {
 	print(' found pgAge.rds. Loading.')
 	pgAge=readRDS('/scratch/users/apines/gp/pgAge.rds')
-#}
+}
 ####### plot derivs
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/pgAge_derivs_pg.png',width=800,height=800)
 # prinout gg_derivs
 get_derivs_and_plot(pgAge,'cbcl_scr_syn_totprob_r')
 dev.off()
 # use model fit for geom_smooth plotting
-forSpline<-predict(pgAge, data = masterdf)
+forSpline<-predict(pgAge, newdata = masterdf)
+print('length of fit:')
+print(length(forSpline))
 plotdf<-data.frame(masterdf$cbcl_scr_syn_totprob_r,forSpline,masterdf$g,as.factor(masterdf$eventname))
 colnames(plotdf)<-c('totprob','predicted','g','eventname')
 # make scatter plot showing g~total problems with their spline fit

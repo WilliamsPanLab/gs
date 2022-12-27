@@ -131,6 +131,39 @@ anovaP2<-unlist(anovaP)
 print('chi-sq p value: ti vs. no ti(age,g) in internalizing model')
 print(anovaP2[2])
 
+######## I SCATTERPLOTS ON TWO VARIABLES OF INTEREST WITH THEIR FIT SPLINE
+#### g as response variable
+if (!file.exists("/scratch/users/apines/gp/IntgAge.rds")){
+	        pgAge<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age)+ti(cbcl_scr_syn_internal_r,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
+        rdata_file = file("/scratch/users/apines/gp/IntgAge.rds", blocking = TRUE)
+	        saveRDS(gpAge, file=rdata_file)
+	        close(rdata_file)
+} else {
+	        print(' found IntgAge.rds. Loading.')
+        pgAge=readRDS('/scratch/users/apines/gp/IntgAge.rds')
+}
+####### plot derivs
+png('/oak/stanford/groups/leanew1/users/apines/figs/gp/IntgAge_derivs_pg.png',width=800,height=800)
+# prinout gg_derivs
+get_derivs_and_plot(pgAge,'cbcl_scr_syn_internal_r')
+dev.off()
+# use model fit for geom_smooth plotting
+forSpline<-predict(pgAge, newdata = masterdf)
+plotdf<-data.frame(masterdf$cbcl_scr_syn_internal_r,forSpline,masterdf$g,as.factor(masterdf$eventname))
+colnames(plotdf)<-c('internal','predicted','g','eventname')
+# make scatter plot showing g~total problems with their spline fit
+thePlot<-ggplot(plotdf,aes(totprob,g))+
+geom_point(alpha=.1,aes(color=eventname))+
+geom_smooth(aes(y=predicted),size=2,se=F,color='black')+
+theme_classic(base_size=24)+
+xlab('Internalizing Problems Score')+
+scale_color_discrete(name="Vist",breaks=c("baseline_year_1_arm_1","2_year_follow_up_y_arm_1"),labels=c("Baseline","2 Years"))+
+guides(colour = guide_legend(override.aes = list(alpha = 1)))
+# make the image to be printed
+png('/oak/stanford/groups/leanew1/users/apines/figs/gp/IntgAge_Scatter_pg.png',width=800,height=800)
+ggMarginal(thePlot,groupFill=T)
+dev.off()
+
 ############ II FORMALLY TEST FOR NON-LINEARITY
 #### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
 IntgAge<-bam(g~s(cbcl_scr_syn_internal_r,m=c(2,0))+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re')+ti(cbcl_scr_syn_internal_r,interview_age),data=masterdf)
