@@ -85,8 +85,8 @@ if (!file.exists("/scratch/users/apines/gp/G_Gam_int.rds")){
 	gGam<-bam(cbcl_scr_syn_internal_r~s(g)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf,family=nb())
 	rdata_file = file("/scratch/users/apines/gp/G_Gam_int.rds", blocking = TRUE)
         saveRDS(gGam, file=rdata_file)
-	close(rdata_file)}
- else {
+	close(rdata_file)
+} else {
 	print('found /scratch/users/apines/gp/G_Gam_int.rds. Loading')
 	gGam=readRDS("/scratch/users/apines/gp/G_Gam_int.rds")
 }
@@ -136,7 +136,7 @@ print(anovaP2[2])
 if (!file.exists("/scratch/users/apines/gp/IntgAge.rds")){
 	        pgAge<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age)+ti(cbcl_scr_syn_internal_r,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
         rdata_file = file("/scratch/users/apines/gp/IntgAge.rds", blocking = TRUE)
-	        saveRDS(gpAge, file=rdata_file)
+	        saveRDS(pgAge, file=rdata_file)
 	        close(rdata_file)
 } else {
 	        print(' found IntgAge.rds. Loading.')

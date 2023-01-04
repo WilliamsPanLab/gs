@@ -114,16 +114,15 @@ anovaP2<-unlist(anovaP)
 print('chi-sq p value: g vs. no g in externalizing model')
 print(anovaP2[2])
 
-
 ######## I SCATTERPLOTS ON TWO VARIABLES OF INTEREST WITH THEIR FIT SPLINE
 #### g as response variable
 if (!file.exists("/scratch/users/apines/gp/ExtgAge.rds")){
-	                pgAge<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
+	pgAge<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
         rdata_file = file("/scratch/users/apines/gp/ExtgAge.rds", blocking = TRUE)
-	                saveRDS(gpAge, file=rdata_file)
-	                close(rdata_file)
+	saveRDS(pgAge, file=rdata_file)
+	close(rdata_file)
 } else {
-	                print(' found ExtgAge.rds. Loading.')
+	print(' found ExtgAge.rds. Loading.')
         pgAge=readRDS('/scratch/users/apines/gp/ExtgAge.rds')
 }
 ####### plot derivs

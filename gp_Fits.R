@@ -70,7 +70,7 @@ if (!file.exists("/scratch/users/apines/gp/pgAge.rds")){
 	print('fitting p~g on masterdf')
 	print('master df dims')
 	print(dim(masterdf))
-	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+ti(cbcl_scr_syn_totprob_r,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
+	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
 	rdata_file = file("/scratch/users/apines/gp/pgAge.rds", blocking = TRUE)
 	saveRDS(pgAge, file=rdata_file)
 	close(rdata_file)
@@ -129,7 +129,6 @@ print(min(gpAge_te$fitted.values))
 #     midpoint = 0, limits=c(-2,2)
 #)
 ####
-############################## USE THIS CHUNK ON ti() MODEL IF ti() FITS: OTHERWISE, KEEP ON NO-INTERACTIONS MODEL
 
 print('testing for interaction between g and age on totprobs')
 ### interaction test
