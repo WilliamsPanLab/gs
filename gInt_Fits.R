@@ -120,6 +120,7 @@ gg_tensor(mixedEfModel)
 dev.off()
 # ti-included model for measuring difference
 tiSum<-summary(mixedEfModel)
+print(tiSum)
 notiSum<-summary(gGam)
 dif<-tiSum$r.sq-gGam$r.sq
 print('difference in r^2: ti vs. no ti(age,g) in internalizing model')
@@ -134,12 +135,12 @@ print(anovaP2[2])
 ######## I SCATTERPLOTS ON TWO VARIABLES OF INTEREST WITH THEIR FIT SPLINE
 #### g as response variable
 if (!file.exists("/scratch/users/apines/gp/IntgAge.rds")){
-	        pgAge<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age)+ti(cbcl_scr_syn_internal_r,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
+	pgAge<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age)+ti(cbcl_scr_syn_internal_r,interview_age)+s(subjectkey,bs='re')+s(rel_family_id,bs='re'),data=masterdf)
         rdata_file = file("/scratch/users/apines/gp/IntgAge.rds", blocking = TRUE)
-	        saveRDS(pgAge, file=rdata_file)
-	        close(rdata_file)
+	saveRDS(pgAge, file=rdata_file)
+	close(rdata_file)
 } else {
-	        print(' found IntgAge.rds. Loading.')
+	print(' found IntgAge.rds. Loading.')
         pgAge=readRDS('/scratch/users/apines/gp/IntgAge.rds')
 }
 ####### plot derivs
@@ -152,7 +153,7 @@ forSpline<-predict(pgAge, newdata = masterdf)
 plotdf<-data.frame(masterdf$cbcl_scr_syn_internal_r,forSpline,masterdf$g,as.factor(masterdf$eventname))
 colnames(plotdf)<-c('internal','predicted','g','eventname')
 # make scatter plot showing g~total problems with their spline fit
-thePlot<-ggplot(plotdf,aes(totprob,g))+
+thePlot<-ggplot(plotdf,aes(internal,g))+
 geom_point(alpha=.1,aes(color=eventname))+
 geom_smooth(aes(y=predicted),size=2,se=F,color='black')+
 theme_classic(base_size=24)+
