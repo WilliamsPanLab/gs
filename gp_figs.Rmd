@@ -94,36 +94,10 @@ masterdf$lmt_scr_perc_correct<-as.numeric(masterdf$lmt_scr_perc_correct)
 # isolate PCA df
 pcVars=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct")
 
-# only use subjects with both timepoints as complete cases
-subjs=unique(masterdf$subjectkey)
-for (s in subjs){
-  # if there are less than two compelte cases of the pca variables
-  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,pcVars]))<2){
-    subjs=subjs[subjs!=s]
-  }
-}
-# convert masterdf to df with complete observations for cognition
-masterdf=masterdf[masterdf$subjectkey %in% subjs,]
-
-# pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
-pcaDf<-masterdf[,pcVars]
-# derive pcs
-Y = as.matrix(scale(pcaDf[complete.cases(pcaDf[,pcVars]),pcVars]))
-# equiv for binding scores to IDs and eventnames
-pcVarsAndIDs=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","subjectkey","eventname")
-Yextended=masterdf[complete.cases(masterdf[,pcVarsAndIDs]),pcVarsAndIDs]
-ev = eigen(cor(Y))
-ap = parallel(subject=nrow(Y),var=ncol(Y),rep=100,cent=.05)
-nS = nScree(x=ev$values,aparallel=ap$eigen$qevpea)
-plotnScree(nS)
-ncomp = 3
-y.pca = psych::principal(Y, rotate="varimax", nfactors=ncomp, scores=TRUE)
-y.pca$loadings
-# assign scores to subjs
-Yextended$g<-y.pca$scores[,1]
 ```
 
 ```{r}
+# complete other criteria for completeness prior to running pca
 # load in additional data
 cbcls=read.delim('/Users/panlab/Downloads/Package_1205735/abcd_cbcls01.txt')
 # subset timepoints
@@ -172,9 +146,6 @@ y2=merge(y2,k2,by='subjectkey')
 y3=merge(cbcls3,tb3,by='subjectkey')
 y3=merge(y3,k3,by='subjectkey')
 
-```
-
-```{r}
 #### clean data
 
 # convert to numeric
@@ -203,7 +174,90 @@ masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_totprob_r),]
 # r being fucking stubborn
 masterdf=masterdf[!masterdf$cbcl_scr_syn_totprob_r=='',]
 #masterdf=masterdf[!masterdf$cbcl_q61_p=='',]
+
 ```
+
+```{r}
+#### pre pca - check for completeness
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two compelte cases of the pca variables
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,pcVars]))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+# convert masterdf to df with complete observations for cognition
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
+pcaDf<-masterdf[,pcVars]
+
+```
+
+```{r}
+# ANALYSIS 0: DERIVE PCS
+
+# derive pcs
+Y = as.matrix(scale(pcaDf[complete.cases(pcaDf[,pcVars]),pcVars]))
+# equiv for binding scores to IDs and eventnames
+pcVarsAndIDs=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","subjectkey","eventname")
+Yextended=masterdf[complete.cases(masterdf[,pcVarsAndIDs]),pcVarsAndIDs]
+ncomp = 3
+y.pca = psych::principal(Y, rotate="varimax", nfactors=ncomp, scores=TRUE)
+y.pca$loadings
+# assign scores to subjs
+Yextended$g<-y.pca$scores[,1]
+```
+
+```{r}
+### PRINOUT BIG DATA FOR CLUSTER MIXED EFFECTS
+
+# finish cleaning data for sherlock runs: use thompson 2019 approach to family ID
+masterdf$id_fam = NULL
+# default value of family size (# of children in abcd study)
+masterdf$fam_size = 1
+
+# counter index
+ind=0
+
+# set each instance of multiple family members to a family ID, as ind
+set.seed(1)
+for(f in 1:length(unique(masterdf$rel_family_id))){
+  # calculate family size
+  famsize=sum(masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]) / 2
+  masterdf$fam_size[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = famsize
+  # note that each  person is represented twice at this point:
+  # divide by 2 to take number of visits to number of people, if there's more than 2x visits per family ID, izza family
+  # this logic gets hairy. Starting from outside in: > 1 is family size >1, /2 is divided by 2 for two visits, [f] is unique familyID, rel_family_id is place in column of masterdf
+  if(famsize>1){
+    # remove one from instances where family-id = this relative family id (sequence for siblings, 1:size(Family))
+    print(paste0('family size ',famsize))
+    # keep one sib
+    kept=sample(seq(1,famsize),1)
+    print(paste0('kept ',kept))
+    # use to select one subject id
+    famIDs=unique(masterdf$subjectkey[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]])
+    # chosen sib
+    keeper=famIDs[kept]
+    left=famIDs[-c(kept)]
+    # leave rest
+    masterdf=masterdf[masterdf$subjectkey!=left,] 
+    print(paste0('left ',left))
+    # calc index of family
+    ind=ind+1	
+    # set index of family
+    masterdf$id_fam[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = ind
+  }	
+}
+
+# make family ID for those with families represented in ABCD
+masterdf$rel_family_id=masterdf$id_fam
+
+# save out model for cluster mixed-effect fittinga
+saveRDS(masterdf,'~/mixedEfDf.rds')
+```
+
 
 ```{r}
 ### ANALYSIS 1: TEMPORAL PRECEDENCE
@@ -311,7 +365,15 @@ ggplot(aes(x=variable,y=value),data=barplot_df)+geom_bar(stat='identity')+theme(
 # load in bootstrapped data from sherlock
 boots<-readRDS('~/Desktop/g_p/DevExplained.rds')
 boot_barplot_df<-melt(boots)
-ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme(axis.text.x=element_text(angle=45,vjust=.5))+theme_classic()
+ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme(axis.text.x=element_text(angle=45,vjust=.5))+theme_classic()+ggtitle('Total Problems')
+
+boots<-readRDS('~/Desktop/g_p/DevExplainedInt.rds')
+boot_barplot_df<-melt(boots)
+ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme(axis.text.x=element_text(angle=45,vjust=.5))+theme_classic()+ggtitle('Internalizing Problems')
+
+boots<-readRDS('~/Desktop/g_p/DevExplainedExt.rds')
+boot_barplot_df<-melt(boots)
+ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme(axis.text.x=element_text(angle=45,vjust=.5))+theme_classic()+ggtitle('Externalizing Problems')
 ```
 
 ```{r}
@@ -352,33 +414,6 @@ gg_tensor(fixedEfModel)
 
 ```
 
-```{r}
-# finish cleaning data for sherlock runs: use thompson 2019 approach to family ID
-masterdf$id_fam = NULL
-# default value of family size (# of children in abcd study)
-masterdf$fam_size = 1
-
-# counter index
-ind=0
-
-# set each instance of multiple family members to a family ID, as ind
-for(f in 1:length(unique(masterdf$rel_family_id))){
-  masterdf$fam_size[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = 
-  sum(masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]) / 2
-  # note that each  person is represented twice at this point:
-  # divide by 2 to take number of visits to number of people, if there's more than 2x visits per family ID, izza family
-  if((sum(masterdf$fam_size[masterdf$rel_family_id == (unique(masterdf$rel_family_id)[f])])/2)>1){	
-    ind=ind+1	
-    masterdf$id_fam[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = ind
-  }	
-}
-
-# make family ID for those with families represented in ABCD
-masterdf$rel_family_id=masterdf$id_fam
-
-# save out model for cluster mixed-effect fittinga
-saveRDS(masterdf,'~/mixedEfDf.rds')
-```
 
 ```{r}
 #### ANALYSIS 5A: KSADS BASELINE 
