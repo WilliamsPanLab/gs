@@ -167,18 +167,16 @@ masterdf$ksads_back_grades_in_school_p<-as.ordered(masterdf$ksads_back_grades_in
 # remove instances of NA tot probs
 masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_totprob_r),]
 # and for q61
-#masterdf=masterdf[!is.na(masterdf$cbcl_q61_p),]=
+masterdf=masterdf[!is.na(masterdf$cbcl_q61_p),]
 # and for is empty
 masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_totprob_r),]
-#masterdf=masterdf[!is.empty(masterdf$cbcl_q61_p),]
-# r being fucking stubborn
+masterdf=masterdf[!is.empty(masterdf$cbcl_q61_p),]
+# r can't take the hint
 masterdf=masterdf[!masterdf$cbcl_scr_syn_totprob_r=='',]
-#masterdf=masterdf[!masterdf$cbcl_q61_p=='',]
+d=masterdf[!masterdf$cbcl_q61_p=='',]
 
 ```
-
 ```{r}
-#### pre pca - check for completeness
 # only use subjects with both timepoints as complete cases
 subjs=unique(masterdf$subjectkey)
 for (s in subjs){
@@ -190,30 +188,10 @@ for (s in subjs){
 # convert masterdf to df with complete observations for cognition
 masterdf=masterdf[masterdf$subjectkey %in% subjs,]
 
-# pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
-pcaDf<-masterdf[,pcVars]
-
 ```
 
 ```{r}
-# ANALYSIS 0: DERIVE PCS
-
-# derive pcs
-Y = as.matrix(scale(pcaDf[complete.cases(pcaDf[,pcVars]),pcVars]))
-# equiv for binding scores to IDs and eventnames
-pcVarsAndIDs=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","subjectkey","eventname")
-Yextended=masterdf[complete.cases(masterdf[,pcVarsAndIDs]),pcVarsAndIDs]
-ncomp = 3
-y.pca = psych::principal(Y, rotate="varimax", nfactors=ncomp, scores=TRUE)
-y.pca$loadings
-# assign scores to subjs
-Yextended$g<-y.pca$scores[,1]
-```
-
-```{r}
-### PRINOUT BIG DATA FOR CLUSTER MIXED EFFECTS
-
-# finish cleaning data for sherlock runs: use thompson 2019 approach to family ID
+# finish cleaning data for sherlock runs: one family member per family to facilitate random sample
 masterdf$id_fam = NULL
 # default value of family size (# of children in abcd study)
 masterdf$fam_size = 1
@@ -232,10 +210,10 @@ for(f in 1:length(unique(masterdf$rel_family_id))){
   # this logic gets hairy. Starting from outside in: > 1 is family size >1, /2 is divided by 2 for two visits, [f] is unique familyID, rel_family_id is place in column of masterdf
   if(famsize>1){
     # remove one from instances where family-id = this relative family id (sequence for siblings, 1:size(Family))
-    print(paste0('family size ',famsize))
+    #print(paste0('family size ',famsize))
     # keep one sib
     kept=sample(seq(1,famsize),1)
-    print(paste0('kept ',kept))
+    #print(paste0('kept ',kept))
     # use to select one subject id
     famIDs=unique(masterdf$subjectkey[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]])
     # chosen sib
@@ -243,7 +221,7 @@ for(f in 1:length(unique(masterdf$rel_family_id))){
     left=famIDs[-c(kept)]
     # leave rest
     masterdf=masterdf[masterdf$subjectkey!=left,] 
-    print(paste0('left ',left))
+    #print(paste0('left ',left))
     # calc index of family
     ind=ind+1	
     # set index of family
@@ -254,8 +232,48 @@ for(f in 1:length(unique(masterdf$rel_family_id))){
 # make family ID for those with families represented in ABCD
 masterdf$rel_family_id=masterdf$id_fam
 
-# save out model for cluster mixed-effect fittinga
+# pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
+pcaDf<-masterdf[,pcVars]
+```
+
+```{r}
+# ANALYSIS 0: DERIVE PCS
+
+# derive pcs
+Y = as.matrix(scale(pcaDf[complete.cases(pcaDf[,pcVars]),pcVars]))
+# equiv for binding scores to IDs and eventnames
+pcVarsAndIDs=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","subjectkey","eventname")
+Yextended=masterdf[complete.cases(masterdf[,pcVarsAndIDs]),pcVarsAndIDs]
+ncomp = 3
+y.pca = psych::principal(Y, rotate="varimax", nfactors=ncomp, scores=TRUE)
+y.pca$loadings
+# assign scores to subjs
+Yextended$g<-y.pca$scores[,1]
+# merge in cog data
+
+masterdf$g<-Yextended$g
+```
+
+
+```{r}
+# compare to thompson PC1
+PC1=readRDS('/Users/panlab/Downloads/DEAP-data-download.rds')
+PC1$subjectkey=PC1$src_subject_id
+PC1$eventname<-PC1$event_name
+# only baseline is meaningful
+PC1<-PC1[PC1$event_name=='baseline_year_1_arm_1',]
+# mergin'
+compareG_df<-merge(PC1,masterdf,by=c('src_subject_id'))
+# compare
+cor.test(as.numeric(compareG_df$g),compareG_df$neurocog_pc1.bl)
+# note: .964 correlation when calculated on only TP1 data
+```
+
+```{r}
+### PRINOUT BIG DATA FOR CLUSTER MIXED EFFECTS
+# save out model for cluster mixed-effect fitting
 saveRDS(masterdf,'~/mixedEfDf.rds')
+print(dim(masterdf))
 ```
 
 

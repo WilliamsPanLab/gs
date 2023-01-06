@@ -135,7 +135,7 @@ forSpline<-predict(pgAge, newdata = masterdf)
 plotdf<-data.frame(masterdf$cbcl_scr_syn_external_r,forSpline,masterdf$g,as.factor(masterdf$eventname))
 colnames(plotdf)<-c('external','predicted','g','eventname')
 # make scatter plot showing g~total problems with their spline fit
-thePlot<-ggplot(plotdf,aes(totprob,g))+
+thePlot<-ggplot(plotdf,aes(external,g))+
 geom_point(alpha=.1,aes(color=eventname))+
 geom_smooth(aes(y=predicted),size=2,se=F,color='black')+
 theme_classic(base_size=24)+

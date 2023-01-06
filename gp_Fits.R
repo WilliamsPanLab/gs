@@ -46,8 +46,6 @@ dev.off()
 
 #### gpAge_independent splines
 if (!file.exists("/scratch/users/apines/gp/gpAge.rds")){
-	# interrogate an error message, why are 12273 predictions coming out?
-	# looks like a bunch of familyIDs are missing: 467 of them.
 	print(dim(masterdf))
 	gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re'),data=masterdf,family=nb())
 	rdata_file = file("/scratch/users/apines/gp/gpAge.rds", blocking = TRUE)
