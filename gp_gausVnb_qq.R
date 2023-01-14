@@ -2,8 +2,6 @@ library(mgcv)
 
 # load in data
 masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rds')
-# convert family id to factor
-masterdf$rel_family_id=as.factor(masterdf$rel_family_id)
 
 #### gpAge_independent splines
 nb_gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re'),data=masterdf,family=nb())

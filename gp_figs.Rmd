@@ -200,7 +200,7 @@ masterdf$fam_size = 1
 ind=0
 
 # set each instance of multiple family members to a family ID, as ind
-set.seed(1)
+set.seed(2)
 for(f in 1:length(unique(masterdf$rel_family_id))){
   # calculate family size
   famsize=sum(masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]) / 2
@@ -508,8 +508,8 @@ library(forcats)
 # plot it
 plotdf<-data.frame(pvector,tvector,questionVec,reporterVec)
 # fdr correct
-plotdf$fdrP<-p.adjust(plotdf$pvector,metho='fdr')
-sigDf<-plotdf[plotdf$fdrP<0.05,]
+plotdf$fdrP<-p.adjust(plotdf$pvector,method='fdr')
+sigDf<-plotdf[plotdf$fdrP<0.01,]
 # order by t vector
 sigDf<-sigDf[order(sigDf$tvector),]
 # bar plot
@@ -589,7 +589,7 @@ for (question in 956:1907){
 # plot it
 plotdf<-data.frame(pvector,tvector,questionVec,reporterVec)
 # fdr correct
-plotdf$fdrP<-p.adjust(plotdf$pvector,metho='fdr')
+plotdf$fdrP<-p.adjust(plotdf$pvector,method='fdr')
 sigDf<-plotdf[plotdf$fdrP<0.01,]
 # order by t vector
 sigDf<-sigDf[order(sigDf$tvector),]
@@ -601,20 +601,26 @@ ggplot(aes(fct_reorder(questionVec,tvector),tvector,fill=reporterVec),data=sigDf
 ```{r}
 #### ANALYSIS 6: ADULT SELF-REPORT
 # load in asr
-asr=read.delim('~/Downloads/Package_1207917/pasr01.txt')
+asr=read.delim('~/Downloads/Package_1207917/pasr01.txt',na.strings=c("","NA"))
+# columns of interest to guage completeness of
+ColsOfInt=asr[,c(11:142,144,146)]
+# retain complete cases
+completeInd=ColsOfInt[rowSums(is.na(ColsOfInt)) == 0,]
+# merge with master
 masterdf=merge(asr,masterdf,by=c('subjectkey','eventname','src_subject_id'))
 ASRcolnames=asr[1,]
-####### QUICK ASIDE TO TRY MICHELI APPROACH TO FACTOR DELINEATION OF ASR
+
+
+#######MICHELI APPROACH TO FACTOR DELINEATION OF ASR
 
 # composite creation
-
-
 
 # polycors to eval if tp1 vars still meet criterion
 library(polycor)
 # subset asr into timepoints
 asrBV=subset(asr,eventname=='baseline_year_1_arm_1')
 asr2=subset(asr,eventname=='2_year_follow_up_y_arm_1')
+
 # save subjIDs
 asrBVSubjs=asrBV$subjectkey
 asr2Subjs=asr2$subjectkey
@@ -625,8 +631,8 @@ asr2_qs=asr2[,11:142]
 asrBV_qs <- as.data.frame(lapply(asrBV_qs, as.ordered))
 asr2_qs <- as.data.frame(lapply(asr2_qs, as.ordered))
 # polycormat
-#asrBV_qs_cormat=hetcor(asrBV_qs)
-#asr2_qs_cormat=hetcor(asr2_qs)
+asrBV_qs_cormat=hetcor(asrBV_qs)
+asr2_qs_cormat=hetcor(asr2_qs)
 # ok piecemeal go through and find rows with >.75 cors
 for (i in 1:dim(asrBV_qs_cormat$correlations)[1]){
   # a single 1 is expected for diagonal
@@ -699,12 +705,12 @@ y.pca$loadings
 subjPvalues=data.frame(pcaDf_p_CompleteSubjs,pcaDf_p_CompleteEventNames,y.pca$scores[,1])
 colnames(subjPvalues)<-c('subjectkey','eventname','parentP')
 
-test=merge(data,subjPvalues,by=c('subjectkey','eventname'))
+OutDF=merge(masterdf,subjPvalues,by=c('subjectkey','eventname'))
 ```
 
 ```{r}
 ### FINISHED HERE 
-saveRDS(subjPvalues,'~/subjPvalues.rds')
+saveRDS(OutDF,'~/mixedEfDF_wAdultp.rds')
 
 # loop through asr questions
 asr_qs=grep('asr_',colnames(masterdf))
@@ -730,11 +736,13 @@ for (question in 2:133){
     t.testRes=t.test(asrPos$g,asrNeg$g)
     pvector=c(pvector,t.testRes$p.value)
     tvector=c(tvector,t.testRes$statistic)
-    questionVec=c(questionVec,asr[1,item])
+    # strsplit for dropping .x for indexing OG question name
+    item2=strsplit(item,".x")[[1]]
+    questionVec=c(questionVec,asr[1,item2])
     if (t.testRes$statistic>0 && t.testRes$p.value < 0.01){
-      print(item)
+      print(item2)
       print(t.testRes)
-      print(asr[1,item])
+      print(asr[1,item2])
     }
   }
 }
@@ -746,6 +754,7 @@ library(ggplot2)
 library(forcats)
 # plot it
 plotdf<-data.frame(pvector,tvector,questionVec)
+pvector=p.adjust(pvector,method='fdr')
 sigDf<-plotdf[plotdf$pvector<0.01,]
 # order by t vector
 sigDf<-sigDf[order(sigDf$tvector),]

@@ -17,8 +17,6 @@ source(here::here('/oak/stanford/groups/leanew1/users/apines/scripts/gp', 'get_d
 
 # load in data
 masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rds')
-# convert family id to factor
-masterdf$rel_family_id=as.factor(masterdf$rel_family_id)
 # FYI
 print('dimensions of dataframe')
 dim(masterdf)
