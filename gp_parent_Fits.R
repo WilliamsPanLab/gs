@@ -24,16 +24,16 @@ dim(masterdf)
 # could be placed in preproc script
 masterdf$interview_age=as.numeric(masterdf$interview_age)
 masterdf$subjectkey=as.factor(masterdf$subjectkey)
-
+masterdf=subset(masterdf,eventname=='2_year_follow_up_y_arm_1')
 ##############################
 ######## I SCATTERPLOTS ON TWO VARIABLES OF INTEREST WITH THEIR FIT SPLINE
 #### g as response variable
-if (!file.exists("/scratch/users/apines/gp/pgAge_parent.rds")){
+if (!file.exists("/scratch/users/apines/gp/pgAge_parent2y.rds")){
 	print('fitting p~g on masterdf')
 	print('master df dims')
 	print(dim(masterdf))
-	pgAge<-bam(g~s(parentP)+s(interview_age)+s(subjectkey,bs='re'),data=masterdf)
-	rdata_file = file("/scratch/users/apines/gp/pgAge_parent.rds", blocking = TRUE)
+	pgAge<-bam(g~s(parentP)+s(interview_age),data=masterdf)
+	rdata_file = file("/scratch/users/apines/gp/pgAge_parent2y.rds", blocking = TRUE)
 	saveRDS(pgAge, file=rdata_file)
 	close(rdata_file)
 } else {
