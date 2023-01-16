@@ -34,7 +34,7 @@ if (!file.exists("/scratch/users/apines/gp/g_ext_Age_te.rds")){
 }
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gExtAge_te.png',width=800,height=800)
 # prinout gg_tensor
-gg_tensor(mixedEfModel)
+gg_tensor(mixedEfModel)+scale_fill_gradient2(low = "blue",mid = "white",high = "red", midpoint = 0, limits=c(-.7,.4))
 dev.off()
 # prinout gg_tensor
 gg_tensor(mixedEfModel)
@@ -59,7 +59,7 @@ if (!file.exists("/scratch/users/apines/gp/g_ext_Age_te_cbcl61.rds")){
 }
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gExtAge_te_cbcl61.png',width=800,height=800)
 # prinout gg_tensor
-gg_tensor(mixedEfModel)
+gg_tensor(mixedEfModel)+scale_fill_gradient2(low = "blue",mid = "white",high = "red", midpoint = 0, limits=c(-.7,.4))
 dev.off()
 
 print('testing externalizing~g*age interaction with REs for subj and family')

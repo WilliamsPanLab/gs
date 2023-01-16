@@ -34,7 +34,7 @@ if (!file.exists("/scratch/users/apines/gp/gpAge_te.rds")){
 }
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te.png',width=800,height=800)
 # prinout gg_tensor
-gg_tensor(gpAge_te)
+gg_tensor(gpAge_te)+scale_fill_gradient2(low = "blue", mid = "white",high = "red", midpoint = 0, limits=c(-.7,.4))
 dev.off()
 # print confidence intervals for supplemental figure
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te_ci.png',width=2400,height=800)
@@ -175,7 +175,7 @@ if (!file.exists("/scratch/users/apines/gp/gpAge_te_cbcl61.rds")){
 ######## plot tensor 
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te_cbcl61.png',width=800,height=800)
 # prinout gg_tensor
-gg_tensor(mixedEfModel)
+gg_tensor(mixedEfModel)+scale_fill_gradient2(low = "blue",mid = "white",high = "red", midpoint = 0, limits=c(-.7,.4))
 dev.off()
 
 print('Max and Min of gpAge_te (with cbcl61) fitted values')

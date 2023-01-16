@@ -36,7 +36,7 @@ if (!file.exists("/scratch/users/apines/gp/g_int_Age_te.rds")){
 }
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gIntAge_te.png',width=800,height=800)
 # prinout gg_tensor
-gg_tensor(mixedEfModel)
+gg_tensor(mixedEfModel)+scale_fill_gradient2(low = "blue",mid = "white",high = "red", midpoint = 0, limits=c(-.7,.4))
 dev.off()
 print('tensor printed. Printing confidence intervals')
 # print confidence intervals for supplemental figure
@@ -60,7 +60,7 @@ if (!file.exists("/scratch/users/apines/gp/g_int_Age_te_cbcl61.rds")){
 # print png of tensor
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gIntAge_te_cbcl61.png',width=800,height=800)
 # prinout gg_tensor
-gg_tensor(mixedEfModel)
+gg_tensor(mixedEfModel)+scale_fill_gradient2(low = "blue",mid = "white",high = "red", midpoint = 0, limits=c(-.7,.4))
 dev.off()
 
 print('calculating effect size for g within internalizing symptoms')
