@@ -10,33 +10,17 @@ p_devExplained_NoG=rep(0,1000)
 # garner num subjs for bootstrapping
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
-# entire subject-ID bootstrapping function from https://stackoverflow.com/questions/11919808/block-bootstrap-from-subject-list
-#SubjLevelBoot <- function(x,i) {
-#	unlist(lapply(i, function(n) which(x[n] == masterdf$subjectkey)))
-#	print
-#	do.call("rbind", lapply(i,function(n) subset(masterdf, subjectkey==x[n])))
-	#model<-as.formula(f)
-	#summary(model)$dev.expl
-#}
-#create_subject_samples <- function(data, n, subjs) {
-#	  data[data$subjectkey %in% sample(subjs, n, replace = TRUE), ]
-#}
-#create_subject_samples <- function(data, subjects, R) {
-#	resample_subjects <- sample(subjects, R, replace = TRUE)
-#	data_subset <- data[data$subject %in% resample_subjects, ]
-#	resample_indices <- sapply(split(data_subset, data_subset$subject), function(x) sample(1:nrow(x), nrow(x), replace = TRUE))
-#	data_subset[unlist(resample_indices),]
-#}
+# cut df to just variables of interest to speed stuff up
+masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','g','subjectkey','interview_age','cbcl_q61_p')]
 # loop over manual bootstrap
 for (b in 1:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
-	# inefficient but interpretable loop
+	### inefficient but interpretable loop
 	# Create an empty dataframe to store the resampled observations
 	resampled_df <- data.frame()
 	for (j in 1:length(BootSubjs)){
-		print(j)
 		subject_obs <- masterdf[masterdf$subjectkey == BootSubjs[j], ]
 		resampled_df <- rbind(resampled_df, subject_obs)
 	}
@@ -61,7 +45,6 @@ for (b in 1:10000){
 	pgAge_noG<-bam(cbcl_scr_syn_totprob_r~cbcl_q61_p+s(interview_age),data=bootSamp,family=nb())
 	p_devExplained_NoG[b]<-summary(pgAge_noG)$dev.expl
 }
-
 # saveout df of dev explained for plotting
 outdf=data.frame(devExplained_full,devExplained_NoCbcl61,devExplained_NoTot,p_devExplained_full,p_devExplained_NoCbcl61,p_devExplained_NoG)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/DevExplained.rds')
