@@ -23,7 +23,7 @@ dim(masterdf)
 
 #### gpAge_te
 if (!file.exists("/scratch/users/apines/gp/gpAge_te.rds")){
-	gpAge_te<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+s(subjectkey,bs='re'),data=masterdf,family=nb())
+	gpAge_te<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g),data=masterdf,family=nb())
 	# resilient version
 	rdata_file = file("/scratch/users/apines/gp/gpAge_te.rds", blocking = TRUE)
 	saveRDS(gpAge_te, file=rdata_file)
@@ -34,7 +34,7 @@ if (!file.exists("/scratch/users/apines/gp/gpAge_te.rds")){
 }
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te.png',width=800,height=800)
 # prinout gg_tensor
-gg_tensor(gpAge_te)+scale_fill_gradient2(low = "blue", mid = "white",high = "red", midpoint = 0, limits=c(-.7,.4))
+gg_tensor(gpAge_te)+scale_fill_gradient2(low = "blue", mid = "white",high = "red", midpoint = 0, limits=c(-.8,.8))
 dev.off()
 # print confidence intervals for supplemental figure
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te_ci.png',width=2400,height=800)
@@ -45,7 +45,7 @@ dev.off()
 #### gpAge_independent splines
 if (!file.exists("/scratch/users/apines/gp/gpAge.rds")){
 	print(dim(masterdf))
-	gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re'),data=masterdf,family=nb())
+	gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age),data=masterdf,family=nb())
 	rdata_file = file("/scratch/users/apines/gp/gpAge.rds", blocking = TRUE)
 	saveRDS(gpAge, file=rdata_file)
 	close(rdata_file)
@@ -66,7 +66,7 @@ if (!file.exists("/scratch/users/apines/gp/pgAge.rds")){
 	print('fitting p~g on masterdf')
 	print('master df dims')
 	print(dim(masterdf))
-	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+s(subjectkey,bs='re'),data=masterdf)
+	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
 	rdata_file = file("/scratch/users/apines/gp/pgAge.rds", blocking = TRUE)
 	saveRDS(pgAge, file=rdata_file)
 	close(rdata_file)
@@ -99,7 +99,7 @@ ggMarginal(thePlot,groupFill=T)
 dev.off()
 ######## II FORMALLY TEST FOR NON-LINEARITY
 #### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
-pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age)+s(subjectkey,bs='re')+ti(cbcl_scr_syn_totprob_r,interview_age),data=masterdf)
+pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age)+ti(cbcl_scr_syn_totprob_r,interview_age),data=masterdf)
 summary(pgAge)
 
 
@@ -128,7 +128,7 @@ print(min(gpAge_te$fitted.values))
 
 print('testing for interaction between g and age on totprobs')
 ### interaction test
-gpAge_intrxn<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+ti(g,interview_age)+s(subjectkey,bs='re'),data=masterdf,family=nb())
+gpAge_intrxn<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+ti(g,interview_age),data=masterdf,family=nb())
 print('model with interaction (ti) for age and g')
 print(summary(gpAge_intrxn))
 
@@ -137,7 +137,7 @@ print('full vs reduced model for effect size and anova of g~totprob')
 
 ###### FULL VS REDUCED ANOVA: P AND DR2
 if (!file.exists("/scratch/users/apines/gp/noG_Gam_p.rds")){
-        no_g_Gam<-bam(cbcl_scr_syn_totprob_r~s(interview_age)+s(subjectkey,bs='re'),data=masterdf,family=nb())
+        no_g_Gam<-bam(cbcl_scr_syn_totprob_r~s(interview_age),data=masterdf,family=nb())
 	rdata_file = file("/scratch/users/apines/gp/noG_Gam_p.rds", blocking = TRUE)
         saveRDS(no_g_Gam, file=rdata_file)
         close(rdata_file)
@@ -163,7 +163,7 @@ print(anovaP2[2])
 print('fitting te() with cbcl61 included + visualizing')
 # fit version with cbcl 61
 if (!file.exists("/scratch/users/apines/gp/gpAge_te_cbcl61.rds")){
-	mixedEfModel<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+cbcl_q61_p+s(subjectkey,bs='re'),data=masterdf,family=nb())
+	mixedEfModel<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g)+cbcl_q61_p,data=masterdf,family=nb())
 	# save
 	rdata_file = file("/scratch/users/apines/gp/gpAge_te_cbcl61.rds", blocking = TRUE)
         saveRDS(mixedEfModel, file=rdata_file)
@@ -175,7 +175,7 @@ if (!file.exists("/scratch/users/apines/gp/gpAge_te_cbcl61.rds")){
 ######## plot tensor 
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_te_cbcl61.png',width=800,height=800)
 # prinout gg_tensor
-gg_tensor(mixedEfModel)+scale_fill_gradient2(low = "blue",mid = "white",high = "red", midpoint = 0, limits=c(-.7,.4))
+gg_tensor(mixedEfModel)+scale_fill_gradient2(low = "blue",mid = "white",high = "red", midpoint = 0, limits=c(-.8,.8))
 dev.off()
 
 print('Max and Min of gpAge_te (with cbcl61) fitted values')

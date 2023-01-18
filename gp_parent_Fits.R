@@ -24,16 +24,15 @@ dim(masterdf)
 # could be placed in preproc script
 masterdf$interview_age=as.numeric(masterdf$interview_age)
 masterdf$subjectkey=as.factor(masterdf$subjectkey)
-masterdf=subset(masterdf,eventname=='2_year_follow_up_y_arm_1')
 ##############################
 ######## I SCATTERPLOTS ON TWO VARIABLES OF INTEREST WITH THEIR FIT SPLINE
 #### g as response variable
-if (!file.exists("/scratch/users/apines/gp/pgAge_parent2y.rds")){
+if (!file.exists("/scratch/users/apines/gp/pgAge_parent.rds")){
 	print('fitting p~g on masterdf')
 	print('master df dims')
 	print(dim(masterdf))
 	pgAge<-bam(g~s(parentP)+s(interview_age),data=masterdf)
-	rdata_file = file("/scratch/users/apines/gp/pgAge_parent2y.rds", blocking = TRUE)
+	rdata_file = file("/scratch/users/apines/gp/pgAge_parent.rds", blocking = TRUE)
 	saveRDS(pgAge, file=rdata_file)
 	close(rdata_file)
 } else {
@@ -65,10 +64,10 @@ ggMarginal(thePlot,groupFill=T)
 dev.off()
 ######## II FORMALLY TEST FOR NON-LINEARITY
 #### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
-pgAge<-bam(g~s(parentP,m=c(2,0))+s(interview_age)+s(subjectkey,bs='re')+ti(parentP,interview_age),data=masterdf)
+pgAge<-bam(g~s(parentP,m=c(2,0))+s(interview_age)+ti(parentP,interview_age),data=masterdf)
 summary(pgAge)
 
 print('ti model: parent P')
-pgAge<-bam(g~s(parentP)+s(interview_age)+s(subjectkey,bs='re')+ti(parentP,interview_age),data=masterdf)
+pgAge<-bam(g~s(parentP)+s(interview_age)+ti(parentP,interview_age),data=masterdf)
 summary(pgAge)
 

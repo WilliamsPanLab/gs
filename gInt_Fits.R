@@ -25,7 +25,7 @@ dim(masterdf)
 print('data loaded, fitting te(age,g) for internalizing symptoms, REs for participant and family')
 ### internalizing
 if (!file.exists("/scratch/users/apines/gp/g_int_Age_te.rds")){
-	mixedEfModel<-bam(cbcl_scr_syn_internal_r~te(interview_age,g)+s(subjectkey,bs='re'),data=masterdf,family=nb())
+	mixedEfModel<-bam(cbcl_scr_syn_internal_r~te(interview_age,g),data=masterdf,family=nb())
 	# save
 	rdata_file = file("/scratch/users/apines/gp/g_int_Age_te.rds", blocking = TRUE)
 	saveRDS(mixedEfModel, file=rdata_file)
@@ -36,7 +36,7 @@ if (!file.exists("/scratch/users/apines/gp/g_int_Age_te.rds")){
 }
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gIntAge_te.png',width=800,height=800)
 # prinout gg_tensor
-gg_tensor(mixedEfModel)+scale_fill_gradient2(low = "blue",mid = "white",high = "red", midpoint = 0, limits=c(-.7,.4))
+gg_tensor(mixedEfModel)+scale_fill_gradient2(low = "blue",mid = "white",high = "red", midpoint = 0, limits=c(-.8,.8))
 dev.off()
 print('tensor printed. Printing confidence intervals')
 # print confidence intervals for supplemental figure
@@ -48,7 +48,7 @@ dev.off()
 print('fitting te(age,g) for internalizing symptoms with cbcl61 as covariate, REs for participant and family')
 # FIT WITH CBCL61
 if (!file.exists("/scratch/users/apines/gp/g_int_Age_te_cbcl61.rds")){
-	mixedEfModel<-bam(cbcl_scr_syn_internal_r~te(interview_age,g)+cbcl_q61_p+s(subjectkey,bs='re'),data=masterdf,family=nb())
+	mixedEfModel<-bam(cbcl_scr_syn_internal_r~te(interview_age,g)+cbcl_q61_p,data=masterdf,family=nb())
 	# save
 	rdata_file = file("/scratch/users/apines/gp/g_int_Age_te_cbcl61.rds", blocking = TRUE)
 	saveRDS(mixedEfModel, file=rdata_file)
@@ -60,7 +60,7 @@ if (!file.exists("/scratch/users/apines/gp/g_int_Age_te_cbcl61.rds")){
 # print png of tensor
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gIntAge_te_cbcl61.png',width=800,height=800)
 # prinout gg_tensor
-gg_tensor(mixedEfModel)+scale_fill_gradient2(low = "blue",mid = "white",high = "red", midpoint = 0, limits=c(-.7,.4))
+gg_tensor(mixedEfModel)+scale_fill_gradient2(low = "blue",mid = "white",high = "red", midpoint = 0, limits=c(-.8,.8))
 dev.off()
 
 print('calculating effect size for g within internalizing symptoms')
@@ -69,7 +69,7 @@ print('calculating effect size for g within internalizing symptoms')
 ###### FULL VS REDUCED ANOVA: P AND DR2
 
 if (!file.exists("/scratch/users/apines/gp/noG_Gam_int.rds")){
-	no_g_Gam<-bam(cbcl_scr_syn_internal_r~s(interview_age)+s(subjectkey,bs='re'), data=masterdf,family=nb())
+	no_g_Gam<-bam(cbcl_scr_syn_internal_r~s(interview_age), data=masterdf,family=nb())
 	rdata_file = file("/scratch/users/apines/gp/noG_Gam_int.rds", blocking = TRUE)
         saveRDS(no_g_Gam, file=rdata_file)
 	close(rdata_file)
@@ -80,7 +80,7 @@ if (!file.exists("/scratch/users/apines/gp/noG_Gam_int.rds")){
 no_g_Sum<-summary(no_g_Gam)
 # g-included model for measuring difference: note gGam gets used later for comparison with ti tensor
 if (!file.exists("/scratch/users/apines/gp/G_Gam_int.rds")){
-	gGam<-bam(cbcl_scr_syn_internal_r~s(g)+s(interview_age)+s(subjectkey,bs='re'),data=masterdf,family=nb())
+	gGam<-bam(cbcl_scr_syn_internal_r~s(g)+s(interview_age),data=masterdf,family=nb())
 	rdata_file = file("/scratch/users/apines/gp/G_Gam_int.rds", blocking = TRUE)
         saveRDS(gGam, file=rdata_file)
 	close(rdata_file)
@@ -103,7 +103,7 @@ print(anovaP2[2])
 print('testing for interaction of age*g on internalizing symptoms')
 # FIT AS INDEPENDENT SPLINES TO TEST FOR INTERACTION: try anova.gam with and without ti interaction (NOTE NO CBCL61)
 if (!file.exists("/scratch/users/apines/gp/g_int_Age_ti.rds")){
-	mixedEfModel<-bam(cbcl_scr_syn_internal_r~s(interview_age)+s(g)+ti(interview_age,g)+s(subjectkey,bs='re'),data=masterdf,family=nb())
+	mixedEfModel<-bam(cbcl_scr_syn_internal_r~s(interview_age)+s(g)+ti(interview_age,g),data=masterdf,family=nb())
 	rdata_file=file("/scratch/users/apines/gp/g_int_Age_ti.rds", blocking = TRUE)
 	saveRDS(mixedEfModel,file=rdata_file)
 	close(rdata_file)
@@ -133,7 +133,7 @@ print(anovaP2[2])
 ######## I SCATTERPLOTS ON TWO VARIABLES OF INTEREST WITH THEIR FIT SPLINE
 #### g as response variable
 if (!file.exists("/scratch/users/apines/gp/IntgAge.rds")){
-	pgAge<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age)+ti(cbcl_scr_syn_internal_r,interview_age)+s(subjectkey,bs='re'),data=masterdf)
+	pgAge<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age)+ti(cbcl_scr_syn_internal_r,interview_age),data=masterdf)
         rdata_file = file("/scratch/users/apines/gp/IntgAge.rds", blocking = TRUE)
 	saveRDS(pgAge, file=rdata_file)
 	close(rdata_file)
@@ -165,7 +165,7 @@ dev.off()
 
 ############ II FORMALLY TEST FOR NON-LINEARITY
 #### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
-IntgAge<-bam(g~s(cbcl_scr_syn_internal_r,m=c(2,0))+s(interview_age)+s(subjectkey,bs='re')+ti(cbcl_scr_syn_internal_r,interview_age),data=masterdf)
+IntgAge<-bam(g~s(cbcl_scr_syn_internal_r,m=c(2,0))+s(interview_age)+ti(cbcl_scr_syn_internal_r,interview_age),data=masterdf)
 summary(IntgAge)
 
 print('done with internalizing')
