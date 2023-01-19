@@ -25,7 +25,7 @@ dim(masterdf)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up
-masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','g','subjectkey','interview_age','cbcl_q61_p')]
+masterdf=masterdf[,c('cbcl_scr_syn_external_r','g','subjectkey','interview_age','cbcl_q61_p')]
 # get length of df for later
 lenDF=dim(masterdf)[1]
 
@@ -53,30 +53,26 @@ for (b in 1:10000){
 	bootSamp <- data.frame()
 	for (j in 1:length(BootSubjs)){
 		subject_obs <- masterdf[masterdf$subjectkey == BootSubjs[j], ]
-		bootSamp <- rbind(bootSamp, subject_obs)
+        	bootSamp <- rbind(bootSamp, subject_obs)
 	}
 	##############################
 	######## I PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
 	#### g as response variable
-	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=bootSamp)
+	pgAge<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age),data=bootSamp)
 	# use model fit for saving
 	forSpline<-predict(pgAge, newdata = masterdf)
 	# save out forspline to a matrix
 	predCIs[b,]=forSpline
 	######## II FORMALLY TEST FOR NON-LINEARITY
 	#### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
-	pgAge<-bam(g~cbcl_scr_syn_totprob_r+s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age)+ti(cbcl_scr_syn_totprob_r,interview_age),data=bootSamp)
+	pgAge<-bam(g~cbcl_scr_syn_external_r+s(cbcl_scr_syn_external_r,m=c(2,0))+s(interview_age),data=bootSamp)
 	linBoots[b]=summary(pgAge)$s.pv[1]
 	####### III TEST INTERACTION
-	### interaction test
-	gpAge_intrxn<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+g*interview_age,data=bootSamp,family=nb())
-	intrxnBootsStat[b]=summary(gpAge_intrxn)$p.coeff[4]
-	intrxnBootsP[b]=summary(gpAge_intrxn)$s.pv[4]
 	###### FULL VS REDUCED ANOVA: P AND DR2
-	no_g_Gam<-bam(cbcl_scr_syn_totprob_r~s(interview_age),data=bootSamp,family=nb())
+	no_g_Gam<-bam(cbcl_scr_syn_external_r~s(interview_age),data=bootSamp,family=nb())
 	no_g_Sum<-summary(no_g_Gam)
 	# g-included model for measuring difference
-	gGam<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age),data=bootSamp,family=nb())
+	gGam<-bam(cbcl_scr_syn_external_r~s(g)+s(interview_age),data=bootSamp,family=nb())
 	gSum<-summary(gGam)
 	dif<-gSum$r.sq-no_g_Sum$r.sq
 	# insert into vec
@@ -89,8 +85,8 @@ for (b in 1:10000){
 	pBoots[b]=anovaP2[2]
 }
 # SAVEOUT
-outdf=data.frame(linBoots,intrxnBootsStat,intrxnBootsP,dr2Boots,pBoots)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots.rds')
+outdf=data.frame(linBoots,dr2Boots,pBoots)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gExtBoots.rds')
 outdf=data.frame(predCIs)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpPredictedBoots.rds')
-print('done with g~p fit bootstrapping!')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gExtPredictedBoots.rds')
+print('done with g~Ext fit bootstrapping!')
