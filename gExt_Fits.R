@@ -147,7 +147,7 @@ dev.off()
 
 ############ II FORMALLY TEST FOR NON-LINEARITY
 #### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
-ExtgAge<-bam(g~s(cbcl_scr_syn_external_r,m=c(2,0))+s(interview_age),data=masterdf)
+ExtgAge<-bam(g~cbcl_scr_syn_external_r+s(cbcl_scr_syn_external_r,m=c(2,0))+s(interview_age),data=masterdf)
 summary(ExtgAge)
 
 print('done with externalizing')

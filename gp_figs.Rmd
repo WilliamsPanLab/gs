@@ -200,7 +200,7 @@ masterdf$fam_size = 1
 ind=0
 
 # set each instance of multiple family members to a family ID, as ind
-set.seed(2)
+set.seed(1)
 for(f in 1:length(unique(masterdf$rel_family_id))){
   # calculate family size
   famsize=sum(masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]) / 2
@@ -602,15 +602,15 @@ ggplot(aes(fct_reorder(questionVec,tvector),tvector,fill=reporterVec),data=sigDf
 #### ANALYSIS 6: ADULT SELF-REPORT
 # load in asr
 asr=read.delim('~/Downloads/Package_1207917/pasr01.txt',na.strings=c("","NA"))
-# columns of interest to guage completeness of
-ColsOfInt=asr[,c(11:142,144,146)]
+# columns of interest to gauge completeness of
+ColsOfInt=asr[,c(11:141)]
 # retain complete cases
 completeInd=ColsOfInt[rowSums(is.na(ColsOfInt)) == 0,]
 # merge with master
 masterdf=merge(asr,masterdf,by=c('subjectkey','eventname','src_subject_id'))
 ASRcolnames=asr[1,]
 
-
+# make permanent record of 
 #######MICHELI APPROACH TO FACTOR DELINEATION OF ASR
 
 # composite creation
@@ -625,8 +625,8 @@ asr2=subset(asr,eventname=='2_year_follow_up_y_arm_1')
 asrBVSubjs=asrBV$subjectkey
 asr2Subjs=asr2$subjectkey
 # isolate asr qs
-asrBV_qs=asrBV[,11:142]
-asr2_qs=asr2[,11:142]
+asrBV_qs=asrBV[,11:141]
+asr2_qs=asr2[,11:141]
 # fix character specification for variables
 asrBV_qs <- as.data.frame(lapply(asrBV_qs, as.ordered))
 asr2_qs <- as.data.frame(lapply(asr2_qs, as.ordered))
@@ -662,6 +662,26 @@ mergedTPsSubjs<-c(asrBVSubjs,asr2Subjs)
 mergedTPsEventName<-rep()
 mergedTPs <- as.data.frame(lapply(mergedTPs, as.numeric))
 
+# destroyer composite
+mergedTPs$asr_destroyer=round((mergedTPs$asr_q20_p+mergedTPs$asr_q21_p)/2)
+# remove constituent variables
+mergedTPs=subset(mergedTPs, select = -c(`asr_q20_p`,`asr_q21_p`))
+
+# hallucinations composite
+mergedTPs$asr_halluc=round((mergedTPs$asr_q40_p+mergedTPs$asr_q70_p)/2)
+# remove constituent variables
+mergedTPs=subset(mergedTPs, select = -c(`asr_q40_p`,`asr_q70_p`))
+
+# Odd composite
+mergedTPs$asr_odd=round((mergedTPs$asr_q84_p+mergedTPs$asr_q85_p)/2)
+# remove constituent variables
+mergedTPs=subset(mergedTPs, select = -c(`asr_q84_p`,`asr_q85_p`))
+
+# sick composite
+mergedTPs$asr_sick=round((mergedTPs$asr_q56c_p+mergedTPs$asr_q56g_p)/2)
+# remove constituent variables
+mergedTPs=subset(mergedTPs, select = -c(`asr_q56c_p`,`asr_q56g_p`))
+
 # clumsy composite
 mergedTPs$asr_clumsy=round((mergedTPs$asr_q36_p+mergedTPs$asr_q62_p)/2)
 # remove constituent variables
@@ -693,7 +713,7 @@ pcaDf_p_CompleteSubjs<-pcaDf_p_Complete$SubjsNames
 pcaDf_p_CompleteEventNames<-pcaDf_p_Complete$eventname
 pcaDf_p=subset(pcaDf_p, select = -c(`eventname`,`SubjsNames`))
 # isolate numeric
-pcaDf_p_num<-pcaDf_p_Complete[,1:128]
+pcaDf_p_num<-pcaDf_p_Complete[,1:123]
 # convert to numeric for pca
 pcaDf_p_num <- as.data.frame(lapply(pcaDf_p_num, as.numeric))
 # derive pcs
@@ -706,6 +726,27 @@ subjPvalues=data.frame(pcaDf_p_CompleteSubjs,pcaDf_p_CompleteEventNames,y.pca$sc
 colnames(subjPvalues)<-c('subjectkey','eventname','parentP')
 
 OutDF=merge(masterdf,subjPvalues,by=c('subjectkey','eventname'))
+```
+
+```{r}
+# make count version
+ASRdfNum<-as.data.frame(lapply(asr[-1,11:141],as.numeric))
+ASRtotal=rowSums(ASRdfNum)
+# and subtract reverse score items because they were included in sum above, and modeling "happiness" as symmetric to "symptoms" seems like a strong assumption
+# reverse scored = face validity AND loading in expected direction
+ASRtotal=ASRtotal-ASRdfNum$asr_q02_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q04_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q15_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q73_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q80_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q88_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q106_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q109_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q123_p
+
+# merge in (first row is colnames)
+asr$parentPcount=c(NA,ASRtotal)
+OutDF=merge(OutDF,asr,by=c('subjectkey','eventname'))
 ```
 
 ```{r}

@@ -31,7 +31,7 @@ if (!file.exists("/scratch/users/apines/gp/pgAge_parent.rds")){
 	print('fitting p~g on masterdf')
 	print('master df dims')
 	print(dim(masterdf))
-	pgAge<-bam(g~s(parentP)+s(interview_age),data=masterdf)
+	pgAge<-bam(g~s(parentPcount)+s(interview_age),data=masterdf)
 	rdata_file = file("/scratch/users/apines/gp/pgAge_parent.rds", blocking = TRUE)
 	saveRDS(pgAge, file=rdata_file)
 	close(rdata_file)
@@ -42,20 +42,20 @@ if (!file.exists("/scratch/users/apines/gp/pgAge_parent.rds")){
 ####### plot derivs
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/pgAge_derivs_pg_parent.png',width=800,height=800)
 # prinout gg_derivs
-get_derivs_and_plot(pgAge,'parentP')
+get_derivs_and_plot(pgAge,'parentPcount')
 dev.off()
 # use model fit for geom_smooth plotting
 forSpline<-predict(pgAge, newdata = masterdf)
 print('length of fit:')
 print(length(forSpline))
-plotdf<-data.frame(masterdf$parentP,forSpline,masterdf$g,as.factor(masterdf$eventname))
-colnames(plotdf)<-c('parentP','predicted','g','eventname')
+plotdf<-data.frame(masterdf$parentPcount,forSpline,masterdf$g,as.factor(masterdf$eventname))
+colnames(plotdf)<-c('parentPcount','predicted','g','eventname')
 # make scatter plot showing g~total problems with their spline fit
-thePlot<-ggplot(plotdf,aes(parentP,g))+
+thePlot<-ggplot(plotdf,aes(parentPcount,g))+
 geom_point(alpha=.1,aes(color=eventname))+
 geom_smooth(aes(y=predicted),size=2,se=F,color='black')+
 theme_classic(base_size=24)+
-xlab('parentP')+
+xlab('parentPcount')+
 scale_color_discrete(name="Vist",breaks=c("baseline_year_1_arm_1","2_year_follow_up_y_arm_1"),labels=c("Baseline","2 Years"))+
 guides(colour = guide_legend(override.aes = list(alpha = 1)))
 # make the image to be printed
@@ -64,10 +64,10 @@ ggMarginal(thePlot,groupFill=T)
 dev.off()
 ######## II FORMALLY TEST FOR NON-LINEARITY
 #### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
-pgAge<-bam(g~s(parentP,m=c(2,0))+s(interview_age)+ti(parentP,interview_age),data=masterdf)
+pgAge<-bam(g~parentPcount+s(parentPcount,m=c(2,0))+s(interview_age)+ti(parentPcount,interview_age),data=masterdf)
 summary(pgAge)
 
 print('ti model: parent P')
-pgAge<-bam(g~s(parentP)+s(interview_age)+ti(parentP,interview_age),data=masterdf)
+pgAge<-bam(g~s(parentPcount)+s(interview_age)+ti(parentPcount,interview_age),data=masterdf)
 summary(pgAge)
 

@@ -4,7 +4,7 @@ library(mgcv)
 masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rds')
 
 #### gpAge_independent splines
-nb_gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re'),data=masterdf,family=nb())
+nb_gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age),data=masterdf,family=nb())
 ####### plot residuals
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_nb_residuals_qq.png',width=700,height=700)
 # prinout gg_derivs
@@ -13,7 +13,7 @@ dev.off()
 
 # gaussian
 #### gpAge_independent splines
-gaussian_gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+s(subjectkey,bs='re'),data=masterdf)
+gaussian_gpAge<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age),data=masterdf)
 ####### plot residuals
 png('/oak/stanford/groups/leanew1/users/apines/figs/gp/gpAge_gaus_residuals_qq.png',width=700,height=700)
 # prinout gg_derivs

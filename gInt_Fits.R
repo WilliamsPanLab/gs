@@ -165,7 +165,7 @@ dev.off()
 
 ############ II FORMALLY TEST FOR NON-LINEARITY
 #### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
-IntgAge<-bam(g~s(cbcl_scr_syn_internal_r,m=c(2,0))+s(interview_age)+ti(cbcl_scr_syn_internal_r,interview_age),data=masterdf)
+IntgAge<-bam(g~cbcl_scr_syn_internal_r+s(cbcl_scr_syn_internal_r,m=c(2,0))+s(interview_age)+ti(cbcl_scr_syn_internal_r,interview_age),data=masterdf)
 summary(IntgAge)
 
 print('done with internalizing')

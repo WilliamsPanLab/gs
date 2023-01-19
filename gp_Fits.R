@@ -20,7 +20,6 @@ masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rd
 # FYI
 print('dimensions of dataframe')
 dim(masterdf)
-
 #### gpAge_te
 if (!file.exists("/scratch/users/apines/gp/gpAge_te.rds")){
 	gpAge_te<-bam(cbcl_scr_syn_totprob_r~te(interview_age,g),data=masterdf,family=nb())
@@ -99,7 +98,7 @@ ggMarginal(thePlot,groupFill=T)
 dev.off()
 ######## II FORMALLY TEST FOR NON-LINEARITY
 #### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
-pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age)+ti(cbcl_scr_syn_totprob_r,interview_age),data=masterdf)
+pgAge<-bam(g~cbcl_scr_syn_totprob_r+s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age)+ti(cbcl_scr_syn_totprob_r,interview_age),data=masterdf)
 summary(pgAge)
 
 
