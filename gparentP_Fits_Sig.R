@@ -36,7 +36,7 @@ masterdf$subjectkey=as.factor(masterdf$subjectkey)
 linBoots=rep(0,10000)
 # predicted for CIs? bootlengthxpredictlength
 # NOTE THIS IS PREDICTED ON MASTERDF ORDER: NOT FROM LOW-TO-HIGH ON RESPONSE VARIABLE
-predCIs=matrix(0,10000,lenDF)
+predCIs=matrix(0,nrow=10000,ncol=200)
 # interaction? 1xbootlength
 intrxnBootsStat=rep(0,10000)
 intrxnBootsP=rep(0,10000)
@@ -60,10 +60,11 @@ for (b in 1:10000){
 	######## I PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
 	#### g as response variable
 	pgAge<-bam(g~s(parentPcount)+s(interview_age),data=bootSamp)
-	# use model fit for saving
-	forSpline<-predict(pgAge, newdata = masterdf)
+	# use DERIVATIVES of model fit for saving
+	forSpline=derivatives(pgAge,term='s(parentPcount)',partial_match = TRUE,level=0.95)
+	forSpline<-forSpline[,4]
 	# save out forspline to a matrix
-	predCIs[b,]=forSpline
+	predCIs[b,]=unlist(forSpline)
 	######## II FORMALLY TEST FOR NON-LINEARITY
 	#### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
 	pgAge<-bam(g~parentPcount+s(parentPcount,m=c(2,0))+s(interview_age)+ti(parentPcount,interview_age),data=bootSamp)
