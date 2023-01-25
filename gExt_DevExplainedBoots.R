@@ -1,18 +1,21 @@
 library(mgcv)
 
 # load in data
-masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf.rds')
-devExplained_full=rep(0,1000)
-devExplained_NoCbcl61=rep(0,1000)
-devExplained_NoTot=rep(0,1000)
-e_devExplained_full=rep(0,1000)
-e_devExplained_NoCbcl61=rep(0,1000)
-e_devExplained_NoG=rep(0,1000)
+masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf_WithGrades.rds')
+devExplained_full=rep(0,10000)
+devExplained_NoGrades=rep(0,10000)
+devExplained_NoTot=rep(0,10000)
+e_devExplained_full=rep(0,10000)
+e_devExplained_NoGrades=rep(0,10000)
+e_devExplained_NoG=rep(0,10000)
+grades_devExplained_full=rep(0,10000)
+grades_devExplained_noG=rep(0,10000)
+grades_devExplained_noTot=rep(0,10000)
 # garner num subjs for bootstrapping
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up
-masterdf=masterdf[,c('cbcl_scr_syn_external_r','g','subjectkey','interview_age','cbcl_q61_p')]
+masterdf=masterdf[,c('cbcl_scr_syn_external_r','g','subjectkey','interview_age','Grades')]
 # loop over manual bootstrap
 for (b in 1:10000){
 	print(b)
@@ -28,26 +31,33 @@ for (b in 1:10000){
 	# bootstrap sample
 	bootSamp=resampled_df
 	#### full model
-	gpAge_full<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age)+cbcl_q61_p,data=bootSamp)
+	gpAge_full<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age)+s(Grades,k=4),data=bootSamp)
 	devExplained_full[b]<-summary(gpAge_full)$dev.expl
-	# fit version with cbcl 61
-	gpAge_nocbcl61<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age),data=bootSamp)
-	devExplained_NoCbcl61[b]<-summary(gpAge_nocbcl61)$dev.expl
-	# fit version with just cbcl61
-	gpAge_noTotProbs<-bam(g~cbcl_q61_p+s(interview_age),data=bootSamp)
+	# fit version without Grades
+	gpAge_noGrades<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age),data=bootSamp)
+	devExplained_NoGrades[b]<-summary(gpAge_noGrades)$dev.expl
+	# fit version with just Grades
+	gpAge_noTotProbs<-bam(g~s(Grades,k=4)+s(interview_age),data=bootSamp)
 	devExplained_NoTot[b]<-summary(gpAge_noTotProbs)$dev.expl
 	### version with symptom count as response variable
-	pgAge_full<-bam(cbcl_scr_syn_external_r~s(g)+s(interview_age)+cbcl_q61_p,data=bootSamp,family=nb())
+	pgAge_full<-bam(cbcl_scr_syn_external_r~s(g)+s(interview_age)+s(Grades,k=4),data=bootSamp,family=nb())
 	e_devExplained_full[b]<-summary(pgAge_full)$dev.expl
-        # fit version with cbcl 61
-        pgAge_nocbcl61<-bam(cbcl_scr_syn_external_r~s(g)+s(interview_age),data=bootSamp,family=nb())
-        e_devExplained_NoCbcl61[b]<-summary(pgAge_nocbcl61)$dev.expl
-	# fit version with just cbcl61
-	pgAge_noG<-bam(cbcl_scr_syn_external_r~cbcl_q61_p+s(interview_age),data=bootSamp,family=nb())
+        # fit version without Grades
+        pgAge_noGrades<-bam(cbcl_scr_syn_external_r~s(g)+s(interview_age),data=bootSamp,family=nb())
+        e_devExplained_NoGrades[b]<-summary(pgAge_noGrades)$dev.expl
+	# fit version with just Grades
+	pgAge_noG<-bam(cbcl_scr_syn_external_r~s(Grades,k=4)+s(interview_age),data=bootSamp,family=nb())
 	e_devExplained_NoG[b]<-summary(pgAge_noG)$dev.expl
+	# variance explained in grades
+	spgAge_full<-bam(Grades~s(g)+s(cbcl_scr_syn_external_r)+s(interview_age),data=bootSamp)
+	grades_devExplained_full[b]<-summary(spgAge_full)$dev.expl
+	spgAge_noG<-bam(Grades~s(cbcl_scr_syn_external_r)+s(interview_age),data=bootSamp)
+	grades_devExplained_noG[b]<-summary(spgAge_noG)$dev.expl
+	spgAge_noTot<-bam(Grades~s(g)+s(interview_age),data=bootSamp)
+	grades_devExplained_noTot[b]<-summary(spgAge_noTot)$dev.expl
 }
 
 # saveout df of dev explained for plotting
-outdf=data.frame(devExplained_full,devExplained_NoCbcl61,devExplained_NoTot,e_devExplained_full,e_devExplained_NoCbcl61,e_devExplained_NoG)
+outdf=data.frame(devExplained_full,devExplained_NoGrades,devExplained_NoTot,e_devExplained_full,e_devExplained_NoGrades,e_devExplained_NoG,grades_devExplained_full,grades_devExplained_noG,grades_devExplained_noTot)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/DevExplainedExt.rds')
 

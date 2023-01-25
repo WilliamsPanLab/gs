@@ -118,20 +118,64 @@ k1=subset(clinc1,eventname=='1_year_follow_up_y_arm_1')
 k2=subset(clinc1,eventname=='2_year_follow_up_y_arm_1')
 clinc1_p=read.delim('/Users/panlab/Downloads/Package_1205908/abcd_ksad01.txt')
 
-# read in grades
-gradesInfo=readRDS('~/Downloads/DEAP-data-download-13.rds')
-# correct column names for equivalence
-colnames(gradesInfo)[1]<-'subjectkey'
-colnames(gradesInfo)[10]<-'eventname'
-gradesInfo$ksads_back_grades_in_school_p[gradesInfo$ksads_back_grades_in_school_p==-1]=NA
-# -1 = N/A, 1 = A, 2 = B, etc.
+# read in grades, annoying distinction between tp1 measure (decent granulrity) and tp2 measure (high granularity)
+gradesInfoBV=readRDS('~/Downloads/DEAP-data-download-13.rds')
+gradesInfoBV=subset(gradesInfoBV,event_name=='baseline_year_1_arm_1')
+gradesInfoBV$Grades<-as.numeric(gradesInfoBV$ksads_back_grades_in_school_p)
+gradesInfoBV$Grades[gradesInfoBV$Grades==-1]=NA
+gradesInfoBV$eventname=gradesInfoBV$event_name
+gradesInfoBV$subjectkey=gradesInfoBV$src_subject_id
+# for this one, the key is 1 = A's, 2 = B's, 3 = C's, 4 = D's, 5 = F's, -1 = NA
+gradesInfoY2=read.delim('~/Downloads/Package_1207225/abcd_saag01.txt')
+gradesInfoY2=subset(gradesInfoY2,eventname=='2_year_follow_up_y_arm_1')
+gradesInfoY2$sag_grade_type<-as.numeric(gradesInfoY2$sag_grade_type)
+# key: 1=100-97,2=96-93,3=92-90,4=89-87,5=86-83,6=82-80,7=79-77,8=76-73,9=72-70,10=69-67,11=66-65,12=0-65,-1=NA,777= no answer
+gradesInfoY2$sag_grade_type[gradesInfoY2$sag_grade_type==-1]=NA
+gradesInfoY2$sag_grade_type[gradesInfoY2$sag_grade_type==777]=NA
+# now convert to be equivalent with timepoint 1 grades measure
+ind12=gradesInfoY2$sag_grade_type==12
+ind11=gradesInfoY2$sag_grade_type==11
+ind10=gradesInfoY2$sag_grade_type==10
+ind9=gradesInfoY2$sag_grade_type==9
+ind8=gradesInfoY2$sag_grade_type==8
+ind7=gradesInfoY2$sag_grade_type==7
+ind6=gradesInfoY2$sag_grade_type==6
+ind5=gradesInfoY2$sag_grade_type==5
+ind4=gradesInfoY2$sag_grade_type==4
+ind3=gradesInfoY2$sag_grade_type==3
+ind2=gradesInfoY2$sag_grade_type==2
+ind1=gradesInfoY2$sag_grade_type==1
+#### Set indices to low-res versions
+# < 65 becomes failing
+gradesInfoY2$sag_grade_type[ind12]=5
+# 66-69 = Ds
+gradesInfoY2$sag_grade_type[ind11]=4
+gradesInfoY2$sag_grade_type[ind10]=4
+# 70-79 = Cs
+gradesInfoY2$sag_grade_type[ind7]=3
+gradesInfoY2$sag_grade_type[ind8]=3
+gradesInfoY2$sag_grade_type[ind9]=3
+# 80-89 = Bs
+gradesInfoY2$sag_grade_type[ind4]=2
+gradesInfoY2$sag_grade_type[ind5]=2
+gradesInfoY2$sag_grade_type[ind6]=2
+# 90+ = As
+gradesInfoY2$sag_grade_type[ind1]=1
+gradesInfoY2$sag_grade_type[ind2]=1
+gradesInfoY2$sag_grade_type[ind3]=1
+gradesInfoY2$Grades<-gradesInfoY2$sag_grade_type
+###### ∆∆∆∆∆∆∆ create grades info from both of em
+NeededColNames=c('subjectkey','eventname','Grades')
+gradesInfo<-rbind(gradesInfoBV[,NeededColNames],gradesInfoY2[,NeededColNames])
+###################################
+
 
 # for mixed effect modeling
 masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id'))
 masterdf<-merge(masterdf,clinc1,by=c('subjectkey','eventname','interview_age','src_subject_id'))
 masterdf<-merge(masterdf,clinc1_p,by=c('subjectkey','eventname','interview_age','src_subject_id'))
 masterdf<-merge(masterdf,Yextended,by=c('subjectkey','eventname'))
-masterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
+
 # for within-timepoint measurements
 # merge BV
 bv=merge(cbclsBV,tbBV,by='subjectkey')
@@ -163,7 +207,6 @@ masterdf$cbcl_scr_syn_internal_r<-as.numeric(masterdf$cbcl_scr_syn_internal_r)
 masterdf$cbcl_scr_syn_external_r<-as.numeric(masterdf$cbcl_scr_syn_external_r)
 masterdf$subjectkey<-as.factor(masterdf$subjectkey)
 masterdf$cbcl_q61_p<-as.ordered(masterdf$cbcl_q61_p)
-masterdf$ksads_back_grades_in_school_p<-as.ordered(masterdf$ksads_back_grades_in_school_p)
 # remove instances of NA tot probs
 masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_totprob_r),]
 # and for q61
@@ -173,9 +216,10 @@ masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_totprob_r),]
 masterdf=masterdf[!is.empty(masterdf$cbcl_q61_p),]
 # r can't take the hint
 masterdf=masterdf[!masterdf$cbcl_scr_syn_totprob_r=='',]
-d=masterdf[!masterdf$cbcl_q61_p=='',]
+masterdf=masterdf[!masterdf$cbcl_q61_p=='',]
 
 ```
+
 ```{r}
 # only use subjects with both timepoints as complete cases
 subjs=unique(masterdf$subjectkey)
@@ -189,6 +233,9 @@ for (s in subjs){
 masterdf=masterdf[masterdf$subjectkey %in% subjs,]
 
 ```
+
+
+
 
 ```{r}
 # finish cleaning data for sherlock runs: one family member per family to facilitate random sample
@@ -256,17 +303,17 @@ masterdf$g<-Yextended$g
 
 
 ```{r}
-# compare to thompson PC1
-PC1=readRDS('/Users/panlab/Downloads/DEAP-data-download.rds')
-PC1$subjectkey=PC1$src_subject_id
-PC1$eventname<-PC1$event_name
-# only baseline is meaningful
-PC1<-PC1[PC1$event_name=='baseline_year_1_arm_1',]
-# mergin'
-compareG_df<-merge(PC1,masterdf,by=c('src_subject_id'))
-# compare
-cor.test(as.numeric(compareG_df$g),compareG_df$neurocog_pc1.bl)
-# note: .964 correlation when calculated on only TP1 data
+#####   # compare to thompson PC1
+#####   PC1=readRDS('/Users/panlab/Downloads/DEAP-data-download.rds')
+#####   PC1$subjectkey=PC1$src_subject_id
+#####   PC1$eventname<-PC1$event_name
+#####   # only baseline is meaningful
+#####   PC1<-PC1[PC1$event_name=='baseline_year_1_arm_1',]
+#####   # mergin'
+#####   compareG_df<-merge(PC1,masterdf,by=c('src_subject_id'))
+#####   # compare
+#####   cor.test(as.numeric(compareG_df$g),compareG_df$neurocog_pc1.bl)
+#####   # note: .964 correlation when calculated on only TP1 data
 ```
 
 ```{r}
@@ -274,6 +321,12 @@ cor.test(as.numeric(compareG_df$g),compareG_df$neurocog_pc1.bl)
 # save out model for cluster mixed-effect fitting
 saveRDS(masterdf,'~/mixedEfDf.rds')
 print(dim(masterdf))
+
+# this line excludes timepoint one visits
+gradesMasterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
+saveRDS(gradesMasterdf,'~/mixedEfDf_WithGrades.rds')
+print(dim(gradesMasterdf))
+
 ```
 
 
@@ -287,23 +340,62 @@ year2=subset(masterdf,eventname=='2_year_follow_up_y_arm_1')
 crossTPdf<-merge(yearBV,year2,by='subjectkey')
 crossTPdf$cbcl_scr_syn_totprob_r.x<-as.numeric(crossTPdf$cbcl_scr_syn_totprob_r.x)
 crossTPdf$cbcl_scr_syn_totprob_r.y<-as.numeric(crossTPdf$cbcl_scr_syn_totprob_r.y)
-crossTPdf$cbcl_q61_p.x<-as.ordered(crossTPdf$cbcl_q61_p.x)
-crossTPdf$cbcl_q61_p.y<-as.ordered(crossTPdf$cbcl_q61_p.y)
+# coded as numeric for now
+crossTPdf$cbcl_q61_p.x<-as.numeric(crossTPdf$cbcl_q61_p.x)
+crossTPdf$cbcl_q61_p.y<-as.numeric(crossTPdf$cbcl_q61_p.y)
 
-# make some gams with nb, revert to glms if linear
-pPredg<-gam(cbcl_scr_syn_totprob_r.x~s(g.y)+s(g.x),data=crossTPdf,family=nb())
-gPredp<-gam(cbcl_scr_syn_totprob_r.y~s(g.x)+s(cbcl_scr_syn_totprob_r.x),data=crossTPdf,family = nb())
+# make some gams for predicting timepoint 2 from tp 1 (above and beyond tp1 response variable)
+gPredp<-gam(cbcl_scr_syn_totprob_r.y~s(g.x)+s(cbcl_scr_syn_totprob_r.x)+cbcl_q61_p.x,data=crossTPdf,family = nb())
+pPredg<-gam(g.y~s(cbcl_scr_syn_totprob_r.x)+s(g.x)+cbcl_q61_p.x,data=crossTPdf)
+pPredsc<-gam(cbcl_q61_p.y~s(cbcl_scr_syn_totprob_r.x)+s(g.x)+cbcl_q61_p.x,data=crossTPdf)
 
-pPredg2<-gam(g.y~s(cbcl_scr_syn_totprob_r.x)+s(g.x),data=crossTPdf)
-gPredp2<-gam(g.x~s(cbcl_scr_syn_totprob_r.y)+s(cbcl_scr_syn_totprob_r.x),data=crossTPdf)
+# externalizing
+gPredp<-gam(cbcl_scr_syn_external_r.y~s(g.x)+s(cbcl_scr_syn_external_r.x)+cbcl_q61_p.x,data=crossTPdf,family = nb())
+pPredg<-gam(g.y~s(cbcl_scr_syn_external_r.x)+s(g.x)+cbcl_q61_p.x,data=crossTPdf)
+pPredsc<-gam(cbcl_q61_p.y~s(cbcl_scr_syn_external_r.x)+s(g.x)+cbcl_q61_p.x+ti(cbcl_scr_syn_external_r.x,g.x),data=crossTPdf)
 
-# temporal precedence of school perf
-scPredp<-glm.nb(cbcl_scr_syn_totprob_r.y~cbcl_q61_p.x+cbcl_scr_syn_totprob_r.x,data=crossTPdf)
-pPredsc<-glm.nb(cbcl_scr_syn_totprob_r.x~cbcl_q61_p.y+cbcl_q61_p.x,data=crossTPdf)
+# internalizing
+gPredp<-gam(cbcl_scr_syn_internal_r.y~s(g.x)+s(cbcl_scr_syn_internal_r.x)+cbcl_q61_p.x,data=crossTPdf,family = nb())
+pPredg<-gam(g.y~s(cbcl_scr_syn_internal_r.x)+s(g.x)+cbcl_q61_p.x,data=crossTPdf)
+pPredsc<-gam(cbcl_q61_p.y~s(cbcl_scr_syn_internal_r.x)+s(g.x)+cbcl_q61_p.x,data=crossTPdf)
 
-scPredg<-glm(g.y~cbcl_q61_p.x+g.x,data=crossTPdf)
-gPredsc<-glm(g.x~cbcl_q61_p.y+cbcl_q61_p.x,data=crossTPdf)
+###############################################################
+##### ∆∆∆∆∆∆∆∆∆∆∆ with parent P (note DF saved out further down)
+###############################################################
+
+withParentP<-readRDS('~/mixedEfDF_wAdultp.rds')
+yearBV=subset(withParentP,eventname=='baseline_year_1_arm_1')
+year2=subset(withParentP,eventname=='2_year_follow_up_y_arm_1')
+
+# merge back - .x is tp1, .y is tp2
+crossTPdf<-merge(yearBV,year2,by='subjectkey')
+crossTPdf$cbcl_scr_syn_totprob_r.x<-as.numeric(crossTPdf$cbcl_scr_syn_totprob_r.x)
+crossTPdf$cbcl_scr_syn_totprob_r.y<-as.numeric(crossTPdf$cbcl_scr_syn_totprob_r.y)
+# coded as numeric for now
+crossTPdf$cbcl_q61_p.x<-as.numeric(crossTPdf$cbcl_q61_p.x)
+crossTPdf$cbcl_q61_p.y<-as.numeric(crossTPdf$cbcl_q61_p.y)
+
+# make some gams for predicting timepoint 2 from tp 1 (above and beyond tp1 response variable)
+gPredp<-gam(cbcl_scr_syn_totprob_r.y~s(g.x)+s(cbcl_scr_syn_totprob_r.x)+cbcl_q61_p.x+s(parentPcount.x),data=crossTPdf,family = nb())
+pPredg<-gam(g.y~s(cbcl_scr_syn_totprob_r.x)+s(g.x)+cbcl_q61_p.x+s(parentPcount.x),data=crossTPdf)
+pPredsc<-gam(cbcl_q61_p.y~s(cbcl_scr_syn_totprob_r.x)+s(g.x)+cbcl_q61_p.x+s(parentPcount.x),data=crossTPdf)
+
+# externalizing
+gPredp<-gam(cbcl_scr_syn_external_r.y~s(g.x)+s(cbcl_scr_syn_external_r.x)+cbcl_q61_p.x+s(parentPcount.x),data=crossTPdf,family = nb())
+pPredg<-gam(g.y~s(cbcl_scr_syn_external_r.x)+s(g.x)+cbcl_q61_p.x+s(parentPcount.x),data=crossTPdf)
+pPredsc<-gam(cbcl_q61_p.y~s(cbcl_scr_syn_external_r.x)+s(g.x)+cbcl_q61_p.x+s(parentPcount.x),data=crossTPdf)
+
+# internalizing
+gPredp<-gam(cbcl_scr_syn_internal_r.y~s(g.x)+s(cbcl_scr_syn_internal_r.x)+cbcl_q61_p.x+s(parentPcount.x),data=crossTPdf,family = nb())
+pPredg<-gam(g.y~s(cbcl_scr_syn_internal_r.x)+s(g.x)+cbcl_q61_p.x+s(parentPcount.x),data=crossTPdf)
+pPredsc<-gam(cbcl_q61_p.y~s(cbcl_scr_syn_internal_r.x)+s(g.x)+cbcl_q61_p.x+s(parentPcount.x),data=crossTPdf)
+
+# interactions?
+gPredp<-gam(cbcl_scr_syn_totprob_r.y~s(g.x)+s(cbcl_scr_syn_totprob_r.x)+cbcl_q61_p.x+s(parentPcount.x)+ti(parentPcount.x,g.x)+ti(parentPcount.x,cbcl_scr_syn_totprob_r.x),data=crossTPdf,family = nb())
+gPredp<-gam(cbcl_scr_syn_external_r.y~s(g.x)+s(cbcl_scr_syn_external_r.x)+cbcl_q61_p.x+s(parentPcount.x)+ti(parentPcount.x,g.x)+ti(parentPcount.x,cbcl_scr_syn_external_r.x),data=crossTPdf,family = nb())
+gPredp<-gam(cbcl_scr_syn_internal_r.y~s(g.x)+s(cbcl_scr_syn_internal_r.x)+cbcl_q61_p.x+s(parentPcount.x)+ti(parentPcount.x,g.x)+ti(parentPcount.x,cbcl_scr_syn_internal_r.x),data=crossTPdf,family = nb())
 ```
+
 
 ```{r}
 ###∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆#
@@ -332,7 +424,6 @@ get_derivs_and_plot(fixedEfModel,smooth='cbcl_scr_syn_totprob_r')
 ###∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆#
 ###∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆#
 ###∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆#
-
 
 ### ANALYSIS 2: g~p NON-LINEAR (migrated to cluster)
 
@@ -379,19 +470,116 @@ deviance_withTot_sub61<-summary(fixedEfModel)$dev.expl
 barplot_df<-melt(data.frame(deviance_with61,deviance_withoutTot,deviance_without61,deviance_withTot_sub61))
 ggplot(aes(x=variable,y=value),data=barplot_df)+geom_bar(stat='identity')+theme(axis.text.x=element_text(angle=45,vjust=.5))
 
-
+##### P ∆∆∆∆∆∆∆
 # load in bootstrapped data from sherlock
 boots<-readRDS('~/Desktop/g_p/DevExplained.rds')
-boot_barplot_df<-melt(boots)
-ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme(axis.text.x=element_text(angle=45,vjust=.5))+theme_classic()+ggtitle('Total Problems')
+gasResp<-boots[,1:3]
+pasResp<-boots[,4:6]
 
+# rename columns - g as response
+gasResp$Full<-gasResp[,1]
+gasResp$P<-gasResp[,2]
+gasResp$School<-gasResp[,3]
+gasResp<-gasResp[,4:6]
+# melt into plottable df
+boot_barplot_df<-melt(gasResp)
+# reorder for plot
+boot_barplot_df$variable <- factor(boot_barplot_df$variable, levels = c("P", "School", "Full"))
+ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme_classic(base_size=35)+
+  ylim(c(0,.15))+
+  theme(axis.text.x=element_text(angle=45,vjust=.5))+
+  labs(x="Models",y="Variance explained",title = expression(paste(italic("g"))))
+
+# saved out at 700 w 900 h
+
+# rename columns - p as response
+pasResp$Full<-pasResp[,1]
+pasResp$g<-pasResp[,2]
+pasResp$School<-pasResp[,3]
+pasResp<-pasResp[,4:6]
+# melt into plottable df
+boot_barplot_df<-melt(pasResp)
+boot_barplot_df$variable <- factor(boot_barplot_df$variable, levels = c("g", "School", "Full"))
+ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme_classic(base_size=35)+ggtitle('P')+
+  ylim(c(0,.15))+
+  theme(axis.text.x=element_text(angle=45,vjust=.5))+
+  labs(x="Models",y="Variance explained")
+
+
+
+#### INTERNALIZING ∆∆∆∆∆∆∆
 boots<-readRDS('~/Desktop/g_p/DevExplainedInt.rds')
-boot_barplot_df<-melt(boots)
-ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme(axis.text.x=element_text(angle=45,vjust=.5))+theme_classic()+ggtitle('Internalizing Problems')
+# can sep. into p as response and g as response
+gasResp<-boots[,1:3]
+pasResp<-boots[,4:6]
 
+# rename columns - g as response
+gasResp$Full<-gasResp[,1]
+gasResp$Internalizing<-gasResp[,2]
+gasResp$School<-gasResp[,3]
+gasResp<-gasResp[,4:6]
+# melt into plottable df
+boot_barplot_df<-melt(gasResp)
+# reorder for plot
+boot_barplot_df$variable <- factor(boot_barplot_df$variable, levels = c("Internalizing", "School", "Full"))
+ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme_classic(base_size=35)+
+  ylim(c(0,.15))+
+  theme(axis.text.x=element_text(angle=45,vjust=.5))+
+  labs(x="Models",y="Variance explained",title = expression(paste(italic("g"))))
+
+# saved out at 700 w 900 h
+
+# rename columns - p as response
+pasResp$Full<-pasResp[,1]
+pasResp$g<-pasResp[,2]
+pasResp$School<-pasResp[,3]
+pasResp<-pasResp[,4:6]
+# melt into plottable df
+boot_barplot_df<-melt(pasResp)
+boot_barplot_df$variable <- factor(boot_barplot_df$variable, levels = c("g", "School", "Full"))
+ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme_classic(base_size=35)+ggtitle('Internalizing')+
+  ylim(c(0,.15))+
+  theme(axis.text.x=element_text(angle=45,vjust=.5))+
+  labs(x="Models",y="Variance explained")
+
+# saved out at 700 w 900 h
+
+#### EXTERNALIZING ∆∆∆∆∆∆
 boots<-readRDS('~/Desktop/g_p/DevExplainedExt.rds')
-boot_barplot_df<-melt(boots)
-ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme(axis.text.x=element_text(angle=45,vjust=.5))+theme_classic()+ggtitle('Externalizing Problems')
+
+# can sep. into p as response and g as response
+gasResp<-boots[,1:3]
+pasResp<-boots[,4:6]
+
+# rename columns - g as response
+gasResp$Full<-gasResp[,1]
+gasResp$Externalizing<-gasResp[,2]
+gasResp$School<-gasResp[,3]
+gasResp<-gasResp[,4:6]
+# melt into plottable df
+boot_barplot_df<-melt(gasResp)
+# reorder for plot
+boot_barplot_df$variable <- factor(boot_barplot_df$variable, levels = c("Externalizing", "School", "Full"))
+ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme_classic(base_size=35)+
+  ylim(c(0,.15))+
+  theme(axis.text.x=element_text(angle=45,vjust=.5))+
+  labs(x="Models",y="Variance explained",title = expression(paste(italic("g"))))
+
+
+# rename columns - p as response
+pasResp$Full<-pasResp[,1]
+pasResp$g<-pasResp[,2]
+pasResp$School<-pasResp[,3]
+pasResp<-pasResp[,4:6]
+# melt into plottable df
+boot_barplot_df<-melt(pasResp)
+boot_barplot_df$variable <- factor(boot_barplot_df$variable, levels = c("g", "School", "Full"))
+ggplot(aes(x=variable,y=value),data=boot_barplot_df)+geom_boxplot()+theme_classic(base_size=35)+ggtitle('Externalizing')+
+  ylim(c(0,.15))+
+  theme(axis.text.x=element_text(angle=45,vjust=.5))+
+  labs(x="Models",y="Variance explained")
+
+### update with p as response variable AND correct bootstrapping
 ```
 
 ```{r}
@@ -399,35 +587,84 @@ library(pammtools)
 #### ANALYSIS 4: TENSOR SMOOTHS WITH AND WITHOUT CONTROLLING FOR SCHOOL PERFORMANCE
 fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_totprob_r),data=masterdf)
 gg_tensor(fixedEfModel)
+# individual components to gauge if ti is sig
+fixedEfModel<-gam(g~s(interview_age)+s(cbcl_scr_syn_totprob_r)+ti(interview_age,cbcl_scr_syn_totprob_r),data=masterdf)
+gg_tensor(fixedEfModel)
+# school included
 fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_totprob_r)+cbcl_q61_p,data=masterdf)
 gg_tensor(fixedEfModel)
+# individual components for ti()
+fixedEfModel<-gam(g~s(interview_age)+s(cbcl_scr_syn_totprob_r)+ti(interview_age,cbcl_scr_syn_totprob_r)+cbcl_q61_p,data=masterdf)
+gg_tensor(fixedEfModel)
+
 # internalizing
 fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_internal_r),data=masterdf)
 gg_tensor(fixedEfModel)
+# ti components sep.
+fixedEfModel<-gam(g~s(interview_age)+s(cbcl_scr_syn_internal_r)+ti(interview_age,cbcl_scr_syn_internal_r),data=masterdf)
+# school included
 fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_internal_r)+cbcl_q61_p,data=masterdf)
 gg_tensor(fixedEfModel)
-# internalizing and externalizing components
-fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_external_r),data=masterdf)
-gg_tensor(fixedEfModel)
-fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_external_r)+cbcl_q61_p,data=masterdf)
+# ti components sep.
+fixedEfModel<-gam(g~s(interview_age)+s(cbcl_scr_syn_internal_r)+ti(interview_age,cbcl_scr_syn_internal_r)+cbcl_q61_p,data=masterdf)
 gg_tensor(fixedEfModel)
 
-################
-### with psychopathology as response variable
-#########
+
+# externalizing components
+fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_external_r),data=masterdf)
+gg_tensor(fixedEfModel)
+# ti components sep.
+fixedEfModel<-gam(g~s(interview_age)+s(cbcl_scr_syn_external_r)+ti(interview_age,cbcl_scr_syn_external_r),data=masterdf)
+# school included
+fixedEfModel<-gam(g~te(interview_age,cbcl_scr_syn_external_r)+cbcl_q61_p,data=masterdf)
+gg_tensor(fixedEfModel)
+# ti components sep.
+fixedEfModel<-gam(g~s(interview_age)+s(cbcl_scr_syn_external_r)+ti(interview_age,cbcl_scr_syn_external_r)+cbcl_q61_p,data=masterdf)
+gg_tensor(fixedEfModel)
+
+
+#######################
+
+##### SYMPTOMS AS RESPONSE
+
+#######################
+
+# p factor holistic
 fixedEfModel<-gam(cbcl_scr_syn_totprob_r~te(interview_age,g),data=masterdf,family=nb())
 gg_tensor(fixedEfModel)
+# p factor ti
+fixedEfModel<-gam(cbcl_scr_syn_totprob_r~s(interview_age)+s(g)+ti(interview_age,g),data=masterdf,family=nb())
+gg_tensor(fixedEfModel)
+# p factor holistic + school
 fixedEfModel<-gam(cbcl_scr_syn_totprob_r~te(interview_age,g)+cbcl_q61_p,data=masterdf,family=nb())
 gg_tensor(fixedEfModel)
+# p factor ti + school
+fixedEfModel<-gam(cbcl_scr_syn_totprob_r~s(interview_age)+s(g)+ti(interview_age,g)+cbcl_q61_p,data=masterdf,family=nb())
+gg_tensor(fixedEfModel)
+
 # internalizing
 fixedEfModel<-gam(cbcl_scr_syn_internal_r~te(interview_age,g),data=masterdf,family=nb())
 gg_tensor(fixedEfModel)
+# int  ti
+fixedEfModel<-gam(cbcl_scr_syn_internal_r~s(interview_age)+s(g)+ti(interview_age,g),data=masterdf,family=nb())
+gg_tensor(fixedEfModel)
+# int  holistic + school
 fixedEfModel<-gam(cbcl_scr_syn_internal_r~te(interview_age,g)+cbcl_q61_p,data=masterdf,family=nb())
 gg_tensor(fixedEfModel)
-# internalizing and externalizing components
+# int ti + school
+fixedEfModel<-gam(cbcl_scr_syn_internal_r~s(interview_age)+s(g)+ti(interview_age,g)+cbcl_q61_p,data=masterdf,family=nb())
+gg_tensor(fixedEfModel)
+
+# externalizing components 
 fixedEfModel<-gam(cbcl_scr_syn_external_r~te(interview_age,g),data=masterdf,family=nb())
 gg_tensor(fixedEfModel)
+# ext ti
+fixedEfModel<-gam(cbcl_scr_syn_external_r~s(interview_age)+s(g)+ti(interview_age,g),data=masterdf,family=nb())
+# ext holistic + school
 fixedEfModel<-gam(cbcl_scr_syn_external_r~te(interview_age,g)+cbcl_q61_p,data=masterdf)
+gg_tensor(fixedEfModel)
+# ext ti + school
+fixedEfModel<-gam(cbcl_scr_syn_external_r~s(interview_age)+s(g)+ti(interview_age,g)+cbcl_q61_p,data=masterdf,family=nb())
 gg_tensor(fixedEfModel)
 
 ```
