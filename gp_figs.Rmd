@@ -167,8 +167,8 @@ gradesInfoY2$Grades<-gradesInfoY2$sag_grade_type
 ###### ∆∆∆∆∆∆∆ create grades info from both of em
 NeededColNames=c('subjectkey','eventname','Grades')
 gradesInfo<-rbind(gradesInfoBV[,NeededColNames],gradesInfoY2[,NeededColNames])
+gradesInfo$Grades<-as.ordered(gradesInfo$Grades)
 ###################################
-
 
 # for mixed effect modeling
 masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id'))
@@ -317,17 +317,67 @@ masterdf$g<-Yextended$g
 ```
 
 ```{r}
-### PRINOUT BIG DATA FOR CLUSTER MIXED EFFECTS
-# save out model for cluster mixed-effect fitting
-saveRDS(masterdf,'~/mixedEfDf.rds')
-print(dim(masterdf))
-
-# this line excludes timepoint one visits
+### PRINOUT BIG DATA FOR CLUSTER BOOTS
 gradesMasterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
 saveRDS(gradesMasterdf,'~/mixedEfDf_WithGrades.rds')
 print(dim(gradesMasterdf))
 
+
+
 ```
+
+```{r}
+# ∆∆∆∆∆∆∆∆∆∆∆∆∆∆
+#### 1/25/23 - new analysis 1 - p~g better epxlained by school function
+# ∆∆∆∆∆∆∆∆∆∆∆∆∆∆
+
+
+#### Row 1A - g~p alone
+model<-gam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age),data=gradesMasterdf,family = nb())
+# plot of p~g
+summary(model)
+visreg(model,"g",gg=TRUE,ylab="Total Symptoms",scale="response",rug=FALSE,band=FALSE,line.par=list(size=2))+geom_point(alpha=0.01,size=3)+ylim(c(0,170))+theme_minimal(base_size=25)
+# note clim 0,170 seems to exclude =< 1% 
+
+### ext
+model<-gam(cbcl_scr_syn_external_r~s(g)+s(interview_age),data=gradesMasterdf,family = nb())
+# plot of p~g
+summary(model)
+visreg(model,"g",gg=TRUE,ylab="Externalizing Symptoms",scale="response",rug=FALSE,band=FALSE,line.par=list(size=2))+geom_point(alpha=0.01,size=3)+ylim(c(0,33))+theme_minimal(base_size=25)
+# note clim 0,33 seems to exclude =< 1% 
+
+### int
+model<-gam(cbcl_scr_syn_internal_r~s(g)+s(interview_age),data=gradesMasterdf,family = nb())
+# plot of p~g
+summary(model)
+visreg(model,"g",gg=TRUE,ylab="Internalizing Symptoms",scale="response",rug=FALSE,band=FALSE,line.par=list(size=2,col='gray'))+geom_point(alpha=0.02,size=3)+ylim(c(0,45))+theme_minimal(base_size=25)
+# note clim 0,45 seems to exclude =< 1% 
+
+
+#### Row 2B - g~p conditional upon school
+model<-gam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+Grades,data=gradesMasterdf,family = nb())
+# plot of p~g
+summary(model)
+visreg(model,"g",gg=TRUE,ylab="Total Symptoms",scale="response",rug=FALSE,band=FALSE,line.par=list(size=2))+geom_point(alpha=0.01,size=3)+ylim(c(0,170))+theme_minimal(base_size=25)
+# note clim 0,170 seems to exclude =< 1% 
+
+### ext
+model<-gam(cbcl_scr_syn_external_r~s(g)+s(interview_age)+Grades,data=gradesMasterdf,family = nb())
+# plot of p~g
+summary(model)
+visreg(model,"g",gg=TRUE,ylab="Externalizing Symptoms",scale="response",rug=FALSE,band=FALSE,line.par=list(size=2,col='gray'))+geom_point(alpha=0.01,size=3)+ylim(c(0,33))+theme_minimal(base_size=25)
+# note clim 0,33 seems to exclude =< 1% 
+
+### int
+model<-gam(cbcl_scr_syn_internal_r~s(g)+s(interview_age)+Grades,data=gradesMasterdf,family = nb())
+# plot of p~g
+summary(model)
+visreg(model,"g",gg=TRUE,ylab="Internalizing Symptoms",scale="response",rug=FALSE,band=FALSE,line.par=list(size=2))+geom_point(alpha=0.02,size=3)+ylim(c(0,45))+theme_minimal(base_size=25)
+# note clim 0,45 seems to exclude =< 1% 
+
+### boo-ya all permutations of g~p~grades are high certainty or high uncertainty
+```
+
 
 
 ```{r}
@@ -1038,4 +1088,25 @@ sigDf<-plotdf[plotdf$pvector<0.01,]
 sigDf<-sigDf[order(sigDf$tvector),]
 # bar plot
 ggplot(aes(fct_reorder(questionVec,tvector),tvector),data=sigDf)+geom_bar(stat = 'identity')+theme(axis.text=element_text(angle=90))
+```
+
+```{r}
+# load in bootstrapped confidence intervals, plot
+parentP=readRDS('~/Desktop/g_p/gparentPPredictedBoots.rds')
+# g ~ parentP function
+topCI=apply(parentP,2,quantile,c(.99))
+bottomCI=apply(parentP,2,quantile,c(.01))
+# group variable for plotting
+groupVar=rep('Upper',200)
+groupVar=c(groupVar,(rep('Lower',200)))
+# parentP variable for plotting
+parentPVar=c(as.numeric(seq(1,200)),as.numeric(seq(1,200)))
+# format df for plotting
+CI=c(topCI,bottomCI)
+plotdf=data.frame(CI,groupVar,parentPVar)
+colnames(plotdf)<-c('CI','groupVar','ParentP')
+#  x axis to correct range
+plotdf$ParentP<-plotdf$ParentP/(200/max(OutDF$parentPcount))
+# plot it
+ggplot(aes(x=ParentP,y=CI,group=groupVar),data=plotdf)+geom_line()+geom_hline(yintercept = 0)+ylab('99% CI of Derivative')+xlab('Parent Symptoms')
 ```
