@@ -94,6 +94,7 @@ gradesInfoY2$Grades<-gradesInfoY2$sag_grade_type
 NeededColNames=c('subjectkey','eventname','Grades')
 gradesInfo<-rbind(gradesInfoBV[,NeededColNames],gradesInfoY2[,NeededColNames])
 gradesInfo$Grades<-as.ordered(gradesInfo$Grades)
+
 ################################### ∆∆∆∆∆
 
 # initialize master df
@@ -203,7 +204,7 @@ masterdf<-merge(masterdf,DEAP,by=c('subjectkey','eventname'))
     ## 'collection_title.y', 'src_subject_id.y' are duplicated in the result
 
 ``` r
-# clean
+# clean age
 masterdf$interview_age<-as.numeric(masterdf$interview_age)/12
 ```
 
@@ -254,11 +255,18 @@ KidVarsOfInt=c('Grades','cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl
 # columns of interest to gauge completeness of
 ColsOfInt=asr[,c(11:141)]
 ASRVarsOfInt=colnames(ColsOfInt)
-# merge with master
-masterdf=merge(asr,masterdf,by=c('subjectkey','eventname'))
+# clean age in ASR
+asr$interview_age<-as.numeric(asr$interview_age)/12
 ```
 
-    ## Warning in merge.data.frame(asr, masterdf, by = c("subjectkey", "eventname")):
+    ## Warning: NAs introduced by coercion
+
+``` r
+# merge with master
+masterdf=merge(asr,masterdf,by=c('subjectkey','eventname','interview_age'))
+```
+
+    ## Warning in merge.data.frame(asr, masterdf, by = c("subjectkey", "eventname", :
     ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
     ## 'collection_title.x', 'collection_id.x', 'dataset_id.x', 'interview_date.x',
     ## 'sex.x', 'collection_title.x', 'collection_id.y', 'dataset_id.y',
@@ -284,7 +292,7 @@ masterdf=masterdf[masterdf$subjectkey %in% subjs,]
 print(dim(masterdf))
 ```
 
-    ## [1] 11448  2517
+    ## [1] 11448  2516
 
 ``` r
 # finish cleaning data for sherlock runs: one family member per family to facilitate random sample
@@ -331,7 +339,7 @@ masterdf$rel_family_id=masterdf$id_fam
 print(dim(masterdf))
 ```
 
-    ## [1] 10100  2519
+    ## [1] 10100  2518
 
 ``` r
 # pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
@@ -381,7 +389,7 @@ saveRDS(masterdf,'~/DfWithGrades.rds')
 print(dim(masterdf))
 ```
 
-    ## [1] 10100  2520
+    ## [1] 10100  2519
 
 ``` r
 #### ∆∆∆ Note this is without adult P
@@ -395,10 +403,10 @@ ColsOfInt=asr[,c(11:141)]
 # retain complete cases
 completeInd=ColsOfInt[rowSums(is.na(ColsOfInt)) == 0,]
 # merge with master
-masterdf=merge(asr,masterdf,by=c('subjectkey','eventname'))
+masterdf=merge(asr,masterdf,by=c('subjectkey','eventname','interview_age'))
 ```
 
-    ## Warning in merge.data.frame(asr, masterdf, by = c("subjectkey", "eventname")):
+    ## Warning in merge.data.frame(asr, masterdf, by = c("subjectkey", "eventname", :
     ## column names 'src_subject_id.x', 'collection_id.x', 'dataset_id.x',
     ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.x',
     ## 'dataset_id.x', 'interview_date.x', 'sex.x', 'collection_title.x',
@@ -7638,30 +7646,32 @@ ASRtotal=ASRtotal-ASRdfNum$asr_q123_p
 
 # merge in (first row is colnames)
 asr$parentPcount=c(NA,ASRtotal)
-OutDF=merge(OutDF,asr,by=c('subjectkey','eventname'))
+OutDF=merge(OutDF,asr,by=c('subjectkey','eventname','interview_age'))
 ```
 
-    ## Warning in merge.data.frame(OutDF, asr, by = c("subjectkey", "eventname")):
-    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
-    ## 'interview_age.x', 'sex.x', 'collection_title.x', 'src_subject_id.x',
-    ## 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'collection_id.x', 'dataset_id.x', 'interview_date.x',
-    ## 'sex.x', 'collection_title.x', 'collection_id.y', 'dataset_id.y',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'collection_id.x',
-    ## 'dataset_id.x', 'src_subject_id.y', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
+    ## Warning in merge.data.frame(OutDF, asr, by = c("subjectkey", "eventname", :
+    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
+    ## 'collection_title.x', 'src_subject_id.x', 'collection_id.x', 'dataset_id.x',
+    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.x',
+    ## 'dataset_id.x', 'interview_date.x', 'sex.x', 'collection_title.x',
+    ## 'collection_id.y', 'dataset_id.y', 'interview_date.y', 'sex.y',
+    ## 'collection_title.y', 'collection_id.x', 'dataset_id.x', 'src_subject_id.y',
+    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
+    ## 'dataset_id.y', 'src_subject_id.x', 'interview_date.y', 'sex.y',
+    ## 'collection_title.y', 'collection_id.y', 'dataset_id.y', 'src_subject_id.y',
     ## 'interview_date.y', 'sex.y', 'collection_title.y', 'collection_id.y',
-    ## 'dataset_id.y', 'src_subject_id.y', 'interview_date.y', 'sex.y',
-    ## 'collection_title.y', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
-    ## 'interview_age.y', 'sex.y', 'collection_title.y' are duplicated in the result
+    ## 'dataset_id.y', 'interview_date.y', 'sex.y', 'collection_title.y' are duplicated
+    ## in the result
 
 ``` r
 print(dim(OutDF))
 ```
 
-    ## [1] 10100  2814
+    ## [1] 10100  2811
 
 ``` r
+saveRDS(OutDF,'~/OutDfFull.rds')
+
 # convert to one row per subj for temporal precedence analyses
 OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')
 OutDF2Y=subset(OutDF,eventname=='2_year_follow_up_y_arm_1')
@@ -7669,7 +7679,7 @@ OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 5038 5627
+    ## [1] 5038 5621
 
 ``` r
 saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec.rds')

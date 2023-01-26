@@ -133,8 +133,7 @@ masterdf<-merge(masterdf,nihCog,by=c('subjectkey','eventname','interview_age'))
 masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age'))
 masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age'))
 masterdf<-merge(masterdf,DEAP,by=c('subjectkey','eventname'))
-
-# clean
+# clean age
 masterdf$interview_age<-as.numeric(masterdf$interview_age)/12
 ```
 
@@ -180,8 +179,10 @@ KidVarsOfInt=c('Grades','cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl
 # columns of interest to gauge completeness of
 ColsOfInt=asr[,c(11:141)]
 ASRVarsOfInt=colnames(ColsOfInt)
+# clean age in ASR
+asr$interview_age<-as.numeric(asr$interview_age)/12
 # merge with master
-masterdf=merge(asr,masterdf,by=c('subjectkey','eventname'))
+masterdf=merge(asr,masterdf,by=c('subjectkey','eventname','interview_age'))
 
 ```
 
@@ -284,7 +285,7 @@ ColsOfInt=asr[,c(11:141)]
 # retain complete cases
 completeInd=ColsOfInt[rowSums(is.na(ColsOfInt)) == 0,]
 # merge with master
-masterdf=merge(asr,masterdf,by=c('subjectkey','eventname'))
+masterdf=merge(asr,masterdf,by=c('subjectkey','eventname','interview_age'))
 ASRcolnames=asr[1,]
 
 #######MICHELI APPROACH TO FACTOR DELINEATION OF ASR
@@ -418,8 +419,9 @@ ASRtotal=ASRtotal-ASRdfNum$asr_q123_p
 
 # merge in (first row is colnames)
 asr$parentPcount=c(NA,ASRtotal)
-OutDF=merge(OutDF,asr,by=c('subjectkey','eventname'))
+OutDF=merge(OutDF,asr,by=c('subjectkey','eventname','interview_age'))
 print(dim(OutDF))
+saveRDS(OutDF,'~/OutDfFull.rds')
 
 # convert to one row per subj for temporal precedence analyses
 OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')

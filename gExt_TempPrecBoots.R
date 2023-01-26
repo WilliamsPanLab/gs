@@ -8,7 +8,7 @@ dr2adj_Gr=rep(0,10000)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up
-masterdf=masterdf[,c('parentPcount','cbcl_scr_syn_external_r','g','subjectkey','interview_age','Grades')]
+masterdf=masterdf[,c('parentPcount.x','cbcl_scr_syn_external_r.x','cbcl_scr_syn_external_r.y','g.x','subjectkey','interview_age.x','Grades.x')]
 # loop over manual bootstrap
 for (b in 1:10000){
 	print(b)
