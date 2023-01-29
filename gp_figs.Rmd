@@ -1143,6 +1143,69 @@ ggplot(aes(fct_reorder(questionVec,tvector),tvector),data=sigDf)+geom_bar(stat =
 
 ```{r}
 # load in bootstrapped confidence intervals, plot
+P=readRDS('~/Desktop/g_p/gpPredictedBoots.rds')
+# g ~ parentP function
+topCI=apply(P,2,quantile,c(.99))
+bottomCI=apply(P,2,quantile,c(.01))
+# group variable for plotting
+groupVar=rep('Upper',200)
+groupVar=c(groupVar,(rep('Lower',200)))
+# parentP variable for plotting
+PVar=c(as.numeric(seq(1,200)),as.numeric(seq(1,200)))
+# format df for plotting
+CI=c(topCI,bottomCI)
+plotdf=data.frame(CI,groupVar,PVar)
+colnames(plotdf)<-c('CI','groupVar','P')
+#  x axis to correct range
+plotdf$P<-plotdf$P/(200/max(OutDF$cbcl_scr_syn_totprob_r))
+# plot it
+ggplot(aes(x=P,y=CI,group=groupVar),data=plotdf)+geom_line()+geom_hline(yintercept = 0)+ylab('99% CI of Derivative')+xlab('Child Symptoms')
+```
+
+```{r}
+# load in bootstrapped confidence intervals, plot
+Ext=readRDS('~/Desktop/g_p/gExtPredictedBoots.rds')
+# g ~ parentP function
+topCI=apply(Ext,2,quantile,c(.99))
+bottomCI=apply(Ext,2,quantile,c(.01))
+# group variable for plotting
+groupVar=rep('Upper',200)
+groupVar=c(groupVar,(rep('Lower',200)))
+# parentP variable for plotting
+ExtVar=c(as.numeric(seq(1,200)),as.numeric(seq(1,200)))
+# format df for plotting
+CI=c(topCI,bottomCI)
+plotdf=data.frame(CI,groupVar,ExtVar)
+colnames(plotdf)<-c('CI','groupVar','Ext')
+#  x axis to correct range
+plotdf$Ext<-plotdf$Ext/(200/max(OutDF$cbcl_scr_syn_external_r))
+# plot it
+ggplot(aes(x=Ext,y=CI,group=groupVar),data=plotdf)+geom_line()+geom_hline(yintercept = 0)+ylab('99% CI of Derivative')+xlab('Child Ext. Symptoms')
+```
+
+```{r}
+# load in bootstrapped confidence intervals, plot
+Int=readRDS('~/Desktop/g_p/gIntPredictedBoots.rds')
+# g ~ parentP function
+topCI=apply(Int,2,quantile,c(.99))
+bottomCI=apply(Int,2,quantile,c(.01))
+# group variable for plotting
+groupVar=rep('Upper',200)
+groupVar=c(groupVar,(rep('Lower',200)))
+# parentP variable for plotting
+IntVar=c(as.numeric(seq(1,200)),as.numeric(seq(1,200)))
+# format df for plotting
+CI=c(topCI,bottomCI)
+plotdf=data.frame(CI,groupVar,IntVar)
+colnames(plotdf)<-c('CI','groupVar','Int')
+#  x axis to correct range
+plotdf$Int<-plotdf$Int/(200/max(OutDF$cbcl_scr_syn_internal_r))
+# plot it
+ggplot(aes(x=Int,y=CI,group=groupVar),data=plotdf)+geom_line()+geom_hline(yintercept = 0)+ylab('99% CI of Derivative')+xlab('Child Int. Symptoms')
+```
+
+```{r}
+# load in bootstrapped confidence intervals, plot
 parentP=readRDS('~/Desktop/g_p/gparentPPredictedBoots.rds')
 # g ~ parentP function
 topCI=apply(parentP,2,quantile,c(.99))
@@ -1157,7 +1220,74 @@ CI=c(topCI,bottomCI)
 plotdf=data.frame(CI,groupVar,parentPVar)
 colnames(plotdf)<-c('CI','groupVar','ParentP')
 #  x axis to correct range
-plotdf$ParentP<-plotdf$ParentP/(200/max(OutDF$parentPcount))
+plotdf$ParentP<-plotdf$ParentP/(200/max(OutDF$parentPcount.x))
 # plot it
 ggplot(aes(x=ParentP,y=CI,group=groupVar),data=plotdf)+geom_line()+geom_hline(yintercept = 0)+ylab('99% CI of Derivative')+xlab('Parent Symptoms')
+```
+
+
+```{r}
+# load in temporal precedence bootstraps
+pTmPr<-readRDS('~/Desktop/g_p/dr2_p.rds')
+
+# variance explained in tp2 p by tp1 g
+ggplot(pTmPr,aes(x=dr2adj_G))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by ',italic('g'),' (',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting P')
+
+# variance explained in tp2 p by tp1 parent P
+ggplot(pTmPr,aes(x=dr2adj_PP))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by parent P (',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting P')
+
+# variance explained in tp2 p by tp1 grades
+ggplot(pTmPr,aes(x=dr2adj_Gr))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by Grades (',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting P')
+
+
+# externalizing ∆∆∆∆∆
+eTmPr<-readRDS('~/Desktop/g_p/dr2_Ext.rds')
+ggplot(eTmPr,aes(x=dr2adj_G))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by ',italic('g'),' (',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Ext')
+
+ggplot(eTmPr,aes(x=dr2adj_PP))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by parent P (',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Ext')
+
+ggplot(eTmPr,aes(x=dr2adj_Gr))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by Grades (',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Ext')
+
+# internalizing ∆∆∆∆
+
+iTmPr<-readRDS('~/Desktop/g_p/dr2_Int.rds')
+ggplot(iTmPr,aes(x=dr2adj_G))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by ',italic('g'),' (',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Int')
+
+ggplot(iTmPr,aes(x=dr2adj_PP))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by parent P (',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Int')
+
+ggplot(iTmPr,aes(x=dr2adj_Gr))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by Grades (',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Int')
+```
+
+
+```{r}
+# now for predicting future g
+# load in temporal precedence bootstraps
+gTmPr<-readRDS('~/Desktop/g_p/dr2_pg.rds')
+
+# variance explained in tp2 p by tp1 g
+ggplot(gTmPr,aes(x=dr2adj_p))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by ',italic('P'),' (',Delta,R^2[adj],')',sep='')))+ggtitle(expression(paste('Predicting ',italic('g'),sep='')))
+
+# variance explained in tp2 p by tp1 parent P
+ggplot(gTmPr,aes(x=dr2adj_PP))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by parent P (',Delta,R^2[adj],')',sep='')))+ggtitle(expression(paste('Predicting ',italic('g'),sep='')))
+
+# variance explained in tp2 p by tp1 grades
+ggplot(gTmPr,aes(x=dr2adj_Gr))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by Grades (',Delta,R^2[adj],')',sep='')))+ggtitle(expression(paste('Predicting ',italic('g'),sep='')))
+
+
+## externalizing ∆∆∆∆∆
+#eTmPr<-readRDS('~/Desktop/g_p/dr2_Ext.rds')
+#ggplot(eTmPr,aes(x=dr2adj_G))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = #element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by ',italic('g'),' #(',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Ext')
+#
+#ggplot(eTmPr,aes(x=dr2adj_PP))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = #element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by parent P #(',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Ext')
+#
+#ggplot(eTmPr,aes(x=dr2adj_Gr))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = #element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by Grades #(',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Ext')
+#
+## internalizing ∆∆∆∆
+#
+#iTmPr<-readRDS('~/Desktop/g_p/dr2_Int.rds')
+#ggplot(iTmPr,aes(x=dr2adj_G))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = #element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by ',italic('g'),' #(',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Int')
+#
+#ggplot(iTmPr,aes(x=dr2adj_PP))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = #element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by parent P #(',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Int')
+#
+#ggplot(iTmPr,aes(x=dr2adj_Gr))+geom_histogram(fill='#BC3754')+theme_classic(base_size=20)+theme(axis.text = #element_text(size=23))+ylab('Boots')+geom_vline(xintercept = 0)+xlab(expression(paste('Variance explained by Grades #(',Delta,R^2[adj],')',sep='')))+ggtitle('Predicting Int')
 ```

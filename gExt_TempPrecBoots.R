@@ -29,7 +29,7 @@ for (b in 1:10000){
 	# dr2 for Grades
 	pgAge_full<-summary(bam(cbcl_scr_syn_external_r.y~s(cbcl_scr_syn_external_r.x)+s(parentPcount.x)+s(g.x)+s(interview_age.x)+Grades.x,data=bootSamp,family=nb()))
 	# reduced
-	pgAge_reduced<-summary(bam(cbcl_scr_syn_external_r.y~s(cbcl_scr_syn_external_r.x)+s(parentPcount.x)+s(g.x)+s(interview_age.x)+Grades.x,data=bootSamp,family=nb()))
+	pgAge_reduced<-summary(bam(cbcl_scr_syn_external_r.y~s(cbcl_scr_syn_external_r.x)+s(parentPcount.x)+s(g.x)+s(interview_age.x),data=bootSamp,family=nb()))
 	dr2adj_Gr[b]=pgAge_full$r.sq-pgAge_reduced$r.sq
 }
 # saveout df of dev explained for plotting
