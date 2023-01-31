@@ -16,7 +16,9 @@ addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/PersonalCircu
 
 % download that one subject's data
 
+% ∆∆∆∆∆∆
 % keep looking at github for updates on authent. fix
+% ∆∆∆∆∆∆
 
 % subjDlCommand=['python3 /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/download.py -i /scratch/users/apines/datastructure_manifest.txt -o /scratch/users/apines/ -s /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt -l /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/dl_logs -d /oak/stanford/groups/leanew1/users/apines/data_subsets_3_9_21_from9620.txt &']
 
@@ -25,34 +27,55 @@ addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/PersonalCircu
 system(subjDlCommand)
 pause(300)
 
-% now the matlab portions. Apply the motion mask to the downloaded data
-apply_motion_mask(subj)
 
-% consider downsampling
+
+% now the matlab portions. Apply the motion mask to the downloaded data
+%%% probably will lose psychopathology instances if we do this
+%%% apply_motion_mask(subj)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% ∆∆∆∆ EITHER RUN THIS FOR EACH TASK, OR CONCATENATE PRIOR TO LOADING THIS IN ∆∆∆∆∆∆∆∆∆∆∆∆
+% time series filepath
+TS=
+% make output dir
+mkdir(['/scratch/users/apines/' subj '/subcort.ptseries.nii'])
+% cifti-parcellate to get subcortical time series
+ParcCommand=['wb_command -cifti-parcellate ' TS '/oak/stanford/groups/leanew1/users/apines/maps/Tian_Subcortex_S2_3T_32k.dlabel.nii COLUMN /scratch/users/apines/' subj '/subcort.ptseries.nii'];
+system(ParcCommand)
+
+% downsample to fsaverage5
 subjDSCommand=['DS_surf_ts_fs5.sh ' subj ' &']
 system(subjDSCommand)
 pause(45)
 
+% this will become concatenate only as download works
 % concatenate masked time series and isolate the cortex (for cortical surface only SSP)
-concat_TS_and_IsoCort(subj)
+%concat_TS_and_IsoCort(subj)
 
-% derive an indivudalized parcellation
-Individualize_ciftiSurf_resampledGroCon(subj)
+% derive an indivudalized parcellation (just parent filepath for inputTS_fp, g_ls will find 10k mgh extension within folder
+for k=2:30
+	PersonalizeNetworks(inputTS_fp,k,subj)
+end
 
 % for "cifti_read", interferes if added earlier
 addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/cifti-matlab/'));
 
-% convert to dscalar hard parcel
-mat_to_dlabel(subj)
-
 % calculate multiscale FC
+
 % saveout low memory version
 
-% run optical flow pipeline
-%
-%
-%
-%
+% run optical flow pipeline ∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆
+%%% calculate optical flow
+OpFl_abcd(tsIn_L,tsIn_R,tsOut)
+% set output filepaths to calculcate angular distances
+rsOut=${childfp}/${subj}_${sesh}_PGGDist_rs_fs5.mat
+
+% needed?
+mkdir /oak/stanford/groups/leanew1/users/apines/OpFlAngDs/mdma/${subj}
+% calculate angular distances (change output filepath to something meaningful)
+AngDCalcCmd=['/oak/stanford/groups/leanew1/users/apines/scripts/OpFl_CDys/scripts/run_Extract_BUTD_ResultantVecs_Gran_fs5.sh /share/software/user/restricted/matlab/R2018a/ ' tsOut '$childfp/OpFl_timeseries_L_fs5.mat $childfp/OpFl_timeseries_R_fs5.mat'];
+system(AngDCalcCmd)
+
 % saveout low memory version
 
 % delete input data
