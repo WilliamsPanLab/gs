@@ -14,7 +14,7 @@ alphaL = 300;
 vxI = 1;
 spaR = 1;
 ard = 0;
-iterNum = 30;
+iterNum = 20;
 eta = 0;
 calcGrp = 0;
 parforOn = 0;
@@ -28,7 +28,7 @@ surfMR = '/oak/stanford/groups/leanew1/users/apines/data/gp/rh.Mask_SNR.label';
 %FoldStr = strsplit(Fold, '/');
 %ID_Str = FoldStr{8};
 ResultantFolder_I = [ResultantFolder '/k' num2str(K) '/' ID_Str];
-ResultFile_check = dir([ResultantFolder_I, '/**/final*.mat']);
+ResultFile_check = dir([ResultantFolder_I, '/**/final_UV.mat']);
 
 % check for existing directory
 if ~exist(ResultantFolder_I, 'dir')

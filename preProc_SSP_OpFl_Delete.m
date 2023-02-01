@@ -34,7 +34,8 @@ pause(300)
 %%% apply_motion_mask(subj)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%% ∆∆∆∆ EITHER RUN THIS FOR EACH TASK, OR CONCATENATE PRIOR TO LOADING THIS IN ∆∆∆∆∆∆∆∆∆∆∆∆
+%%%% CONCATENATE PRIOR TO LOADING INTO PARCCOMMAND
+
 % time series filepath
 TS=
 % make output dir
@@ -61,8 +62,7 @@ end
 addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/cifti-matlab/'));
 
 % calculate multiscale FC
-
-% saveout low memory version
+CalcFC(['/scratch/users/apines/' subj '/subcort.ptseries.nii'],CortTS_L,CortTS_R,percyParcelParent,outFP)
 
 % run optical flow pipeline ∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆
 %%% calculate optical flow

@@ -8,11 +8,9 @@ alpha = 1; % scales Tikhonov regularization, > alpha = > spatiotemporal smoothne
 s = 1; % R(u), regularizing functional, scales Tikhonov regularization more rapidly via penalization of first spatial and first temporal derivative
 %%%%%%%%%%%%%%%%%%%%
 
-childfp=['/scratch/users/apines/data/mdma/' subj '/' sesh ];
-
 % load in data
-fpL=[childfp '/' subj '_' sesh '_L_AggTS_10k.mgh'];
-fpR=[childfp '/' subj '_' sesh '_R_AggTS_10k.mgh'];
+fpL=tsIn_L;
+fpR=tsIn_R;
 
 dataL=MRIread(fpL).vol;
 dataR=MRIread(fpR).vol;
@@ -96,5 +94,5 @@ for TRP=1:(TR_n-1)
 	TRPC=TRPC+1;
 end
 
-save([tsOut,'us')
+save(tsOut,'us')
 
