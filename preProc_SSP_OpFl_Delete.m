@@ -15,11 +15,9 @@ addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/PersonalCircu
 %system(subjTxtCommand)
 
 % download that one subject's data
-
 % ∆∆∆∆∆∆
 % keep looking at github for updates on authent. fix
 % ∆∆∆∆∆∆
-
 % subjDlCommand=['python3 /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/download.py -i /scratch/users/apines/datastructure_manifest.txt -o /scratch/users/apines/ -s /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt -l /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/dl_logs -d /oak/stanford/groups/leanew1/users/apines/data_subsets_3_9_21_from9620.txt &']
 
 % note: downloader tool does not seem to communicate when it is done to matlab
@@ -27,7 +25,11 @@ addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/PersonalCircu
 system(subjDlCommand)
 pause(300)
 
-
+% set parent file path
+parentFP=['/scratch/users/apines/derivatives/abcd-hcp-pipeline/ses-baselineYear1Arm1/func/' subj ];
+% and child file path
+childFP=['/scratch/users/apines/derivatives/pinespipe/' subj '/'];
+mkdir(childFP)
 
 % now the matlab portions. Apply the motion mask to the downloaded data
 %%% probably will lose psychopathology instances if we do this
@@ -64,21 +66,20 @@ end
 addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/cifti-matlab/'));
 
 % calculate multiscale FC
-CalcFC(['/scratch/users/apines/' subj '/subcort.ptseries.nii'],CortTS_L,CortTS_R,percyParcelParent,outFP)
+CalcFC(['/scratch/users/apines/' subj '/subcort.ptseries.nii'],CortTS_L,CortTS_R,subj,outFP)
 
 % run optical flow pipeline ∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆
 %%% calculate optical flow
 OpFl_abcd(tsIn_L,tsIn_R,tsOut)
 % set output filepaths to calculcate angular distances
-rsOut=${childfp}/${subj}_${sesh}_PGGDist_rs_fs5.mat
+rsOut=[childfp '/' subj '_' '_PGGDist_fs5.mat'];
 
 % needed?
 mkdir /oak/stanford/groups/leanew1/users/apines/OpFlAngDs/mdma/${subj}
 % calculate angular distances (change output filepath to something meaningful)
-AngDCalcCmd=['/oak/stanford/groups/leanew1/users/apines/scripts/OpFl_CDys/scripts/run_Extract_BUTD_ResultantVecs_Gran_fs5.sh /share/software/user/restricted/matlab/R2018a/ ' tsOut '$childfp/OpFl_timeseries_L_fs5.mat $childfp/OpFl_timeseries_R_fs5.mat'];
+AngDCalcCmd=['/oak/stanford/groups/leanew1/users/apines/scripts/OpFl_CDys/scripts/fs_5/run_Extract_BUTD_ResultantVecs_Gran_fs5.sh /share/software/user/restricted/matlab/R2018a/ ' tsOut ' ' childFP 'OpFl_timeseries_L_fs5.mat' ' ' childFP 'OpFl_timeseries_R_fs5.mat'];
 system(AngDCalcCmd)
 
-% saveout low memory version
 
 % delete input data
 Delete_input_data(subj)

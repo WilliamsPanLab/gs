@@ -93,6 +93,6 @@ for TRP=1:(TR_n-1)
 	% update TR pair counter, which should increase +1 across segments
 	TRPC=TRPC+1;
 end
-
+% save
 save(tsOut,'us')
 
