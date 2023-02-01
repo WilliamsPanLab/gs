@@ -53,6 +53,8 @@ pause(45)
 % concatenate masked time series and isolate the cortex (for cortical surface only SSP)
 %concat_TS_and_IsoCort(subj)
 
+inputTS_fp=['/scratch/users/apines/derivatives/abcd-hcp-pipeline/ses-baselineYear1Arm1/func/' subj ];
+
 % derive an indivudalized parcellation (just parent filepath for inputTS_fp, g_ls will find 10k mgh extension within folder
 for k=2:30
 	PersonalizeNetworks(inputTS_fp,k,subj)
