@@ -11,4 +11,5 @@
 # ------------------------------------------
 ml aws-cli
 ml python3
+ml matlab
 matlab -nodisplay -r "OpFl_abcd('${1}','${2}','${3}')"
