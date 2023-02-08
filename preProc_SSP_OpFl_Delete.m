@@ -35,8 +35,11 @@ mkdir(childFP)
 %%% probably will lose psychopathology instances if we do this
 %%% apply_motion_mask(subj)
 
+%%%%%% extract FD and TRs passing threshold
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% CONCATENATE PRIOR TO LOADING INTO PARCCOMMAND
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % time series filepath
 TS=
@@ -75,10 +78,11 @@ OpFl_abcd(tsIn_L,tsIn_R,tsOut)
 rsOut=[childfp '/' subj '_' '_PGGDist_fs5.mat'];
 
 % needed?
-mkdir /oak/stanford/groups/leanew1/users/apines/OpFlAngDs/mdma/${subj}
 % calculate angular distances (change output filepath to something meaningful)
 AngDCalcCmd=['/oak/stanford/groups/leanew1/users/apines/scripts/OpFl_CDys/scripts/fs_5/run_Extract_BUTD_ResultantVecs_Gran_fs5.sh /share/software/user/restricted/matlab/R2018a/ ' tsOut ' ' childFP 'OpFl_timeseries_L_fs5.mat' ' ' childFP 'OpFl_timeseries_R_fs5.mat'];
 system(AngDCalcCmd)
+
+%%%%% VECTORIZE DATA
 
 
 % delete input data
