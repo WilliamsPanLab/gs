@@ -1,11 +1,14 @@
 ---
-title: "SampleConstruction"
-author: "Adam"
+title: "FunctionalEquivalence"
 output: github_document
-date: "2023-01-25"
+date: "2023-02-10"
 ---
 
-This .rmd links ndar downloads into a master dataset. Cross-sectional and temporal precedence datasets are be exported from this file (no matched imaging groups needed, pooled factor decomposition), while predictive datasets are exported from SampleConstruction_Ridge.Rmd
+```{r}
+################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
+###  ∆∆∆ Demonstration of functionalEquivalence in bcpa g ~ pcag, p ~ p count, and parentP ~parentP count
+################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
+```
 
 ```{r}
 #### LOAD libraries
@@ -15,7 +18,6 @@ library(rapportools)
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 ### This chunk processes mental health data ###
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in cbcl data
 cbcl=read.delim('~/Downloads/Package_1205735/abcd_cbcl01.txt')
@@ -34,7 +36,6 @@ cbcls2=merge(cbcls2,cbcl2,by=c('subjectkey','eventname'))
 masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id'))
 cbcldim<-dim(masterdf)
 print(cbcldim)
-
 
 ### LOAD in grades, ∆∆∆ will need to correct for incongruency between tp1 measure (decent granularity) and tp2 measure (high granularity) ∆∆∆
 gradesInfoBV=readRDS('~/Downloads/DEAP-data-download-13.rds')
@@ -139,7 +140,6 @@ print(paste0(newDim2[1],' after removing isempty for totprob_r, ',(newDim[1]- ne
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 ###   This chunk processes cognitive data    ###
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 #### LOAD in cognitive data
 nihCog=read.delim('~/Downloads/Package_1206930/abcd_tbss01.txt')
@@ -195,6 +195,7 @@ masterdf$nihtbx_reading_uncorrected<-as.numeric(masterdf$nihtbx_reading_uncorrec
 masterdf$pea_wiscv_tss<-as.numeric(masterdf$pea_wiscv_tss)
 masterdf$lmt_scr_perc_correct<-as.numeric(masterdf$lmt_scr_perc_correct)
 
+
 # for isolating PCA dataframe
 pcVars=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct")
 
@@ -221,7 +222,6 @@ print(paste0(newDim6[1],' after retaining only subjs with vars of int at BOTH ti
 
 print(dim(masterdf))
 
-### ∆∆∆
 # finish cleaning data for sherlock runs: one family member per family to facilitate random sample
 masterdf$id_fam = NULL
 # default value of family size (# of children in abcd study)
@@ -269,45 +269,63 @@ print(paste0(newDim7[1],' after retaining only one subjs per family, ',(newDim6[
 #       NOW 
 # THAT'S WHAT I CALL PCAPREP
 #       271
-# pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
-pcaDf<-masterdf[,pcVars]
+
+pcVars=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","pea_wiscv_tss","nihtbx_list_uncorrected","nihtbx_cardsort_uncorrected")
+# only pca vars, only timepoint 1 for eval of overlap with bpca
+masterdfbv=masterdf[masterdf$eventname=="baseline_year_1_arm_1",]
+masterdfbv=masterdfbv[complete.cases(masterdfbv[,pcVars]),]
+# and for a pcadf version (pure numeric)
+pcaDf<-masterdfbv[complete.cases(masterdfbv[,pcVars]),pcVars]
 ```
 
 ```{r}
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-###  This chunk runs cognition factorization ###
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
+#### G: BPCA ~= PCA
+################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
+
+# compare to thompson PC1
+PC1=readRDS('/Users/panlab/Downloads/DEAP-data-download.rds')
+PC1$subjectkey=PC1$src_subject_id
+PC1$eventname<-PC1$event_name
+# only baseline is meaningful
+PC1<-PC1[PC1$event_name=='baseline_year_1_arm_1',]
 
 # derive pcs
-Y = as.matrix(scale(pcaDf[complete.cases(pcaDf[,pcVars]),pcVars]))
+Y = as.matrix(scale(pcaDf[,pcVars]))
 # equiv for binding scores to IDs and eventnames
 pcVarsAndIDs=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","subjectkey","eventname")
-Yextended=masterdf[complete.cases(masterdf[,pcVarsAndIDs]),pcVarsAndIDs]
+Yextended=masterdfbv[,pcVarsAndIDs]
 ncomp = 3
 y.pca = psych::principal(Y, rotate="varimax", nfactors=ncomp, scores=TRUE)
 y.pca$loadings
 # assign scores to subjs
 Yextended$g<-y.pca$scores[,1]
 # merge in cog data
-masterdf$g<-Yextended$g
-
-### can insert sidequest for g~bpca g functional equivalence if desired here
+masterdfbv$g<-Yextended$g
+# mergin'
+compareG_df<-merge(PC1,masterdfbv,by=c('src_subject_id'))
+# compare
+compareG_df$g<-as.numeric(compareG_df$g)
+compareG_df$neurocog_pc1.bl<-as.numeric(compareG_df$neurocog_pc1.bl)
+print(cor.test(compareG_df$g,compareG_df$neurocog_pc1.bl))
+library(ggplot2)
+plotdf<-compareG_df[,c('g','neurocog_pc1.bl')]
+ComparePlot<-ggplot(data=plotdf,aes(x=g,y=neurocog_pc1.bl))+geom_smooth(method='lm')+geom_point(alpha=.05)+theme_classic()
+print(ComparePlot)
 ```
 
 ```{r}
-# save out all timepoints df for bootstrapping both-tp-fits
-saveRDS(masterdf,'~/DfWithGrades.rds')
-print(dim(masterdf))
+################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
+#### P: P FACTOR  ~= SYMPTOM COUNT
+################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
 
 ```
 
-```{r}
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-# This chunk is a sidequest for demonstrating  #
-# functional equivalence of total count and p in
-# adults. Same for kids established elsehwere  #
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
+```{r}
+################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
+#### PARENT P: COUNT ~= FACTOR
+################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
 ### derive adult p
 # columns of interest to gauge completeness of
 ColsOfInt=asr[,c(11:141)]
@@ -437,15 +455,6 @@ outDf2dim=dim(OutDF)
 print(outDf2dim)
 dif=dimOutDF[1]-outDf2dim[1]
 print(paste0(dif,' rows lost from only using subjs with both timepoints'))
-```
-
-```{r}
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-# This chunk wraps up the sidequest for 
-# demonstrating functional equivalence of total 
-# count and p in adults. Same for kids 
-# established elsehwere,as same for g is
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # make count version
 ASRdfNum<-as.data.frame(lapply(asr[-1,11:141],as.numeric))
@@ -474,65 +483,7 @@ OutDF=merge(OutDF,asr,by=c('subjectkey','eventname','interview_age'))
 ### confirm tangentivity of sidequest
 print(cor.test(OutDF$parentP,OutDF$parentPcount))
 
-print(dim(OutDF))
-saveRDS(OutDF,'~/OutDfFull.rds')
-
-# convert to one row per subj for temporal precedence analyses
-OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')
-OutDF2Y=subset(OutDF,eventname=='2_year_follow_up_y_arm_1')
-OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
-print(dim(OutDFTmpPrec))
-
-saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec.rds')
-```
-
-
-```{r}
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Now we are at sample construction for ES   ##
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-
-#### LOAD in ParticipantsTSV for parent income and edu background
-## ordained sample split
-#participantsTSV=read.delim('~/Downloads/participants.tsv',sep="\t")
-#participantsTSV$subjectkey<-participantsTSV$participant_id
-## reformat participant IDs so they match everything else
-#participantsTSV$subjectkey<-gsub('sub-','',participantsTSV$subjectkey)
-#participantsTSV$subjectkey<-as.factor(gsub('NDARINV','NDAR_INV',participantsTSV$subjectkey))
-#participantsTSV$eventname=participantsTSV$session_id
-#### ∆∆∆ Apparently odd issue where subjects are repeated. Maybe rows are identical?
-## query. get table of subject ids
-#b=table(as.factor(participantsTSV$participant_id))
-## report subj ids used more than once and times used
-#bdf=data.frame(b[b>1])
-#SubjsRepeated=bdf$Var1
-## well some rows with the same participant IDs have different sites, can't use that unless it makes sense\
-#dimB4repRem=dim(participantsTSV)
-## remove repeated subjs
-#participantsTSV=participantsTSV[!participantsTSV$participant_id %in% SubjsRepeated,]
-#dif=dimB4repRem[1]-dim(participantsTSV)[1]
-#print(paste0(dif/2,' Participants lost from ambiguously repeated pt ids in participants.tsv'))
-#### merge in for fam income and parent edu
-#OutDF=merge(OutDF,participantsTSV,by=c('subjectkey'))
-
-### LOAD in residential deprivation
-resIn=read.delim('~/Downloads/Package_1209596/abcd_rhds01.txt')
-# remove 1 and 3_year follow up as other variables aren't populated there
-
-### ∆∆∆ ended here for restart
-resIn=resIn[resIn$eventname!='1_year_follow_up_y_arm_1',]
-resIn=resIn[resIn$eventname!='3_year_follow_up_y_arm_1',]
-dimOutDF=dim(OutDF)
-OutDF=merge(OutDF,resIn,by=c('subjectkey','eventname'))
-dimOutDF2=dim(OutDF)
-dif=dimOutDF[1]=dimOutDF2[2]
-print(paste0(dif,' rows lost from residential deprivation merge'))
-print(dim(OutDF))
-      
-#### load in youth life events
-yle=read.delim('~/Downloads/Package_1209596/abcd_yle01.txt')
-#### load in parental life events
-ple=read.delim('~/Downloads/Package_1209596/abcd_ple01.txt')
-#### Some will need to be restropective 
-
+plotdf<-OutDF[,c('parentP','parentPcount')]
+ComparePlot<-ggplot(data=plotdf,aes(x=parentPcount,y=parentP))+geom_smooth(method='lm')+geom_point(alpha=.05)+theme_classic()
+print(ComparePlot)
 ```
