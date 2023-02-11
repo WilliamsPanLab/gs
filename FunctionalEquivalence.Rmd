@@ -310,15 +310,139 @@ compareG_df$neurocog_pc1.bl<-as.numeric(compareG_df$neurocog_pc1.bl)
 print(cor.test(compareG_df$g,compareG_df$neurocog_pc1.bl))
 library(ggplot2)
 plotdf<-compareG_df[,c('g','neurocog_pc1.bl')]
-ComparePlot<-ggplot(data=plotdf,aes(x=g,y=neurocog_pc1.bl))+geom_smooth(method='lm')+geom_point(alpha=.05)+theme_classic()
+ComparePlot<-ggplot(data=plotdf,aes(x=g,y=neurocog_pc1.bl))+geom_smooth(method='lm',color='black')+geom_point(alpha=.05)+theme_classic()
 print(ComparePlot)
+
+### Can add cormat among loadings for all 3 components it looks like they are functionally equivalent all the way down
 ```
 
 ```{r}
 ################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
 #### P: P FACTOR  ~= SYMPTOM COUNT
 ################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
+## write a version parallel to michelini et al 2019
+#### low freq removal
+##The following CBCL items were removed because of low frequency: “Drinks alcohol without parents' approval”, “Sexual problems”, “Smokes, chews, or sniffs tobacco”, “Truancy, skips school”, “Uses drugs for non-medical #purposes (don't include alcohol or tobacco)”. 
+## find items
+lf1<-grep('Drinks alcohol without parents',cbcl[1,])
+lf2<-grep('Sexual problem',cbcl[1,])
+lf3<-grep('Smokes, chews, or sniffs tobacco',cbcl[1,])
+lf4<-grep('Truancy, skips school',cbcl[1,])
+lf5<-grep('non medical purpose',cbcl[1,])
+# check if these meet criteria in tp2
+lf1_nonzero=sum(as.numeric(cbcl2[,lf1])>0)
+lf2_nonzero=sum(as.numeric(cbcl2[,lf2])>0)
+lf3_nonzero=sum(as.numeric(cbcl2[,lf3])>0)
+lf4_nonzero=sum(as.numeric(cbcl2[,lf4])>0)
+lf5_nonzero=sum(as.numeric(cbcl2[,lf5])>0)
+# add tp1 values
+lf1_nonzero=lf1_nonzero+sum(as.numeric(cbclBV[,lf1])>0)
+lf2_nonzero=lf2_nonzero+sum(as.numeric(cbclBV[,lf2])>0)
+lf3_nonzero=lf3_nonzero+sum(as.numeric(cbclBV[,lf3])>0)
+lf4_nonzero=lf4_nonzero+sum(as.numeric(cbclBV[,lf4])>0)
+lf5_nonzero=lf5_nonzero+sum(as.numeric(cbclBV[,lf5])>0)
 
+# num rows
+numRows=dim(cbcl2)[1]+dim(cbclBV)[1]
+
+# is prop greater 
+lf1_nonzero/numRows
+lf2_nonzero/numRows
+lf3_nonzero/numRows
+lf4_nonzero/numRows
+lf5_nonzero/numRows
+
+# looks like truancy meets their inclusion criteria with tp2 included
+
+# remove those meeting criteria
+cbclBV=cbclBV[-c(lf1,lf2,lf3,lf5)]
+cbcl2=cbcl2[-c(lf1,lf2,lf3,lf5)]
+# and col names to index later
+CBCLcolnames=cbcl[1,]
+CBCLcolnames=CBCLcolnames[-c(lf1,lf2,lf3,lf5)]
+
+```
+
+```{r}
+# polycors to eval if tp1 vars still meet criterion
+library(polycor)
+
+# isolate cbcl qs
+cbclBV_qs=cbclBV[,10:124]
+# fix character specification for variables
+cbclBV_qs <- as.data.frame(lapply(cbclBV_qs, as.ordered))
+# polycormat
+cbclBV_qs_cormat=suppressWarnings(hetcor(cbclBV_qs))
+# ok piecemeal go through and find rows with >.75 cors
+for (i in 1:dim(cbclBV_qs_cormat$correlations)[1]){
+  # 1 is for diagonal
+  if (sum(cbclBV_qs_cormat$correlations[i,]>.75)>1){
+    print('Correlated Items:')
+    # + 9 because 10th col is first col
+    print(CBCLcolnames[1,i+9])
+    BVoverCorrelateds<-colnames(CBCLcolnames[1,which(cbclBV_qs_cormat$correlations[i,]>.75)+9])
+    print(unlist(CBCLcolnames[BVoverCorrelateds]))
+    print('-------')
+    }
+}
+
+#### composite creation
+####The following composites were created: Attacks/threatens (“Physically attacks people”, “Threatens people”); Destroys (“Destroys his/her own things”, “Destroys things belonging to his/her family or others”, “Vandalism”); Disobeys rules (“Disobedient at home”, “Disobedient at school”, “Breaks rules at home, school or elsewhere”); Steals (“Steals at home”, “Steals outside ###the home”); Peer problems (“Doesn't get along with other kids”, “Not liked by other kids”); Distracted/Hyperactive (“Can't concentrate, can't pay attention for long”, “Inattentive or easily distracted”, “Can't sit still, restless, or hyperactive”); Hallucinations (“Hears sound or voices that aren't there”, “Sees things that aren't there”); Sex play (“Plays with own sex ###parts in public”, “Plays with own sex parts too much”); Weight problems (“Overeating”, “Overweight”)
+
+# merge timepoints
+mergedTPs=cbclBV
+# retain subjs and 
+mergedTPsSubjs<-mergedTPs$subjectkey
+mergedTPsEventName<-mergedTPs$eventname
+mergedTPs <- as.data.frame(lapply(mergedTPs, as.numeric))
+# inattentive composite
+mergedTPs$cbcl_inattentive=round((mergedTPs$cbcl_q08_p+mergedTPs$cbcl_q10_p)/2)
+# remove constituent variables
+mergedTPs=subset(mergedTPs, select = -c(`cbcl_q08_p`,`cbcl_q10_p`))
+# aggressive composite
+mergedTPs$cbcl_aggresive=round((mergedTPs$cbcl_q16_p+mergedTPs$cbcl_q97_p)/2)
+# remove constituent variables
+mergedTPs=subset(mergedTPs, select = -c(`cbcl_q16_p`,`cbcl_q97_p`))
+# anarchic composite
+mergedTPs$cbcl_anarchic=round((mergedTPs$cbcl_q22_p+mergedTPs$cbcl_q23_p+mergedTPs$cbcl_q28_p)/3)
+# remove constituent variables
+mergedTPs=subset(mergedTPs, select = -c(`cbcl_q22_p`,`cbcl_q23_p`,`cbcl_q28_p`))
+# unpopular composite
+mergedTPs$cbcl_unpopular=round((mergedTPs$cbcl_q25_p+mergedTPs$cbcl_q48_p+mergedTPs$cbcl_q38_p)/3)
+# remove constits
+mergedTPs=subset(mergedTPs, select = -c(`cbcl_q25_p`,`cbcl_q48_p`,`cbcl_q38_p`))
+# tummy composite
+mergedTPs$cbcl_tummy=round((mergedTPs$cbcl_q56f_p+mergedTPs$cbcl_q56c_p)/2)
+
+####### ∆∆∆∆∆∆∆∆∆∆
+## run pca on cbcl
+pcaDf_p<-mergedTPs[,10:122]
+pcaDf_p$SubjsNames<-mergedTPsSubjs
+pcaDf_p$EventNames<-mergedTPsEventName
+pcaDf_p=subset(pcaDf_p, select = -c(`eventname`,`timept`,`collection_title`))
+# remove NA vars
+pcaDf_p_Complete<-pcaDf_p[complete.cases(pcaDf_p),]
+pcaDf_p_CompleteSubjs<-pcaDf_p_Complete$SubjsNames
+pcaDf_p_CompleteEventNames<-pcaDf_p_Complete$EventNames
+# isolate numeric
+pcaDf_p_num<-pcaDf_p_Complete[,1:110]
+# convert to numeric for pca
+pcaDf_p_num <- as.data.frame(lapply(pcaDf_p_num, as.numeric))
+# derive pcs
+ncomp = 1
+y.pca = psych::principal(pcaDf_p_num, rotate="geominT", nfactors=ncomp, scores=TRUE)
+y.pca$loadings
+# assign scores to subjs
+subjPvalues=data.frame(pcaDf_p_CompleteSubjs,pcaDf_p_CompleteEventNames,y.pca$scores[,1])
+colnames(subjPvalues)<-c('subjectkey','eventname','p')
+
+# compare 'em!
+testEquivDf=merge(masterdf,subjPvalues,by=c('subjectkey','eventname'))
+print(cor.test(testEquivDf$p,testEquivDf$cbcl_scr_syn_totprob_r))
+
+plotdf<-testEquivDf[,c('p','cbcl_scr_syn_totprob_r')]
+ComparePlot<-ggplot(data=plotdf,aes(x=p,y=cbcl_scr_syn_totprob_r))+geom_smooth(method='lm',col='black')+geom_point(alpha=.05)+theme_classic()
+print(ComparePlot)
 ```
 
 
@@ -484,6 +608,6 @@ OutDF=merge(OutDF,asr,by=c('subjectkey','eventname','interview_age'))
 print(cor.test(OutDF$parentP,OutDF$parentPcount))
 
 plotdf<-OutDF[,c('parentP','parentPcount')]
-ComparePlot<-ggplot(data=plotdf,aes(x=parentPcount,y=parentP))+geom_smooth(method='lm')+geom_point(alpha=.05)+theme_classic()
+ComparePlot<-ggplot(data=plotdf,aes(x=parentPcount,y=parentP))+geom_smooth(method='lm',col='black')+geom_point(alpha=.05)+theme_classic()
 print(ComparePlot)
 ```
