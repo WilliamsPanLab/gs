@@ -596,8 +596,9 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 # ditto, ple_suicide_y
 
 # now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
-preBVdf$eventname='baseline_year_1_arm_1'
-OutDFyle=merge(OutDF,preBVdf,by=c('subjectkey','eventname'))
+# no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
+#preBVdf$eventname='baseline_year_1_arm_1'
+OutDFyle=merge(OutDF,preBVdf,by=c('subjectkey'))
 print(dim(OutDFyle))
 print(dim(OutDF))
 # so if we use the events recorded that happened prior to the baseline visit, how much missingess does that imbue?
@@ -607,33 +608,39 @@ print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost'))
 ```{r}
 
 #### load in parental life events
-ple=read.delim('~/Downloads/Package_1209596/abcd_ple01.txt')
-pleColnames=ple[1,]
+#ple=read.delim('~/Downloads/Package_1209596/abcd_ple01.txt')
+#pleColnames=colnames(ple)
+#pleColDescrip=ple[1,]
+#
+#### apply similar framework to extract purely retrospective
+#
+## note yle's are labeled ple's in the colnames, but end with a _y extension (ples end with _p extension)
+#
+###### Extract purely retrospective, i.e., viable for inclusion in tp1-based predictions
+##### Some will need to be retrospective. Use PLE and YLE instances of "not in past year" to get starting point for ACEs (assumed prior to tp1 scan)
+## so to reconstruct whether or not this happened before timepoint 1 scan, we will need _past_yr variables
+#plepastYearcols=pleColnames[grep('_past_yr',pleColnames)]
+#
+## verify with descriptions
+#pleColDescrip[grep('_past_yr',pleColnames)]
+## remove "past year?" from column names to boil down to binary variables of interest
+#ple_No_PastYearcols=pleColnames[-which(pleColnames %in% plepastYearcols)]
+#
+## remove "was this a good or bad experience?", not really true retrospective
+#goodBad=ple_No_PastYearcols[grep('_fu_',ple_No_PastYearcols)]
+#ple_No_PastYearcols_No_Goodbad=ple_No_PastYearcols[-which(ple_No_PastYearcols %in% goodBad)]
+#
+## remove "how much did this event affect you" for now, not really true retrospective
+#EvAffect=ple_No_PastYearcols_No_Goodbad[grep('_fu2_',ple_No_PastYearcols_No_Goodbad)]
+#ple_No_PastYearcols_No_Goodbad_No_EvAff=ple_No_PastYearcols_No_Goodbad[-which(ple_No_PastYearcols_No_Goodbad %in% EvAffect)]
+#
+## extract just tp1 (really timepoint 1.5, 1-year in) for ple's
+#ple1=subset(ple,eventname=='1_year_follow_up_y_arm_1')
+#
+#
+## well, can't use this until these three lines make combined sense. Could be administered to multiple parents, but odd that the vast majority of parents would have time to both fill #this measure but not others?
+#length(unique(ple1$subjectkey))
+#length(ple1$subjectkey)
+#table(ple1$eventname)
 
-
-```
-
-```{r}
-### prelim models
-library(mgcv)
-
-OutDF$reshist_addr1_adi_wsum<-as.numeric(OutDF$reshist_addr1_adi_wsum)
-
-model_p=gam(cbcl_scr_syn_totprob_r~race_ethnicity+s(g)+Grades+s(parentPcount)+s(reshist_addr1_adi_wsum)+s(income)+parental_education,OutDF,family=nb())
-model_int=gam(cbcl_scr_syn_internal_r~race_ethnicity+s(g)+Grades+s(parentPcount)+s(reshist_addr1_adi_wsum)+s(income)+parental_education,OutDF,family=nb())
-model_ext=gam(cbcl_scr_syn_external_r~race_ethnicity+s(g)+Grades+s(parentPcount)+s(reshist_addr1_adi_wsum)+s(income)+parental_education,OutDF,family=nb())
-
-
-
-# prelim temporal precedence models
-OutDFBV2=subset(OutDF,eventname.x=='baseline_year_1_arm_1')
-OutDF2Y2=subset(OutDF,eventname.x=='2_year_follow_up_y_arm_1')
-OutDFTmpPrec2<-merge(OutDFBV2,OutDF2Y2,by='subjectkey')
-
-# lost major # of subjects from residential data
-print(dim(OutDFTmpPrec2))
-
-model_p=gam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.y)+race_ethnicity.x+(g.x)+Grades.x+s(parentPcount.x)+s(reshist_addr1_adi_wsum.x)+s(income.x)+parental_education.x,OutDFTmpPrec2,family=nb())
-model_int=gam(cbcl_scr_syn_internal_r.y~s(cbcl_scr_syn_internal_r.x)+race_ethnicity.x+s(g.x)+Grades.x+s(parentPcount.x)+s(reshist_addr1_adi_wsum.x)+s(income.x)+parental_education.x,OutDFTmpPrec2,family=nb())
-model_ext=gam(cbcl_scr_syn_external_r.y~s(cbcl_scr_syn_external_r.x)+race_ethnicity+s(g.x)+Grades.x+s(parentPcount.x)+s(reshist_addr1_adi_wsum.x)+s(income.x)+parental_education.x,OutDFTmpPrec2,family=nb())
 ```
