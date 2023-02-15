@@ -10,6 +10,8 @@ This .rmd links ndar downloads into a master dataset. Cross-sectional and tempor
 ```{r}
 #### LOAD libraries
 library(rapportools)
+library(reshape2)
+library(ggplot2)
 ```
 
 ```{r}
@@ -338,99 +340,6 @@ asr$subjectkey<-as.factor(asr$subjectkey)
 # merge
 OutDF=merge(OutDF,asr,by=c('subjectkey','eventname','interview_age'))
 print(dim(OutDF))
-saveRDS(OutDF,'~/OutDfFull.rds')
-
-# convert to one row per subj for temporal precedence analyses
-OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')
-OutDF2Y=subset(OutDF,eventname=='2_year_follow_up_y_arm_1')
-OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
-print(dim(OutDFTmpPrec))
-
-saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec.rds')
-```
-
-
-```{r}
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Now we are at sample construction for ES   ##
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-
-# residential deprivation index removes most participants. Current form relegates us to post-hoc analyses in sub-sample, unless new data release is better populated. Commented out.
-
-#### LOAD in residential deprivation. Warning that this .txt file is gnarly. IMO should cross reference sex subjectkey and event name to confirm that non missing data is feasibly #accurate
-#resIn=read.delim('~/Downloads/Package_1209596/abcd_rhds01.txt',sep="\t")
-#resInColNames=resIn[1,]
-## will print warning on end-of-file being within quotes: textedit reports 117,151,883 " within the file, suggesting there is at least one missing or extraneous quotation mark #somewhere 
-#StartingResDim=dim(resIn)
-#print(paste0('Starting Residential df dim: ',StartingResDim[1]))
-## remove 1 and 3_year follow up as other variables aren't populated there
-#resIn=resIn[resIn$eventname!='1_year_follow_up_y_arm_1',]
-#resIn=resIn[resIn$eventname!='3_year_follow_up_y_arm_1',]
-## remove colname row
-#resIn=resIn[-1,]
-#JustBV2y=dim(resIn)
-#print(paste0('After removing 1 year and 3 year: ',JustBV2y[1]))
-## there are some missing subjectkeys, and some that are nonsensical numbers (i.e., 722.56, -0.306). Remove em both unless someone can justify them
-#resIn=resIn[!is.empty(resIn$subjectkey),]
-#print(dim(resIn))
-## remove those that don't start with feasible ID
-#FeasibleIDs=grep('NDAR_',resIn$subjectkey)
-#resIn=resIn[FeasibleIDs,]
-## remove those that are a million characters (likely a line read error)
-#Selected <- sapply(seq_len(nrow(resIn)),
-#                      function(i) nchar(resIn$subjectkey[i]))
-#print(max(Selected))
-## looks like there's one $#!@ing row with a 61,304 chareacter length subject ID mussing this up. Should be 16
-#resIn=resIn[Selected<17,]
-#ValidSubjIDDim=dim(resIn)
-#print(paste0('After removing overtly invalid subjIDs: ',ValidSubjIDDim[1]))
-## there are more subject IDs than expected given number of unique subject IDs. Go ahead and split by timepoint finna slueth
-#resInBV=resIn[resIn$eventname!='baseline_year_1_arm_1',]
-#resIn2Y=resIn[resIn$eventname!='2_year_follow_up_y_arm_1',]
-##BV
-## remove subjects who are repeated within-timepoint
-#bvSubjs=table(as.factor(resInBV$subjectkey))
-### report subj ids used more than once and times used
-#bvSubjsdf=data.frame(bvSubjs[bvSubjs<2])
-#UniqueSubjs=bvSubjsdf$Var1
-## throw out repeated subjs unless someone can justify them
-#resInBV=resInBV[resInBV$subjectkey %in% UniqueSubjs,]
-##2Year
-## remove subjects who are repeated within-timepoint
-#Y2Subjs=table(as.factor(resIn2Y$subjectkey))
-### report subj ids used more than once and times used
-#Y2Subjsdf=data.frame(Y2Subjs[Y2Subjs<2])
-#UniqueSubjs=Y2Subjsdf$Var1
-## throw out repeated subjs unless someone can justify them
-#resIn2Y=resIn2Y[resIn2Y$subjectkey %in% UniqueSubjs,]
-## reunited and it feeeels so good
-#resIn=rbind(resInBV,resIn2Y)
-#print(paste0('After removing after removing further monkey-business in subjIDs: ',dim(resIn)[1]))
-#
-## looks like address one is the only with <94% empty values. Let's only use that
-#addy1=grep('reshist_addr1',colnames(resIn))
-#resIn=resIn[,c(1:9,addy1)]
-## evaluate data availability
-#colMeans(is.empty(resIn))
-## empty out if reshist deriv score is goen
-#resIn=resIn[resIn$reshist_addr1_adi_wsum!='',]
-#
-## OK, now only subjects with both timepoints
-#subjs=unique(resIn$subjectkey)
-#for (s in subjs){
-#  # if there are more than one complete cases of the variables of interest
-#  if (sum(complete.cases(resIn$reshist_addr1_adi_wsum[resIn$subjectkey==s]))>1){
-#    subjs=subjs[subjs!=s]
-#  }
-#}
-#
-## get dimensions and compare
-#dimOutDF=dim(OutDF)
-#OutDFRes=merge(OutDF,resIn,by=c('subjectkey','eventname'))
-#dimOutDF2=dim(OutDFRes)
-#dif=dimOutDF[1]-dimOutDF2[1]
-#print(paste0('After removing after retaining only subjs with 2 obs. : ',dimOutDF2[1]))
-#print(paste0(dif, ' lost'))
 ```
 
 ```{r}
@@ -443,13 +352,13 @@ participantsTSV$subjectkey<-participantsTSV$participant_id
 participantsTSV$subjectkey<-gsub('sub-','',participantsTSV$subjectkey)
 participantsTSV$subjectkey<-as.factor(gsub('NDARINV','NDAR_INV',participantsTSV$subjectkey))
 participantsTSV$eventname=participantsTSV$session_id
-### ∆∆∆ Apparently odd issue where subjects are repeated. Maybe rows are identical?
+### issue where subjects are repeated. Rows are not identical either.
 # query. get table of subject ids
 b=table(as.factor(participantsTSV$participant_id))
 # report subj ids used more than once and times used
 bdf=data.frame(b[b>1])
 SubjsRepeated=bdf$Var1
-# well some rows with the same participant IDs have different sites, can't use that unless it makes sense\
+# well some rows with the same participant IDs have different sites, can't use that unless it makes sense
 dimB4repRem=dim(participantsTSV)
 # remove repeated subjs
 participantsTSV=participantsTSV[!participantsTSV$participant_id %in% SubjsRepeated,]
@@ -467,14 +376,6 @@ OutDF=merge(OutDF,participantsTSV,by=c('subjectkey'))
 # take out na incomes
 OutDF=OutDF[OutDF$income!=777,]
 OutDF=OutDF[OutDF$income!=999,]
-
-### not functional with residential deprivation commented out.
-# plot baseline only for better sense of site coverage
-#plotdf<-na.omit(data.frame(OutDF$reshist_addr1_adi_wsum[OutDF$eventname.x=='baseline_year_1_arm_1'],OutDF$site[OutDF$eventname.x=='baseline_year_1_arm_1']))
-#colnames(plotdf)=c('ResDep','Site')
-#plotdf$Site<-as.factor(plotdf$Site)
-#plotdf$ResDep<-as.numeric(plotdf$ResDep)
-#ggplot(aes(x=ResDep,y=Site),data=plotdf)+geom_boxplot()+xlab('Area Deprivation Index')+ylab('Site')
 
 # race
 OutDF=OutDF[OutDF$race_ethnicity!=888,]
@@ -580,8 +481,8 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
   plotdf<-invisible(melt(plotdf))
   a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
   print(a)
-  # iteratively make a dataframe of true retrospective YLE's, those that occurred prior to first visit for predictive purposes
-  preBVdf$null<-NotPastYr
+  # iteratively make a dataframe of yes/no (standard) for cross-sectional DF
+  preBVdf$null<-as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]])
   colnamesMinusNull=head(colnames(preBVdf), -1)
   colnames(preBVdf)<-c(colnamesMinusNull,currColName)
 }
@@ -603,44 +504,21 @@ print(dim(OutDFyle))
 print(dim(OutDF))
 # so if we use the events recorded that happened prior to the baseline visit, how much missingess does that imbue?
 print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost'))
+
+# save ouput
+saveRDS(OutDFyle,'~/OutDfFull.rds')
 ```
 
 ```{r}
 
-#### load in parental life events
-#ple=read.delim('~/Downloads/Package_1209596/abcd_ple01.txt')
-#pleColnames=colnames(ple)
-#pleColDescrip=ple[1,]
-#
-#### apply similar framework to extract purely retrospective
-#
-## note yle's are labeled ple's in the colnames, but end with a _y extension (ples end with _p extension)
-#
-###### Extract purely retrospective, i.e., viable for inclusion in tp1-based predictions
-##### Some will need to be retrospective. Use PLE and YLE instances of "not in past year" to get starting point for ACEs (assumed prior to tp1 scan)
-## so to reconstruct whether or not this happened before timepoint 1 scan, we will need _past_yr variables
-#plepastYearcols=pleColnames[grep('_past_yr',pleColnames)]
-#
-## verify with descriptions
-#pleColDescrip[grep('_past_yr',pleColnames)]
-## remove "past year?" from column names to boil down to binary variables of interest
-#ple_No_PastYearcols=pleColnames[-which(pleColnames %in% plepastYearcols)]
-#
-## remove "was this a good or bad experience?", not really true retrospective
-#goodBad=ple_No_PastYearcols[grep('_fu_',ple_No_PastYearcols)]
-#ple_No_PastYearcols_No_Goodbad=ple_No_PastYearcols[-which(ple_No_PastYearcols %in% goodBad)]
-#
-## remove "how much did this event affect you" for now, not really true retrospective
-#EvAffect=ple_No_PastYearcols_No_Goodbad[grep('_fu2_',ple_No_PastYearcols_No_Goodbad)]
-#ple_No_PastYearcols_No_Goodbad_No_EvAff=ple_No_PastYearcols_No_Goodbad[-which(ple_No_PastYearcols_No_Goodbad %in% EvAffect)]
-#
-## extract just tp1 (really timepoint 1.5, 1-year in) for ple's
-#ple1=subset(ple,eventname=='1_year_follow_up_y_arm_1')
-#
-#
-## well, can't use this until these three lines make combined sense. Could be administered to multiple parents, but odd that the vast majority of parents would have time to both fill #this measure but not others?
-#length(unique(ple1$subjectkey))
-#length(ple1$subjectkey)
-#table(ple1$eventname)
+#### MIGHT NEED TO RECODE THIS LINE FOR TEMP PREC DF: preBVdf$null<-as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]])
+# THINK THROUGH. DEPENDS ON IF YOU ARE GAUGING LIFETIME OCCURENCE AS CAUSAL FROM TP1->2, OR EVENT OCCURING B/W VISITS AS CAUSAL. MIGHT NEED BOTH.
 
+# convert to one row per subj for temporal precedence analyses
+OutDFBV=subset(OutDFyle,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(OutDFyle,eventname=='2_year_follow_up_y_arm_1')
+OutDFTmpPrec<-merge(OutDFyle,OutDF2Y,by='subjectkey')
+print(dim(OutDFTmpPrec))
+
+saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec.rds')
 ```

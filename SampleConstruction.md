@@ -3,8 +3,13 @@ SampleConstruction
 Adam
 2023-01-25
 
+This .rmd links ndar downloads into a master dataset. Cross-sectional
+and temporal precedence datasets are be exported from this file (no
+matched imaging groups needed, pooled factor decomposition), while
+predictive datasets are exported from SampleConstruction_Ridge.Rmd
+
 ``` r
-# libraries
+#### LOAD libraries
 library(rapportools)
 ```
 
@@ -20,13 +25,21 @@ library(rapportools)
     ##     max, mean, min, range, sum
 
 ``` r
-# load in data
+library(reshape2)
+library(ggplot2)
+```
+
+``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+### This chunk processes mental health data ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
+### LOAD in cbcl data
 cbcl=read.delim('~/Downloads/Package_1205735/abcd_cbcl01.txt')
 cbcls=read.delim('/Users/panlab/Downloads/Package_1205735/abcd_cbcls01.txt')
 # subset timepoints
 cbclsBV=subset(cbcls,eventname=='baseline_year_1_arm_1')
 cbcls2=subset(cbcls,eventname=='2_year_follow_up_y_arm_1')
-#### add non summary items to cbcl for schoolwork q
 # subset timepoints
 cbclBV=subset(cbcl,eventname=='baseline_year_1_arm_1')
 cbcl2=subset(cbcl,eventname=='2_year_follow_up_y_arm_1')
@@ -34,24 +47,26 @@ cbcl2=subset(cbcl,eventname=='2_year_follow_up_y_arm_1')
 cbclsBV=merge(cbclsBV,cbclBV,by=c('subjectkey','eventname'))
 cbcls2=merge(cbcls2,cbcl2,by=c('subjectkey','eventname'))
 
-# load in ASR
-asr=read.delim('~/Downloads/Package_1207917/pasr01.txt',na.strings=c("","NA"))
+# initialize master df
+masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id'))
+cbcldim<-dim(masterdf)
+print(cbcldim)
+```
 
-# load in clinicalish data
-clinc1=read.delim('/Users/panlab/Downloads/Package_1205908/abcd_ksad501.txt')
-kBV=subset(clinc1,eventname=='baseline_year_1_arm_1')
-k1=subset(clinc1,eventname=='1_year_follow_up_y_arm_1')
-k2=subset(clinc1,eventname=='2_year_follow_up_y_arm_1')
-clinc1_p=read.delim('/Users/panlab/Downloads/Package_1205908/abcd_ksad01.txt')
+    ## [1] 39767   218
 
-# read in grades, annoying distinction between tp1 measure (decent granulrity) and tp2 measure (high granularity)
+``` r
+### LOAD in grades, ∆∆∆ will need to correct for incongruency between tp1 measure (decent granularity) and tp2 measure (high granularity) ∆∆∆
 gradesInfoBV=readRDS('~/Downloads/DEAP-data-download-13.rds')
+# extract baseline
 gradesInfoBV=subset(gradesInfoBV,event_name=='baseline_year_1_arm_1')
 gradesInfoBV$Grades<-as.numeric(gradesInfoBV$ksads_back_grades_in_school_p)
+# convert ndar value to R
 gradesInfoBV$Grades[gradesInfoBV$Grades==-1]=NA
+# convert ndar colnames to other ndar colnames
 gradesInfoBV$eventname=gradesInfoBV$event_name
 gradesInfoBV$subjectkey=gradesInfoBV$src_subject_id
-# for this one, the key is 1 = A's, 2 = B's, 3 = C's, 4 = D's, 5 = F's, -1 = NA
+# for tp2, the key is 1 = A's, 2 = B's, 3 = C's, 4 = D's, 5 = F's, -1 = NA
 gradesInfoY2=read.delim('~/Downloads/Package_1207225/abcd_saag01.txt')
 gradesInfoY2=subset(gradesInfoY2,eventname=='2_year_follow_up_y_arm_1')
 gradesInfoY2$sag_grade_type<-as.numeric(gradesInfoY2$sag_grade_type)
@@ -90,34 +105,44 @@ gradesInfoY2$sag_grade_type[ind1]=1
 gradesInfoY2$sag_grade_type[ind2]=1
 gradesInfoY2$sag_grade_type[ind3]=1
 gradesInfoY2$Grades<-gradesInfoY2$sag_grade_type
+
 ###### ∆∆∆∆∆∆∆ create grades info from both of em
 NeededColNames=c('subjectkey','eventname','Grades')
 gradesInfo<-rbind(gradesInfoBV[,NeededColNames],gradesInfoY2[,NeededColNames])
 gradesInfo$Grades<-as.ordered(gradesInfo$Grades)
+###### ∆∆∆∆∆∆∆
 
-################################### ∆∆∆∆∆
-
-# initialize master df
-masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id'))
-masterdf<-merge(masterdf,clinc1,by=c('subjectkey','eventname','interview_age','src_subject_id'))
-masterdf<-merge(masterdf,clinc1_p,by=c('subjectkey','eventname','interview_age','src_subject_id'))
+# merge and count losses
+masterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
+gradesdim=dim(masterdf)
+print(gradesdim)
 ```
 
-    ## Warning in merge.data.frame(masterdf, clinc1_p, by = c("subjectkey",
-    ## "eventname", : column names 'collection_id.x', 'dataset_id.x',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'interview_date.y', 'sex.y', 'collection_title.y' are duplicated
-    ## in the result
+    ## [1] 22289   219
 
 ``` r
-masterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
+dif=cbcldim[1]-gradesdim[1]
+print(paste0(dif,' rows lost from grades merge, note loss of rows due to no 1 year timepoint'))
 ```
 
-    ## Warning in merge.data.frame(masterdf, gradesInfo, by = c("subjectkey",
-    ## "eventname")): column names 'collection_id.x', 'dataset_id.x',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'interview_date.y', 'sex.y', 'collection_title.y' are duplicated
-    ## in the result
+    ## [1] "17478 rows lost from grades merge, note loss of rows due to no 1 year timepoint"
+
+``` r
+### LOAD in ASR data
+asr=read.delim('~/Downloads/Package_1207917/pasr01.txt',na.strings=c("","NA"))
+masterdf<-merge(masterdf,asr,by=c('subjectkey','eventname','interview_age'))
+asrdim=dim(masterdf)
+print(asrdim)
+```
+
+    ## [1] 22289   364
+
+``` r
+dif=gradesdim[1]-asrdim[1]
+print(paste0(dif,' rows lost from asr merge'))
+```
+
+    ## [1] "0 rows lost from asr merge"
 
 ``` r
 # load in a DEAP file for rel_family_ID
@@ -125,33 +150,51 @@ DEAP=readRDS('~/Downloads/DEAP-data-download-13.rds')
 DEAP$subjectkey<-DEAP$src_subject_id
 DEAP$eventname=DEAP$event_name
 DEAP=DEAP[,c('rel_family_id','subjectkey','eventname')]
+masterdf<-merge(masterdf,DEAP,by=c('subjectkey','eventname'))
+deapdim=dim(masterdf)
+print(deapdim)
+```
 
-#### clean data
+    ## [1] 22288   365
 
-# convert to numeric
-masterdf$interview_age<-as.numeric(masterdf$interview_age)
-# cbcl sum indep. of the q of interest
-masterdf$cbcl_scr_syn_totprob_r<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)-as.numeric(masterdf$cbcl_q61_p)
-masterdf$cbcl_q61_p<-as.ordered(masterdf$cbcl_q61_p)
+``` r
+dif=asrdim[1]-deapdim[1]
+print(paste0(dif,' rows lost from deap familyID merge'))
+```
+
+    ## [1] "1 rows lost from deap familyID merge"
+
+``` r
+### CLEAN data
+# subjectkey as factor
 masterdf$subjectkey<-as.factor(masterdf$subjectkey)
-# clean data
+# convert cbcl scores to numeric
 masterdf$cbcl_scr_syn_totprob_r<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)
 masterdf$cbcl_scr_syn_internal_r<-as.numeric(masterdf$cbcl_scr_syn_internal_r)
 masterdf$cbcl_scr_syn_external_r<-as.numeric(masterdf$cbcl_scr_syn_external_r)
-masterdf$subjectkey<-as.factor(masterdf$subjectkey)
-masterdf$cbcl_q61_p<-as.ordered(masterdf$cbcl_q61_p)
 # remove instances of NA tot probs
 masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_totprob_r),]
-# and for q61
-masterdf=masterdf[!is.na(masterdf$cbcl_q61_p),]
+newDim=dim(masterdf)
+print(paste0(newDim[1],' after removing NAs for totprob_r, ',(deapdim[1]- newDim[1]),' lost after removing'))
+```
+
+    ## [1] "19951 after removing NAs for totprob_r, 2337 lost after removing"
+
+``` r
 # and for is empty
 masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_totprob_r),]
-masterdf=masterdf[!is.empty(masterdf$cbcl_q61_p),]
-# r can't take the hint
-masterdf=masterdf[!masterdf$cbcl_scr_syn_totprob_r=='',]
-masterdf=masterdf[!masterdf$cbcl_q61_p=='',]
+newDim2=dim(masterdf)
+print(paste0(newDim2[1],' after removing isempty for totprob_r, ',(newDim[1]- newDim2[1]),' lost after removing'))
+```
 
-#### now load in cognitive data
+    ## [1] "18935 after removing isempty for totprob_r, 1016 lost after removing"
+
+``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+###   This chunk processes cognitive data    ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
+#### LOAD in cognitive data
 nihCog=read.delim('~/Downloads/Package_1206930/abcd_tbss01.txt')
 othCog=read.delim('~/Downloads/Package_1206930/abcd_ps01.txt')
 littleMan=read.delim('~/Downloads/Package_1206931/lmtp201.txt')
@@ -167,16 +210,28 @@ masterdf<-merge(masterdf,nihCog,by=c('subjectkey','eventname','interview_age'))
     ## in the result
 
 ``` r
+newDim3=dim(masterdf)
+print(paste0(newDim3[1],' after merging nih toolbox, ',(newDim2[1]- newDim3[1]),' lost after removing'))
+```
+
+    ## [1] "18935 after merging nih toolbox, 0 lost after removing"
+
+``` r
 masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age'))
 ```
 
     ## Warning in merge.data.frame(masterdf, othCog, by = c("subjectkey",
     ## "eventname", : column names 'collection_id.x', 'dataset_id.x',
     ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'interview_date.y', 'sex.y', 'collection_title.y',
-    ## 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
-    ## 'sex.y', 'collection_title.y' are duplicated in the result
+    ## 'dataset_id.y', 'src_subject_id.x', 'interview_date.y', 'sex.y',
+    ## 'collection_title.y', 'src_subject_id.y' are duplicated in the result
+
+``` r
+newDim4=dim(masterdf)
+print(paste0(newDim4[1],' after merging other cognitive measures, ',(newDim3[1]- newDim4[1]),' lost after removing'))
+```
+
+    ## [1] "18935 after merging other cognitive measures, 0 lost after removing"
 
 ``` r
 masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age'))
@@ -185,30 +240,30 @@ masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age'
     ## Warning in merge.data.frame(masterdf, littleMan, by = c("subjectkey",
     ## "eventname", : column names 'collection_id.x', 'dataset_id.x',
     ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'interview_date.y', 'sex.y', 'collection_title.y',
-    ## 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'src_subject_id.y' are
-    ## duplicated in the result
+    ## 'dataset_id.y', 'src_subject_id.x', 'interview_date.y', 'sex.y',
+    ## 'collection_title.y', 'collection_id.x', 'dataset_id.x', 'src_subject_id.y',
+    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
+    ## 'dataset_id.y', 'interview_date.y', 'sex.y', 'collection_title.y' are duplicated
+    ## in the result
 
 ``` r
-masterdf<-merge(masterdf,DEAP,by=c('subjectkey','eventname'))
+newDim5=dim(masterdf)
+print(paste0(newDim5[1],' after merging little man, ',(newDim4[1]- newDim5[1]),' lost after removing'))
 ```
 
-    ## Warning in merge.data.frame(masterdf, DEAP, by = c("subjectkey", "eventname")):
-    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
-    ## 'sex.y', 'collection_title.y', 'collection_id.x', 'dataset_id.x',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'src_subject_id.x', 'interview_date.y', 'sex.y',
-    ## 'collection_title.y', 'src_subject_id.y' are duplicated in the result
+    ## [1] "18935 after merging little man, 0 lost after removing"
 
 ``` r
 # clean age
+masterdf$interview_age<-as.numeric(masterdf$interview_age)
 masterdf$interview_age<-as.numeric(masterdf$interview_age)/12
 ```
 
 ``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+##This chunk preps for cognition factorization##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 # use thompson 2019 recreation of non nih-tb measures
 ind_pea_ravlt = c(which(names(masterdf)=="pea_ravlt_sd_trial_i_tc"),which(names(masterdf)=="pea_ravlt_sd_trial_ii_tc"),
     which(names(masterdf)=="pea_ravlt_sd_trial_iii_tc"),which(names(masterdf)=="pea_ravlt_sd_trial_iv_tc"),
@@ -229,10 +284,6 @@ masterdf$pea_ravlt_sd_trial_v_tc=as.numeric(masterdf$pea_ravlt_sd_trial_v_tc)
 
 # total correct across trials
 masterdf$pea_ravlt_ld = masterdf$pea_ravlt_sd_trial_i_tc + masterdf$pea_ravlt_sd_trial_ii_tc + masterdf$pea_ravlt_sd_trial_iii_tc + masterdf$pea_ravlt_sd_trial_iv_tc + masterdf$pea_ravlt_sd_trial_v_tc
-```
-
-``` r
-#### calculate PCs
 
 # change to numeric
 masterdf$nihtbx_picvocab_uncorrected<-as.numeric(masterdf$nihtbx_picvocab_uncorrected)
@@ -245,39 +296,16 @@ masterdf$nihtbx_reading_uncorrected<-as.numeric(masterdf$nihtbx_reading_uncorrec
 masterdf$pea_wiscv_tss<-as.numeric(masterdf$pea_wiscv_tss)
 masterdf$lmt_scr_perc_correct<-as.numeric(masterdf$lmt_scr_perc_correct)
 
-# for isolating PCA df
+# for isolating PCA dataframe
 pcVars=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct")
 
+# test for completeness before running PCA. Better move to calculate ONLY in the sample that we are running analyses on (more technically accurate than PC structure slightly misaligned with sample of interest)
 # get other vars of interest to check for complete cases
 KidVarsOfInt=c('Grades','cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r')
-
-
-# columns of interest to gauge completeness of
+# asr columns of interest to gauge completeness of
 ColsOfInt=asr[,c(11:141)]
 ASRVarsOfInt=colnames(ColsOfInt)
-# clean age in ASR
-asr$interview_age<-as.numeric(asr$interview_age)/12
-```
 
-    ## Warning: NAs introduced by coercion
-
-``` r
-# merge with master
-masterdf=merge(asr,masterdf,by=c('subjectkey','eventname','interview_age'))
-```
-
-    ## Warning in merge.data.frame(asr, masterdf, by = c("subjectkey", "eventname", :
-    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'collection_id.x', 'dataset_id.x', 'interview_date.x',
-    ## 'sex.x', 'collection_title.x', 'collection_id.y', 'dataset_id.y',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'collection_id.x',
-    ## 'dataset_id.x', 'interview_date.x', 'sex.x', 'collection_title.x',
-    ## 'collection_id.y', 'dataset_id.y', 'src_subject_id.x', 'interview_date.y',
-    ## 'sex.y', 'collection_title.y', 'collection_id.y', 'dataset_id.y',
-    ## 'src_subject_id.y', 'interview_date.y', 'sex.y', 'collection_title.y' are
-    ## duplicated in the result
-
-``` r
 # only use subjects with both timepoints as complete cases
 subjs=unique(masterdf$subjectkey)
 for (s in subjs){
@@ -289,12 +317,20 @@ for (s in subjs){
 # convert masterdf to df with complete observations for cognition
 masterdf=masterdf[masterdf$subjectkey %in% subjs,]
 
+newDim6=dim(masterdf)
+print(paste0(newDim6[1],' after retaining only subjs with vars of int at BOTH timepoints, ',(newDim5[1]- newDim6[1]),' lost after removing'))
+```
+
+    ## [1] "11452 after retaining only subjs with vars of int at BOTH timepoints, 7483 lost after removing"
+
+``` r
 print(dim(masterdf))
 ```
 
-    ## [1] 11448  2516
+    ## [1] 11452   597
 
 ``` r
+### ∆∆∆
 # finish cleaning data for sherlock runs: one family member per family to facilitate random sample
 masterdf$id_fam = NULL
 # default value of family size (# of children in abcd study)
@@ -332,22 +368,42 @@ for(f in 1:length(unique(masterdf$rel_family_id))){
     masterdf$id_fam[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = ind
   } 
 }
+```
 
+    ## Warning in `!=.default`(masterdf$subjectkey, left): longer object length is not
+    ## a multiple of shorter object length
+
+    ## Warning in is.na(e1) | is.na(e2): longer object length is not a multiple of
+    ## shorter object length
+
+    ## Warning in `!=.default`(masterdf$subjectkey, left): longer object length is not
+    ## a multiple of shorter object length
+
+    ## Warning in is.na(e1) | is.na(e2): longer object length is not a multiple of
+    ## shorter object length
+
+``` r
 # make family ID for those with families represented in ABCD
 masterdf$rel_family_id=masterdf$id_fam
 
-print(dim(masterdf))
+newDim7=dim(masterdf)
+print(paste0(newDim7[1],' after retaining only one subjs per family, ',(newDim6[1]- newDim7[1]),' lost after removing'))
 ```
 
-    ## [1] 10100  2518
+    ## [1] "10101 after retaining only one subjs per family, 1351 lost after removing"
 
 ``` r
+#       NOW 
+# THAT'S WHAT I CALL PCAPREP
+#       271
 # pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
 pcaDf<-masterdf[,pcVars]
 ```
 
 ``` r
-# derive Cognitive PCS
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+###  This chunk runs cognition factorization ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # derive pcs
 Y = as.matrix(scale(pcaDf[complete.cases(pcaDf[,pcVars]),pcVars]))
@@ -363,23 +419,22 @@ y.pca$loadings
     ## Loadings:
     ##                             RC1    RC2    RC3   
     ## nihtbx_picvocab_uncorrected  0.752  0.189       
-    ## nihtbx_flanker_uncorrected   0.203  0.820       
+    ## nihtbx_flanker_uncorrected   0.205  0.820       
     ## nihtbx_pattern_uncorrected   0.163  0.843       
-    ## nihtbx_picture_uncorrected   0.604  0.250       
-    ## nihtbx_reading_uncorrected   0.709  0.202  0.175
-    ## pea_ravlt_ld                 0.763              
-    ## lmt_scr_perc_correct                       0.983
+    ## nihtbx_picture_uncorrected   0.605  0.247       
+    ## nihtbx_reading_uncorrected   0.708  0.205  0.171
+    ## pea_ravlt_ld                 0.764              
+    ## lmt_scr_perc_correct                       0.984
     ## 
     ##                  RC1   RC2   RC3
-    ## SS loadings    2.088 1.527 1.013
-    ## Proportion Var 0.298 0.218 0.145
-    ## Cumulative Var 0.298 0.516 0.661
+    ## SS loadings    2.091 1.527 1.012
+    ## Proportion Var 0.299 0.218 0.145
+    ## Cumulative Var 0.299 0.517 0.662
 
 ``` r
 # assign scores to subjs
 Yextended$g<-y.pca$scores[,1]
 # merge in cog data
-
 masterdf$g<-Yextended$g
 ```
 
@@ -389,7247 +444,33 @@ saveRDS(masterdf,'~/DfWithGrades.rds')
 print(dim(masterdf))
 ```
 
-    ## [1] 10100  2519
+    ## [1] 10101   600
 
 ``` r
-#### ∆∆∆ Note this is without adult P
+# exclude subjs without data for both timepoints
+OutDF=masterdf
+dimOutDF=dim(OutDF)
+OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(OutDF,eventname=='2_year_follow_up_y_arm_1')
+# intersection of subjs in both
+BothTPsubjs=intersect(OutDFBV$subjectkey,OutDF2Y$subjectkey)
+# index out intersection from non tp-split df
+OutDF=OutDF[OutDF$subjectkey %in% BothTPsubjs,]
+outDf2dim=dim(OutDF)
+print(outDf2dim)
 ```
 
-``` r
-# derive adult p
+    ## [1] 10076   600
 
-# columns of interest to gauge completeness of
-ColsOfInt=asr[,c(11:141)]
-# retain complete cases
-completeInd=ColsOfInt[rowSums(is.na(ColsOfInt)) == 0,]
-# merge with master
-masterdf=merge(asr,masterdf,by=c('subjectkey','eventname','interview_age'))
+``` r
+dif=dimOutDF[1]-outDf2dim[1]
+print(paste0(dif,' rows lost from only using subjs with both timepoints'))
 ```
 
-    ## Warning in merge.data.frame(asr, masterdf, by = c("subjectkey", "eventname", :
-    ## column names 'src_subject_id.x', 'collection_id.x', 'dataset_id.x',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.x',
-    ## 'dataset_id.x', 'interview_date.x', 'sex.x', 'collection_title.x',
-    ## 'collection_id.y', 'dataset_id.y', 'interview_date.y', 'sex.y',
-    ## 'collection_title.y', 'collection_id.x', 'dataset_id.x', 'src_subject_id.y',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'src_subject_id.x', 'interview_date.y', 'sex.y',
-    ## 'collection_title.y', 'collection_id.y', 'dataset_id.y', 'src_subject_id.y',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y' are duplicated in the result
+    ## [1] "25 rows lost from only using subjs with both timepoints"
 
 ``` r
-ASRcolnames=asr[1,]
-
-#######MICHELI APPROACH TO FACTOR DELINEATION OF ASR
-# composite creation
-
-# polycors to eval if tp1 vars still meet criterion
-library(polycor)
-# subset asr into timepoints
-asrBV=subset(asr,eventname=='baseline_year_1_arm_1')
-asr2=subset(asr,eventname=='2_year_follow_up_y_arm_1')
-
-# save subjIDs
-asrBVSubjs=asrBV$subjectkey
-asr2Subjs=asr2$subjectkey
-# isolate asr qs
-asrBV_qs=asrBV[,11:141]
-asr2_qs=asr2[,11:141]
-# fix character specification for variables
-asrBV_qs <- as.data.frame(lapply(asrBV_qs, as.ordered))
-asr2_qs <- as.data.frame(lapply(asr2_qs, as.ordered))
-# polycormat
-asrBV_qs_cormat=hetcor(asrBV_qs)
-```
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q31_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q38_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q43_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q61_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q65_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q02_p and asr_q32_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q03_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q03_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q03_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q03_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q03_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q04_p and asr_q12_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q04_p and asr_q32_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q04_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q61_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q10_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q10_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q10_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q10_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q10_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q11_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q11_p and asr_q22_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q11_p and asr_q24_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q11_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q11_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q11_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q12_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q12_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q12_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q12_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q13_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q13_p and asr_q22_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q13_p and asr_q24_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q13_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q13_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q14_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q14_p and asr_q78_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q15_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q17_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q17_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q17_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q17_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q22_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q24_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q25_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q26_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q27_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q28_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q29_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q30_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q32_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q35_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q36_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q38_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q42_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q45_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q46_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q47_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q50_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q52_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q53_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q54_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q55_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56a_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56b_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56c_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56d_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56e_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56f_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56h_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56i_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q58_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q59_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q60_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q62_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q63_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q64_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q67_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q68_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q69_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q71_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q74_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q75_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q77_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q78_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q81_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q83_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q84_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q85_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q86_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q87_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q89_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q93_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q95_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q96_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q99_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q101_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q103_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q104_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q105_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q107_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q108_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q111_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q115_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q116_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q117_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q118_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q119_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q23_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q25_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q28_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q30_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q31_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q35_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q38_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q41_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q43_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q46_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q48_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q55_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q56f_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q56h_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q61_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q62_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q65_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q66_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q94_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q23_p and asr_q24_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q23_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q23_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q23_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q23_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q23_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q23_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q23_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q25_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q28_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q30_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q31_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q35_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q38_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q41_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q43_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q46_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q48_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q55_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q56f_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q56h_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q61_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q62_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q65_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q66_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q94_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q25_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q25_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q25_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q26_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q26_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q26_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q28_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q29_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q29_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q29_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q29_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q29_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q30_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q30_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q30_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q30_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q56b_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q32_p and asr_q37_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q32_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q32_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q32_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q32_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q32_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q35_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q35_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q42_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q45_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q47_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q50_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q53_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q54_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q55_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q56a_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q56b_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q56d_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q56e_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q56i_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q58_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q59_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q63_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q68_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q69_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q71_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q75_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q77_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q78_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q81_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q83_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q86_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q87_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q93_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q95_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q99_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q103_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q104_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q105_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q107_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q108_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q111_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q115_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q116_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q117_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q118_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q119_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q37_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q56b_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q42_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q45_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q47_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q50_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q53_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q54_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q55_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q56a_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q56b_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q56d_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q56e_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q56i_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q58_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q59_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q63_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q68_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q69_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q71_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q75_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q77_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q78_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q81_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q83_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q86_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q87_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q93_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q95_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q99_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q103_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q104_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q105_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q107_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q108_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q111_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q115_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q116_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q117_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q118_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q119_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q41_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q41_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q41_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q42_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q42_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q56b_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q48_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q61_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q62_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q65_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q66_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q94_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q45_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q45_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q46_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q46_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q47_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q47_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q48_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q48_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q48_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q61_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q62_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q65_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q66_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q94_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q50_p and asr_q56f_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q50_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q50_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q54_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q54_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q54_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q55_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q55_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56a_p and asr_q61_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56a_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56a_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56a_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56a_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56b_p and asr_q61_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56b_p and asr_q65_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56b_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56b_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56b_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56b_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56f_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56f_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56h_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56h_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56i_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56i_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q58_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q61_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q61_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q61_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q61_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q61_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q62_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q62_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q62_p and asr_q106_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q62_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q65_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q65_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q65_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q66_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q66_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q66_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q66_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q68_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q69_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q69_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q71_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q71_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q71_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q94_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q104_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q73_p and asr_q94_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q76_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q76_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q76_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q76_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q76_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q77_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q78_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q81_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q86_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q93_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q99_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q108_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q116_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q118_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q80_p and asr_q104_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q80_p and asr_q115_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q80_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q81_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q83_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q86_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q88_p and asr_q104_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q88_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q88_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q93_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q94_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q94_p and asr_q106_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q94_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q94_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q95_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q98_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q99_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q100_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q100_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q102_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q102_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q103_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q104_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q104_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q105_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q105_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q107_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q108_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q108_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q115_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q116_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q117_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q118_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q119_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q112_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q118_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q121_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in hetcor.data.frame(asrBV_qs): the correlation matrix has been adjusted
-    ## to make it positive-definite
-
-``` r
-asr2_qs_cormat=hetcor(asr2_qs)
-```
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q06_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q31_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q38_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q43_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q66_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q01_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q03_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q03_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q03_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q03_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q03_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q03_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q04_p and asr_q63_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q04_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q05_p and asr_q22_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q05_p and asr_q24_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q05_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q05_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q08_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q09_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q22_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q24_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q32_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q54_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q56a_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q56b_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q106_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q06_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q08_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q09_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q10_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q10_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q10_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q10_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q10_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q10_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q11_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q12_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q12_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q12_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q12_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q12_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q12_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q13_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q13_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q13_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q14_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q14_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q14_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q15_p and asr_q56e_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q17_p and asr_q21_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q17_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q17_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q17_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q17_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q18_p and asr_q49_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q22_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q24_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q25_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q26_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q27_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q28_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q29_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q30_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q32_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q33_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q35_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q36_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q38_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q42_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q45_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q46_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q47_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q50_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q51_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q52_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q53_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q54_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q55_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56a_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56b_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56c_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56d_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56e_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56f_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56h_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q56i_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q58_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q59_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q60_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q62_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q63_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q64_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q67_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q68_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q69_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q71_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q75_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q77_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q78_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q81_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q83_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q84_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q85_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q86_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q87_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q89_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q90_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q93_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q95_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q96_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q99_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q101_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q103_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q104_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q105_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q107_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q108_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q111_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q115_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q116_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q117_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q118_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q119_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q21_p and asr_q122_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q26_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q31_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q33_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q38_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q43_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q46_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q51_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q56c_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q56d_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q56e_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q56f_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q60_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q66_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q74_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q77_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q22_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q23_p and asr_q98_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q26_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q31_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q33_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q38_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q43_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q46_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q51_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q56c_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q56d_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q56e_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q56f_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q60_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q63_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q66_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q74_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q77_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q24_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q26_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q26_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q26_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q26_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q26_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q26_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q26_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q26_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q27_p and asr_q88_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q28_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q29_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q29_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q29_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q29_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q29_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q29_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q30_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q56a_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q56b_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q31_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q32_p and asr_q39_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q32_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q32_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q32_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q32_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q33_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q33_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q33_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q33_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q33_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q33_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q35_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q36_p and asr_q40_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q56a_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q38_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q42_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q45_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q47_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q50_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q52_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q53_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q54_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q55_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q56a_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q56b_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q56d_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q56e_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q56i_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q58_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q59_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q63_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q64_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q68_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q69_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q71_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q75_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q77_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q78_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q81_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q83_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q86_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q87_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q93_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q95_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q99_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q103_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q104_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q105_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q107_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q108_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q111_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q115_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q116_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q117_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q118_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q119_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q39_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q42_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q45_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q46_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q47_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q50_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q52_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q53_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q54_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q55_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q56a_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q56b_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q56c_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q56d_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q56e_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q56f_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q56h_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q56i_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q58_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q59_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q63_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q64_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q67_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q68_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q69_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q71_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q75_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q77_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q78_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q80_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q81_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q83_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q84_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q85_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q86_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q87_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q93_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q95_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q99_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q103_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q104_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q105_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q107_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q108_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q111_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q115_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q116_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q117_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q118_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q119_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q40_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q42_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q42_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q42_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q44_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q49_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q56a_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q56b_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q43_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q56d_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q60_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q66_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q44_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q45_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q45_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q45_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q46_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q46_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q46_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q47_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q47_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q47_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q56d_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q66_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q49_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q50_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q50_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q50_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q51_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q51_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q53_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q53_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q54_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q54_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q54_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56a_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56a_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56a_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56a_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56b_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56b_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56b_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56b_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56b_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56c_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56c_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56d_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56d_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56d_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56d_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56e_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56e_p and asr_q73_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56e_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56e_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56e_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56e_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56f_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56f_p and asr_q80_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56f_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56f_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56i_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56i_p and asr_q73_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56i_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56i_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56i_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56i_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q56i_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q58_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q58_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q59_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q60_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q60_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q60_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q61_p and asr_q98_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q73_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q63_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q66_p and asr_q72_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q66_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q66_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q66_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q66_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q69_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q69_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q69_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q71_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q71_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q71_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q74_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q76_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q77_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q89_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q72_p and asr_q119_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q73_p and asr_q74_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q74_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q74_p and asr_q88_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q74_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q74_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q74_p and asr_q123_p produced a warning:
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q76_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q76_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q76_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q76_p and asr_q106_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q76_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q76_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q77_p and asr_q80_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q77_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q77_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q77_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q78_p and asr_q79_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q78_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q78_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q93_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q99_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q105_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q107_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q108_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q118_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q79_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q80_p and asr_q86_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q80_p and asr_q89_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q80_p and asr_q95_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q80_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q80_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q81_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q81_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q83_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q83_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q86_p and asr_q92_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q86_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q88_p and asr_q89_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q88_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q88_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q89_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q89_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q93_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q98_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q99_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q100_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q102_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q103_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q104_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q105_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q107_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q108_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q111_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q116_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q117_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q118_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q119_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q92_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q93_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q95_p and asr_q109_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q98_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q98_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q98_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q99_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q100_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q102_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q103_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q104_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q105_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q106_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q107_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q108_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q110_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q114_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q119_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q109_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q111_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q112_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q113_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q116_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q117_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q118_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q119_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q120_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in FUN(X[[i]], ...): polychoric correlation between variables asr_q110_p and asr_q121_p produced warnings:
-    ##    NaNs produced
-    ##    NaNs produced
-    ##    NaNs produced
-
-    ## Warning in hetcor.data.frame(asr2_qs): the correlation matrix has been adjusted
-    ## to make it positive-definite
-
-``` r
-# ok piecemeal go through and find rows with >.75 cors
-for (i in 1:dim(asrBV_qs_cormat$correlations)[1]){
-  # a single 1 is expected for diagonal
-  if (sum(asrBV_qs_cormat$correlations[i,]>.75)>1){
-    # if it is > .75 in both tps
-    if (sum(asr2_qs_cormat$correlations[i,]>.75)>1){
-      print('Correlated Items:')
-      # + 10 because 11th col is first col
-      BVoverCorrelateds<-colnames(ASRcolnames[1,which(asrBV_qs_cormat$correlations[i,]>.75)+10])
-      year2overCorrelateds<-colnames(ASRcolnames[1,which(asr2_qs_cormat$correlations[i,]>.75)+10])
-      intersection=intersect(BVoverCorrelateds,year2overCorrelateds)
-      print(unlist(ASRcolnames[intersection]))
-      print('-------')
-      }
-    }
-}
-```
-
-    ## [1] "Correlated Items:"
-    ##                                                                             asr_q20_p 
-    ##                            "I damage or destroy my things Destruyo mis propias cosas" 
-    ##                                                                             asr_q21_p 
-    ## "I damage or destroy things belonging to others Destruyo las cosas de otras personas" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                                             asr_q20_p 
-    ##                            "I damage or destroy my things Destruyo mis propias cosas" 
-    ##                                                                             asr_q21_p 
-    ## "I damage or destroy things belonging to others Destruyo las cosas de otras personas" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                                                                                     asr_q36_p 
-    ## "I accidentally get hurt a lot, accident-prone Me lastimo accidentalmente con mucha frecuencia, soy propenso(a) a accidentes" 
-    ##                                                                                                                     asr_q62_p 
-    ##                                                         "I am poorly coordinated or clumsy Tengo mala coordinación o torpeza" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                                                                           asr_q40_p 
-    ## "I hear sounds and voices that other people think aren't there Oigo sonidos o voces que otros creen que no existen" 
-    ##                                                                                                           asr_q70_p 
-    ##                        "I see things that other people think aren't there Veo cosas que otros creen que no existen" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                           asr_q45_p 
-    ##                 "I am nervous or tense Soy nervioso(a), o tenso(a)" 
-    ##                                                           asr_q50_p 
-    ## "I am too fearful or anxious Soy demasiado miedoso(a) o ansioso(a)" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                           asr_q45_p 
-    ##                 "I am nervous or tense Soy nervioso(a), o tenso(a)" 
-    ##                                                           asr_q50_p 
-    ## "I am too fearful or anxious Soy demasiado miedoso(a) o ansioso(a)" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                                                 asr_q55_p 
-    ## "My moods swing between elation and depression Mi humor cambia entre euforia y depresión" 
-    ##                                                                                 asr_q87_p 
-    ##       "My moods or feeling change suddenly Tengo bruscos cambios de humor o sentimientos" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                     asr_q56c_p                     asr_q56g_p 
-    ##    "Nausea, feel sick Náuseas" "Vomiting, throwing up Vómito" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                     asr_q56c_p                     asr_q56g_p 
-    ##    "Nausea, feel sick Náuseas" "Vomiting, throwing up Vómito" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                                                                                     asr_q36_p 
-    ## "I accidentally get hurt a lot, accident-prone Me lastimo accidentalmente con mucha frecuencia, soy propenso(a) a accidentes" 
-    ##                                                                                                                     asr_q62_p 
-    ##                                                         "I am poorly coordinated or clumsy Tengo mala coordinación o torpeza" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                                                                           asr_q40_p 
-    ## "I hear sounds and voices that other people think aren't there Oigo sonidos o voces que otros creen que no existen" 
-    ##                                                                                                           asr_q70_p 
-    ##                        "I see things that other people think aren't there Veo cosas que otros creen que no existen" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                                                                             asr_q84_p 
-    ##              "I do things that other people think are strange Hago cosas que otras personas piensan que son extrañas" 
-    ##                                                                                                             asr_q85_p 
-    ## "I have thoughts that other people would think are strange Tengo ideas que otras personas pensarían que son extrañas" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                                                                             asr_q84_p 
-    ##              "I do things that other people think are strange Hago cosas que otras personas piensan que son extrañas" 
-    ##                                                                                                             asr_q85_p 
-    ## "I have thoughts that other people would think are strange Tengo ideas que otras personas pensarían que son extrañas" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                                                 asr_q55_p 
-    ## "My moods swing between elation and depression Mi humor cambia entre euforia y depresión" 
-    ##                                                                                 asr_q87_p 
-    ##       "My moods or feeling change suddenly Tengo bruscos cambios de humor o sentimientos" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                                                                                             asr_q114_p 
-    ## "I fail to pay my debts or meet other financial responsibilities No pago mis deudas ni me hago cargo de responsabilidades financieras" 
-    ##                                                                                                                             asr_q117_p 
-    ##                        "I have trouble managing my money or credit card Me cuesta trabajo manejar el dinero o las tarjetas de crédito" 
-    ## [1] "-------"
-    ## [1] "Correlated Items:"
-    ##                                                                                                                             asr_q114_p 
-    ## "I fail to pay my debts or meet other financial responsibilities No pago mis deudas ni me hago cargo de responsabilidades financieras" 
-    ##                                                                                                                             asr_q117_p 
-    ##                        "I have trouble managing my money or credit card Me cuesta trabajo manejar el dinero o las tarjetas de crédito" 
-    ## [1] "-------"
-
-``` r
-#### merge timepoints
-mergedTPs=rbind(asrBV_qs,asr2_qs)
-# retain subjsIDs and 
-mergedTPsSubjs<-c(asrBVSubjs,asr2Subjs)
-mergedTPsEventName<-rep()
-mergedTPs <- as.data.frame(lapply(mergedTPs, as.numeric))
-
-# destroyer composite
-mergedTPs$asr_destroyer=round((mergedTPs$asr_q20_p+mergedTPs$asr_q21_p)/2)
-# remove constituent variables
-mergedTPs=subset(mergedTPs, select = -c(`asr_q20_p`,`asr_q21_p`))
-
-# hallucinations composite
-mergedTPs$asr_halluc=round((mergedTPs$asr_q40_p+mergedTPs$asr_q70_p)/2)
-# remove constituent variables
-mergedTPs=subset(mergedTPs, select = -c(`asr_q40_p`,`asr_q70_p`))
-
-# Odd composite
-mergedTPs$asr_odd=round((mergedTPs$asr_q84_p+mergedTPs$asr_q85_p)/2)
-# remove constituent variables
-mergedTPs=subset(mergedTPs, select = -c(`asr_q84_p`,`asr_q85_p`))
-
-# sick composite
-mergedTPs$asr_sick=round((mergedTPs$asr_q56c_p+mergedTPs$asr_q56g_p)/2)
-# remove constituent variables
-mergedTPs=subset(mergedTPs, select = -c(`asr_q56c_p`,`asr_q56g_p`))
-
-# clumsy composite
-mergedTPs$asr_clumsy=round((mergedTPs$asr_q36_p+mergedTPs$asr_q62_p)/2)
-# remove constituent variables
-mergedTPs=subset(mergedTPs, select = -c(`asr_q36_p`,`asr_q62_p`))
-
-# anxious composite
-mergedTPs$asr_anx=round((mergedTPs$asr_q45_p+mergedTPs$asr_q50_p)/2)
-# remove constituent variables
-mergedTPs=subset(mergedTPs, select = -c(`asr_q45_p`,`asr_q50_p`))
-
-# swinger composite
-mergedTPs$asr_swing=round((mergedTPs$asr_q55_p+mergedTPs$asr_q87_p)/2)
-# remove constituent variables
-mergedTPs=subset(mergedTPs, select = -c(`asr_q55_p`,`asr_q87_p`))
-
-# insolvent composite
-mergedTPs$asr_insolvent=round((mergedTPs$asr_q114_p+mergedTPs$asr_q117_p)/2)
-# remove constits
-mergedTPs=subset(mergedTPs, select = -c(`asr_q114_p`,`asr_q117_p`))
-#####################
-
-## run pca on asr
-pcaDf_p<-mergedTPs
-pcaDf_p$SubjsNames<-mergedTPsSubjs
-pcaDf_p$eventname<-c(rep('baseline_year_1_arm_1',dim(asrBV)[1]),rep('2_year_follow_up_y_arm_1',dim(asr2)[1]))
-# remove NA vars
-pcaDf_p_Complete<-pcaDf_p[complete.cases(pcaDf_p),]
-pcaDf_p_CompleteSubjs<-pcaDf_p_Complete$SubjsNames
-pcaDf_p_CompleteEventNames<-pcaDf_p_Complete$eventname
-pcaDf_p=subset(pcaDf_p, select = -c(`eventname`,`SubjsNames`))
-# isolate numeric
-pcaDf_p_num<-pcaDf_p_Complete[,1:123]
-# convert to numeric for pca
-pcaDf_p_num <- as.data.frame(lapply(pcaDf_p_num, as.numeric))
-# derive pcs
-pcaMat_p_complete = as.matrix(scale(pcaDf_p_num))
-ncomp = 1
-y.pca = psych::principal(pcaMat_p_complete, rotate="geomin", nfactors=ncomp, scores=TRUE)
-y.pca$loadings
-```
-
-    ## 
-    ## Loadings:
-    ##               PC1   
-    ## asr_q01_p      0.473
-    ## asr_q02_p     -0.204
-    ## asr_q03_p      0.401
-    ## asr_q04_p     -0.170
-    ## asr_q05_p      0.333
-    ## asr_q06_p      0.152
-    ## asr_q07_p      0.210
-    ## asr_q08_p      0.528
-    ## asr_q09_p      0.571
-    ## asr_q10_p      0.389
-    ## asr_q11_p      0.406
-    ## asr_q12_p      0.567
-    ## asr_q13_p      0.561
-    ## asr_q14_p      0.465
-    ## asr_q15_p           
-    ## asr_q16_p      0.321
-    ## asr_q17_p      0.390
-    ## asr_q18_p      0.193
-    ## asr_q19_p      0.235
-    ## asr_q22_p      0.472
-    ## asr_q23_p      0.308
-    ## asr_q24_p      0.415
-    ## asr_q25_p      0.393
-    ## asr_q26_p      0.176
-    ## asr_q27_p      0.400
-    ## asr_q28_p      0.409
-    ## asr_q29_p      0.319
-    ## asr_q30_p      0.406
-    ## asr_q31_p      0.396
-    ## asr_q32_p      0.360
-    ## asr_q33_p      0.492
-    ## asr_q34_p      0.405
-    ## asr_q35_p      0.589
-    ## asr_q37_p      0.243
-    ## asr_q38_p      0.298
-    ## asr_q39_p      0.219
-    ## asr_q41_p      0.503
-    ## asr_q42_p      0.438
-    ## asr_q43_p      0.325
-    ## asr_q44_p      0.546
-    ## asr_q46_p      0.466
-    ## asr_q47_p      0.573
-    ## asr_q48_p      0.451
-    ## asr_q49_p      0.214
-    ## asr_q51_p      0.408
-    ## asr_q52_p      0.513
-    ## asr_q53_p      0.595
-    ## asr_q54_p      0.565
-    ## asr_q56a_p     0.428
-    ## asr_q56b_p     0.362
-    ## asr_q56d_p     0.248
-    ## asr_q56e_p     0.257
-    ## asr_q56f_p     0.375
-    ## asr_q56h_p     0.427
-    ## asr_q56i_p     0.422
-    ## asr_q57_p      0.200
-    ## asr_q58_p      0.291
-    ## asr_q59_p      0.550
-    ## asr_q60_p      0.520
-    ## asr_q61_p      0.404
-    ## asr_q63_p      0.365
-    ## asr_q64_p      0.532
-    ## asr_q65_p      0.418
-    ## asr_q66_p      0.403
-    ## asr_q67_p      0.469
-    ## asr_q68_p      0.460
-    ## asr_q69_p      0.465
-    ## asr_q71_p      0.505
-    ## asr_q72_p      0.440
-    ## asr_q73_p           
-    ## asr_q74_p      0.241
-    ## asr_q75_p      0.365
-    ## asr_q76_p      0.429
-    ## asr_q77_p      0.362
-    ## asr_q78_p      0.524
-    ## asr_q79_p      0.207
-    ## asr_q80_p           
-    ## asr_q81_p      0.411
-    ## asr_q82_p      0.184
-    ## asr_q83_p      0.437
-    ## asr_q86_p      0.544
-    ## asr_q88_p     -0.158
-    ## asr_q89_p      0.452
-    ## asr_q90_p      0.183
-    ## asr_q91_p      0.313
-    ## asr_q92_p      0.260
-    ## asr_q93_p      0.308
-    ## asr_q94_p      0.251
-    ## asr_q95_p      0.477
-    ## asr_q96_p      0.309
-    ## asr_q97_p      0.251
-    ## asr_q98_p      0.120
-    ## asr_q99_p      0.345
-    ## asr_q100_p     0.461
-    ## asr_q101_p     0.280
-    ## asr_q102_p     0.567
-    ## asr_q103_p     0.653
-    ## asr_q104_p     0.325
-    ## asr_q105_p     0.471
-    ## asr_q106_p          
-    ## asr_q107_p     0.545
-    ## asr_q108_p     0.512
-    ## asr_q109_p          
-    ## asr_q110_p     0.224
-    ## asr_q111_p     0.418
-    ## asr_q112_p     0.576
-    ## asr_q113_p     0.468
-    ## asr_q115_p     0.570
-    ## asr_q116_p     0.595
-    ## asr_q118_p     0.514
-    ## asr_q119_p     0.367
-    ## asr_q120_p     0.267
-    ## asr_q121_p     0.322
-    ## asr_q122_p     0.314
-    ## asr_q123_p    -0.332
-    ## asr_destroyer  0.241
-    ## asr_halluc     0.281
-    ## asr_odd        0.476
-    ## asr_sick       0.413
-    ## asr_clumsy     0.404
-    ## asr_anx        0.583
-    ## asr_swing      0.626
-    ## asr_insolvent  0.467
-    ## 
-    ##                   PC1
-    ## SS loadings    20.092
-    ## Proportion Var  0.163
-
-``` r
-subjPvalues=data.frame(pcaDf_p_CompleteSubjs,pcaDf_p_CompleteEventNames,y.pca$scores[,1])
-colnames(subjPvalues)<-c('subjectkey','eventname','parentP')
-
-OutDF=merge(masterdf,subjPvalues,by=c('subjectkey','eventname'))
-```
-
-    ## Warning in merge.data.frame(masterdf, subjPvalues, by = c("subjectkey", : column
-    ## names 'src_subject_id.x', 'collection_id.x', 'dataset_id.x', 'interview_date.x',
-    ## 'sex.x', 'collection_title.x', 'collection_id.x', 'dataset_id.x',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'interview_date.y', 'sex.y', 'collection_title.y',
-    ## 'collection_id.x', 'dataset_id.x', 'src_subject_id.y', 'interview_date.x',
-    ## 'sex.x', 'collection_title.x', 'collection_id.y', 'dataset_id.y',
-    ## 'src_subject_id.x', 'interview_date.y', 'sex.y', 'collection_title.y',
-    ## 'collection_id.y', 'dataset_id.y', 'src_subject_id.y', 'interview_date.y',
-    ## 'sex.y', 'collection_title.y' are duplicated in the result
-
-``` r
-# make count version
+# make count version of adult P
 ASRdfNum<-as.data.frame(lapply(asr[-1,11:141],as.numeric))
 ASRtotal=rowSums(ASRdfNum)
 # and subtract reverse score items because they were included in sum above, and modeling "happiness" as symmetric to "symptoms" seems like a strong assumption
@@ -7646,40 +487,608 @@ ASRtotal=ASRtotal-ASRdfNum$asr_q123_p
 
 # merge in (first row is colnames)
 asr$parentPcount=c(NA,ASRtotal)
+# fix asr age for merge
+asr$interview_age=as.numeric(asr$interview_age)/12
+```
+
+    ## Warning: NAs introduced by coercion
+
+``` r
+# set subjectkey to factor for merge
+asr$subjectkey<-as.factor(asr$subjectkey)
+
+# merge
 OutDF=merge(OutDF,asr,by=c('subjectkey','eventname','interview_age'))
 ```
 
     ## Warning in merge.data.frame(OutDF, asr, by = c("subjectkey", "eventname", :
     ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'src_subject_id.x', 'collection_id.x', 'dataset_id.x',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.x',
-    ## 'dataset_id.x', 'interview_date.x', 'sex.x', 'collection_title.x',
-    ## 'collection_id.y', 'dataset_id.y', 'interview_date.y', 'sex.y',
-    ## 'collection_title.y', 'collection_id.x', 'dataset_id.x', 'src_subject_id.y',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'src_subject_id.x', 'interview_date.y', 'sex.y',
-    ## 'collection_title.y', 'collection_id.y', 'dataset_id.y', 'src_subject_id.y',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'collection_id.y',
-    ## 'dataset_id.y', 'interview_date.y', 'sex.y', 'collection_title.y' are duplicated
-    ## in the result
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
+    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'collection_id.x',
+    ## 'dataset_id.x', 'src_subject_id.y', 'interview_date.x', 'sex.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
+    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'src_subject_id.y' are
+    ## duplicated in the result
 
 ``` r
 print(dim(OutDF))
 ```
 
-    ## [1] 10100  2811
+    ## [1] 10076   746
 
 ``` r
-saveRDS(OutDF,'~/OutDfFull.rds')
+# ensure site coverage
+### LOAD in ParticipantsTSV for parent income and edu background
+# ordained sample split
+participantsTSV=read.delim('~/Downloads/participants.tsv',sep="\t")
+participantsTSV$subjectkey<-participantsTSV$participant_id
+# reformat participant IDs so they match everything else
+participantsTSV$subjectkey<-gsub('sub-','',participantsTSV$subjectkey)
+participantsTSV$subjectkey<-as.factor(gsub('NDARINV','NDAR_INV',participantsTSV$subjectkey))
+participantsTSV$eventname=participantsTSV$session_id
+### issue where subjects are repeated. Rows are not identical either.
+# query. get table of subject ids
+b=table(as.factor(participantsTSV$participant_id))
+# report subj ids used more than once and times used
+bdf=data.frame(b[b>1])
+SubjsRepeated=bdf$Var1
+# well some rows with the same participant IDs have different sites, can't use that unless it makes sense
+dimB4repRem=dim(participantsTSV)
+# remove repeated subjs
+participantsTSV=participantsTSV[!participantsTSV$participant_id %in% SubjsRepeated,]
+dif=dimB4repRem[1]-dim(participantsTSV)[1]
+print(paste0(dif/2,' Participants lost from ambiguously repeated pt ids in participants.tsv'))
+```
+
+    ## [1] "44 Participants lost from ambiguously repeated pt ids in participants.tsv"
+
+``` r
+# well some rows with the same participant IDs have different sites, can't use that unless it makes sense\
+dimB4repRem=dim(participantsTSV)
+# remove repeated subjs
+participantsTSV=participantsTSV[!participantsTSV$participant_id %in% SubjsRepeated,]
+# remove eventname column from participants tsv, not informative and causes problems down the road
+participantsTSV = participantsTSV[,!(names(participantsTSV) %in% 'eventname')]
+### merge in for fam income and parent edu
+OutDF=merge(OutDF,participantsTSV,by=c('subjectkey'))
+```
+
+    ## Warning in merge.data.frame(OutDF, participantsTSV, by = c("subjectkey")):
+    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
+    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'collection_id.x',
+    ## 'dataset_id.x', 'src_subject_id.y', 'interview_date.x', 'sex.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
+    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'src_subject_id.y', 'sex.x',
+    ## 'sex.y' are duplicated in the result
+
+``` r
+# take out na incomes
+OutDF=OutDF[OutDF$income!=777,]
+OutDF=OutDF[OutDF$income!=999,]
+
+# race
+OutDF=OutDF[OutDF$race_ethnicity!=888,]
+OutDF$race_ethnicity<-as.factor(OutDF$race_ethnicity)
+
+# parental edu
+OutDF=OutDF[OutDF$parental_education!=888,]
+OutDF=OutDF[OutDF$parental_education!=777,]
+OutDF$parental_education<-as.ordered(OutDF$parental_education)
+dim(OutDF)
+```
+
+    ## [1] 9296  763
+
+``` r
+#### LOAD in youth life events. Unfortunately this also appears to be missing for most participants, but is populated for slightly more than residential deprivation
+yle=read.delim('~/Downloads/Package_1209596/abcd_yle01.txt')
+yleColnames=colnames(yle)
+yleColDescrip=yle[1,]
+# note yle's are labeled ple's in the colnames, but end with a _y extension (ples end with _p extension)
+
+##### Extract purely retrospective, i.e., viable for inclusion in tp1-based predictions
+#### Some will need to be retrospective. Use PLE and YLE instances of "not in past year" to get starting point for ACEs (assumed prior to tp1 scan)
+# so to reconstruct whether or not this happened before timepoint 1 scan, we will need _past_yr variables
+ylePastYearcols=yleColnames[grep('_past_yr',yleColnames)]
+
+# verify with descriptions
+# yleColDescrip[grep('_past_yr',yleColnames)]
+# remove _past_yr to get list of assayed youth life events
+###yles=gsub('_past_yr','',ylePastYearcols)
+# this approach does not work because columns are misnamed (idiosyncratic missing characters between past year vs. not past year versions)
+
+# remove "past year?" from column names to boil down to binary variables of interest
+yle_No_PastYearcols=yleColnames[-which(yleColnames %in% ylePastYearcols)]
+
+# remove "was this a good or bad experience?", not really true retrospective
+goodBad=yle_No_PastYearcols[grep('_fu_',yle_No_PastYearcols)]
+yle_No_PastYearcols_No_Goodbad=yle_No_PastYearcols[-which(yle_No_PastYearcols %in% goodBad)]
+
+# remove "how much did this event affect you" for now, not really true retrospective
+EvAffect=yle_No_PastYearcols_No_Goodbad[grep('_fu2_',yle_No_PastYearcols_No_Goodbad)]
+yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad[-which(yle_No_PastYearcols_No_Goodbad %in% EvAffect)]
+
+# extract just tp1 (really timepoint 1.5, 1-year in) for yle's
+yle1=subset(yle,eventname=='1_year_follow_up_y_arm_1')
+
+# need an exception for suicide follow ups (which appear to be blank) and collection ID
+yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad_No_EvAff[-c(43,44,46)]
+
+# for iterative dataset construct
+preBVdf=data.frame(as.factor(yle1$subjectkey))
+colnames(preBVdf)<-'subjectkey'
+
+# OK, now lets remove instances of these things happening in the past year
+for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+  # extract column name
+  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
+  # extract corresponding "was this in the past year?" boolean, which is always right after
+  currColIndex=grep(currColName,yleColnames)
+  # extract vector of values for PTs
+  currCol=yle1[,currColIndex]
+  # need an exception for le_friend_injur_past_yr_y. Appears to be misnamed without p in ple
+  if  (currColName=='ple_friend_injur_y'){
+    currColNamePastYear='le_friend_injur_past_yr_y'
+  # also need except for ple_injur_past_yr_y, which is actually ple_injur_y_past_yr_y which is also probably a typo
+  } else if (currColName=='ple_injur_y'){
+    currColNamePastYear='ple_injur_y_past_yr_y'
+  }  else {
+    # return colname of past year using text in aim to be more robust
+    currColNamePastYear=gsub('_y','_past_yr_y',currColName)
+  }
+  currColIndexPastYear=grep(currColNamePastYear,yleColnames)
+  # This turned out to not be robust to heterogeneity in questionnaire
+  ## "past year"? immediately proceeds question
+  ## currColIndexPastYear=currColIndex+1
+  ## extract this vector of values for PTs
+  currCol_pastyr=yle1[,currColIndexPastYear]
+  # set empties to 0 in follow up question
+  currCol_pastyr[is.empty(currCol_pastyr)]=0
+  # ple_injur_y and ple_injur_y_yr_y are misnamed, need to build catch specifically for these variables
+  if (currColIndex[1]==42){
+    # set to correct column
+    currColIndex=42
+    # re-draw currCol
+    currCol=yle1[,currColIndex]
+    # re-draw past year
+    currColIndexPastYear=currColIndex+1
+    # re-draw vector of values for PTs
+    currCol_pastyr=yle1[,currColIndexPastYear]
+    # set is empty to 0 in follow up question
+    currCol_pastyr[is.empty(currCol_pastyr)]=0
+    # extract "past year"?
+    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+  } else {
+    # if past year, subtract instance
+    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+  }
+  # print out utilized colum names to ensure they match
+  print(paste('Variables:',yle[1,currColIndex],yle[1,currColIndexPastYear]))
+  # explicitly count instances in past year
+  PastYr=as.numeric(currCol)+as.numeric(currCol_pastyr)==2
+  # make a plot dataframe for ggplot2
+  plotdf=data.frame(as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]),NotPastYr,as.numeric(PastYr))
+  colnames(plotdf)=c('Total','BeforeLastYear','DuringLastYear')
+  plotdf<-invisible(melt(plotdf))
+  a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
+  print(a)
+  # iteratively make a dataframe of true retrospective YLE's, those that occurred prior to first visit for predictive purposes
+  preBVdf$null<-NotPastYr
+  colnamesMinusNull=head(colnames(preBVdf), -1)
+  colnames(preBVdf)<-c(colnamesMinusNull,currColName)
+}
+```
+
+    ## [1] "Variables: Someone in family died? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Family member was seriously injured? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Saw crime or accident? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Lost a close friend? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Close friend was seriously sick/injured? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Negative change in parent's financial situation? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-5.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Family member had drug and/or alcohol problem? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-6.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: You got seriously sick? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-7.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: You got seriously injured? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-8.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 24 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parents argued more than previously? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-9.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Mother/father figure lost job? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-10.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: One parent was away from home more often? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-11.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Someone in the family was arrested? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-12.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Close friend died? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-13.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Family member had mental/emotional problem? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-14.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Brother or sister left home? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-15.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Was a victim of crime/violence/assault? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-16.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parents separated or divorced? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-17.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parents/caregiver got into trouble with the law? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-18.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Attended a new school? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-19.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Family moved? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-20.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: One of the parents/caregivers went to jail? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-21.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Got new stepmother or stepfather? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-22.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parent/caregiver got a new job? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-23.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Got new brother or sister? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-24.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: You were placed in foster care? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-25.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Saw or heard someone getting hit Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-26.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Your family was homeless? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-27.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parent or caregiver hospitalized? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-28.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Had a lockdown at your school due to concerns about a school shooting or violence? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-29.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Please indicate how instrument was administered: Please indicate how instrument was administered:"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-30.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Saw or heard someone being shot at (but not actually wounded) in your school or neighborhood? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-31.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Do you know someone who has attempted suicide? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-32.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parent or caregiver deported? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-33.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-34.png)<!-- -->
+
+``` r
+#### for year1 visit
+# note NO answers recorded to ple_foster_care_past_yr_y. I guess we can't use that variable unless new release has it populated
+# ditto, ple_hit_y
+# ditto, ple_homeless_y
+# ditto, ple_hospitalized_y
+# ditto, ple_lockdown_y
+# ditto, ple_shot_y
+# ditto, ple_suicide_y
+
+# now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
+# no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
+#preBVdf$eventname='baseline_year_1_arm_1'
+OutDFyle=merge(OutDF,preBVdf,by=c('subjectkey'))
+```
+
+    ## Warning in merge.data.frame(OutDF, preBVdf, by = c("subjectkey")): column
+    ## names 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
+    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'collection_id.x',
+    ## 'dataset_id.x', 'src_subject_id.y', 'interview_date.x', 'sex.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
+    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'src_subject_id.y', 'sex.x',
+    ## 'sex.y' are duplicated in the result
+
+``` r
+print(dim(OutDFyle))
+```
+
+    ## [1] 9144  797
+
+``` r
+print(dim(OutDF))
+```
+
+    ## [1] 9296  763
+
+``` r
+# so if we use the events recorded that happened prior to the baseline visit, how much missingess does that imbue?
+print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost'))
+```
+
+    ## [1] "152 lost"
+
+``` r
+# save ouput
+saveRDS(OutDFyle,'~/OutDfFull.rds')
 
 # convert to one row per subj for temporal precedence analyses
-OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')
-OutDF2Y=subset(OutDF,eventname=='2_year_follow_up_y_arm_1')
-OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
+OutDFBV=subset(OutDFyle,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(OutDFyle,eventname=='2_year_follow_up_y_arm_1')
+OutDFTmpPrec<-merge(OutDFyle,OutDF2Y,by='subjectkey')
+```
+
+    ## Warning in merge.data.frame(OutDFyle, OutDF2Y, by = "subjectkey"):
+    ## column names 'collection_id.x.x', 'dataset_id.x.x', 'interview_date.x.x',
+    ## 'sex.x.x', 'collection_title.x.x', 'collection_id.y.x', 'dataset_id.y.x',
+    ## 'src_subject_id.x.x', 'interview_date.y.x', 'sex.y.x', 'collection_title.y.x',
+    ## 'collection_id.x.x', 'dataset_id.x.x', 'src_subject_id.y.x',
+    ## 'interview_date.x.x', 'sex.x.x', 'collection_title.x.x', 'collection_id.y.x',
+    ## 'dataset_id.y.x', 'src_subject_id.x.x', 'interview_date.y.x', 'sex.y.x',
+    ## 'collection_title.y.x', 'src_subject_id.y.x', 'sex.x.x', 'sex.y.x' are
+    ## duplicated in the result
+
+``` r
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 5038 5621
+    ## [1] 9144 1593
 
 ``` r
 saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec.rds')
