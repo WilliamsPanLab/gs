@@ -479,7 +479,7 @@ print(cor.test(compareG_df$g,compareG_df$neurocog_pc1.bl))
 library(ggplot2)
 plotdf<-compareG_df[,c('g','neurocog_pc1.bl')]
 ComparePlot<-ggplot(data=plotdf,aes(x=g,y=neurocog_pc1.bl))+geom_smooth(method='lm',color='black')+geom_point(alpha=.05)+theme_classic()
-print(ComparePlot)
+ComparePlot
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
@@ -562,9 +562,7 @@ cbcl2=cbcl2[-c(lf1,lf2,lf3,lf5)]
 # and col names to index later
 CBCLcolnames=cbcl[1,]
 CBCLcolnames=CBCLcolnames[-c(lf1,lf2,lf3,lf5)]
-```
 
-``` r
 # polycors to eval if tp1 vars still meet criterion
 library(polycor)
 
@@ -909,12 +907,12 @@ print(cor.test(testEquivDf$p,testEquivDf$cbcl_scr_syn_totprob_r))
 ``` r
 plotdf<-testEquivDf[,c('p','cbcl_scr_syn_totprob_r')]
 ComparePlot<-ggplot(data=plotdf,aes(x=p,y=cbcl_scr_syn_totprob_r))+geom_smooth(method='lm',col='black')+geom_point(alpha=.05)+theme_classic()
-print(ComparePlot)
+ComparePlot
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](FunctionalEquivalence_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](FunctionalEquivalence_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 ################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
@@ -1358,9 +1356,9 @@ print(cor.test(OutDF$parentP,OutDF$parentPcount))
 ``` r
 plotdf<-OutDF[,c('parentP','parentPcount')]
 ComparePlot<-ggplot(data=plotdf,aes(x=parentPcount,y=parentP))+geom_smooth(method='lm',col='black')+geom_point(alpha=.05)+theme_classic()
-print(ComparePlot)
+ComparePlot
 ```
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](FunctionalEquivalence_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](FunctionalEquivalence_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->

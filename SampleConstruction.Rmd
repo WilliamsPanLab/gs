@@ -417,6 +417,13 @@ yle_No_PastYearcols_No_Goodbad=yle_No_PastYearcols[-which(yle_No_PastYearcols %i
 EvAffect=yle_No_PastYearcols_No_Goodbad[grep('_fu2_',yle_No_PastYearcols_No_Goodbad)]
 yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad[-which(yle_No_PastYearcols_No_Goodbad %in% EvAffect)]
 
+
+```
+
+```{r}
+
+#### make outdf for cross-sectional analyses w/ bootstrapping
+
 # extract just tp1 (really timepoint 1.5, 1-year in) for yle's
 yle1=subset(yle,eventname=='1_year_follow_up_y_arm_1')
 
@@ -496,23 +503,156 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 # ditto, ple_shot_y
 # ditto, ple_suicide_y
 
+# ∆∆ now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a different predictive context)
+# ∆∆ BUT this only captures baseline ABCD visit. Now we need to merge two-year FUP life events with the rest of the two years for cross-sectional analyses
+OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(OutDF,eventname=='2_year_follow_up_y_arm_1')
+# we have one valid reconstruction from code above to merge into bv
+OutDFBVyle=merge(OutDFBV,preBVdf,by=c('subjectkey'))
+# and now we need to get the two year yles to merge in
+yle2=subset(yle,eventname=='2_year_follow_up_y_arm_1')
+
+#### extract same columns of interest - 2 YEAR
+
+# for iterative dataset construct
+Y2df=data.frame(as.factor(yle2$subjectkey))
+colnames(Y2df)<-'subjectkey'
+
+# OK, now lets remove instances of these things happening in the past year
+for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+  # extract column name
+  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
+  # get variable of interest and plop into loop Y2 dataframe
+  Y2df$null<-as.numeric(yle2[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]])
+  colnamesMinusNull=head(colnames(Y2df), -1)
+  colnames(Y2df)<-c(colnamesMinusNull,currColName)         
+}  
+
+# and now we can merge it in
+OutDF2Yyle=merge(OutDF2Y,Y2df,by=c('subjectkey'))
+# now we can recombine them
+OutDFyle=rbind(OutDFBVyle,OutDF2Yyle)
+
+
+# for now exclude subjs who report yes at timepoint 1 but not 2: looks like about 152
+tmpdf=merge(OutDFBVyle,OutDF2Yyle,by='subjectkey')
+
+# f'in ugh
+ggplot(data=tmpdf,aes(x=ple_arrest_y.x,y=ple_arrest_y.y))+geom_point()+geom_jitter()+xlab('Has a family member ever been arrested? timepoint 1')+ylab('Has a family member ever been arrested? timepoint 2')
+
+# find subjects who report yle's at timepoint 1 but not 2
+questionableSubjs=as.factor(NULL)
+for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+  # extract column name
+  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
+  currColNamex=paste0(currColName,'.x')
+  currColNamey=paste0(currColName,'.y')
+  # extract year 1
+  y1<-tmpdf[,currColNamex]
+  # extract year 2
+  y2<-tmpdf[,currColNamey]
+  print(sum(y2)-sum(y1))
+  # if x > y, either i don't understand this questionnaire or the kids don't
+  questionableSubjs=tmpdf$subjectkey[y1>y2]
+  # are these subjs who were interviewer by RA disprop?
+  nonQSubjs=tmpdf$subjectkey[!questionableSubjs]
+  #questionableSubjs=c(questionableSubjs,tmpdf$subjectkey[y1>y2])
+}
+  
+# so if we use the events recorded that happened prior to the baseline visit, and those that are included at 2 year FUP how much missingess does that imbue?
+print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost from requiring those with yle at both timepoints with full data'))
+
+# and if we exclude subjs with inconsistent timepoint-to-timepoint answers 
+OutDFyle=OutDFyle[!OutDFyle$subjectkey %in% questionableSubjs,]
+print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost from requiring those with yle at both timepoints with full data, and kids who inconsistently report yles'))
+
+# save ouput
+saveRDS(OutDFyle,'~/OutDfxc.rds')
+
+```
+
+```{r}
+
+#### make outdf FULL retrospective for temporal precedence analyses
+# for iterative dataset construct
+preBVdf=data.frame(as.factor(yle1$subjectkey))
+colnames(preBVdf)<-'subjectkey'
+
+# OK, now lets remove instances of these things happening in the past year
+for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+  # extract column name
+  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
+  # extract corresponding "was this in the past year?" boolean, which is always right after
+  currColIndex=grep(currColName,yleColnames)
+  # extract vector of values for PTs
+  currCol=yle1[,currColIndex]
+  # need an exception for le_friend_injur_past_yr_y. Appears to be misnamed without p in ple
+  if  (currColName=='ple_friend_injur_y'){
+    currColNamePastYear='le_friend_injur_past_yr_y'
+  # also need except for ple_injur_past_yr_y, which is actually ple_injur_y_past_yr_y which is also probably a typo
+  } else if (currColName=='ple_injur_y'){
+    currColNamePastYear='ple_injur_y_past_yr_y'
+  }  else {
+    # return colname of past year using text in aim to be more robust
+    currColNamePastYear=gsub('_y','_past_yr_y',currColName)
+  }
+  currColIndexPastYear=grep(currColNamePastYear,yleColnames)
+  # This turned out to not be robust to heterogeneity in questionnaire
+  ## "past year"? immediately proceeds question
+  ## currColIndexPastYear=currColIndex+1
+  ## extract this vector of values for PTs
+  currCol_pastyr=yle1[,currColIndexPastYear]
+  # set empties to 0 in follow up question
+  currCol_pastyr[is.empty(currCol_pastyr)]=0
+  # ple_injur_y and ple_injur_y_yr_y are misnamed, need to build catch specifically for these variables
+  if (currColIndex[1]==42){
+    # set to correct column
+    currColIndex=42
+    # re-draw currCol
+    currCol=yle1[,currColIndex]
+    # re-draw past year
+    currColIndexPastYear=currColIndex+1
+    # re-draw vector of values for PTs
+    currCol_pastyr=yle1[,currColIndexPastYear]
+    # set is empty to 0 in follow up question
+    currCol_pastyr[is.empty(currCol_pastyr)]=0
+    # extract "past year"?
+    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+  } else {
+    # if past year, subtract instance
+    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+  }
+  # print out utilized colum names to ensure they match
+  print(paste('Variables:',yle[1,currColIndex],yle[1,currColIndexPastYear]))
+  # explicitly count instances in past year
+  PastYr=as.numeric(currCol)+as.numeric(currCol_pastyr)==2
+  # make a plot dataframe for ggplot2
+  plotdf=data.frame(as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]),NotPastYr,as.numeric(PastYr))
+  colnames(plotdf)=c('Total','BeforeLastYear','DuringLastYear')
+  plotdf<-invisible(melt(plotdf))
+  a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
+  print(a)
+  # iteratively make a dataframe of yes/no (standard)
+  preBVdf$null<-NotPastYr
+  colnamesMinusNull=head(colnames(preBVdf), -1)
+  colnames(preBVdf)<-c(colnamesMinusNull,currColName)
+}
+
+#### for year1 visit
+# note NO answers recorded to ple_foster_care_past_yr_y. I guess we can't use that variable unless new release has it populated
+# ditto, ple_hit_y
+# ditto, ple_homeless_y
+# ditto, ple_hospitalized_y
+# ditto, ple_lockdown_y
+# ditto, ple_shot_y
+# ditto, ple_suicide_y
+
 # now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
 # no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
 #preBVdf$eventname='baseline_year_1_arm_1'
 OutDFyle=merge(OutDF,preBVdf,by=c('subjectkey'))
 print(dim(OutDFyle))
 print(dim(OutDF))
-# so if we use the events recorded that happened prior to the baseline visit, how much missingess does that imbue?
-print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost'))
-
-# save ouput
-saveRDS(OutDFyle,'~/OutDfFull.rds')
-```
-
-```{r}
-
-#### MIGHT NEED TO RECODE THIS LINE FOR TEMP PREC DF: preBVdf$null<-as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]])
-# THINK THROUGH. DEPENDS ON IF YOU ARE GAUGING LIFETIME OCCURENCE AS CAUSAL FROM TP1->2, OR EVENT OCCURING B/W VISITS AS CAUSAL. MIGHT NEED BOTH.
 
 # convert to one row per subj for temporal precedence analyses
 OutDFBV=subset(OutDFyle,eventname=='baseline_year_1_arm_1')
@@ -520,5 +660,99 @@ OutDF2Y=subset(OutDFyle,eventname=='2_year_follow_up_y_arm_1')
 OutDFTmpPrec<-merge(OutDFyle,OutDF2Y,by='subjectkey')
 print(dim(OutDFTmpPrec))
 
-saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec.rds')
+saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_FullRetro.rds')
+```
+
+```{r}
+
+#### make outdf retrospective PLUS for temporal precedence analyses (includes YLE's that happened before tp2 measurement. Sep. measure)
+# for iterative dataset construct
+preBVdf=data.frame(as.factor(yle1$subjectkey))
+colnames(preBVdf)<-'subjectkey'
+
+# OK, now lets remove instances of these things happening in the past year
+for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+  # extract column name
+  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
+  # make a "w/in past year" column 
+  currColName_winYear=paste0(currColName,'_past')
+  # extract corresponding "was this in the past year?" boolean, which is always right after
+  currColIndex=grep(currColName,yleColnames)
+  # extract vector of values for PTs
+  currCol=yle1[,currColIndex]
+  # need an exception for le_friend_injur_past_yr_y. Appears to be misnamed without p in ple
+  if  (currColName=='ple_friend_injur_y'){
+    currColNamePastYear='le_friend_injur_past_yr_y'
+  # also need except for ple_injur_past_yr_y, which is actually ple_injur_y_past_yr_y which is also probably a typo
+  } else if (currColName=='ple_injur_y'){
+    currColNamePastYear='ple_injur_y_past_yr_y'
+  }  else {
+    # return colname of past year using text in aim to be more robust
+    currColNamePastYear=gsub('_y','_past_yr_y',currColName)
+  }
+  currColIndexPastYear=grep(currColNamePastYear,yleColnames)
+  # This turned out to not be robust to heterogeneity in questionnaire
+  ## "past year"? immediately proceeds question
+  ## currColIndexPastYear=currColIndex+1
+  ## extract this vector of values for PTs
+  currCol_pastyr=yle1[,currColIndexPastYear]
+  # set empties to 0 in follow up question
+  currCol_pastyr[is.empty(currCol_pastyr)]=0
+  # ple_injur_y and ple_injur_y_yr_y are misnamed, need to build catch specifically for these variables
+  if (currColIndex[1]==42){
+    # set to correct column
+    currColIndex=42
+    # re-draw currCol
+    currCol=yle1[,currColIndex]
+    # re-draw past year
+    currColIndexPastYear=currColIndex+1
+    # re-draw vector of values for PTs
+    currCol_pastyr=yle1[,currColIndexPastYear]
+    # set is empty to 0 in follow up question
+    currCol_pastyr[is.empty(currCol_pastyr)]=0
+    # extract "past year"?
+    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+  } else {
+    # if past year, subtract instance
+    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+  }
+  # print out utilized colum names to ensure they match
+  print(paste('Variables:',yle[1,currColIndex],yle[1,currColIndexPastYear]))
+  # explicitly count instances in past year
+  PastYr=as.numeric(currCol)+as.numeric(currCol_pastyr)==2
+  # make a plot dataframe for ggplot2
+  plotdf=data.frame(as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]),NotPastYr,as.numeric(PastYr))
+  colnames(plotdf)=c('Total','BeforeLastYear','DuringLastYear')
+  plotdf<-invisible(melt(plotdf))
+  a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
+  print(a)
+  # iteratively make a dataframe of yes/no (standard) for cross-sectional DF
+  preBVdf$null<-as.numeric(PastYr)
+  colnamesMinusNull=head(colnames(preBVdf), -1)
+  colnames(preBVdf)<-c(colnamesMinusNull,currColName)
+}
+
+#### for year1 visit
+# note NO answers recorded to ple_foster_care_past_yr_y. I guess we can't use that variable unless new release has it populated
+# ditto, ple_hit_y
+# ditto, ple_homeless_y
+# ditto, ple_hospitalized_y
+# ditto, ple_lockdown_y
+# ditto, ple_shot_y
+# ditto, ple_suicide_y
+
+# now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
+# no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
+#preBVdf$eventname='baseline_year_1_arm_1'
+OutDFyle=merge(OutDF,preBVdf,by=c('subjectkey'))
+print(dim(OutDFyle))
+print(dim(OutDF))
+
+# convert to one row per subj for temporal precedence analyses
+OutDFBV=subset(OutDFyle,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(OutDFyle,eventname=='2_year_follow_up_y_arm_1')
+OutDFTmpPrec<-merge(OutDFyle,OutDF2Y,by='subjectkey')
+print(dim(OutDFTmpPrec))
+
+saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_FullRetro.rds')
 ```

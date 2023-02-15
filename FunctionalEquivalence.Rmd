@@ -311,7 +311,7 @@ print(cor.test(compareG_df$g,compareG_df$neurocog_pc1.bl))
 library(ggplot2)
 plotdf<-compareG_df[,c('g','neurocog_pc1.bl')]
 ComparePlot<-ggplot(data=plotdf,aes(x=g,y=neurocog_pc1.bl))+geom_smooth(method='lm',color='black')+geom_point(alpha=.05)+theme_classic()
-print(ComparePlot)
+ComparePlot
 
 ### Can add cormat among loadings for all 3 components it looks like they are functionally equivalent all the way down
 ```
@@ -361,9 +361,6 @@ cbcl2=cbcl2[-c(lf1,lf2,lf3,lf5)]
 CBCLcolnames=cbcl[1,]
 CBCLcolnames=CBCLcolnames[-c(lf1,lf2,lf3,lf5)]
 
-```
-
-```{r}
 # polycors to eval if tp1 vars still meet criterion
 library(polycor)
 
@@ -442,7 +439,7 @@ print(cor.test(testEquivDf$p,testEquivDf$cbcl_scr_syn_totprob_r))
 
 plotdf<-testEquivDf[,c('p','cbcl_scr_syn_totprob_r')]
 ComparePlot<-ggplot(data=plotdf,aes(x=p,y=cbcl_scr_syn_totprob_r))+geom_smooth(method='lm',col='black')+geom_point(alpha=.05)+theme_classic()
-print(ComparePlot)
+ComparePlot
 ```
 
 
@@ -609,5 +606,5 @@ print(cor.test(OutDF$parentP,OutDF$parentPcount))
 
 plotdf<-OutDF[,c('parentP','parentPcount')]
 ComparePlot<-ggplot(data=plotdf,aes(x=parentPcount,y=parentP))+geom_smooth(method='lm',col='black')+geom_point(alpha=.05)+theme_classic()
-print(ComparePlot)
+ComparePlot
 ```
