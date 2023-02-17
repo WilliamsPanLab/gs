@@ -517,7 +517,6 @@ print(dim(OutDF))
     ## [1] 10076   746
 
 ``` r
-# ensure site coverage
 ### LOAD in ParticipantsTSV for parent income and edu background
 # ordained sample split
 participantsTSV=read.delim('~/Downloads/participants.tsv',sep="\t")
@@ -566,11 +565,9 @@ OutDF=merge(OutDF,participantsTSV,by=c('subjectkey'))
 # take out na incomes
 OutDF=OutDF[OutDF$income!=777,]
 OutDF=OutDF[OutDF$income!=999,]
-
 # race
 OutDF=OutDF[OutDF$race_ethnicity!=888,]
 OutDF$race_ethnicity<-as.factor(OutDF$race_ethnicity)
-
 # parental edu
 OutDF=OutDF[OutDF$parental_education!=888,]
 OutDF=OutDF[OutDF$parental_education!=777,]
@@ -608,6 +605,10 @@ yle_No_PastYearcols_No_Goodbad=yle_No_PastYearcols[-which(yle_No_PastYearcols %i
 # remove "how much did this event affect you" for now, not really true retrospective
 EvAffect=yle_No_PastYearcols_No_Goodbad[grep('_fu2_',yle_No_PastYearcols_No_Goodbad)]
 yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad[-which(yle_No_PastYearcols_No_Goodbad %in% EvAffect)]
+```
+
+``` r
+#### make outdf for cross-sectional analyses w/ bootstrapping
 
 # extract just tp1 (really timepoint 1.5, 1-year in) for yle's
 yle1=subset(yle,eventname=='1_year_follow_up_y_arm_1')
@@ -673,8 +674,8 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
   plotdf<-invisible(melt(plotdf))
   a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
   print(a)
-  # iteratively make a dataframe of true retrospective YLE's, those that occurred prior to first visit for predictive purposes
-  preBVdf$null<-NotPastYr
+  # iteratively make a dataframe of yes/no (standard) for cross-sectional DF
+  preBVdf$null<-as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]])
   colnamesMinusNull=head(colnames(preBVdf), -1)
   colnames(preBVdf)<-c(colnamesMinusNull,currColName)
 }
@@ -692,7 +693,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -702,7 +703,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -712,7 +713,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -722,7 +723,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-4.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -732,7 +733,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-5.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-5.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -742,7 +743,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-6.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-6.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -752,7 +753,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-7.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-7.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -762,7 +763,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-8.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-8.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -772,7 +773,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-9.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-9.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -782,7 +783,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-10.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-10.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -792,7 +793,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-11.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-11.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -802,7 +803,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-12.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-12.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -812,7 +813,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-13.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-13.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -822,7 +823,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-14.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-14.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -832,7 +833,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-15.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-15.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -842,7 +843,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-16.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-16.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -852,7 +853,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-17.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-17.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -862,7 +863,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-18.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-18.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -872,7 +873,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-19.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-19.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -882,7 +883,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-20.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-20.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -892,7 +893,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-21.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-21.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -902,7 +903,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-22.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-22.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -912,7 +913,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-23.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-23.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -922,7 +923,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-24.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-24.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -932,7 +933,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-25.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-25.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -942,7 +943,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-26.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-26.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -952,7 +953,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-27.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-27.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -962,7 +963,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-28.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-28.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -972,7 +973,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-29.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-29.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -982,7 +983,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-30.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-30.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -992,7 +993,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-31.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-31.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1002,7 +1003,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-32.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-32.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1012,13 +1013,13 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-33.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-33.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-9-34.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-34.png)<!-- -->
 
 ``` r
 #### for year1 visit
@@ -1030,66 +1031,379 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 # ditto, ple_shot_y
 # ditto, ple_suicide_y
 
-# now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
-# no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
-#preBVdf$eventname='baseline_year_1_arm_1'
-OutDFyle=merge(OutDF,preBVdf,by=c('subjectkey'))
+# ∆∆ now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a different predictive context)
+# ∆∆ BUT this only captures baseline ABCD visit. Now we need to merge two-year FUP life events with the rest of the two years for cross-sectional analyses
+OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(OutDF,eventname=='2_year_follow_up_y_arm_1')
+# we have one valid reconstruction from code above to merge into bv
+OutDFBVyle=merge(OutDFBV,preBVdf,by=c('subjectkey'))
+# and now we need to get the two year yles to merge in
+yle2=subset(yle,eventname=='2_year_follow_up_y_arm_1')
+
+#### extract same columns of interest - 2 YEAR
+# for iterative dataset construct
+Y2df=data.frame(as.factor(yle2$subjectkey))
+colnames(Y2df)<-'subjectkey'
+# OK, now lets extract timepoint 2 values for the same columns
+for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+  # extract column name
+  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
+  # get variable of interest and plop into loop Y2 dataframe
+  Y2df$null<-as.numeric(yle2[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]])
+  colnamesMinusNull=head(colnames(Y2df), -1)
+  colnames(Y2df)<-c(colnamesMinusNull,currColName)         
+}  
+# and now we can merge it in
+OutDF2Yyle=merge(OutDF2Y,Y2df,by=c('subjectkey'))
+# now we can recombine them
+OutDFyle=rbind(OutDFBVyle,OutDF2Yyle)
+
+# so if we use the events recorded that happened prior to the baseline visit, and those that are included at 2 year FUP how much missingness does that imbue?
+print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost from requiring those with yle at both timepoints with full data'))
 ```
 
-    ## Warning in merge.data.frame(OutDF, preBVdf, by = c("subjectkey")): column
-    ## names 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'collection_id.x',
-    ## 'dataset_id.x', 'src_subject_id.y', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'src_subject_id.y', 'sex.x',
-    ## 'sex.y' are duplicated in the result
+    ## [1] "76 lost from requiring those with yle at both timepoints with full data"
+
+``` r
+# gauge consistency of responses across visits: happened at al in past should be reflected at tp 2 if it is at tp1
+tmpdf=merge(OutDFBVyle,OutDF2Yyle,by='subjectkey')
+
+# f'in ugh
+ggplot(data=tmpdf,aes(x=ple_arrest_y.x,y=ple_arrest_y.y))+geom_point()+geom_jitter()+xlab('Has a family member ever been arrested? timepoint 1')+ylab('Has a family member ever been arrested? timepoint 2')
+```
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-35.png)<!-- -->
+
+``` r
+# find subjects who report yle's at timepoint 1 but not 2
+questionableSubjs=as.factor(NULL)
+for (i in 10:34){
+  # extract column name
+  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
+  currColNamex=paste0(currColName,'.x')
+  currColNamey=paste0(currColName,'.y')
+  # extract year 1
+  y1<-tmpdf[,currColNamex]
+  # extract year 2
+  y2<-tmpdf[,currColNamey]
+  # if x > y, either i don't understand this questionnaire or the kids don't
+  questionableSubjs=tmpdf$subjectkey[y1>y2]
+  # are these subjs who were interviewer by RA disprop?
+  questionableSubjs=c(questionableSubjs,tmpdf$subjectkey[y1>y2])
+}
+
+# and if we exclude subjs with inconsistent timepoint-to-timepoint answers 
+OutDFyle=OutDFyle[!OutDFyle$subjectkey %in% questionableSubjs,]
+print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost from requiring those with yle at both timepoints with full data, and kids who inconsistently report yles'))
+```
+
+    ## [1] "880 lost from requiring those with yle at both timepoints with full data, and kids who inconsistently report yles"
 
 ``` r
 print(dim(OutDFyle))
 ```
 
-    ## [1] 9144  797
+    ## [1] 8416  797
 
 ``` r
-print(dim(OutDF))
+##############
+### LOAD IN PLE'S TOO SUCKAAAA SHRINK THAT SAMPLE SIZE
+##############
+
+# ple QC
+#### LOAD in youth life events. Unfortunately this also appears to be missing for most participants, but is populated for slightly more than residential deprivation
+ple=read.delim('~/Downloads/Package_1209596/abcd_ple01.txt')
+pleColnames=colnames(ple)
+pleColDescrip=ple[1,]
+# note yle's are labeled ple's in the colnames, but end with a _y extension (ples end with _p extension)
+
+##### Extract purely retrospective, i.e., viable for inclusion in tp1-based predictions
+#### Some will need to be retrospective. Use PLE and YLE instances of "not in past year" to get starting point for ACEs (assumed prior to tp1 scan)
+# so to reconstruct whether or not this happened before timepoint 1 scan, we will need _past_yr variables
+plePastYearcols=pleColnames[grep('_past_yr',pleColnames)]
+
+# remove "past year?" from column names to boil down to binary variables of interest
+ple_No_PastYearcols=pleColnames[-which(pleColnames %in% plePastYearcols)]
+
+# remove "was this a good or bad experience?", not really true retrospective
+goodBad=ple_No_PastYearcols[grep('_fu_',ple_No_PastYearcols)]
+ple_No_PastYearcols_No_Goodbad=ple_No_PastYearcols[-which(ple_No_PastYearcols %in% goodBad)]
+
+# remove "how much did this event affect you" for now, not really true retrospective
+EvAffect=ple_No_PastYearcols_No_Goodbad[grep('_fu2_',ple_No_PastYearcols_No_Goodbad)]
+ple_No_PastYearcols_No_Goodbad_No_EvAff=ple_No_PastYearcols_No_Goodbad[-which(ple_No_PastYearcols_No_Goodbad %in% EvAffect)]
+
+# remove remaining instances of undesireable columns (unpopulated, misnamed)
+ple_No_PastYearcols_No_Goodbad_No_EvAff=ple_No_PastYearcols_No_Goodbad_No_EvAff[-c(13,21)]
+
+# now loop through to look for inconsistency b/w timepoints
+timepoint1PLE=subset(ple,eventname=='1_year_follow_up_y_arm_1')
+timepoint2PLE=subset(ple,eventname=='2_year_follow_up_y_arm_1')
+# make merged PLE
+tmpdf=merge(timepoint1PLE,timepoint2PLE,by='subjectkey')
+# and merged ple + yle for each timepoint to eval correspondence between parent/child
+BVboth=merge(OutDFBVyle,timepoint1PLE,by='subjectkey')
 ```
 
-    ## [1] 9296  763
+    ## Warning in merge.data.frame(OutDFBVyle, timepoint1PLE, by = "subjectkey"):
+    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
+    ## 'collection_title.y' are duplicated in the result
 
 ``` r
-# so if we use the events recorded that happened prior to the baseline visit, how much missingess does that imbue?
-print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost'))
+Y2both=merge(OutDF2Yyle,timepoint2PLE,by='subjectkey')
 ```
 
-    ## [1] "152 lost"
+    ## Warning in merge.data.frame(OutDF2Yyle, timepoint2PLE, by = "subjectkey"):
+    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
+    ## 'collection_title.y' are duplicated in the result
+
+``` r
+# loop over to get another estimate of questionable reliability
+ple_based_questionableSubjs=as.factor(NULL)
+# starts with 11 instead of 10 because 10 is "select language" here
+for (i in 11:34){
+  # extract column name
+  currColName=ple_No_PastYearcols_No_Goodbad_No_EvAff[i]
+  currColNamex=paste0(currColName,'.x')
+  currColNamey=paste0(currColName,'.y')
+  # extract year 1
+  y1<-as.numeric(tmpdf[,currColNamex])
+  # extract year 2
+  y2<-as.numeric(tmpdf[,currColNamey])
+  # if x > y, either i don't understand this questionnaire or the kids don't
+  ple_based_questionableSubjs=tmpdf$subjectkey[y1>y2]
+  # are these subjs who were interviewer by RA disprop?
+  ple_based_questionableSubjs=c(ple_based_questionableSubjs,tmpdf$subjectkey[y1>y2])
+  # consistent subjs are those that aren't questionable
+  goodsubjs=tmpdf$subjectkey[!tmpdf$subjectkey %in% ple_based_questionableSubjs]
+  #### ∆∆∆ now see if they are discordant with their own child's answers
+    # find corresponding column name in yle - in theory it's replacing the _p with _y but both dataframes have typos in column names
+    currColName_y=gsub('.{1}$', 'y', currColName)
+    # extract columns
+    # extract year 1 - parent SR
+    p_y1<-as.numeric(BVboth[,currColName])
+    # youth
+    y_y1<-as.numeric(BVboth[,currColName_y])
+    # extract year 2 - parent SR
+    p_y2<-as.numeric(Y2both[,currColName])
+    # youth
+    y_y2<-as.numeric(Y2both[,currColName_y])
+    # discordant timepoint 1?
+    Discordant_tp1=BVboth$subjectkey[p_y1!=y_y1]
+    # discordant timepoint 2
+    Discordant_tp2=Y2both$subjectkey[p_y2!=y_y2]
+    Discordantsubjs=unique(c(Discordant_tp1,Discordant_tp2))
+    ple_based_questionableSubjs=c(ple_based_questionableSubjs,Discordantsubjs)
+}
+
+
+# combine with questionable subjs on the basis of tp1 ysr and tp2 ysr not matching
+questionableSubjs=unique(c(questionableSubjs,ple_based_questionableSubjs))
+
+
+OutDFyle2=OutDFyle[!OutDFyle$subjectkey %in% questionableSubjs,]
+print(paste0(dim(OutDFyle2)[1]-dim(OutDFyle2)[1],' lost from cross-referncing parent report of childs life events and removing inconsistents'))
+```
+
+    ## [1] "0 lost from cross-referncing parent report of childs life events and removing inconsistents"
+
+``` r
+print(dim(OutDFyle2))
+```
+
+    ## [1] 7342  797
 
 ``` r
 # save ouput
-saveRDS(OutDFyle,'~/OutDfFull.rds')
-
-# convert to one row per subj for temporal precedence analyses
-OutDFBV=subset(OutDFyle,eventname=='baseline_year_1_arm_1')
-OutDF2Y=subset(OutDFyle,eventname=='2_year_follow_up_y_arm_1')
-OutDFTmpPrec<-merge(OutDFyle,OutDF2Y,by='subjectkey')
+saveRDS(OutDFyle2,'~/OutDfxc.rds')
 ```
 
-    ## Warning in merge.data.frame(OutDFyle, OutDF2Y, by = "subjectkey"):
-    ## column names 'collection_id.x.x', 'dataset_id.x.x', 'interview_date.x.x',
-    ## 'sex.x.x', 'collection_title.x.x', 'collection_id.y.x', 'dataset_id.y.x',
-    ## 'src_subject_id.x.x', 'interview_date.y.x', 'sex.y.x', 'collection_title.y.x',
-    ## 'collection_id.x.x', 'dataset_id.x.x', 'src_subject_id.y.x',
-    ## 'interview_date.x.x', 'sex.x.x', 'collection_title.x.x', 'collection_id.y.x',
-    ## 'dataset_id.y.x', 'src_subject_id.x.x', 'interview_date.y.x', 'sex.y.x',
-    ## 'collection_title.y.x', 'src_subject_id.y.x', 'sex.x.x', 'sex.y.x' are
-    ## duplicated in the result
-
 ``` r
-print(dim(OutDFTmpPrec))
+##### make outdf FULL retrospective for temporal precedence analyses
+## for iterative dataset construct
+#preBVdf=data.frame(as.factor(yle1$subjectkey))
+#colnames(preBVdf)<-'subjectkey'
+#
+## OK, now lets remove instances of these things happening in the past year
+#for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+#  # extract column name
+#  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
+#  # extract corresponding "was this in the past year?" boolean, which is always right after
+#  currColIndex=grep(currColName,yleColnames)
+#  # extract vector of values for PTs
+#  currCol=yle1[,currColIndex]
+#  # need an exception for le_friend_injur_past_yr_y. Appears to be misnamed without p in ple
+#  if  (currColName=='ple_friend_injur_y'){
+#    currColNamePastYear='le_friend_injur_past_yr_y'
+#  # also need except for ple_injur_past_yr_y, which is actually ple_injur_y_past_yr_y which is also probably a typo
+#  } else if (currColName=='ple_injur_y'){
+#    currColNamePastYear='ple_injur_y_past_yr_y'
+#  }  else {
+#    # return colname of past year using text in aim to be more robust
+#    currColNamePastYear=gsub('_y','_past_yr_y',currColName)
+#  }
+#  currColIndexPastYear=grep(currColNamePastYear,yleColnames)
+#  # This turned out to not be robust to heterogeneity in questionnaire
+#  ## "past year"? immediately proceeds question
+#  ## currColIndexPastYear=currColIndex+1
+#  ## extract this vector of values for PTs
+#  currCol_pastyr=yle1[,currColIndexPastYear]
+#  # set empties to 0 in follow up question
+#  currCol_pastyr[is.empty(currCol_pastyr)]=0
+#  # ple_injur_y and ple_injur_y_yr_y are misnamed, need to build catch specifically for these variables
+#  if (currColIndex[1]==42){
+#    # set to correct column
+#    currColIndex=42
+#    # re-draw currCol
+#    currCol=yle1[,currColIndex]
+#    # re-draw past year
+#    currColIndexPastYear=currColIndex+1
+#    # re-draw vector of values for PTs
+#    currCol_pastyr=yle1[,currColIndexPastYear]
+#    # set is empty to 0 in follow up question
+#    currCol_pastyr[is.empty(currCol_pastyr)]=0
+#    # extract "past year"?
+#    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+#  } else {
+#    # if past year, subtract instance
+#    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+#  }
+#  # print out utilized colum names to ensure they match
+#  print(paste('Variables:',yle[1,currColIndex],yle[1,currColIndexPastYear]))
+#  # explicitly count instances in past year
+#  PastYr=as.numeric(currCol)+as.numeric(currCol_pastyr)==2
+#  # make a plot dataframe for ggplot2
+#  plotdf=data.frame(as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]),NotPastYr,as.numeric(PastYr))
+#  colnames(plotdf)=c('Total','BeforeLastYear','DuringLastYear')
+#  plotdf<-invisible(melt(plotdf))
+#  a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
+#  print(a)
+#  # iteratively make a dataframe of yes/no (standard)
+#  preBVdf$null<-NotPastYr
+#  colnamesMinusNull=head(colnames(preBVdf), -1)
+#  colnames(preBVdf)<-c(colnamesMinusNull,currColName)
+#}
+#
+##### for year1 visit
+## note NO answers recorded to ple_foster_care_past_yr_y. I guess we can't use that variable unless new release has it populated
+## ditto, ple_hit_y
+## ditto, ple_homeless_y
+## ditto, ple_hospitalized_y
+## ditto, ple_lockdown_y
+## ditto, ple_shot_y
+## ditto, ple_suicide_y
+#
+## now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
+## no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
+##preBVdf$eventname='baseline_year_1_arm_1'
+#OutDFyle=merge(OutDF,preBVdf,by=c('subjectkey'))
+#print(dim(OutDFyle))
+#print(dim(OutDF))
+#
+## convert to one row per subj for temporal precedence analyses
+#OutDFBV=subset(OutDFyle,eventname=='baseline_year_1_arm_1')
+#OutDF2Y=subset(OutDFyle,eventname=='2_year_follow_up_y_arm_1')
+#OutDFTmpPrec<-merge(OutDFyle,OutDF2Y,by='subjectkey')
+#print(dim(OutDFTmpPrec))
+#
+#saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_FullRetro.rds')
 ```
 
-    ## [1] 9144 1593
-
 ``` r
-saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec.rds')
+#### make outdf retrospective PLUS for temporal precedence analyses (includes YLE's that happened before tp2 measurement. Sep. measure)
+# for iterative dataset construct
+#preBVdf=data.frame(as.factor(yle1$subjectkey))
+#colnames(preBVdf)<-'subjectkey'
+#
+## OK, now lets remove instances of these things happening in the past year
+#for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+#  # extract column name
+#  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
+#  # make a "w/in past year" column 
+#  currColName_winYear=paste0(currColName,'_past')
+#  # extract corresponding "was this in the past year?" boolean, which is always right after
+#  currColIndex=grep(currColName,yleColnames)
+#  # extract vector of values for PTs
+#  currCol=yle1[,currColIndex]
+#  # need an exception for le_friend_injur_past_yr_y. Appears to be misnamed without p in ple
+#  if  (currColName=='ple_friend_injur_y'){
+#    currColNamePastYear='le_friend_injur_past_yr_y'
+#  # also need except for ple_injur_past_yr_y, which is actually ple_injur_y_past_yr_y which is also probably a typo
+#  } else if (currColName=='ple_injur_y'){
+#    currColNamePastYear='ple_injur_y_past_yr_y'
+#  }  else {
+#    # return colname of past year using text in aim to be more robust
+#    currColNamePastYear=gsub('_y','_past_yr_y',currColName)
+#  }
+#  currColIndexPastYear=grep(currColNamePastYear,yleColnames)
+#  # This turned out to not be robust to heterogeneity in questionnaire
+#  ## "past year"? immediately proceeds question
+#  ## currColIndexPastYear=currColIndex+1
+#  ## extract this vector of values for PTs
+#  currCol_pastyr=yle1[,currColIndexPastYear]
+#  # set empties to 0 in follow up question
+#  currCol_pastyr[is.empty(currCol_pastyr)]=0
+#  # ple_injur_y and ple_injur_y_yr_y are misnamed, need to build catch specifically for these variables
+#  if (currColIndex[1]==42){
+#    # set to correct column
+#    currColIndex=42
+#    # re-draw currCol
+#    currCol=yle1[,currColIndex]
+#    # re-draw past year
+#    currColIndexPastYear=currColIndex+1
+#    # re-draw vector of values for PTs
+#    currCol_pastyr=yle1[,currColIndexPastYear]
+#    # set is empty to 0 in follow up question
+#    currCol_pastyr[is.empty(currCol_pastyr)]=0
+#    # extract "past year"?
+#    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+#  } else {
+#    # if past year, subtract instance
+#    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+#  }
+#  # print out utilized colum names to ensure they match
+#  print(paste('Variables:',yle[1,currColIndex],yle[1,currColIndexPastYear]))
+#  # explicitly count instances in past year
+#  PastYr=as.numeric(currCol)+as.numeric(currCol_pastyr)==2
+#  # make a plot dataframe for ggplot2
+#  plotdf=data.frame(as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]),NotPastYr,as.numeric(PastYr))
+#  colnames(plotdf)=c('Total','BeforeLastYear','DuringLastYear')
+#  plotdf<-invisible(melt(plotdf))
+#  a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
+#  print(a)
+#  # iteratively make a dataframe of yes/no (standard) for cross-sectional DF
+#  preBVdf$null<-as.numeric(PastYr)
+#  colnamesMinusNull=head(colnames(preBVdf), -1)
+#  colnames(preBVdf)<-c(colnamesMinusNull,currColName)
+#}
+#
+##### for year1 visit
+## note NO answers recorded to ple_foster_care_past_yr_y. I guess we can't use that variable unless new release has it populated
+## ditto, ple_hit_y
+## ditto, ple_homeless_y
+## ditto, ple_hospitalized_y
+## ditto, ple_lockdown_y
+## ditto, ple_shot_y
+## ditto, ple_suicide_y
+#
+## now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
+## no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
+##preBVdf$eventname='baseline_year_1_arm_1'
+#OutDFyle=merge(OutDF,preBVdf,by=c('subjectkey'))
+#print(dim(OutDFyle))
+#print(dim(OutDF))
+#
+## convert to one row per subj for temporal precedence analyses
+#OutDFBV=subset(OutDFyle,eventname=='baseline_year_1_arm_1')
+#OutDF2Y=subset(OutDFyle,eventname=='2_year_follow_up_y_arm_1')
+#OutDFTmpPrec<-merge(OutDFyle,OutDF2Y,by='subjectkey')
+#print(dim(OutDFTmpPrec))
+#
+#saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_FullRetro.rds')
 ```
