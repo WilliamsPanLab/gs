@@ -647,6 +647,10 @@ OutDFyle2=OutDFyle[!OutDFyle$subjectkey %in% questionableSubjs,]
 print(paste0(dim(OutDFyle2)[1]-dim(OutDFyle2)[1],' lost from cross-referncing parent report of childs life events and removing inconsistents'))
 print(dim(OutDFyle2))
 
+###### ∆∆∆∆
+###### convert to numeric and factors for ple's
+###### ∆∆∆∆
+
 # save ouput
 saveRDS(OutDFyle2,'~/OutDfxc.rds')
 

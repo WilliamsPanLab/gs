@@ -53,18 +53,31 @@ for (b in 1:10000){
 	# fit models
 	### full
 	fullModel<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	devExplained_full[b]=fullModel$deviance/fullModel$null.deviance
 	### died
 	Model_n_died<-bam(cbcl_scr_syn_totprob_r~ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	devExplained_n_died[b]=Model_n_died$deviance/Model_n_died$null.deviance
 	### injured
 	Model_n_injured<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	devExplained_n_injured[b]=Model_n_injured$deviance/Model_n_injured$null.deviance
 	### crime
 	Model_n_crime<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	devExplained_n_crime[b]=Model_n_crime$deviance/Model_n_crime$null.deviance
 	### friend
 	Model_n_friend<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	devExplained_n_friend[b]=Model_n_friend$deviance/Model_n_friend$null.deviance
 	### friend_injured
 	Model_n_friend_injured<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	devExplained_n_friend_injured[b]=Model_n_friend_injured$deviance/Model_n_friend_injured$null.deviance
 	### arrest
-	Model_n_arrest
+	Model_n_arrest<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	devExplained_n_arrest[b]=Model_n_arrest$deviance/Model_n_arrest$null.deviance
+	### friend_died
+	Model_n_friend_died<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_arrest_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	devExplained_n_friend_died[b]=Model_n_friend_died$deviance/Model_n_friend_died$null.deviance
+	### mental_health
+	##### LEFT OFF HERE - CONVERT SPLINE VARIABLES TO NUMERIC AND PLES TO FACTORS
+	
 
 	#### gpAge_independent splines
 	gpAge_full<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+Grades,data=bootSamp)
