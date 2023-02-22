@@ -1,20 +1,41 @@
 library(mgcv)
 # load in data
-masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/mixedEfDf_WithGrades.rds')
+masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/OutDfxc.rds')
+
+# dev explained for all models
 devExplained_full=rep(0,10000)
-devExplained_NoGrades=rep(0,10000)
-devExplained_NoTot=rep(0,10000)
-p_devExplained_full=rep(0,10000)
-p_devExplained_NoGrades=rep(0,10000)
-p_devExplained_NoG=rep(0,10000)
-grades_devExplained_full=rep(0,10000)
-grades_devExplained_noG=rep(0,10000)
-grades_devExplained_noTot=rep(0,10000)
+devExplained_n_died=rep(0,10000)
+devExplained_n_injured=rep(0,10000)
+devExplained_n_crime=rep(0,10000)
+devExplained_n_friend=rep(0,10000)
+devExplained_n_friend_injur=rep(0,10000)
+devExplained_n_arrest=rep(0,10000)
+devExplained_n_friend_died=rep(0,10000)
+devExplained_n_mh=rep(0,10000)
+devExplained_n_sib=rep(0,10000)
+devExplained_n_victim=rep(0,10000)
+devExplained_n_separ=rep(0,10000)
+devExplained_n_law=rep(0,10000)
+devExplained_n_school=rep(0,10000)
+devExplained_n_move=rep(0,10000)
+devExplained_n_jail=rep(0,10000)
+devExplained_n_step=rep(0,10000)
+devExplained_n_new_job=rep(0,10000)
+devExplained_n_new_sib=rep(0,10000)
+devExplained_n_g=rep(0,10000)
+devExplained_n_interview_age=rep(0,10000)
+devExplained_n_Grades=rep(0,10000)
+devExplained_n_parentPcount=rep(0,10000)
+devExplained_n_income=rep(0,10000)
+devExplained_n_parental_education=rep(0,10000)
+devExplained_n_sex=rep(0,10000)
+devExplained_n_race=rep(0,10000)
+
 # garner num subjs for bootstrapping
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up
-masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','g','subjectkey','interview_age','Grades')]
+masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','ple_died_y','ple_injured_y','ple_crime_y','ple_friend_y','ple_friend_injur_y','ple_arrest_y','ple_friend_died_y','ple_mh_y','ple_sib_y','ple_victim_y','ple_separ_y','ple_law_y','ple_school_y','ple_move_y','ple_jail_y','ple_step_y','ple_new_job_y','ple_new_sib_y','g','subjectkey','interview_age','Grades','parentPcount','income','parental_education','sex','race_ethnicity')]
 # loop over manual bootstrap
 for (b in 1:10000){
 	print(b)
@@ -29,6 +50,22 @@ for (b in 1:10000){
 	}
 	# bootstrap sample
 	bootSamp=resampled_df
+	# fit models
+	### full
+	fullModel<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	### died
+	Model_n_died<-bam(cbcl_scr_syn_totprob_r~ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	### injured
+	Model_n_injured<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	### crime
+	Model_n_crime<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	### friend
+	Model_n_friend<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	### friend_injured
+	Model_n_friend_injured<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g)+s(interview_age)+s(Grades)+s(parentPcount)+s(income)+s(parental_education)+sex+race_ethnicity,data=bootSamp,family=nb())
+	### arrest
+	Model_n_arrest
+
 	#### gpAge_independent splines
 	gpAge_full<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+Grades,data=bootSamp)
 	devExplained_full[b]<-summary(gpAge_full)$dev.expl
