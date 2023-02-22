@@ -132,6 +132,15 @@ for (b in 1:10000){
 	Model_n_race<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex,data=bootSamp,family=nb())
 	devExplained_n_race[b]=Model_n_race$deviance/Model_n_race$null.deviance
 	### verify same number of terms in each model (except first because it is full/+1)
+	assert((length(fullModel$var.summary)+1)==length(Model_n_died$var.summary))
+	assert(length(Model_n_died$var.summary)==length(Model_n_injured$var.summary))
+	assert(length(Model_n_injured$var.summary)==length(Model_n_crime$var.summary))
+	assert(length(Model_n_crime$var.summary)==length(Model_n_friend$var.summary))
+	assert(length(Model_n_friend$var.summary)==length(Model_n_friend_injur$var.summary))
+	assert(
+
+
+
 	assert((length(fullModel$var.summary)+1)==length(Model_n_died$var.summary)==length(Model_n_injured$var.summary)==length(Model_n_crime$var.summary)==length(Model_n_friend$var.summary)==length(Model_n_friend_injur$var.summary)==length(Model_n_arrest$var.summary)==length(Model_n_friend_died$var.summary)==length(Model_n_mh$var.summary)==length(Model_n_sib$var.summary)==length(Model_n_victim$var.summary)==length(Model_n_separ$var.summary)==length(Model_n_law$var.summary)==length(Model_n_school$var.summary)==length(Model_n_move$var.summary)==length(Model_n_jail$var.summary)==length(Model_n_step$var.summary)==length(Model_n_new_job$var.summary)==length(Model_n_new_sib$var.summary)==length(Model_n_g$var.summary)==length(Model_n_age$var.summary)==length(Model_n_grades$var.summary)==length(Model_n_parentPcount$var.summary)==length(Model_n_income$var.summary)==length(Model_n_parental_edu$var.summary)==length(Model_n_sex$var.summary)==length(Model_n_race$var.summary))
 }
 # saveout df of dev explained for plotting
