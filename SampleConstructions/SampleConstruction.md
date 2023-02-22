@@ -548,18 +548,21 @@ dimB4repRem=dim(participantsTSV)
 participantsTSV=participantsTSV[!participantsTSV$participant_id %in% SubjsRepeated,]
 # remove eventname column from participants tsv, not informative and causes problems down the road
 participantsTSV = participantsTSV[,!(names(participantsTSV) %in% 'eventname')]
+# convert sex to M/F in particpants tsv
+participantsTSV$sex[participantsTSV$sex==1]="M"
+participantsTSV$sex[participantsTSV$sex==2]="F"
 ### merge in for fam income and parent edu
-OutDF=merge(OutDF,participantsTSV,by=c('subjectkey'))
+OutDF=merge(OutDF,participantsTSV,by=c('subjectkey','sex'))
 ```
 
-    ## Warning in merge.data.frame(OutDF, participantsTSV, by = c("subjectkey")):
+    ## Warning in merge.data.frame(OutDF, participantsTSV, by = c("subjectkey", :
     ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
     ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
     ## 'interview_date.y', 'sex.y', 'collection_title.y', 'collection_id.x',
     ## 'dataset_id.x', 'src_subject_id.y', 'interview_date.x', 'sex.x',
     ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'src_subject_id.y', 'sex.x',
-    ## 'sex.y' are duplicated in the result
+    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'src_subject_id.y' are
+    ## duplicated in the result
 
 ``` r
 # take out na incomes
@@ -575,7 +578,7 @@ OutDF$parental_education<-as.ordered(OutDF$parental_education)
 dim(OutDF)
 ```
 
-    ## [1] 9296  763
+    ## [1] 9292  762
 
 ``` r
 #### LOAD in youth life events. Unfortunately this also appears to be missing for most participants, but is populated for slightly more than residential deprivation
@@ -1107,7 +1110,7 @@ print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost from requiring those with yle
 print(dim(OutDFyle))
 ```
 
-    ## [1] 8416  797
+    ## [1] 8412  796
 
 ``` r
 ##############
@@ -1150,18 +1153,18 @@ BVboth=merge(OutDFBVyle,timepoint1PLE,by='subjectkey')
 ```
 
     ## Warning in merge.data.frame(OutDFBVyle, timepoint1PLE, by = "subjectkey"):
-    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
+    ## column names 'sex.x', 'collection_id.x', 'dataset_id.x', 'interview_date.x',
     ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
-    ## 'collection_title.y' are duplicated in the result
+    ## 'sex.y', 'collection_title.y' are duplicated in the result
 
 ``` r
 Y2both=merge(OutDF2Yyle,timepoint2PLE,by='subjectkey')
 ```
 
     ## Warning in merge.data.frame(OutDF2Yyle, timepoint2PLE, by = "subjectkey"):
-    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
+    ## column names 'sex.x', 'collection_id.x', 'dataset_id.x', 'interview_date.x',
     ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
-    ## 'collection_title.y' are duplicated in the result
+    ## 'sex.y', 'collection_title.y' are duplicated in the result
 
 ``` r
 # loop over to get another estimate of questionable reliability
@@ -1217,9 +1220,32 @@ print(paste0(dim(OutDFyle2)[1]-dim(OutDFyle2)[1],' lost from cross-referncing pa
 print(dim(OutDFyle2))
 ```
 
-    ## [1] 7342  797
+    ## [1] 7340  796
 
 ``` r
+###### fix data formats
+# variables of interest
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_totprob_r','ple_died_y','ple_injured_y','ple_crime_y','ple_friend_y','ple_friend_injur_y','ple_arrest_y','ple_friend_died_y','ple_mh_y','ple_sib_y','ple_victim_y','ple_separ_y','ple_law_y','ple_school_y','ple_move_y','ple_jail_y','ple_step_y','ple_new_job_y','ple_new_sib_y','g','subjectkey','interview_age','Grades','parentPcount','income','parental_education','sex','race_ethnicity')
+
+# convert PLE's to factors
+for (i in 4:21){
+  VarOfInt=variablesOfInterest[i]
+  OutDFyle2[,VarOfInt]<-as.factor(OutDFyle2[,VarOfInt])
+}
+
+# convert grades, parent P, income, and parental edu to numeric
+for (i in 25:28){
+  VarOfInt=variablesOfInterest[i]
+  OutDFyle2[,VarOfInt]<-as.numeric(OutDFyle2[,VarOfInt])
+}
+
+# convert sex and race/ethnicity to factors
+for (i in 29:30){
+  VarOfInt=variablesOfInterest[i]
+  OutDFyle2[,VarOfInt]<-as.factor(OutDFyle2[,VarOfInt])
+}
+
+
 # save ouput
 saveRDS(OutDFyle2,'~/OutDfxc.rds')
 ```
