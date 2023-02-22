@@ -137,11 +137,22 @@ for (b in 1:10000){
 	assert(length(Model_n_injured$var.summary)==length(Model_n_crime$var.summary))
 	assert(length(Model_n_crime$var.summary)==length(Model_n_friend$var.summary))
 	assert(length(Model_n_friend$var.summary)==length(Model_n_friend_injur$var.summary))
-	assert(
-
-
-
-	assert((length(fullModel$var.summary)+1)==length(Model_n_died$var.summary)==length(Model_n_injured$var.summary)==length(Model_n_crime$var.summary)==length(Model_n_friend$var.summary)==length(Model_n_friend_injur$var.summary)==length(Model_n_arrest$var.summary)==length(Model_n_friend_died$var.summary)==length(Model_n_mh$var.summary)==length(Model_n_sib$var.summary)==length(Model_n_victim$var.summary)==length(Model_n_separ$var.summary)==length(Model_n_law$var.summary)==length(Model_n_school$var.summary)==length(Model_n_move$var.summary)==length(Model_n_jail$var.summary)==length(Model_n_step$var.summary)==length(Model_n_new_job$var.summary)==length(Model_n_new_sib$var.summary)==length(Model_n_g$var.summary)==length(Model_n_age$var.summary)==length(Model_n_grades$var.summary)==length(Model_n_parentPcount$var.summary)==length(Model_n_income$var.summary)==length(Model_n_parental_edu$var.summary)==length(Model_n_sex$var.summary)==length(Model_n_race$var.summary))
+	assert(length(Model_n_friend_injur$var.summary)==length(Model_n_arrest$var.summary))
+	assert(length(Model_n_arrest$var.summary)==length(Model_n_friend_died$var.summary))
+	assert(length(Model_n_friend_died$var.summary)==length(Model_n_mh$var.summary))
+	assert(length(Model_n_mh$var.summary)==length(Model_n_sib$var.summary))
+	assert(length(Model_n_sib$var.summary)==length(Model_n_victim$var.summary))
+	assert(length(Model_n_victim$var.summary)==length(Model_n_separ$var.summary))
+	assert(length(Model_n_separ$var.summary)==length(Model_n_law$var.summary))
+	assert(length(Model_n_law$var.summary)==length(Model_n_school$var.summary))
+	assert(length(Model_n_school$var.summary)==length(Model_n_move$var.summary))
+	assert(length(Model_n_move$var.summary)==length(Model_n_jail$var.summary))
+	assert(length(Model_n_jail$var.summary)==length(Model_n_step$var.summary))
+	assert(length(Model_n_step$var.summary)==length(Model_n_new_job$var.summary))
+	assert(length(Model_n_new_job$var.summary)==length(Model_n_new_sib$var.summary))
+	assert(length(Model_n_new_sib$var.summary)==length(Model_n_parental_edu$var.summary))
+	assert(length(Model_n_parental_edu$var.summary)==length(Model_n_sex$var.summary))
+	assert(length(Model_n_sex$var.summary)==length(Model_n_race$var.summary))
 }
 # saveout df of dev explained for plotting
 outdf=data.frame(devExplained_full,devExplained_NoDied,devExplained_NoInjured,devExplained_NoCrime,devExplained_NoFriend,devExplained_NoFriendInjur,devExplained_NoArrest,devExplained_NoFriendDied,devExplained_NoMh,devExplained_NoSib,devExplained_NoVictim,devExplained_NoSepar,devExplained_NoLaw,devExplained_NoSchool,devExplained_NoMove,devExplained_NoJail,devExplained_NoStep,devExplained_NoNewJob,devExplained_NoNewSib,devExplained_NoG,devExplained_NoAge,devExplained_NoGrades,devExplained_NoParentPcount,devExplained_NoIncome,devExplained_NoParentalEdu,devExplained_NoSex,devExplained_NoRace)
