@@ -667,7 +667,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
     # if past year, subtract instance
     NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
   }
-  # print out utilized colum names to ensure they match
+  # print out utilized column names to ensure they match
   print(paste('Variables:',yle[1,currColIndex],yle[1,currColIndexPastYear]))
   # explicitly count instances in past year
   PastYr=as.numeric(currCol)+as.numeric(currCol_pastyr)==2
@@ -1251,185 +1251,850 @@ saveRDS(OutDFyle2,'~/OutDfxc.rds')
 ```
 
 ``` r
+# remove prior YLE columns for clarity (except for subjectkey and eventname, items 4 and 9)
+yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad_No_EvAff[-c(4,9)]
+OutDFyle2=OutDFyle2[,!colnames(OutDFyle2) %in% yle_No_PastYearcols_No_Goodbad_No_EvAff]
 ##### make outdf FULL retrospective for temporal precedence analyses
 ## for iterative dataset construct
-#preBVdf=data.frame(as.factor(yle1$subjectkey))
-#colnames(preBVdf)<-'subjectkey'
-#
-## OK, now lets remove instances of these things happening in the past year
-#for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
-#  # extract column name
-#  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
-#  # extract corresponding "was this in the past year?" boolean, which is always right after
-#  currColIndex=grep(currColName,yleColnames)
-#  # extract vector of values for PTs
-#  currCol=yle1[,currColIndex]
-#  # need an exception for le_friend_injur_past_yr_y. Appears to be misnamed without p in ple
-#  if  (currColName=='ple_friend_injur_y'){
-#    currColNamePastYear='le_friend_injur_past_yr_y'
-#  # also need except for ple_injur_past_yr_y, which is actually ple_injur_y_past_yr_y which is also probably a typo
-#  } else if (currColName=='ple_injur_y'){
-#    currColNamePastYear='ple_injur_y_past_yr_y'
-#  }  else {
-#    # return colname of past year using text in aim to be more robust
-#    currColNamePastYear=gsub('_y','_past_yr_y',currColName)
-#  }
-#  currColIndexPastYear=grep(currColNamePastYear,yleColnames)
-#  # This turned out to not be robust to heterogeneity in questionnaire
-#  ## "past year"? immediately proceeds question
-#  ## currColIndexPastYear=currColIndex+1
-#  ## extract this vector of values for PTs
-#  currCol_pastyr=yle1[,currColIndexPastYear]
-#  # set empties to 0 in follow up question
-#  currCol_pastyr[is.empty(currCol_pastyr)]=0
-#  # ple_injur_y and ple_injur_y_yr_y are misnamed, need to build catch specifically for these variables
-#  if (currColIndex[1]==42){
-#    # set to correct column
-#    currColIndex=42
-#    # re-draw currCol
-#    currCol=yle1[,currColIndex]
-#    # re-draw past year
-#    currColIndexPastYear=currColIndex+1
-#    # re-draw vector of values for PTs
-#    currCol_pastyr=yle1[,currColIndexPastYear]
-#    # set is empty to 0 in follow up question
-#    currCol_pastyr[is.empty(currCol_pastyr)]=0
-#    # extract "past year"?
-#    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
-#  } else {
-#    # if past year, subtract instance
-#    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
-#  }
-#  # print out utilized colum names to ensure they match
-#  print(paste('Variables:',yle[1,currColIndex],yle[1,currColIndexPastYear]))
-#  # explicitly count instances in past year
-#  PastYr=as.numeric(currCol)+as.numeric(currCol_pastyr)==2
-#  # make a plot dataframe for ggplot2
-#  plotdf=data.frame(as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]),NotPastYr,as.numeric(PastYr))
-#  colnames(plotdf)=c('Total','BeforeLastYear','DuringLastYear')
-#  plotdf<-invisible(melt(plotdf))
-#  a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
-#  print(a)
-#  # iteratively make a dataframe of yes/no (standard)
-#  preBVdf$null<-NotPastYr
-#  colnamesMinusNull=head(colnames(preBVdf), -1)
-#  colnames(preBVdf)<-c(colnamesMinusNull,currColName)
-#}
-#
-##### for year1 visit
-## note NO answers recorded to ple_foster_care_past_yr_y. I guess we can't use that variable unless new release has it populated
-## ditto, ple_hit_y
-## ditto, ple_homeless_y
-## ditto, ple_hospitalized_y
-## ditto, ple_lockdown_y
-## ditto, ple_shot_y
-## ditto, ple_suicide_y
-#
-## now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
-## no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
-##preBVdf$eventname='baseline_year_1_arm_1'
-#OutDFyle=merge(OutDF,preBVdf,by=c('subjectkey'))
-#print(dim(OutDFyle))
-#print(dim(OutDF))
-#
-## convert to one row per subj for temporal precedence analyses
-#OutDFBV=subset(OutDFyle,eventname=='baseline_year_1_arm_1')
-#OutDF2Y=subset(OutDFyle,eventname=='2_year_follow_up_y_arm_1')
-#OutDFTmpPrec<-merge(OutDFyle,OutDF2Y,by='subjectkey')
-#print(dim(OutDFTmpPrec))
-#
-#saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_FullRetro.rds')
+preBVdf=data.frame(as.factor(yle1$subjectkey))
+colnames(preBVdf)<-'subjectkey'
+
+# OK, now lets remove instances of these things happening in the past year
+for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+  # extract column name
+  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
+  # extract corresponding "was this in the past year?" boolean, which is always right after
+  currColIndex=grep(currColName,yleColnames)
+  # extract vector of values for PTs
+  currCol=yle1[,currColIndex]
+  # need an exception for le_friend_injur_past_yr_y. Appears to be misnamed without p in ple
+  if  (currColName=='ple_friend_injur_y'){
+    currColNamePastYear='le_friend_injur_past_yr_y'
+  # also need except for ple_injur_past_yr_y, which is actually ple_injur_y_past_yr_y which is also probably a typo
+  } else if (currColName=='ple_injur_y'){
+    currColNamePastYear='ple_injur_y_past_yr_y'
+  }  else {
+    # return colname of past year using text in aim to be more robust
+    currColNamePastYear=gsub('_y','_past_yr_y',currColName)
+  }
+  currColIndexPastYear=grep(currColNamePastYear,yleColnames)
+  # This turned out to not be robust to heterogeneity in questionnaire
+  ## "past year"? immediately proceeds question
+  ## currColIndexPastYear=currColIndex+1
+  ## extract this vector of values for PTs
+  currCol_pastyr=yle1[,currColIndexPastYear]
+  # set empties to 0 in follow up question
+  currCol_pastyr[is.empty(currCol_pastyr)]=0
+  # ple_injur_y and ple_injur_y_yr_y are misnamed, need to build catch specifically for these variables
+  if (currColIndex[1]==42){
+    # set to correct column
+    currColIndex=42
+    # re-draw currCol
+    currCol=yle1[,currColIndex]
+    # re-draw past year
+    currColIndexPastYear=currColIndex+1
+    # re-draw vector of values for PTs
+    currCol_pastyr=yle1[,currColIndexPastYear]
+    # set is empty to 0 in follow up question
+    currCol_pastyr[is.empty(currCol_pastyr)]=0
+    # extract "past year"?
+    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+  } else {
+    # if past year, subtract instance
+    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+  }
+  # print out utilized colum names to ensure they match
+  print(paste('Variables:',yle[1,currColIndex],yle[1,currColIndexPastYear]))
+  # explicitly count instances in past year
+  PastYr=as.numeric(currCol)+as.numeric(currCol_pastyr)==2
+  # make a plot dataframe for ggplot2
+  plotdf=data.frame(as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]),NotPastYr,as.numeric(PastYr))
+  colnames(plotdf)=c('Total','BeforeLastYear','DuringLastYear')
+  plotdf<-invisible(melt(plotdf))
+  a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
+  print(a)
+  # iteratively make a dataframe of yes/no (standard)
+  preBVdf$null<-NotPastYr
+  colnamesMinusNull=head(colnames(preBVdf), -1)
+  colnames(preBVdf)<-c(colnamesMinusNull,currColName)
+}
+```
+
+    ## [1] "Variables: Saw crime or accident? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Lost a close friend? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Close friend was seriously sick/injured? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Negative change in parent's financial situation? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-3.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Family member had drug and/or alcohol problem? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-4.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: You got seriously sick? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-5.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: You got seriously injured? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-6.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 24 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parents argued more than previously? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-7.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Mother/father figure lost job? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-8.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: One parent was away from home more often? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-9.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Someone in the family was arrested? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-10.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Close friend died? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-11.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Family member had mental/emotional problem? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-12.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Brother or sister left home? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-13.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Was a victim of crime/violence/assault? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-14.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parents separated or divorced? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-15.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parents/caregiver got into trouble with the law? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-16.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Attended a new school? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-17.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Family moved? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-18.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: One of the parents/caregivers went to jail? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-19.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Got new stepmother or stepfather? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-20.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parent/caregiver got a new job? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-21.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Got new brother or sister? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-22.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: You were placed in foster care? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-23.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Saw or heard someone getting hit Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-24.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Your family was homeless? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-25.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parent or caregiver hospitalized? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-26.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Had a lockdown at your school due to concerns about a school shooting or violence? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-27.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Please indicate how instrument was administered: Please indicate how instrument was administered:"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-28.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Saw or heard someone being shot at (but not actually wounded) in your school or neighborhood? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-29.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Do you know someone who has attempted suicide? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-30.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parent or caregiver deported? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-31.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-32.png)<!-- -->
+
+``` r
+#### for year1 visit
+# note NO answers recorded to ple_foster_care_past_yr_y. I guess we can't use that variable unless new release has it populated
+# ditto, ple_hit_y
+# ditto, ple_homeless_y
+# ditto, ple_hospitalized_y
+# ditto, ple_lockdown_y
+# ditto, ple_shot_y
+# ditto, ple_suicide_y
+
+# now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
+# no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
+#preBVdf$eventname='baseline_year_1_arm_1'
+OutDFyle3=merge(OutDFyle2,preBVdf,by=c('subjectkey'))
+print(dim(OutDFyle3))
+```
+
+    ## [1] 7264  789
+
+``` r
+# convert to one row per subj for temporal precedence analyses
+OutDFBV=subset(OutDFyle3,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(OutDFyle3,eventname=='2_year_follow_up_y_arm_1')
+OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
+print(dim(OutDFTmpPrec))
+```
+
+    ## [1] 3632 1577
+
+``` r
+saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_FullRetro.rds')
 ```
 
 ``` r
 #### make outdf retrospective PLUS for temporal precedence analyses (includes YLE's that happened before tp2 measurement. Sep. measure)
-# for iterative dataset construct
-#preBVdf=data.frame(as.factor(yle1$subjectkey))
-#colnames(preBVdf)<-'subjectkey'
-#
-## OK, now lets remove instances of these things happening in the past year
-#for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
-#  # extract column name
-#  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
-#  # make a "w/in past year" column 
-#  currColName_winYear=paste0(currColName,'_past')
-#  # extract corresponding "was this in the past year?" boolean, which is always right after
-#  currColIndex=grep(currColName,yleColnames)
-#  # extract vector of values for PTs
-#  currCol=yle1[,currColIndex]
-#  # need an exception for le_friend_injur_past_yr_y. Appears to be misnamed without p in ple
-#  if  (currColName=='ple_friend_injur_y'){
-#    currColNamePastYear='le_friend_injur_past_yr_y'
-#  # also need except for ple_injur_past_yr_y, which is actually ple_injur_y_past_yr_y which is also probably a typo
-#  } else if (currColName=='ple_injur_y'){
-#    currColNamePastYear='ple_injur_y_past_yr_y'
-#  }  else {
-#    # return colname of past year using text in aim to be more robust
-#    currColNamePastYear=gsub('_y','_past_yr_y',currColName)
-#  }
-#  currColIndexPastYear=grep(currColNamePastYear,yleColnames)
-#  # This turned out to not be robust to heterogeneity in questionnaire
-#  ## "past year"? immediately proceeds question
-#  ## currColIndexPastYear=currColIndex+1
-#  ## extract this vector of values for PTs
-#  currCol_pastyr=yle1[,currColIndexPastYear]
-#  # set empties to 0 in follow up question
-#  currCol_pastyr[is.empty(currCol_pastyr)]=0
-#  # ple_injur_y and ple_injur_y_yr_y are misnamed, need to build catch specifically for these variables
-#  if (currColIndex[1]==42){
-#    # set to correct column
-#    currColIndex=42
-#    # re-draw currCol
-#    currCol=yle1[,currColIndex]
-#    # re-draw past year
-#    currColIndexPastYear=currColIndex+1
-#    # re-draw vector of values for PTs
-#    currCol_pastyr=yle1[,currColIndexPastYear]
-#    # set is empty to 0 in follow up question
-#    currCol_pastyr[is.empty(currCol_pastyr)]=0
-#    # extract "past year"?
-#    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
-#  } else {
-#    # if past year, subtract instance
-#    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
-#  }
-#  # print out utilized colum names to ensure they match
-#  print(paste('Variables:',yle[1,currColIndex],yle[1,currColIndexPastYear]))
-#  # explicitly count instances in past year
-#  PastYr=as.numeric(currCol)+as.numeric(currCol_pastyr)==2
-#  # make a plot dataframe for ggplot2
-#  plotdf=data.frame(as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]),NotPastYr,as.numeric(PastYr))
-#  colnames(plotdf)=c('Total','BeforeLastYear','DuringLastYear')
-#  plotdf<-invisible(melt(plotdf))
-#  a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
-#  print(a)
-#  # iteratively make a dataframe of yes/no (standard) for cross-sectional DF
-#  preBVdf$null<-as.numeric(PastYr)
-#  colnamesMinusNull=head(colnames(preBVdf), -1)
-#  colnames(preBVdf)<-c(colnamesMinusNull,currColName)
-#}
-#
-##### for year1 visit
-## note NO answers recorded to ple_foster_care_past_yr_y. I guess we can't use that variable unless new release has it populated
-## ditto, ple_hit_y
-## ditto, ple_homeless_y
-## ditto, ple_hospitalized_y
-## ditto, ple_lockdown_y
-## ditto, ple_shot_y
-## ditto, ple_suicide_y
-#
-## now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
-## no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
-##preBVdf$eventname='baseline_year_1_arm_1'
-#OutDFyle=merge(OutDF,preBVdf,by=c('subjectkey'))
-#print(dim(OutDFyle))
-#print(dim(OutDF))
-#
-## convert to one row per subj for temporal precedence analyses
-#OutDFBV=subset(OutDFyle,eventname=='baseline_year_1_arm_1')
-#OutDF2Y=subset(OutDFyle,eventname=='2_year_follow_up_y_arm_1')
-#OutDFTmpPrec<-merge(OutDFyle,OutDF2Y,by='subjectkey')
-#print(dim(OutDFTmpPrec))
-#
-#saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_FullRetro.rds')
+##### make outdf FULL retrospective for temporal precedence analyses
+## for iterative dataset construct
+preBVdf=data.frame(as.factor(yle1$subjectkey))
+colnames(preBVdf)<-'subjectkey'
+
+# OK, now lets remove instances of these things happening in the past year
+for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+  # extract column name
+  currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
+  # extract corresponding "was this in the past year?" boolean, which is always right after
+  currColIndex=grep(currColName,yleColnames)
+  # extract vector of values for PTs
+  currCol=yle1[,currColIndex]
+  # need an exception for le_friend_injur_past_yr_y. Appears to be misnamed without p in ple
+  if  (currColName=='ple_friend_injur_y'){
+    currColNamePastYear='le_friend_injur_past_yr_y'
+  # also need except for ple_injur_past_yr_y, which is actually ple_injur_y_past_yr_y which is also probably a typo
+  } else if (currColName=='ple_injur_y'){
+    currColNamePastYear='ple_injur_y_past_yr_y'
+  }  else {
+    # return colname of past year using text in aim to be more robust
+    currColNamePastYear=gsub('_y','_past_yr_y',currColName)
+  }
+  currColIndexPastYear=grep(currColNamePastYear,yleColnames)
+  # This turned out to not be robust to heterogeneity in questionnaire
+  ## "past year"? immediately proceeds question
+  ## currColIndexPastYear=currColIndex+1
+  ## extract this vector of values for PTs
+  currCol_pastyr=yle1[,currColIndexPastYear]
+  # set empties to 0 in follow up question
+  currCol_pastyr[is.empty(currCol_pastyr)]=0
+  # ple_injur_y and ple_injur_y_yr_y are misnamed, need to build catch specifically for these variables
+  if (currColIndex[1]==42){
+    # set to correct column
+    currColIndex=42
+    # re-draw currCol
+    currCol=yle1[,currColIndex]
+    # re-draw past year
+    currColIndexPastYear=currColIndex+1
+    # re-draw vector of values for PTs
+    currCol_pastyr=yle1[,currColIndexPastYear]
+    # set is empty to 0 in follow up question
+    currCol_pastyr[is.empty(currCol_pastyr)]=0
+    # extract "past year"?
+    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+  } else {
+    # if past year, subtract instance
+    NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+  }
+  # print out utilized colum names to ensure they match
+  print(paste('Variables:',yle[1,currColIndex],yle[1,currColIndexPastYear]))
+  # explicitly count instances in past year
+  PastYr=as.numeric(currCol)+as.numeric(currCol_pastyr)==2
+  # make a plot dataframe for ggplot2
+  plotdf=data.frame(as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]),NotPastYr,as.numeric(PastYr))
+  colnames(plotdf)=c('Total','BeforeLastYear','DuringLastYear')
+  plotdf<-invisible(melt(plotdf))
+  a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
+  print(a)
+  # iteratively make a dataframe of yes/no (standard)
+  preBVdf$null<-NotPastYr
+  colnamesMinusNull=head(colnames(preBVdf), -1)
+  colnames(preBVdf)<-c(colnamesMinusNull,currColName)
+  # now with happaned in past year
+  preBVdf$null<-as.numeric(PastYr)
+  colnamesMinusNull=head(colnames(preBVdf), -1)
+  currColName_last_year=paste0(currColName,'_lastYr')
+  colnames(preBVdf)<-c(colnamesMinusNull,currColName_last_year)
+}
+```
+
+    ## [1] "Variables: Saw crime or accident? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Lost a close friend? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Close friend was seriously sick/injured? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Negative change in parent's financial situation? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-3.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Family member had drug and/or alcohol problem? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-4.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: You got seriously sick? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-5.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: You got seriously injured? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-6.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 24 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parents argued more than previously? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-7.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Mother/father figure lost job? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-8.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: One parent was away from home more often? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-9.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Someone in the family was arrested? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-10.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Close friend died? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-11.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Family member had mental/emotional problem? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-12.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Brother or sister left home? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-13.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Was a victim of crime/violence/assault? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-14.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parents separated or divorced? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-15.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parents/caregiver got into trouble with the law? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-16.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Attended a new school? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-17.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Family moved? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-18.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: One of the parents/caregivers went to jail? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-19.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Got new stepmother or stepfather? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-20.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parent/caregiver got a new job? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-21.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Got new brother or sister? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-22.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: You were placed in foster care? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-23.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Saw or heard someone getting hit Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-24.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Your family was homeless? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-25.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parent or caregiver hospitalized? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-26.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Had a lockdown at your school due to concerns about a school shooting or violence? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-27.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Please indicate how instrument was administered: Please indicate how instrument was administered:"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-28.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Saw or heard someone being shot at (but not actually wounded) in your school or neighborhood? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-29.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Do you know someone who has attempted suicide? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-30.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+    ## [1] "Variables: Parent or caregiver deported? Did this happen in the past year?"
+
+    ## No id variables; using all as measure variables
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-31.png)<!-- -->
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-32.png)<!-- -->
+
+``` r
+#### for year1 visit
+# note NO answers recorded to ple_foster_care_past_yr_y. I guess we can't use that variable unless new release has it populated
+# ditto, ple_hit_y
+# ditto, ple_homeless_y
+# ditto, ple_hospitalized_y
+# ditto, ple_lockdown_y
+# ditto, ple_shot_y
+# ditto, ple_suicide_y
+
+# now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
+# no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
+#preBVdf$eventname='baseline_year_1_arm_1'
+OutDFyle3=merge(OutDFyle2,preBVdf,by=c('subjectkey'))
+print(dim(OutDFyle3))
+```
+
+    ## [1] 7264  821
+
+``` r
+# convert to one row per subj for temporal precedence analyses
+OutDFBV=subset(OutDFyle3,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(OutDFyle3,eventname=='2_year_follow_up_y_arm_1')
+OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
+print(dim(OutDFTmpPrec))
+```
+
+    ## [1] 3632 1641
+
+``` r
+saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_FunctionallyRetro.rds')
 ```
