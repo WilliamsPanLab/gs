@@ -160,7 +160,8 @@ masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','ple_died_y','ple_injured_y','ple_
 # set seed because I'll have to rerun this differently for second 5k
 set.seed(1)
 # loop over manual bootstrap
-for (b in 1:5000){
+for (b in 1:35){
+#for (b in 1:5000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -180,10 +181,10 @@ for (b in 1:5000){
 	fullModel<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predictFull=predict.bam(fullModel,bootSamp)
-	sumSqFull[b]=sum((predictFull-bootSamp$cbcl_scr_syn_totprob_r)^2)
+	sumSq_full[b]=sum((predictFull-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predictFullHeldOut=predict.bam(fullModel,heldOut)
-	sumSqFullHeldOut[b]=sum((predictFullHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_full[b]=sum((predictFullHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_full[b]=AIC(fullModel)
 	# get BIC
@@ -198,7 +199,7 @@ for (b in 1:5000){
 	sumSq_n_died[b]=sum((predict_n_died-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_diedHeldOut=predict.bam(Model_n_died,heldOut)
-	sumSq_n_diedHeldOut[b]=sum((predict_n_diedHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_died[b]=sum((predict_n_diedHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_died[b]=AIC(Model_n_died)
 	# get BIC
@@ -213,7 +214,7 @@ for (b in 1:5000){
 	sumSq_n_injured[b]=sum((predict_n_injured-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_injuredHeldOut=predict.bam(Model_n_injured,heldOut)
-	sumSq_n_injuredHeldOut[b]=sum((predict_n_injuredHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_injured[b]=sum((predict_n_injuredHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_injured[b]=AIC(Model_n_injured)
 	# get BIC
@@ -228,7 +229,7 @@ for (b in 1:5000){
 	sumSq_n_crime[b]=sum((predict_n_crime-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_crimeHeldOut=predict.bam(Model_n_crime,heldOut)
-	sumSq_n_crimeHeldOut[b]=sum((predict_n_crimeHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_crime[b]=sum((predict_n_crimeHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_crime[b]=AIC(Model_n_crime)
 	# get BIC
@@ -243,7 +244,7 @@ for (b in 1:5000){
 	sumSq_n_friend[b]=sum((predict_n_friend-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_friendHeldOut=predict.bam(Model_n_friend,heldOut)
-	sumSq_n_friendHeldOut[b]=sum((predict_n_friendHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_friend[b]=sum((predict_n_friendHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_friend[b]=AIC(Model_n_friend)
 	# get BIC
@@ -255,16 +256,16 @@ for (b in 1:5000){
 	Model_n_friend_injured<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_friend_injured=predict.bam(Model_n_friend_injured,bootSamp)
-	sumSq_n_friend_injured[b]=sum((predict_n_friend_injured-bootSamp$cbcl_scr_syn_totprob_r)^2)
+	sumSq_n_friend_injur[b]=sum((predict_n_friend_injured-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_friend_injuredHeldOut=predict.bam(Model_n_friend_injured,heldOut)
-	sumSq_n_friend_injuredHeldOut[b]=sum((predict_n_friend_injuredHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_friend_injur[b]=sum((predict_n_friend_injuredHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
-	AIC_n_friend_injured[b]=AIC(Model_n_friend_injured)
+	AIC_n_friend_injur[b]=AIC(Model_n_friend_injured)
 	# get BIC
-	BIC_n_friend_injured[b]=BIC(Model_n_friend_injured)
+	BIC_n_friend_injur[b]=BIC(Model_n_friend_injured)
 	# get deviance explained
-	devExplained_n_friend_injured[b]=summary(Model_n_friend_injured)$dev.expl
+	devExplained_n_friend_injur[b]=summary(Model_n_friend_injured)$dev.expl
 
 	### arrest
 	Model_n_arrest<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity,data=bootSamp,family=nb())
@@ -273,7 +274,7 @@ for (b in 1:5000){
 	sumSq_n_arrest[b]=sum((predict_n_arrest-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_arrestHeldOut=predict.bam(Model_n_arrest,heldOut)
-	sumSq_n_arrestHeldOut[b]=sum((predict_n_arrestHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_arrest[b]=sum((predict_n_arrestHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_arrest[b]=AIC(Model_n_arrest)
 	# get BIC
@@ -288,7 +289,7 @@ for (b in 1:5000){
 	sumSq_n_friend_died[b]=sum((predict_n_friend_died-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_friend_diedHeldOut=predict.bam(Model_n_friend_died,heldOut)
-	sumSq_n_friend_diedHeldOut[b]=sum((predict_n_friend_diedHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_friend_died[b]=sum((predict_n_friend_diedHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_friend_died[b]=AIC(Model_n_friend_died)
 	# get BIC
@@ -303,7 +304,7 @@ for (b in 1:5000){
 	sumSq_n_mh[b]=sum((predict_n_mh-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_mhHeldOut=predict.bam(Model_n_mh,heldOut)
-	sumSq_n_mhHeldOut[b]=sum((predict_n_mhHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_mh[b]=sum((predict_n_mhHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_mh[b]=AIC(Model_n_mh)
 	# get BIC
@@ -318,7 +319,7 @@ for (b in 1:5000){
 	sumSq_n_sib[b]=sum((predict_n_sib-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_sibHeldOut=predict.bam(Model_n_sib,heldOut)
-	sumSq_n_sibHeldOut[b]=sum((predict_n_sibHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_sib[b]=sum((predict_n_sibHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_sib[b]=AIC(Model_n_sib)
 	# get BIC
@@ -333,7 +334,7 @@ for (b in 1:5000){
 	sumSq_n_victim[b]=sum((predict_n_victim-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_victimHeldOut=predict.bam(Model_n_victim,heldOut)
-	sumSq_n_victimHeldOut[b]=sum((predict_n_victimHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_victim[b]=sum((predict_n_victimHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_victim[b]=AIC(Model_n_victim)
 	# get BIC
@@ -348,7 +349,7 @@ for (b in 1:5000){
 	sumSq_n_separ[b]=sum((predict_n_separ-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_separHeldOut=predict.bam(Model_n_separ,heldOut)
-	sumSq_n_separHeldOut[b]=sum((predict_n_separHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_separ[b]=sum((predict_n_separHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_separ[b]=AIC(Model_n_separ)
 	# get BIC
@@ -363,7 +364,7 @@ for (b in 1:5000){
 	sumSq_n_law[b]=sum((predict_n_law-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_lawHeldOut=predict.bam(Model_n_law,heldOut)
-	sumSq_n_lawHeldOut[b]=sum((predict_n_lawHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_law[b]=sum((predict_n_lawHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_law[b]=AIC(Model_n_law)
 	# get BIC
@@ -378,7 +379,7 @@ for (b in 1:5000){
 	sumSq_n_school[b]=sum((predict_n_school-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_schoolHeldOut=predict.bam(Model_n_school,heldOut)
-	sumSq_n_schoolHeldOut[b]=sum((predict_n_schoolHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_school[b]=sum((predict_n_schoolHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_school[b]=AIC(Model_n_school)
 	# get BIC
@@ -393,7 +394,7 @@ for (b in 1:5000){
 	sumSq_n_move[b]=sum((predict_n_move-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_moveHeldOut=predict.bam(Model_n_move,heldOut)
-	sumSq_n_moveHeldOut[b]=sum((predict_n_moveHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_move[b]=sum((predict_n_moveHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_move[b]=AIC(Model_n_move)
 	# get BIC
@@ -408,7 +409,7 @@ for (b in 1:5000){
 	sumSq_n_jail[b]=sum((predict_n_jail-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_jailHeldOut=predict.bam(Model_n_jail,heldOut)
-	sumSq_n_jailHeldOut[b]=sum((predict_n_jailHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_jail[b]=sum((predict_n_jailHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_jail[b]=AIC(Model_n_jail)
 	# get BIC
@@ -423,7 +424,7 @@ for (b in 1:5000){
 	sumSq_n_step[b]=sum((predict_n_step-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_stepHeldOut=predict.bam(Model_n_step,heldOut)
-	sumSq_n_stepHeldOut[b]=sum((predict_n_stepHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_step[b]=sum((predict_n_stepHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_step[b]=AIC(Model_n_step)
 	# get BIC
@@ -435,16 +436,16 @@ for (b in 1:5000){
 	Model_n_job<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_job=predict.bam(Model_n_job,bootSamp)
-	sumSq_n_job[b]=sum((predict_n_job-bootSamp$cbcl_scr_syn_totprob_r)^2)
+	sumSq_n_new_job[b]=sum((predict_n_job-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_jobHeldOut=predict.bam(Model_n_job,heldOut)
-	sumSq_n_jobHeldOut[b]=sum((predict_n_jobHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_new_job[b]=sum((predict_n_jobHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
-	AIC_n_job[b]=AIC(Model_n_job)
+	AIC_n_new_job[b]=AIC(Model_n_job)
 	# get BIC
-	BIC_n_job[b]=BIC(Model_n_job)
+	BIC_n_new_job[b]=BIC(Model_n_job)
 	# get deviance explained
-	devExplained_n_job[b]=summary(Model_n_job)$dev.expl
+	devExplained_n_new_job[b]=summary(Model_n_job)$dev.expl
 
 	### new sib
 	Model_n_new_sib<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity,data=bootSamp,family=nb())
@@ -453,7 +454,7 @@ for (b in 1:5000){
 	sumSq_n_new_sib[b]=sum((predict_n_new_sib-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_new_sibHeldOut=predict.bam(Model_n_new_sib,heldOut)
-	sumSq_n_new_sibHeldOut[b]=sum((predict_n_new_sibHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_new_sib[b]=sum((predict_n_new_sibHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_new_sib[b]=AIC(Model_n_new_sib)
 	# get BIC
@@ -468,7 +469,7 @@ for (b in 1:5000){
 	sumSq_n_g[b]=sum((predict_n_g-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_gHeldOut=predict.bam(Model_n_g,heldOut)
-	sumSq_n_gHeldOut[b]=sum((predict_n_gHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_g[b]=sum((predict_n_gHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_g[b]=AIC(Model_n_g)
 	# get BIC
@@ -480,31 +481,31 @@ for (b in 1:5000){
 	Model_n_age<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_age=predict.bam(Model_n_age,bootSamp)
-	sumSq_n_age[b]=sum((predict_n_age-bootSamp$cbcl_scr_syn_totprob_r)^2)
+	sumSq_n_interview_age[b]=sum((predict_n_age-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_ageHeldOut=predict.bam(Model_n_age,heldOut)
-	sumSq_n_ageHeldOut[b]=sum((predict_n_ageHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_interview_age[b]=sum((predict_n_ageHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
-	AIC_n_age[b]=AIC(Model_n_age)
+	AIC_n_interview_age[b]=AIC(Model_n_age)
 	# get BIC
-	BIC_n_age[b]=BIC(Model_n_age)
+	BIC_n_interview_age[b]=BIC(Model_n_age)
 	# get deviance explained
-	devExplained_n_age[b]=summary(Model_n_age)$dev.expl
+	devExplained_n_interview_age[b]=summary(Model_n_age)$dev.expl
 
 	### grades
 	Model_n_grades<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_grades=predict.bam(Model_n_grades,bootSamp)
-	sumSq_n_grades[b]=sum((predict_n_grades-bootSamp$cbcl_scr_syn_totprob_r)^2)
+	sumSq_n_Grades[b]=sum((predict_n_grades-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_gradesHeldOut=predict.bam(Model_n_grades,heldOut)
-	sumSq_n_gradesHeldOut[b]=sum((predict_n_gradesHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_Grades[b]=sum((predict_n_gradesHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
-	AIC_n_grades[b]=AIC(Model_n_grades)
+	AIC_n_Grades[b]=AIC(Model_n_grades)
 	# get BIC
-	BIC_n_grades[b]=BIC(Model_n_grades)
+	BIC_n_Grades[b]=BIC(Model_n_grades)
 	# get deviance explained
-	devExplained_n_grades[b]=summary(Model_n_grades)$dev.expl
+	devExplained_n_Grades[b]=summary(Model_n_grades)$dev.expl
 
 	### parentPcount
 	Model_n_parentPcount<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity,data=bootSamp,family=nb())
@@ -513,7 +514,7 @@ for (b in 1:5000){
 	sumSq_n_parentPcount[b]=sum((predict_n_parentPcount-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_parentPcountHeldOut=predict.bam(Model_n_parentPcount,heldOut)
-	sumSq_n_parentPcountHeldOut[b]=sum((predict_n_parentPcountHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_parentPcount[b]=sum((predict_n_parentPcountHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_parentPcount[b]=AIC(Model_n_parentPcount)
 	# get BIC
@@ -528,7 +529,7 @@ for (b in 1:5000){
 	sumSq_n_income[b]=sum((predict_n_income-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_incomeHeldOut=predict.bam(Model_n_income,heldOut)
-	sumSq_n_incomeHeldOut[b]=sum((predict_n_incomeHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_income[b]=sum((predict_n_incomeHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_income[b]=AIC(Model_n_income)
 	# get BIC
@@ -543,7 +544,7 @@ for (b in 1:5000){
 	sumSq_n_parental_education[b]=sum((predict_n_parental_education-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_parental_educationHeldOut=predict.bam(Model_n_parental_education,heldOut)
-	sumSq_n_parental_educationHeldOut[b]=sum((predict_n_parental_educationHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_parental_education[b]=sum((predict_n_parental_educationHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_parental_education[b]=AIC(Model_n_parental_education)
 	# get BIC
@@ -558,7 +559,7 @@ for (b in 1:5000){
 	sumSq_n_sex[b]=sum((predict_n_sex-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_sexHeldOut=predict.bam(Model_n_sex,heldOut)
-	sumSq_n_sexHeldOut[b]=sum((predict_n_sexHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_sex[b]=sum((predict_n_sexHeldOut-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_sex[b]=AIC(Model_n_sex)
 	# get BIC
@@ -573,7 +574,7 @@ for (b in 1:5000){
 	sumSq_n_race_ethnicity[b]<-sum((predict_n_race_ethnicity-bootSamp$cbcl_scr_syn_totprob_r)^2)
 	# predict held out to get sum of squares on held out
 	predict_n_race_ethnicityHeldout=predict.bam(Model_n_race_ethnicity,heldOut)
-	sumSq_n_race_ethnicity[b]<-sum((predict_n_race_ethnicityHeldout-heldOut$cbcl_scr_syn_totprob_r)^2)
+	sumSq_heldout_n_race_ethnicity[b]<-sum((predict_n_race_ethnicityHeldout-heldOut$cbcl_scr_syn_totprob_r)^2)
 	# get AIC
 	AIC_n_race_ethnicity[b]=AIC(Model_n_race_ethnicity)
 	# get BIC
@@ -600,13 +601,13 @@ for (b in 1:5000){
 	assert(length(Model_n_jail$var.summary)==length(Model_n_step$var.summary))
 	assert(length(Model_n_step$var.summary)==length(Model_n_job$var.summary))
 	assert(length(Model_n_job$var.summary)==length(Model_n_new_sib$var.summary))
-	assert(length(Model_n_new_sib$var.summary)==length(Model_n_parental_edu$var.summary))
+	assert(length(Model_n_new_sib$var.summary)==length(Model_n_parental_education$var.summary))
 	assert(length(Model_n_g$var.summary)==length(Model_n_new_sib$var.summary))
 	assert(length(Model_n_age$var.summary)==length(Model_n_new_sib$var.summary))
 	assert(length(Model_n_grades$var.summary)==length(Model_n_new_sib$var.summary))
-	assert(length(Model_n_parentP$var.summary)==length(Model_n_new_sib$var.summary))
+	assert(length(Model_n_parentPcount$var.summary)==length(Model_n_new_sib$var.summary))
 	assert(length(Model_n_income$var.summary)==length(Model_n_new_sib$var.summary))
-	assert(length(Model_n_parental_edu$var.summary)==length(Model_n_sex$var.summary))
+	assert(length(Model_n_parental_education$var.summary)==length(Model_n_sex$var.summary))
 	assert(length(Model_n_sex$var.summary)==length(Model_n_race_ethnicity$var.summary))
 }
 # saveout df of sumSq for plotting
