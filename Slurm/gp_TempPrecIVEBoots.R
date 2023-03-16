@@ -2,9 +2,13 @@ library(mgcv)
 library(testit)
 
 # load in data
-masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/OutDFTmpPrec_FullRetro.rds')
+masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/OutDFTmpPrec_IVEandRetro.rds')
 
 # need to save out reduction in sum of squares, reduction of sum of squares in held-out, deviance explained, AIC, and BIC for all models
+
+# need to change to saveout values for each vector reflecting inter-visit event associated metric
+# need to add inter-vist event to each model
+# need to change existing terms to .x.x
 
 # reduction in sum of squares for all models
 sumSq_full=rep(0,10000)
