@@ -727,6 +727,10 @@ masterdf=masterdf[!masterdf$subjectkey %in% questionableSubjs,]
 ConsistentYleSubjs=length(unique(masterdf$subjectkey))
 print(paste0(YLESubjs-ConsistentYleSubjs,' lost from requiring those with yle at both timepoints with full data, and kids who inconsistently report yles'))
 print(paste0(ConsistentYleSubjs,' participants remain'))
+
+# add to included subjs DF
+includedSubjects$YLEConsistentSubjs=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$YLEConsistentSubjs=1
 ```
 
 ```{r}
@@ -815,6 +819,9 @@ AgreeingYleSubjs=length(unique(masterdf$subjectkey))
 print(paste0(ConsistentYleSubjs-AgreeingYleSubjs,' lost from cross-referencing parent report of childs life events and removing inconsistents'))
 print(paste0(AgreeingYleSubjs,' Participants remain'))
 
+# update includedSubjsDF
+
+
 ###### fix data formats
 # variables of interest
 variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','ple_died_y','ple_injured_y','ple_crime_y','ple_friend_y','ple_friend_injur_y','ple_arrest_y','ple_friend_died_y','ple_mh_y','ple_sib_y','ple_victim_y','ple_separ_y','ple_law_y','ple_school_y','ple_move_y','ple_jail_y','ple_step_y','ple_new_job_y','ple_new_sib_y','g','subjectkey','interview_age','Grades','parentPcount','income','parental_education','sex','race_ethnicity','eventname')
@@ -846,9 +853,57 @@ masterdf=masterdf[,c(variablesOfInterest)]
 masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ] 
 print(dim(masterdf))
 
+#
+
+
 # save ouput
 saveRDS(masterdf,'~/OutDfxc.rds')
 
+# add to included subjs DF
+includedSubjects$YLEConsistentAgreeSubjs=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$YLEConsistentAgreeSubjs=1
+```
+
+```{r}
+# make alluvial: in theory no other subjects excluded
+library(ggplot2)
+library(ggalluvial)
+library(scales)
+
+
+plotdf=melt(includedSubjects)
+plotdf$value<-as.factor(plotdf$value)
+plotdf$subj<-as.factor(plotdf$subj)
+
+# merge in raceEth of each subj
+raceEth=participantsTSV$race_ethnicity
+subjectsInPtsv=participantsTSV$subjectkey
+infoDf=data.frame(raceEth,subjectsInPtsv)
+colnames(infoDf)<-c('RaceEthn','subj')
+test=merge(plotdf,infoDf,by='subj')
+# overwrite race with "empty" if missing after each checkpoint
+test$RaceEthn<-factor(test$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
+test$RaceEthn[test$value==0]="Missing"
+
+ggplot(test,aes(x=variable,stratum=RaceEthn,alluvium=subj))+geom_stratum(aes(fill=RaceEthn))+geom_flow(aes(fill=RaceEthn))+theme_bw(base_size=20)
+
+
+### and equivalent for sex
+plotdf=melt(includedSubjects)
+plotdf$value<-as.factor(plotdf$value)
+plotdf$subj<-as.factor(plotdf$subj)
+
+# merge in raceEth of each subj
+sexes=participantsTSV$sex
+subjectsInPtsv=participantsTSV$subjectkey
+infoDf=data.frame(sexes,subjectsInPtsv)
+colnames(infoDf)<-c('sex','subj')
+test=merge(plotdf,infoDf,by='subj')
+# overwrite race with "empty" if missing after each checkpoint
+test$sex<-factor(test$sex,levels=c("M","F","Missing"))
+test$sex[test$value==0]="Missing"
+
+ggplot(test,aes(x=variable,stratum=sex,alluvium=subj))+geom_stratum(aes(fill=sex))+geom_flow(aes(fill=sex))+theme_bw(base_size=20)
 ```
 
 ```{r}
@@ -858,7 +913,11 @@ saveRDS(masterdf,'~/OutDfxc.rds')
 
 # remove prior YLE columns for clarity (except for subjectkey and eventname, items 4 and 9)
 yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad_No_EvAff[-c(4,9)]
-OutDFyle2_nao=OutDFyle2_nao[,!colnames(OutDFyle2_nao) %in% yle_No_PastYearcols_No_Goodbad_No_EvAff]
+
+# DELETE?
+masterdf=masterdf[,!colnames(masterdf) %in% yle_No_PastYearcols_No_Goodbad_No_EvAff]
+
+
 ##### make outdf absolute retrospective for temporal precedence analyses
 ## for iterative dataset construct
 preBVdf=data.frame(as.factor(yle1$subjectkey))
@@ -937,9 +996,8 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 # no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
 #preBVdf$eventname='baseline_year_1_arm_1'
 
-# remove OutDFyle2 ple columns for clarity
-OutDFyle2=OutDFyle2[,-grep('ple',colnames(OutDFyle2))]
-OutDFyle3=merge(preBVdf,OutDFyle2,by=c('subjectkey'))
+# merge it back in (OutDFyle3 is legacy name, 1 and 2 have gone their own way)
+OutDFyle3=merge(preBVdf,masterdf,by=c('subjectkey'))
 print(dim(OutDFyle3))
 
 # convert to one row per subj for temporal precedence analyses
@@ -1080,7 +1138,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 # no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
 #preBVdf$eventname='baseline_year_1_arm_1'
 colnames(preBVdf)=gsub('_y','_yBV',colnames(preBVdf))
-OutDFyle3=merge(preBVdf,OutDFyle2,by=c('subjectkey'))
+OutDFyle3=merge(preBVdf,masterdf,by=c('subjectkey'))
 OutDFyle3=merge(y2df,OutDFyle3,by=c('subjectkey'))
 print(dim(OutDFyle3))
 

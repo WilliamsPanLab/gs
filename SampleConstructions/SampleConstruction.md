@@ -9,7 +9,7 @@ matched imaging groups needed, pooled factor decomposition), while
 predictive datasets are exported from SampleConstruction_Ridge.Rmd
 
 ``` r
-#### LOAD libraries
+#### load libraries
 library(rapportools)
 ```
 
@@ -35,8 +35,8 @@ library(ggplot2)
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in cbcl data
-cbcl=read.delim('~/Downloads/Package_1205735/abcd_cbcl01.txt')
-cbcls=read.delim('/Users/panlab/Downloads/Package_1205735/abcd_cbcls01.txt')
+cbcl=read.delim('~/Downloads/Package_1210940/abcd_cbcl01.txt')
+cbcls=read.delim('~/Downloads/Package_1210940/abcd_cbcls01.txt')
 # subset timepoints
 cbclsBV=subset(cbcls,eventname=='baseline_year_1_arm_1')
 cbcls2=subset(cbcls,eventname=='2_year_follow_up_y_arm_1')
@@ -48,26 +48,67 @@ cbclsBV=merge(cbclsBV,cbclBV,by=c('subjectkey','eventname'))
 cbcls2=merge(cbcls2,cbcl2,by=c('subjectkey','eventname'))
 
 # initialize master df
-masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id'))
-cbcldim<-dim(masterdf)
-print(cbcldim)
+masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id','sex'))
+# omit nans and empties for variables of interest (totprobs,int,ext)
+masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_totprob_r),]
+masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_totprob_r),]
+masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_internal_r),]
+masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_internal_r),]
+masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_external_r),]
+masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_external_r),]
+# calculate remaining subjs
+cbclSubjs=length(unique(masterdf$subjectkey))
+# initialize included subjects df
+includedSubjects=data.frame(unique(masterdf$subjectkey))
+colnames(includedSubjects)<-'subj'
+includedSubjects$cbclInclude=1
+
+
+# check for completeness at both timepoints- subset those timepoints
+masterdf=masterdf[masterdf$eventname!='1_year_follow_up_y_arm_1',]
+masterdf=masterdf[masterdf$eventname!='3_year_follow_up_y_arm_1',]
+
+# get other vars of interest to check for complete cases
+KidVarsOfInt=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r')
+
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(KidVarsOfInt)]))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+
+# exclude participants without data at both timepoints
+cbclSubjs=length(unique(masterdf$subjectkey))
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# included subjs df
+includedSubjects$CBCLBoth=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CBCLBoth=1
+
+cbclSubjsBoth=length(unique(masterdf$subjectkey))
+print(paste0(cbclSubjs-cbclSubjsBoth,' lost due to single-timepoint CBCL completeness'))
 ```
 
-    ## [1] 39767   218
+    ## [1] "3764 lost due to single-timepoint CBCL completeness"
 
 ``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+### This  chunk  processes  scholastic  data ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 ### LOAD in grades, ∆∆∆ will need to correct for incongruency between tp1 measure (decent granularity) and tp2 measure (high granularity) ∆∆∆
-gradesInfoBV=readRDS('~/Downloads/DEAP-data-download-13.rds')
+gradesInfoBV=read.delim('~/Downloads/Package_1210940/dibf01.txt')
 # extract baseline
-gradesInfoBV=subset(gradesInfoBV,event_name=='baseline_year_1_arm_1')
-gradesInfoBV$Grades<-as.numeric(gradesInfoBV$ksads_back_grades_in_school_p)
+gradesInfoBV=subset(gradesInfoBV,eventname=='baseline_year_1_arm_1')
+gradesInfoBV$Grades<-as.numeric(gradesInfoBV$kbi_p_grades_in_school)
 # convert ndar value to R
 gradesInfoBV$Grades[gradesInfoBV$Grades==-1]=NA
 # convert ndar colnames to other ndar colnames
-gradesInfoBV$eventname=gradesInfoBV$event_name
-gradesInfoBV$subjectkey=gradesInfoBV$src_subject_id
 # for tp2, the key is 1 = A's, 2 = B's, 3 = C's, 4 = D's, 5 = F's, -1 = NA
-gradesInfoY2=read.delim('~/Downloads/Package_1207225/abcd_saag01.txt')
+gradesInfoY2=read.delim('~/Downloads/Package_1210940/abcd_saag01.txt')
 gradesInfoY2=subset(gradesInfoY2,eventname=='2_year_follow_up_y_arm_1')
 gradesInfoY2$sag_grade_type<-as.numeric(gradesInfoY2$sag_grade_type)
 # key: 1=100-97,2=96-93,3=92-90,4=89-87,5=86-83,6=82-80,7=79-77,8=76-73,9=72-70,10=69-67,11=66-65,12=0-65,-1=NA,777= no answer
@@ -110,61 +151,127 @@ gradesInfoY2$Grades<-gradesInfoY2$sag_grade_type
 NeededColNames=c('subjectkey','eventname','Grades')
 gradesInfo<-rbind(gradesInfoBV[,NeededColNames],gradesInfoY2[,NeededColNames])
 gradesInfo$Grades<-as.ordered(gradesInfo$Grades)
-###### ∆∆∆∆∆∆∆
 
 # merge and count losses
 masterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
-gradesdim=dim(masterdf)
-print(gradesdim)
+
+# subjects with this measure at both timepoints
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,'Grades']))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+
+# exclude participants without data at both timepoints
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# omit nans and empties for variables of interest (totprobs,int,ext)
+masterdf=masterdf[!is.empty(masterdf$Grades),]
+masterdf=masterdf[!is.na(masterdf$Grades),]
+gradesSubjs=length(unique(masterdf$subjectkey))
+# add to included subjs DF
+includedSubjects$Grades=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
+# print data volume
+print(gradesSubjs)
 ```
 
-    ## [1] 22289   219
+    ## [1] 7665
 
 ``` r
-dif=cbcldim[1]-gradesdim[1]
-print(paste0(dif,' rows lost from grades merge, note loss of rows due to no 1 year timepoint'))
+dif=cbclSubjsBoth-gradesSubjs
+print(paste0(dif,' participants lost from grades merge'))
 ```
 
-    ## [1] "17478 rows lost from grades merge, note loss of rows due to no 1 year timepoint"
+    ## [1] "398 participants lost from grades merge"
 
 ``` r
+# included subjs df
+includedSubjects$Grades=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
+```
+
+``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+### This chunk processes adult mental health ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 ### LOAD in ASR data
-asr=read.delim('~/Downloads/Package_1207917/pasr01.txt',na.strings=c("","NA"))
-masterdf<-merge(masterdf,asr,by=c('subjectkey','eventname','interview_age'))
-asrdim=dim(masterdf)
-print(asrdim)
+asr=read.delim('~/Downloads/Package_1210940/pasr01.txt',na.strings=c("","NA"))
+# merge
+masterdf<-merge(masterdf,asr,by=c('subjectkey','eventname','interview_age','sex'))
+# check for populated data at BOTH timepoints
+ColsOfInt=asr[,c(11:141)]
+ASRVarsOfInt=colnames(ColsOfInt)
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(ASRVarsOfInt)]))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# full losses counted after asr count chunk, but note one participant is probably lost here just from merge
+asrSubjs=length(unique(masterdf$subjectkey))
+dif=gradesSubjs-asrSubjs
+print(paste0(dif,' participants lost from needing ASR at both timepoints'))
 ```
 
-    ## [1] 22289   364
+    ## [1] "1 participants lost from needing ASR at both timepoints"
 
 ``` r
-dif=gradesdim[1]-asrdim[1]
-print(paste0(dif,' rows lost from asr merge'))
+# included subjs df
+includedSubjects$ASR=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$ASR=1
 ```
 
-    ## [1] "0 rows lost from asr merge"
-
 ``` r
-# load in a DEAP file for rel_family_ID
-DEAP=readRDS('~/Downloads/DEAP-data-download-13.rds')
-DEAP$subjectkey<-DEAP$src_subject_id
-DEAP$eventname=DEAP$event_name
-DEAP=DEAP[,c('rel_family_id','subjectkey','eventname')]
-masterdf<-merge(masterdf,DEAP,by=c('subjectkey','eventname'))
-deapdim=dim(masterdf)
-print(deapdim)
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+### This   chunk   processes family ID   data ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
+# load in acs file for rel_family_ID
+# get family ID from acs
+acs=read.delim('~/Downloads/Package_1210940/acspsw03.txt')
+acs$subjectkey<-acs$src_subject_id
+acs=acs[,c('rel_family_id','subjectkey','eventname')]
+# looks like all family IDs are missing from timepoint 1, so exclude for ease
+acs=acs[acs$eventname=='baseline_year_1_arm_1',]
+# and isolate family ID for ease
+acs=data.frame(acs$subjectkey,acs$rel_family_id)
+colnames(acs)=c('subjectkey','rel_family_id')
+masterdf<-merge(masterdf,acs,by=c('subjectkey'))
+# na omitted version
+masterdf=masterdf[!is.na(masterdf$rel_family_id),] 
+masterdf=masterdf[!is.empty(masterdf$rel_family_id),] 
+acsSubjs=length(unique(masterdf$subjectkey))
+# add to included subjs DF
+includedSubjects$acs=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$acs=1
+# print data volume
+print(acsSubjs)
 ```
 
-    ## [1] 22288   365
+    ## [1] 7663
 
 ``` r
-dif=asrdim[1]-deapdim[1]
-print(paste0(dif,' rows lost from deap familyID merge'))
+dif=asrSubjs-acsSubjs
+print(paste0(dif,' participants lost from ACS merge for family ID'))
 ```
 
-    ## [1] "1 rows lost from deap familyID merge"
+    ## [1] "1 participants lost from ACS merge for family ID"
 
 ``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+### This  (short)  chunk formats   cbcl data ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 ### CLEAN data
 # subjectkey as factor
 masterdf$subjectkey<-as.factor(masterdf$subjectkey)
@@ -172,22 +279,7 @@ masterdf$subjectkey<-as.factor(masterdf$subjectkey)
 masterdf$cbcl_scr_syn_totprob_r<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)
 masterdf$cbcl_scr_syn_internal_r<-as.numeric(masterdf$cbcl_scr_syn_internal_r)
 masterdf$cbcl_scr_syn_external_r<-as.numeric(masterdf$cbcl_scr_syn_external_r)
-# remove instances of NA tot probs
-masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_totprob_r),]
-newDim=dim(masterdf)
-print(paste0(newDim[1],' after removing NAs for totprob_r, ',(deapdim[1]- newDim[1]),' lost after removing'))
 ```
-
-    ## [1] "19951 after removing NAs for totprob_r, 2337 lost after removing"
-
-``` r
-# and for is empty
-masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_totprob_r),]
-newDim2=dim(masterdf)
-print(paste0(newDim2[1],' after removing isempty for totprob_r, ',(newDim[1]- newDim2[1]),' lost after removing'))
-```
-
-    ## [1] "18935 after removing isempty for totprob_r, 1016 lost after removing"
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
@@ -195,63 +287,61 @@ print(paste0(newDim2[1],' after removing isempty for totprob_r, ',(newDim[1]- ne
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 #### LOAD in cognitive data
-nihCog=read.delim('~/Downloads/Package_1206930/abcd_tbss01.txt')
-othCog=read.delim('~/Downloads/Package_1206930/abcd_ps01.txt')
-littleMan=read.delim('~/Downloads/Package_1206931/lmtp201.txt')
+nihCog=read.delim('~/Downloads/Package_1210940/abcd_tbss01.txt')
+othCog=read.delim('~/Downloads/Package_1210940/abcd_ps01.txt')
+littleMan=read.delim('~/Downloads/Package_1210940/lmtp201.txt')
 
 # merge in
-masterdf<-merge(masterdf,nihCog,by=c('subjectkey','eventname','interview_age'))
+masterdf<-merge(masterdf,nihCog,by=c('subjectkey','eventname','interview_age','sex'))
 ```
 
     ## Warning in merge.data.frame(masterdf, nihCog, by = c("subjectkey",
     ## "eventname", : column names 'collection_id.x', 'dataset_id.x',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'interview_date.y', 'sex.y', 'collection_title.y' are duplicated
-    ## in the result
+    ## 'interview_date.x', 'collection_title.x', 'collection_id.y', 'dataset_id.y',
+    ## 'interview_date.y', 'collection_title.y' are duplicated in the result
 
 ``` r
-newDim3=dim(masterdf)
-print(paste0(newDim3[1],' after merging nih toolbox, ',(newDim2[1]- newDim3[1]),' lost after removing'))
+newList=length(unique(masterdf$subjectkey))
+print(paste0(newList,' after merging nih toolbox, ',(acsSubjs- newList),' lost after merge'))
 ```
 
-    ## [1] "18935 after merging nih toolbox, 0 lost after removing"
+    ## [1] "7663 after merging nih toolbox, 0 lost after merge"
 
 ``` r
-masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age'))
+masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age','sex'))
 ```
 
     ## Warning in merge.data.frame(masterdf, othCog, by = c("subjectkey",
     ## "eventname", : column names 'collection_id.x', 'dataset_id.x',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'src_subject_id.x', 'interview_date.y', 'sex.y',
-    ## 'collection_title.y', 'src_subject_id.y' are duplicated in the result
+    ## 'interview_date.x', 'collection_title.x', 'collection_id.y', 'dataset_id.y',
+    ## 'src_subject_id.x', 'interview_date.y', 'collection_title.y', 'src_subject_id.y'
+    ## are duplicated in the result
 
 ``` r
-newDim4=dim(masterdf)
-print(paste0(newDim4[1],' after merging other cognitive measures, ',(newDim3[1]- newDim4[1]),' lost after removing'))
+newList2=length(unique(masterdf$subjectkey))
+print(paste0(newList2,' after merging other cognitive measures, ',(newList- newList2),' lost after merge'))
 ```
 
-    ## [1] "18935 after merging other cognitive measures, 0 lost after removing"
+    ## [1] "7663 after merging other cognitive measures, 0 lost after merge"
 
 ``` r
-masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age'))
+masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age','sex'))
 ```
 
     ## Warning in merge.data.frame(masterdf, littleMan, by = c("subjectkey",
     ## "eventname", : column names 'collection_id.x', 'dataset_id.x',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'src_subject_id.x', 'interview_date.y', 'sex.y',
-    ## 'collection_title.y', 'collection_id.x', 'dataset_id.x', 'src_subject_id.y',
-    ## 'interview_date.x', 'sex.x', 'collection_title.x', 'collection_id.y',
-    ## 'dataset_id.y', 'interview_date.y', 'sex.y', 'collection_title.y' are duplicated
-    ## in the result
+    ## 'interview_date.x', 'collection_title.x', 'collection_id.y', 'dataset_id.y',
+    ## 'src_subject_id.x', 'interview_date.y', 'collection_title.y', 'collection_id.x',
+    ## 'dataset_id.x', 'src_subject_id.y', 'interview_date.x', 'collection_title.x',
+    ## 'collection_id.y', 'dataset_id.y', 'interview_date.y', 'collection_title.y' are
+    ## duplicated in the result
 
 ``` r
-newDim5=dim(masterdf)
-print(paste0(newDim5[1],' after merging little man, ',(newDim4[1]- newDim5[1]),' lost after removing'))
+newList3=length(unique(masterdf$subjectkey))
+print(paste0(newList3,' after merging little man, ',(newList2 - newList3),' lost after merge'))
 ```
 
-    ## [1] "18935 after merging little man, 0 lost after removing"
+    ## [1] "7663 after merging little man, 0 lost after merge"
 
 ``` r
 # clean age
@@ -299,35 +389,33 @@ masterdf$lmt_scr_perc_correct<-as.numeric(masterdf$lmt_scr_perc_correct)
 # for isolating PCA dataframe
 pcVars=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct")
 
-# test for completeness before running PCA. Better move to calculate ONLY in the sample that we are running analyses on (more technically accurate than PC structure slightly misaligned with sample of interest)
-# get other vars of interest to check for complete cases
-KidVarsOfInt=c('Grades','cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r')
-# asr columns of interest to gauge completeness of
-ColsOfInt=asr[,c(11:141)]
-ASRVarsOfInt=colnames(ColsOfInt)
-
 # only use subjects with both timepoints as complete cases
 subjs=unique(masterdf$subjectkey)
 for (s in subjs){
   # if there are less than two complete cases of the variables of interest
-  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(pcVars,KidVarsOfInt,ASRVarsOfInt)]))<2){
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(pcVars)]))<2){
     subjs=subjs[subjs!=s]
   }
 }
 # convert masterdf to df with complete observations for cognition
 masterdf=masterdf[masterdf$subjectkey %in% subjs,]
-
-newDim6=dim(masterdf)
-print(paste0(newDim6[1],' after retaining only subjs with vars of int at BOTH timepoints, ',(newDim5[1]- newDim6[1]),' lost after removing'))
+newList4=length(unique(masterdf$subjectkey))
+print(paste0(newList4,' after retaining only subjs with Cognitive vars of int at BOTH timepoints, ',(newList3- newList4),' lost after removing'))
 ```
 
-    ## [1] "11452 after retaining only subjs with vars of int at BOTH timepoints, 7483 lost after removing"
+    ## [1] "6255 after retaining only subjs with Cognitive vars of int at BOTH timepoints, 1408 lost after removing"
 
 ``` r
 print(dim(masterdf))
 ```
 
-    ## [1] 11452   597
+    ## [1] 12510   592
+
+``` r
+# populated included subjs df
+includedSubjects$CogBoth=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CogBoth=1
+```
 
 ``` r
 ### ∆∆∆
@@ -360,42 +448,28 @@ for(f in 1:length(unique(masterdf$rel_family_id))){
     keeper=famIDs[kept]
     left=famIDs[-c(kept)]
     # leave rest
-    masterdf=masterdf[masterdf$subjectkey!=left,] 
-    #print(paste0('left ',left))
+    masterdf=masterdf[!masterdf$subjectkey %in% left,] 
     # calc index of family
     ind=ind+1   
     # set index of family
     masterdf$id_fam[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]] = ind
   } 
 }
-```
 
-    ## Warning in `!=.default`(masterdf$subjectkey, left): longer object length is not
-    ## a multiple of shorter object length
-
-    ## Warning in is.na(e1) | is.na(e2): longer object length is not a multiple of
-    ## shorter object length
-
-    ## Warning in `!=.default`(masterdf$subjectkey, left): longer object length is not
-    ## a multiple of shorter object length
-
-    ## Warning in is.na(e1) | is.na(e2): longer object length is not a multiple of
-    ## shorter object length
-
-``` r
 # make family ID for those with families represented in ABCD
 masterdf$rel_family_id=masterdf$id_fam
 
-newDim7=dim(masterdf)
-print(paste0(newDim7[1],' after retaining only one subjs per family, ',(newDim6[1]- newDim7[1]),' lost after removing'))
+newList5=length(unique(masterdf$subjectkey))
+print(paste0(newList5,' after retaining only one subjs per family, ',(newList4- newList5),' lost after removing'))
 ```
 
-    ## [1] "10101 after retaining only one subjs per family, 1351 lost after removing"
+    ## [1] "5433 after retaining only one subjs per family, 822 lost after removing"
 
 ``` r
-#       NOW 
-# THAT'S WHAT I CALL PCAPREP
-#       271
+# included subjects DF to track subj loss
+includedSubjects$OnePerFamily=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$OnePerFamily=1
+
 # pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
 pcaDf<-masterdf[,pcVars]
 ```
@@ -418,16 +492,16 @@ y.pca$loadings
     ## 
     ## Loadings:
     ##                             RC1    RC2    RC3   
-    ## nihtbx_picvocab_uncorrected  0.752  0.189       
-    ## nihtbx_flanker_uncorrected   0.205  0.820       
-    ## nihtbx_pattern_uncorrected   0.163  0.843       
-    ## nihtbx_picture_uncorrected   0.605  0.247       
-    ## nihtbx_reading_uncorrected   0.708  0.205  0.171
+    ## nihtbx_picvocab_uncorrected  0.748  0.195       
+    ## nihtbx_flanker_uncorrected   0.195  0.827       
+    ## nihtbx_pattern_uncorrected   0.173  0.838       
+    ## nihtbx_picture_uncorrected   0.614  0.231       
+    ## nihtbx_reading_uncorrected   0.706  0.210  0.176
     ## pea_ravlt_ld                 0.764              
-    ## lmt_scr_perc_correct                       0.984
+    ## lmt_scr_perc_correct                       0.983
     ## 
     ##                  RC1   RC2   RC3
-    ## SS loadings    2.091 1.527 1.012
+    ## SS loadings    2.093 1.527 1.014
     ## Proportion Var 0.299 0.218 0.145
     ## Cumulative Var 0.299 0.517 0.662
 
@@ -439,37 +513,30 @@ masterdf$g<-Yextended$g
 ```
 
 ``` r
-# save out all timepoints df for bootstrapping both-tp-fits
-saveRDS(masterdf,'~/DfWithGrades.rds')
-print(dim(masterdf))
-```
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## merges subjects with data at both timepoints##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
-    ## [1] 10101   600
-
-``` r
 # exclude subjs without data for both timepoints
-OutDF=masterdf
-dimOutDF=dim(OutDF)
-OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')
-OutDF2Y=subset(OutDF,eventname=='2_year_follow_up_y_arm_1')
+OutDFsubjects=length(unique(masterdf$subjectkey))
+OutDFBV=subset(masterdf,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(masterdf,eventname=='2_year_follow_up_y_arm_1')
 # intersection of subjs in both
 BothTPsubjs=intersect(OutDFBV$subjectkey,OutDF2Y$subjectkey)
-# index out intersection from non tp-split df
-OutDF=OutDF[OutDF$subjectkey %in% BothTPsubjs,]
-outDf2dim=dim(OutDF)
-print(outDf2dim)
-```
-
-    ## [1] 10076   600
-
-``` r
-dif=dimOutDF[1]-outDf2dim[1]
+Different=setdiff(unique(masterdf$subjectkey),BothTPsubjs)
+# print sanity check subjs lost to another check of both tps populated
+newList6=length(unique(BothTPsubjs))
+dif=newList5-newList6
 print(paste0(dif,' rows lost from only using subjs with both timepoints'))
 ```
 
-    ## [1] "25 rows lost from only using subjs with both timepoints"
+    ## [1] "0 rows lost from only using subjs with both timepoints"
 
 ``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## handles adult p factor                     ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 # make count version of adult P
 ASRdfNum<-as.data.frame(lapply(asr[-1,11:141],as.numeric))
 ASRtotal=rowSums(ASRdfNum)
@@ -497,26 +564,39 @@ asr$interview_age=as.numeric(asr$interview_age)/12
 # set subjectkey to factor for merge
 asr$subjectkey<-as.factor(asr$subjectkey)
 
+# ensure none are missing
+paste0(length(unique(masterdf$subjectkey)))
+```
+
+    ## [1] "5433"
+
+``` r
+# collapse to just variables of interest to prevent duplicate variables
+asr=asr[,c('parentPcount','subjectkey','eventname','interview_age')]
 # merge
-OutDF=merge(OutDF,asr,by=c('subjectkey','eventname','interview_age'))
+masterdf=merge(masterdf,asr,by=c('subjectkey','eventname','interview_age'))
 ```
 
-    ## Warning in merge.data.frame(OutDF, asr, by = c("subjectkey", "eventname", :
-    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
+    ## Warning in merge.data.frame(masterdf, asr, by = c("subjectkey", "eventname", :
+    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
     ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'collection_id.x',
-    ## 'dataset_id.x', 'src_subject_id.y', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'src_subject_id.y' are
-    ## duplicated in the result
+    ## 'interview_date.y', 'collection_title.y', 'collection_id.x', 'dataset_id.x',
+    ## 'src_subject_id.y', 'interview_date.x', 'collection_title.x', 'collection_id.y',
+    ## 'dataset_id.y', 'interview_date.y', 'collection_title.y' are duplicated in the
+    ## result
 
 ``` r
-print(dim(OutDF))
+# ensure none are missing
+paste0(length(unique(masterdf$subjectkey)))
 ```
 
-    ## [1] 10076   746
+    ## [1] "5433"
 
 ``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Handles participants TSV from              ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 ### LOAD in ParticipantsTSV for parent income and edu background
 # ordained sample split
 participantsTSV=read.delim('~/Downloads/participants.tsv',sep="\t")
@@ -551,38 +631,56 @@ participantsTSV = participantsTSV[,!(names(participantsTSV) %in% 'eventname')]
 # convert sex to M/F in particpants tsv
 participantsTSV$sex[participantsTSV$sex==1]="M"
 participantsTSV$sex[participantsTSV$sex==2]="F"
-### merge in for fam income and parent edu
-OutDF=merge(OutDF,participantsTSV,by=c('subjectkey','sex'))
-```
 
-    ## Warning in merge.data.frame(OutDF, participantsTSV, by = c("subjectkey", :
-    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'collection_id.x',
-    ## 'dataset_id.x', 'src_subject_id.y', 'interview_date.x', 'sex.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
-    ## 'interview_date.y', 'sex.y', 'collection_title.y', 'src_subject_id.y' are
-    ## duplicated in the result
-
-``` r
 # take out na incomes
-OutDF=OutDF[OutDF$income!=777,]
-OutDF=OutDF[OutDF$income!=999,]
+participantsTSV=participantsTSV[participantsTSV$income!=777,]
+participantsTSV=participantsTSV[participantsTSV$income!=999,]
 # race
-OutDF=OutDF[OutDF$race_ethnicity!=888,]
-OutDF$race_ethnicity<-as.factor(OutDF$race_ethnicity)
+participantsTSV=participantsTSV[participantsTSV$race_ethnicity!=888,]
+participantsTSV$race_ethnicity<-as.factor(participantsTSV$race_ethnicity)
 # parental edu
-OutDF=OutDF[OutDF$parental_education!=888,]
-OutDF=OutDF[OutDF$parental_education!=777,]
-OutDF$parental_education<-as.ordered(OutDF$parental_education)
-dim(OutDF)
+participantsTSV=participantsTSV[participantsTSV$parental_education!=888,]
+participantsTSV=participantsTSV[participantsTSV$parental_education!=777,]
+participantsTSV$parental_education<-as.ordered(participantsTSV$parental_education)
+
+### merge in for fam income and parent edu
+masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
 ```
 
-    ## [1] 9292  762
+    ## Warning in merge.data.frame(masterdf, participantsTSV, by = c("subjectkey", :
+    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
+    ## 'interview_date.y', 'collection_title.y', 'collection_id.x', 'dataset_id.x',
+    ## 'src_subject_id.y', 'interview_date.x', 'collection_title.x', 'collection_id.y',
+    ## 'dataset_id.y', 'interview_date.y', 'collection_title.y' are duplicated in the
+    ## result
 
 ``` r
+# new merge and count
+participantsTSVSubjs=length(unique(masterdf$subjectkey))
+# add to included subjs DF
+includedSubjects$pTSV=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$pTSV=1
+
+print(paste0(newList6-participantsTSVSubjs,' participants lost after needing complete data in participantstsv'))
+```
+
+    ## [1] "446 participants lost after needing complete data in participantstsv"
+
+``` r
+paste0(participantsTSVSubjs,' remain')
+```
+
+    ## [1] "4987 remain"
+
+``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Handles YLE                                ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
+
 #### LOAD in youth life events. Unfortunately this also appears to be missing for most participants, but is populated for slightly more than residential deprivation
-yle=read.delim('~/Downloads/Package_1209596/abcd_yle01.txt')
+yle=read.delim('~/Downloads/Package_1210940/abcd_yle01.txt')
 yleColnames=colnames(yle)
 yleColDescrip=yle[1,]
 # note yle's are labeled ple's in the colnames, but end with a _y extension (ples end with _p extension)
@@ -591,12 +689,6 @@ yleColDescrip=yle[1,]
 #### Some will need to be retrospective. Use PLE and YLE instances of "not in past year" to get starting point for ACEs (assumed prior to tp1 scan)
 # so to reconstruct whether or not this happened before timepoint 1 scan, we will need _past_yr variables
 ylePastYearcols=yleColnames[grep('_past_yr',yleColnames)]
-
-# verify with descriptions
-# yleColDescrip[grep('_past_yr',yleColnames)]
-# remove _past_yr to get list of assayed youth life events
-###yles=gsub('_past_yr','',ylePastYearcols)
-# this approach does not work because columns are misnamed (idiosyncratic missing characters between past year vs. not past year versions)
 
 # remove "past year?" from column names to boil down to binary variables of interest
 yle_No_PastYearcols=yleColnames[-which(yleColnames %in% ylePastYearcols)]
@@ -611,6 +703,10 @@ yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad[-which(yl
 ```
 
 ``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Handles errors in yle                     ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 #### make outdf for cross-sectional analyses w/ bootstrapping
 
 # extract just tp1 (really timepoint 1.5, 1-year in) for yle's
@@ -701,7 +797,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -711,7 +807,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -721,7 +817,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-3.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -731,7 +827,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-4.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-4.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -741,7 +837,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-5.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-5.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -751,7 +847,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-6.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-6.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -761,7 +857,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-7.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-7.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -771,7 +867,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-8.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-8.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -781,7 +877,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-9.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-9.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -791,7 +887,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-10.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-10.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -801,7 +897,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-11.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-11.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -811,7 +907,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-12.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-12.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -821,7 +917,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-13.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-13.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -831,7 +927,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-14.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-14.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -841,7 +937,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-15.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-15.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -851,7 +947,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-16.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-16.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -861,7 +957,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-17.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-17.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -871,7 +967,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-18.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-18.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -881,7 +977,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-19.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-19.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -891,7 +987,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-20.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-20.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -901,7 +997,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-21.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-21.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -911,7 +1007,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-22.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-22.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -921,7 +1017,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-23.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-23.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -931,7 +1027,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-24.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-24.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -941,93 +1037,93 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-25.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-25.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Saw or heard someone getting hit Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-26.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-26.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Your family was homeless? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-27.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-27.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Parent or caregiver hospitalized? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-28.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-28.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Had a lockdown at your school due to concerns about a school shooting or violence? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-29.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-29.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Please indicate how instrument was administered: Please indicate how instrument was administered:"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-30.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-30.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Saw or heard someone being shot at (but not actually wounded) in your school or neighborhood? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-31.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-31.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Do you know someone who has attempted suicide? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-32.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-32.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Parent or caregiver deported? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-33.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-33.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-34.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-34.png)<!-- -->
 
 ``` r
 #### for year1 visit
@@ -1041,13 +1137,27 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
 # ∆∆ now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a different predictive context)
 # ∆∆ BUT this only captures baseline ABCD visit. Now we need to merge two-year FUP life events with the rest of the two years for cross-sectional analyses
-OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')
-OutDF2Y=subset(OutDF,eventname=='2_year_follow_up_y_arm_1')
-# we have one valid reconstruction from code above to merge into bv
-OutDFBVyle=merge(OutDFBV,preBVdf,by=c('subjectkey'))
-# and now we need to get the two year yles to merge in
-yle2=subset(yle,eventname=='2_year_follow_up_y_arm_1')
+OutDFBV=subset(masterdf,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(masterdf,eventname=='2_year_follow_up_y_arm_1')
+# we have one valid reconstruction from code above to merge into bv - but remove subjects already removed from master df
+preBVdf=preBVdf[preBVdf$subjectkey %in% masterdf$subjectkey,]
+# for merging purposes to avoid doubling
+preBVdf$eventname='baseline_year_1_arm_1'
+OutDFBVyle=merge(masterdf,preBVdf,by=c('subjectkey','eventname'))
+```
 
+    ## Warning in merge.data.frame(masterdf, preBVdf, by = c("subjectkey",
+    ## "eventname")): column names 'collection_id.x', 'dataset_id.x',
+    ## 'interview_date.x', 'collection_title.x', 'collection_id.y', 'dataset_id.y',
+    ## 'src_subject_id.x', 'interview_date.y', 'collection_title.y', 'collection_id.x',
+    ## 'dataset_id.x', 'src_subject_id.y', 'interview_date.x', 'collection_title.x',
+    ## 'collection_id.y', 'dataset_id.y', 'interview_date.y', 'collection_title.y' are
+    ## duplicated in the result
+
+``` r
+# and now we need to get the two year yles to merge in - but remove subjects already removed from master df
+yle2=yle2[yle2$subjectkey %in% masterdf$subjectkey,]
+yle2=subset(yle,eventname=='2_year_follow_up_y_arm_1')
 #### extract same columns of interest - 2 YEAR
 # for iterative dataset construct
 Y2df=data.frame(as.factor(yle2$subjectkey))
@@ -1063,14 +1173,51 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 }  
 # and now we can merge it in
 OutDF2Yyle=merge(OutDF2Y,Y2df,by=c('subjectkey'))
+# remove redundant colnames
+redundantColnames=setdiff(colnames(OutDF2Yyle),colnames(OutDFBVyle))
+OutDF2Yyle=OutDF2Yyle[, !names(OutDF2Yyle) %in%  redundantColnames]
+# remove duplicated column names
+OutDFBVyle <- OutDFBVyle[, !duplicated(colnames(OutDFBVyle))]
 # now we can recombine them
 OutDFyle=rbind(OutDFBVyle,OutDF2Yyle)
 
-# so if we use the events recorded that happened prior to the baseline visit, and those that are included at 2 year FUP how much missingness does that imbue?
-print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost from requiring those with yle at both timepoints with full data'))
+# only use subjects with both timepoints as complete cases
+# cols of interest to guage over
+varsOfInt=yle_No_PastYearcols_No_Goodbad_No_EvAff[10:34]
+subjs=unique(OutDFyle$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(OutDFyle[OutDFyle$subjectkey==s,c(varsOfInt)]))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+# convert masterdf to df with complete observations for cognition
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# new count after merge
+masterdf=merge(masterdf,OutDFyle,by=c('subjectkey','sex','eventname','interview_age','Grades','g','income','parental_education','race_ethnicity','matched_group','parentPcount','cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r'))
 ```
 
-    ## [1] "76 lost from requiring those with yle at both timepoints with full data"
+    ## Warning in merge.data.frame(masterdf, OutDFyle, by = c("subjectkey", "sex", :
+    ## column names 'collection_id.x.x', 'dataset_id.x.x', 'interview_date.x.x',
+    ## 'collection_title.x.x', 'collection_id.y.x', 'dataset_id.y.x',
+    ## 'src_subject_id.x.x', 'interview_date.y.x', 'collection_title.y.x',
+    ## 'collection_id.x.x', 'dataset_id.x.x', 'src_subject_id.y.x',
+    ## 'interview_date.x.x', 'collection_title.x.x', 'collection_id.y.x',
+    ## 'dataset_id.y.x', 'interview_date.y.x', 'collection_title.y.x' are duplicated in
+    ## the result
+
+``` r
+YLESubjs=length(unique(masterdf$subjectkey))
+# add to included subjs DF
+includedSubjects$YLESubjs=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$YLESubjs=1
+
+# so if we use the events recorded that happened prior to the baseline visit, and those that are included at 2 year FUP how much missingness does that imbue?
+print(paste0(participantsTSVSubjs-YLESubjs,' lost from requiring those with yle at both timepoints with full data'))
+```
+
+    ## [1] "90 lost from requiring those with yle at both timepoints with full data"
 
 ``` r
 # gauge consistency of responses across visits: happened at al in past should be reflected at tp 2 if it is at tp1
@@ -1081,10 +1228,9 @@ ggplot(data=tmpdf,aes(x=ple_arrest_y.x,y=ple_arrest_y.y))+geom_point()+geom_jitt
 ```
 
     ## Warning: Removed 3 rows containing missing values (geom_point).
+    ## Removed 3 rows containing missing values (geom_point).
 
-    ## Warning: Removed 3 rows containing missing values (geom_point).
-
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-10-35.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 # find subjects who report yle's at timepoint 1 but not 2
@@ -1105,26 +1251,33 @@ for (i in 10:34){
 }
 
 # and if we exclude subjs with inconsistent timepoint-to-timepoint answers 
-OutDFyle=OutDFyle[!OutDFyle$subjectkey %in% questionableSubjs,]
-print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost from requiring those with yle at both timepoints with full data, and kids who inconsistently report yles'))
+masterdf=masterdf[!masterdf$subjectkey %in% questionableSubjs,]
+# remaining unique subjs
+ConsistentYleSubjs=length(unique(masterdf$subjectkey))
+print(paste0(YLESubjs-ConsistentYleSubjs,' lost from requiring those with yle at both timepoints with full data, and kids who inconsistently report yles'))
 ```
 
-    ## [1] "880 lost from requiring those with yle at both timepoints with full data, and kids who inconsistently report yles"
+    ## [1] "421 lost from requiring those with yle at both timepoints with full data, and kids who inconsistently report yles"
 
 ``` r
-print(dim(OutDFyle))
+print(paste0(ConsistentYleSubjs,' participants remain'))
 ```
 
-    ## [1] 8412  796
+    ## [1] "4476 participants remain"
 
 ``` r
-##############
-### LOAD IN PLE'S TOO SUCKAAAA SHRINK THAT SAMPLE SIZE
-##############
+# add to included subjs DF
+includedSubjects$YLEConsistentSubjs=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$YLEConsistentSubjs=1
+```
 
+``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Handles discrep. in ple~yle, saves out X-sectionaldf ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 # ple QC
 #### LOAD in youth life events. Unfortunately this also appears to be missing for most participants, but is populated for slightly more than residential deprivation
-ple=read.delim('~/Downloads/Package_1209596/abcd_ple01.txt')
+ple=read.delim('~/Downloads/Package_1210940/abcd_ple01.txt')
 pleColnames=colnames(ple)
 pleColDescrip=ple[1,]
 # note yle's are labeled ple's in the colnames, but end with a _y extension (ples end with _p extension)
@@ -1158,18 +1311,14 @@ BVboth=merge(OutDFBVyle,timepoint1PLE,by='subjectkey')
 ```
 
     ## Warning in merge.data.frame(OutDFBVyle, timepoint1PLE, by = "subjectkey"):
-    ## column names 'sex.x', 'collection_id.x', 'dataset_id.x', 'interview_date.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
-    ## 'sex.y', 'collection_title.y' are duplicated in the result
+    ## column names 'src_subject_id.x', 'src_subject_id.y' are duplicated in the result
 
 ``` r
 Y2both=merge(OutDF2Yyle,timepoint2PLE,by='subjectkey')
 ```
 
     ## Warning in merge.data.frame(OutDF2Yyle, timepoint2PLE, by = "subjectkey"):
-    ## column names 'sex.x', 'collection_id.x', 'dataset_id.x', 'interview_date.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
-    ## 'sex.y', 'collection_title.y' are duplicated in the result
+    ## column names 'src_subject_id.x', 'src_subject_id.y' are duplicated in the result
 
 ``` r
 # loop over to get another estimate of questionable reliability
@@ -1213,64 +1362,147 @@ for (i in 11:34){
 
 # combine with questionable subjs on the basis of tp1 ysr and tp2 ysr not matching
 questionableSubjs=unique(c(questionableSubjs,ple_based_questionableSubjs))
+masterdf=masterdf[!masterdf$subjectkey %in% questionableSubjs,]
 
-
-OutDFyle2=OutDFyle[!OutDFyle$subjectkey %in% questionableSubjs,]
-print(paste0(dim(OutDFyle2)[1]-dim(OutDFyle2)[1],' lost from cross-referncing parent report of childs life events and removing inconsistents'))
+AgreeingYleSubjs=length(unique(masterdf$subjectkey))
+print(paste0(ConsistentYleSubjs-AgreeingYleSubjs,' lost from cross-referencing parent report of childs life events and removing inconsistents'))
 ```
 
-    ## [1] "0 lost from cross-referncing parent report of childs life events and removing inconsistents"
+    ## [1] "567 lost from cross-referencing parent report of childs life events and removing inconsistents"
 
 ``` r
-print(dim(OutDFyle2))
+print(paste0(AgreeingYleSubjs,' Participants remain'))
 ```
 
-    ## [1] 7340  796
+    ## [1] "3909 Participants remain"
 
 ``` r
+# update includedSubjsDF
+
+
 ###### fix data formats
 # variables of interest
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_totprob_r','ple_died_y','ple_injured_y','ple_crime_y','ple_friend_y','ple_friend_injur_y','ple_arrest_y','ple_friend_died_y','ple_mh_y','ple_sib_y','ple_victim_y','ple_separ_y','ple_law_y','ple_school_y','ple_move_y','ple_jail_y','ple_step_y','ple_new_job_y','ple_new_sib_y','g','subjectkey','interview_age','Grades','parentPcount','income','parental_education','sex','race_ethnicity','eventname')
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','ple_died_y','ple_injured_y','ple_crime_y','ple_friend_y','ple_friend_injur_y','ple_arrest_y','ple_friend_died_y','ple_mh_y','ple_sib_y','ple_victim_y','ple_separ_y','ple_law_y','ple_school_y','ple_move_y','ple_jail_y','ple_step_y','ple_new_job_y','ple_new_sib_y','g','subjectkey','interview_age','Grades','parentPcount','income','parental_education','sex','race_ethnicity','eventname')
 
 # convert PLE's to factors
 for (i in 4:21){
   VarOfInt=variablesOfInterest[i]
-  OutDFyle2[,VarOfInt]<-as.factor(OutDFyle2[,VarOfInt])
+  masterdf[,VarOfInt]<-as.factor(masterdf[,VarOfInt])
 }
 
 # convert grades, parent P, income, and parental edu to numeric
 for (i in 25:28){
   VarOfInt=variablesOfInterest[i]
-  OutDFyle2[,VarOfInt]<-as.numeric(OutDFyle2[,VarOfInt])
+  masterdf[,VarOfInt]<-as.numeric(masterdf[,VarOfInt])
 }
 
 # convert sex and race/ethnicity to factors
 for (i in 29:30){
   VarOfInt=variablesOfInterest[i]
-  OutDFyle2[,VarOfInt]<-as.factor(OutDFyle2[,VarOfInt])
+  masterdf[,VarOfInt]<-as.factor(masterdf[,VarOfInt])
 }
 
 #### ∆∆∆
 # last catch: eliminate rows with NAs
 #### ∆∆∆
 # variables of interest redux
-OutDFyle2=OutDFyle2[,c(variablesOfInterest)]
+masterdf=masterdf[,c(variablesOfInterest)]
 # na omitted version
-OutDFyle2_nao=OutDFyle2[rowSums(is.na(OutDFyle2)) == 0, ] 
-print(dim(OutDFyle2_nao))
+masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ] 
+print(dim(masterdf))
 ```
 
-    ## [1] 7337   31
+    ## [1] 7818   31
 
 ``` r
+#
+
+
 # save ouput
-saveRDS(OutDFyle2_nao,'~/OutDfxc.rds')
+saveRDS(masterdf,'~/OutDfxc.rds')
+
+# add to included subjs DF
+includedSubjects$YLEConsistentAgreeSubjs=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$YLEConsistentAgreeSubjs=1
 ```
 
 ``` r
+# make alluvial: in theory no other subjects excluded
+library(ggplot2)
+library(ggalluvial)
+library(scales)
+```
+
+    ## 
+    ## Attaching package: 'scales'
+
+    ## The following object is masked from 'package:rapportools':
+    ## 
+    ##     percent
+
+``` r
+plotdf=melt(includedSubjects)
+```
+
+    ## Using subj as id variables
+
+``` r
+plotdf$value<-as.factor(plotdf$value)
+plotdf$subj<-as.factor(plotdf$subj)
+
+# merge in raceEth of each subj
+raceEth=participantsTSV$race_ethnicity
+subjectsInPtsv=participantsTSV$subjectkey
+infoDf=data.frame(raceEth,subjectsInPtsv)
+colnames(infoDf)<-c('RaceEthn','subj')
+test=merge(plotdf,infoDf,by='subj')
+# overwrite race with "empty" if missing after each checkpoint
+test$RaceEthn<-factor(test$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
+test$RaceEthn[test$value==0]="Missing"
+
+ggplot(test,aes(x=variable,stratum=RaceEthn,alluvium=subj))+geom_stratum(aes(fill=RaceEthn))+geom_flow(aes(fill=RaceEthn))+theme_bw(base_size=20)
+```
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+
+``` r
+### and equivalent for sex
+plotdf=melt(includedSubjects)
+```
+
+    ## Using subj as id variables
+
+``` r
+plotdf$value<-as.factor(plotdf$value)
+plotdf$subj<-as.factor(plotdf$subj)
+
+# merge in raceEth of each subj
+sexes=participantsTSV$sex
+subjectsInPtsv=participantsTSV$subjectkey
+infoDf=data.frame(sexes,subjectsInPtsv)
+colnames(infoDf)<-c('sex','subj')
+test=merge(plotdf,infoDf,by='subj')
+# overwrite race with "empty" if missing after each checkpoint
+test$sex<-factor(test$sex,levels=c("M","F","Missing"))
+test$sex[test$value==0]="Missing"
+
+ggplot(test,aes(x=variable,stratum=sex,alluvium=subj))+geom_stratum(aes(fill=sex))+geom_flow(aes(fill=sex))+theme_bw(base_size=20)
+```
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
+
+``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Handles tp1 (not bv) yle, tempPrec df ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 # remove prior YLE columns for clarity (except for subjectkey and eventname, items 4 and 9)
 yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad_No_EvAff[-c(4,9)]
-OutDFyle2_nao=OutDFyle2_nao[,!colnames(OutDFyle2_nao) %in% yle_No_PastYearcols_No_Goodbad_No_EvAff]
+
+# DELETE?
+masterdf=masterdf[,!colnames(masterdf) %in% yle_No_PastYearcols_No_Goodbad_No_EvAff]
+
+
 ##### make outdf absolute retrospective for temporal precedence analyses
 ## for iterative dataset construct
 preBVdf=data.frame(as.factor(yle1$subjectkey))
@@ -1349,7 +1581,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1359,7 +1591,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1369,7 +1601,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-3.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-3.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1379,7 +1611,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-4.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-4.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1389,7 +1621,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-5.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-5.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1399,7 +1631,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-6.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-6.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1409,7 +1641,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-7.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-7.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1419,7 +1651,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-8.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-8.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1429,7 +1661,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-9.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-9.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1439,7 +1671,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-10.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-10.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1449,7 +1681,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-11.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-11.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1459,7 +1691,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-12.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-12.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1469,7 +1701,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-13.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-13.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1479,7 +1711,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-14.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-14.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1489,7 +1721,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-15.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-15.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1499,7 +1731,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-16.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-16.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1509,7 +1741,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-17.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-17.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1519,7 +1751,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-18.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-18.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1529,7 +1761,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-19.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-19.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1539,7 +1771,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-20.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-20.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1549,7 +1781,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-21.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-21.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1559,7 +1791,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-22.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-22.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1569,7 +1801,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-23.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-23.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1579,7 +1811,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-24.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-24.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
@@ -1589,93 +1821,93 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-25.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-25.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Saw or heard someone getting hit Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-26.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-26.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Your family was homeless? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-27.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-27.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Parent or caregiver hospitalized? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-28.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-28.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Had a lockdown at your school due to concerns about a school shooting or violence? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-29.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-29.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Please indicate how instrument was administered: Please indicate how instrument was administered:"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-30.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-30.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Saw or heard someone being shot at (but not actually wounded) in your school or neighborhood? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-31.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-31.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Do you know someone who has attempted suicide? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-32.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-32.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
     ## [1] "Variables: Parent or caregiver deported? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-33.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-33.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33675 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-12-34.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-19-34.png)<!-- -->
 
 ``` r
 #### for year1 visit
@@ -1690,11 +1922,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 # now that events reported refer to prior to the baseline visit, we can consider them as BV (not for "since" variables, which can be interpreted differently as below)
 # no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
 #preBVdf$eventname='baseline_year_1_arm_1'
-OutDFyle3=merge(OutDFyle2,preBVdf,by=c('subjectkey'))
+
+# merge it back in (OutDFyle3 is legacy name, 1 and 2 have gone their own way)
+OutDFyle3=merge(preBVdf,masterdf,by=c('subjectkey'))
 print(dim(OutDFyle3))
 ```
 
-    ## [1] 7264   65
+    ## [1] 7818   45
 
 ``` r
 # convert to one row per subj for temporal precedence analyses
@@ -1704,7 +1938,7 @@ OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 3632  129
+    ## [1] 3909   89
 
 ``` r
 #### ∆∆∆
@@ -1718,13 +1952,17 @@ OutDFTmpPrec_nao=OutDFTmpPrec_nao[rowSums(is.na(OutDFTmpPrec_nao)) == 0,]
 print(dim(OutDFTmpPrec_nao))
 ```
 
-    ## [1] 3628  111
+    ## [1] 3909   71
 
 ``` r
 saveRDS(OutDFTmpPrec_nao,'~/OutDFTmpPrec_FullRetro.rds')
 ```
 
 ``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Calculates events-since-bv, saves tempPrec df ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 #### make outdf retrospective PLUS for temporal precedence analyses (includes YLE's that happened before tp2 measurement. Sep. measure)
 ##### make outdf FULL retrospective for temporal precedence analyses
 # but for this, we need to subselect subjects who have data for both timepoints
@@ -1733,9 +1971,13 @@ yle2=yle2[yle2$subjectkey %in% subsetOfBoth,]
 ## for iterative dataset construct
 preBVdf=data.frame(as.factor(yle1$subjectkey))
 colnames(preBVdf)<-'subjectkey'
+# same but for two-year FUP
+y2df=data.frame(as.factor(yle2$subjectkey))
+colnames(y2df)<-'subjectkey'
 
 #### NOTE YOUTH LIFE EVENTS WILL HAVE SLIGHTLY DIFFERENT COEFFICIENTS BECAUSE OF SLIGHTLY DIFFERENT SAMPLE: SMALLER THAN PREVIOUS CHUNK
 # CAN VERIFY EQUIVALENT EXTRACTION OF as.numeric(currCol) into output DF
+# Need to clean this up so there is one column for "occured by baseline" and one for "inter-visit event" for each variable, not this x.x or y.x boggis
 
 # OK, now lets remove instances of these things happening in the past year
 for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
@@ -1813,10 +2055,10 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
   InterVisit_event<-as.numeric(PastYr2)+as.numeric(PastYr)
   # finally, set 2 = 1 for intervisit event, as participants could have truthfully answered yes to past year in both visits given visits can be <1 year apart
   InterVisit_event[InterVisit_event==2]=1
-  preBVdf$null<-as.numeric(InterVisit_event)
-  colnamesMinusNull=head(colnames(preBVdf), -1)
+  y2df$null<-as.numeric(InterVisit_event)
+  colnamesMinusNull=head(colnames(y2df), -1)
   currColName_intervisit=paste0(currColName,'_IVE')
-  colnames(preBVdf)<-c(colnamesMinusNull,currColName_intervisit)
+  colnames(y2df)<-c(colnamesMinusNull,currColName_intervisit)
   # visual QC
   tmpdf=data.frame(as.numeric(currCol),as.numeric(InterVisit_event))
   print(ggplot(data=tmpdf,aes(x=as.numeric.currCol.,y=as.numeric.InterVisit_event.))+geom_point()+geom_jitter()+xlab(paste(currColName, '(BV)'))+ylab(currColName_intervisit))
@@ -1831,7 +2073,7 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning: Removed 9 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
 
@@ -1841,13 +2083,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 9 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-3.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-3.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -1856,13 +2098,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-4.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-4.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 9 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-5.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-5.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -1871,13 +2113,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-6.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-6.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 9 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-7.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-7.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -1886,13 +2128,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-8.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-8.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 9 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-9.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-9.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -1901,13 +2143,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-10.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-10.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 9 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-11.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-11.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -1916,13 +2158,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-12.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-12.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-13.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-13.png)<!-- -->
 
     ## Warning: Removed 23 rows containing missing values (geom_point).
 
@@ -1932,13 +2174,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-14.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-14.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-15.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-15.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
 
@@ -1948,13 +2190,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-16.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-16.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 15 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-17.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-17.png)<!-- -->
 
     ## Warning: Removed 24 rows containing missing values (geom_point).
 
@@ -1964,13 +2206,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-18.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-18.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-19.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-19.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
 
@@ -1980,13 +2222,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-20.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-20.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-21.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-21.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -1995,13 +2237,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-22.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-22.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-23.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-23.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2010,13 +2252,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-24.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-24.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-25.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-25.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2025,13 +2267,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-26.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-26.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-27.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-27.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2040,13 +2282,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-28.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-28.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-29.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-29.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2055,13 +2297,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-30.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-30.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-31.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-31.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2070,13 +2312,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-32.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-32.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-33.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-33.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2085,13 +2327,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-34.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-34.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-35.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-35.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2100,13 +2342,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-36.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-36.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-37.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-37.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2115,13 +2357,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-38.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-38.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-39.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-39.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2130,13 +2372,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-40.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-40.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-41.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-41.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2145,13 +2387,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-42.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-42.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-43.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-43.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2160,13 +2402,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-44.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-44.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-45.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-45.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2175,13 +2417,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-46.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-46.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-47.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-47.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2190,13 +2432,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-48.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-48.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 12 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-49.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-49.png)<!-- -->
 
     ## Warning: Removed 22 rows containing missing values (geom_point).
     ## Removed 22 rows containing missing values (geom_point).
@@ -2205,13 +2447,13 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-50.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-50.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 30558 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 30474 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-51.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-51.png)<!-- -->
 
     ## Warning in min(x): no non-missing arguments to min; returning Inf
 
@@ -2237,20 +2479,20 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 10186 rows containing missing values (geom_point).
-    ## Removed 10186 rows containing missing values (geom_point).
+    ## Warning: Removed 10158 rows containing missing values (geom_point).
+    ## Removed 10158 rows containing missing values (geom_point).
 
     ## [1] "Variables: Saw or heard someone getting hit Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-52.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-52.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 30558 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 30474 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-53.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-53.png)<!-- -->
 
     ## Warning in min(x): no non-missing arguments to min; returning Inf
 
@@ -2276,20 +2518,20 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 10186 rows containing missing values (geom_point).
-    ## Removed 10186 rows containing missing values (geom_point).
+    ## Warning: Removed 10158 rows containing missing values (geom_point).
+    ## Removed 10158 rows containing missing values (geom_point).
 
     ## [1] "Variables: Your family was homeless? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-54.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-54.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 30558 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 30474 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-55.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-55.png)<!-- -->
 
     ## Warning in min(x): no non-missing arguments to min; returning Inf
 
@@ -2315,20 +2557,20 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 10186 rows containing missing values (geom_point).
-    ## Removed 10186 rows containing missing values (geom_point).
+    ## Warning: Removed 10158 rows containing missing values (geom_point).
+    ## Removed 10158 rows containing missing values (geom_point).
 
     ## [1] "Variables: Parent or caregiver hospitalized? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-56.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-56.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 30558 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 30474 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-57.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-57.png)<!-- -->
 
     ## Warning in min(x): no non-missing arguments to min; returning Inf
 
@@ -2354,20 +2596,20 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 10186 rows containing missing values (geom_point).
-    ## Removed 10186 rows containing missing values (geom_point).
+    ## Warning: Removed 10158 rows containing missing values (geom_point).
+    ## Removed 10158 rows containing missing values (geom_point).
 
     ## [1] "Variables: Had a lockdown at your school due to concerns about a school shooting or violence? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-58.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-58.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 30558 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 30474 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-59.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-59.png)<!-- -->
 
     ## Warning in min(x): no non-missing arguments to min; returning Inf
 
@@ -2393,20 +2635,20 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 10186 rows containing missing values (geom_point).
-    ## Removed 10186 rows containing missing values (geom_point).
+    ## Warning: Removed 10158 rows containing missing values (geom_point).
+    ## Removed 10158 rows containing missing values (geom_point).
 
     ## [1] "Variables: Please indicate how instrument was administered: Please indicate how instrument was administered:"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-60.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-60.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 30558 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 30474 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-61.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-61.png)<!-- -->
 
     ## Warning in min(x): no non-missing arguments to min; returning Inf
 
@@ -2432,20 +2674,20 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 10186 rows containing missing values (geom_point).
-    ## Removed 10186 rows containing missing values (geom_point).
+    ## Warning: Removed 10158 rows containing missing values (geom_point).
+    ## Removed 10158 rows containing missing values (geom_point).
 
     ## [1] "Variables: Saw or heard someone being shot at (but not actually wounded) in your school or neighborhood? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-62.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-62.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 30558 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 30474 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-63.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-63.png)<!-- -->
 
     ## Warning in min(x): no non-missing arguments to min; returning Inf
 
@@ -2471,20 +2713,20 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 10186 rows containing missing values (geom_point).
-    ## Removed 10186 rows containing missing values (geom_point).
+    ## Warning: Removed 10158 rows containing missing values (geom_point).
+    ## Removed 10158 rows containing missing values (geom_point).
 
     ## [1] "Variables: Do you know someone who has attempted suicide? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-64.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-64.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 30558 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 30474 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-65.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-65.png)<!-- -->
 
     ## Warning in min(x): no non-missing arguments to min; returning Inf
 
@@ -2510,20 +2752,20 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 10186 rows containing missing values (geom_point).
-    ## Removed 10186 rows containing missing values (geom_point).
+    ## Warning: Removed 10158 rows containing missing values (geom_point).
+    ## Removed 10158 rows containing missing values (geom_point).
 
     ## [1] "Variables: Parent or caregiver deported? Did this happen in the past year?"
 
     ## No id variables; using all as measure variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-66.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-66.png)<!-- -->
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 30558 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 30474 rows containing non-finite values (stat_bin).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-67.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-67.png)<!-- -->
 
     ## Warning in min(x): no non-missing arguments to min; returning Inf
 
@@ -2549,10 +2791,10 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 10186 rows containing missing values (geom_point).
-    ## Removed 10186 rows containing missing values (geom_point).
+    ## Warning: Removed 10158 rows containing missing values (geom_point).
+    ## Removed 10158 rows containing missing values (geom_point).
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-68.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-20-68.png)<!-- -->
 
 ``` r
 #### for year1 visit
@@ -2567,26 +2809,27 @@ for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 # now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a different predictive context)
 # no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
 #preBVdf$eventname='baseline_year_1_arm_1'
-OutDFyle3=merge(preBVdf,OutDFyle2,by=c('subjectkey'))
+colnames(preBVdf)=gsub('_y','_yBV',colnames(preBVdf))
+OutDFyle3=merge(preBVdf,masterdf,by=c('subjectkey'))
+OutDFyle3=merge(y2df,OutDFyle3,by=c('subjectkey'))
 print(dim(OutDFyle3))
 ```
 
-    ## [1] 7264   99
+    ## [1] 7818   79
 
 ``` r
 # convert to one row per subj for temporal precedence analyses
 OutDFBV=subset(OutDFyle3,eventname=='baseline_year_1_arm_1')
 OutDF2Y=subset(OutDFyle3,eventname=='2_year_follow_up_y_arm_1')
+
 OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
+
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 3632  197
+    ## [1] 3909  157
 
 ``` r
-## ∆∆∆∆
-# filter out NAs as above
-## ∆∆∆∆
-
+# saveout
 saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_IVEandRetro.rds')
 ```
