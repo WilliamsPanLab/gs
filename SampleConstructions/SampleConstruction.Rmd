@@ -8,7 +8,7 @@ date: "2023-01-25"
 This .rmd links ndar downloads into a master dataset. Cross-sectional and temporal precedence datasets are be exported from this file (no matched imaging groups needed, pooled factor decomposition), while predictive datasets are exported from SampleConstruction_Ridge.Rmd
 
 ```{r}
-#### LOAD libraries
+#### load libraries
 library(rapportools)
 library(reshape2)
 library(ggplot2)
@@ -20,8 +20,8 @@ library(ggplot2)
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in cbcl data
-cbcl=read.delim('~/Downloads/Package_1205735/abcd_cbcl01.txt')
-cbcls=read.delim('/Users/panlab/Downloads/Package_1205735/abcd_cbcls01.txt')
+cbcl=read.delim('~/Downloads/Package_1210940/abcd_cbcl01.txt')
+cbcls=read.delim('~/Downloads/Package_1210940/abcd_cbcls01.txt')
 # subset timepoints
 cbclsBV=subset(cbcls,eventname=='baseline_year_1_arm_1')
 cbcls2=subset(cbcls,eventname=='2_year_follow_up_y_arm_1')
@@ -33,23 +33,65 @@ cbclsBV=merge(cbclsBV,cbclBV,by=c('subjectkey','eventname'))
 cbcls2=merge(cbcls2,cbcl2,by=c('subjectkey','eventname'))
 
 # initialize master df
-masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id'))
-cbcldim<-dim(masterdf)
-print(cbcldim)
+masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id','sex'))
+# omit nans and empties for variables of interest (totprobs,int,ext)
+masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_totprob_r),]
+masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_totprob_r),]
+masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_internal_r),]
+masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_internal_r),]
+masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_external_r),]
+masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_external_r),]
+# calculate remaining subjs
+cbclSubjs=length(unique(masterdf$subjectkey))
+# initialize included subjects df
+includedSubjects=data.frame(unique(masterdf$subjectkey))
+colnames(includedSubjects)<-'subj'
+includedSubjects$cbclInclude=1
 
+
+# check for completeness at both timepoints- subset those timepoints
+masterdf=masterdf[masterdf$eventname!='1_year_follow_up_y_arm_1',]
+masterdf=masterdf[masterdf$eventname!='3_year_follow_up_y_arm_1',]
+
+# get other vars of interest to check for complete cases
+KidVarsOfInt=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r')
+
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(KidVarsOfInt)]))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+
+# exclude participants without data at both timepoints
+cbclSubjs=length(unique(masterdf$subjectkey))
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# included subjs df
+includedSubjects$CBCLBoth=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CBCLBoth=1
+
+cbclSubjsBoth=length(unique(masterdf$subjectkey))
+print(paste0(cbclSubjs-cbclSubjsBoth,' lost due to single-timepoint CBCL completeness'))
+```
+
+```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+### This  chunk  processes  scholastic  data ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in grades, ∆∆∆ will need to correct for incongruency between tp1 measure (decent granularity) and tp2 measure (high granularity) ∆∆∆
-gradesInfoBV=readRDS('~/Downloads/DEAP-data-download-13.rds')
+gradesInfoBV=read.delim('~/Downloads/Package_1210940/dibf01.txt')
 # extract baseline
-gradesInfoBV=subset(gradesInfoBV,event_name=='baseline_year_1_arm_1')
-gradesInfoBV$Grades<-as.numeric(gradesInfoBV$ksads_back_grades_in_school_p)
+gradesInfoBV=subset(gradesInfoBV,eventname=='baseline_year_1_arm_1')
+gradesInfoBV$Grades<-as.numeric(gradesInfoBV$kbi_p_grades_in_school)
 # convert ndar value to R
 gradesInfoBV$Grades[gradesInfoBV$Grades==-1]=NA
 # convert ndar colnames to other ndar colnames
-gradesInfoBV$eventname=gradesInfoBV$event_name
-gradesInfoBV$subjectkey=gradesInfoBV$src_subject_id
 # for tp2, the key is 1 = A's, 2 = B's, 3 = C's, 4 = D's, 5 = F's, -1 = NA
-gradesInfoY2=read.delim('~/Downloads/Package_1207225/abcd_saag01.txt')
+gradesInfoY2=read.delim('~/Downloads/Package_1210940/abcd_saag01.txt')
 gradesInfoY2=subset(gradesInfoY2,eventname=='2_year_follow_up_y_arm_1')
 gradesInfoY2$sag_grade_type<-as.numeric(gradesInfoY2$sag_grade_type)
 # key: 1=100-97,2=96-93,3=92-90,4=89-87,5=86-83,6=82-80,7=79-77,8=76-73,9=72-70,10=69-67,11=66-65,12=0-65,-1=NA,777= no answer
@@ -92,33 +134,106 @@ gradesInfoY2$Grades<-gradesInfoY2$sag_grade_type
 NeededColNames=c('subjectkey','eventname','Grades')
 gradesInfo<-rbind(gradesInfoBV[,NeededColNames],gradesInfoY2[,NeededColNames])
 gradesInfo$Grades<-as.ordered(gradesInfo$Grades)
-###### ∆∆∆∆∆∆∆
 
 # merge and count losses
 masterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
-gradesdim=dim(masterdf)
-print(gradesdim)
-dif=cbcldim[1]-gradesdim[1]
-print(paste0(dif,' rows lost from grades merge, note loss of rows due to no 1 year timepoint'))
+
+# subjects with this measure at both timepoints
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,'Grades']))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+
+# exclude participants without data at both timepoints
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# omit nans and empties for variables of interest (totprobs,int,ext)
+masterdf=masterdf[!is.empty(masterdf$Grades),]
+masterdf=masterdf[!is.na(masterdf$Grades),]
+gradesSubjs=length(unique(masterdf$subjectkey))
+# add to included subjs DF
+includedSubjects$Grades=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
+# print data volume
+print(gradesSubjs)
+dif=cbclSubjsBoth-gradesSubjs
+print(paste0(dif,' participants lost from grades merge'))
+
+# included subjs df
+includedSubjects$Grades=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
+```
+
+```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+### This chunk processes adult mental health ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in ASR data
-asr=read.delim('~/Downloads/Package_1207917/pasr01.txt',na.strings=c("","NA"))
-masterdf<-merge(masterdf,asr,by=c('subjectkey','eventname','interview_age'))
-asrdim=dim(masterdf)
-print(asrdim)
-dif=gradesdim[1]-asrdim[1]
-print(paste0(dif,' rows lost from asr merge'))
+asr=read.delim('~/Downloads/Package_1210940/pasr01.txt',na.strings=c("","NA"))
+# merge
+masterdf<-merge(masterdf,asr,by=c('subjectkey','eventname','interview_age','sex'))
+# check for populated data at BOTH timepoints
+ColsOfInt=asr[,c(11:141)]
+ASRVarsOfInt=colnames(ColsOfInt)
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(ASRVarsOfInt)]))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
 
-# load in a DEAP file for rel_family_ID
-DEAP=readRDS('~/Downloads/DEAP-data-download-13.rds')
-DEAP$subjectkey<-DEAP$src_subject_id
-DEAP$eventname=DEAP$event_name
-DEAP=DEAP[,c('rel_family_id','subjectkey','eventname')]
-masterdf<-merge(masterdf,DEAP,by=c('subjectkey','eventname'))
-deapdim=dim(masterdf)
-print(deapdim)
-dif=asrdim[1]-deapdim[1]
-print(paste0(dif,' rows lost from deap familyID merge'))
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# full losses counted after asr count chunk, but note one participant is probably lost here just from merge
+asrSubjs=length(unique(masterdf$subjectkey))
+dif=gradesSubjs-asrSubjs
+print(paste0(dif,' participants lost from needing ASR at both timepoints'))
+
+# included subjs df
+includedSubjects$ASR=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$ASR=1
+```
+
+```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+### This   chunk   processes family ID   data ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
+# load in acs file for rel_family_ID
+# get family ID from acs
+acs=read.delim('~/Downloads/Package_1210940/acspsw03.txt')
+acs$subjectkey<-acs$src_subject_id
+acs=acs[,c('rel_family_id','subjectkey','eventname')]
+# looks like all family IDs are missing from timepoint 1, so exclude for ease
+acs=acs[acs$eventname=='baseline_year_1_arm_1',]
+# and isolate family ID for ease
+acs=data.frame(acs$subjectkey,acs$rel_family_id)
+colnames(acs)=c('subjectkey','rel_family_id')
+masterdf<-merge(masterdf,acs,by=c('subjectkey'))
+# na omitted version
+masterdf=masterdf[!is.na(masterdf$rel_family_id),] 
+masterdf=masterdf[!is.empty(masterdf$rel_family_id),] 
+acsSubjs=length(unique(masterdf$subjectkey))
+# add to included subjs DF
+includedSubjects$acs=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$acs=1
+# print data volume
+print(acsSubjs)
+dif=asrSubjs-acsSubjs
+print(paste0(dif,' participants lost from ACS merge for family ID'))
+```
+
+```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+### This  (short)  chunk formats   cbcl data ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### CLEAN data
 # subjectkey as factor
@@ -127,14 +242,6 @@ masterdf$subjectkey<-as.factor(masterdf$subjectkey)
 masterdf$cbcl_scr_syn_totprob_r<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)
 masterdf$cbcl_scr_syn_internal_r<-as.numeric(masterdf$cbcl_scr_syn_internal_r)
 masterdf$cbcl_scr_syn_external_r<-as.numeric(masterdf$cbcl_scr_syn_external_r)
-# remove instances of NA tot probs
-masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_totprob_r),]
-newDim=dim(masterdf)
-print(paste0(newDim[1],' after removing NAs for totprob_r, ',(deapdim[1]- newDim[1]),' lost after removing'))
-# and for is empty
-masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_totprob_r),]
-newDim2=dim(masterdf)
-print(paste0(newDim2[1],' after removing isempty for totprob_r, ',(newDim[1]- newDim2[1]),' lost after removing'))
 
 ```
 
@@ -144,22 +251,20 @@ print(paste0(newDim2[1],' after removing isempty for totprob_r, ',(newDim[1]- ne
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 #### LOAD in cognitive data
-nihCog=read.delim('~/Downloads/Package_1206930/abcd_tbss01.txt')
-othCog=read.delim('~/Downloads/Package_1206930/abcd_ps01.txt')
-littleMan=read.delim('~/Downloads/Package_1206931/lmtp201.txt')
+nihCog=read.delim('~/Downloads/Package_1210940/abcd_tbss01.txt')
+othCog=read.delim('~/Downloads/Package_1210940/abcd_ps01.txt')
+littleMan=read.delim('~/Downloads/Package_1210940/lmtp201.txt')
 
 # merge in
-masterdf<-merge(masterdf,nihCog,by=c('subjectkey','eventname','interview_age'))
-newDim3=dim(masterdf)
-print(paste0(newDim3[1],' after merging nih toolbox, ',(newDim2[1]- newDim3[1]),' lost after removing'))
-
-masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age'))
-newDim4=dim(masterdf)
-print(paste0(newDim4[1],' after merging other cognitive measures, ',(newDim3[1]- newDim4[1]),' lost after removing'))
-
-masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age'))
-newDim5=dim(masterdf)
-print(paste0(newDim5[1],' after merging little man, ',(newDim4[1]- newDim5[1]),' lost after removing'))
+masterdf<-merge(masterdf,nihCog,by=c('subjectkey','eventname','interview_age','sex'))
+newList=length(unique(masterdf$subjectkey))
+print(paste0(newList,' after merging nih toolbox, ',(acsSubjs- newList),' lost after merge'))
+masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age','sex'))
+newList2=length(unique(masterdf$subjectkey))
+print(paste0(newList2,' after merging other cognitive measures, ',(newList- newList2),' lost after merge'))
+masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age','sex'))
+newList3=length(unique(masterdf$subjectkey))
+print(paste0(newList3,' after merging little man, ',(newList2 - newList3),' lost after merge'))
 
 # clean age
 masterdf$interview_age<-as.numeric(masterdf$interview_age)
@@ -200,29 +305,27 @@ masterdf$lmt_scr_perc_correct<-as.numeric(masterdf$lmt_scr_perc_correct)
 # for isolating PCA dataframe
 pcVars=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct")
 
-# test for completeness before running PCA. Better move to calculate ONLY in the sample that we are running analyses on (more technically accurate than PC structure slightly misaligned with sample of interest)
-# get other vars of interest to check for complete cases
-KidVarsOfInt=c('Grades','cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r')
-# asr columns of interest to gauge completeness of
-ColsOfInt=asr[,c(11:141)]
-ASRVarsOfInt=colnames(ColsOfInt)
-
 # only use subjects with both timepoints as complete cases
 subjs=unique(masterdf$subjectkey)
 for (s in subjs){
   # if there are less than two complete cases of the variables of interest
-  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(pcVars,KidVarsOfInt,ASRVarsOfInt)]))<2){
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(pcVars)]))<2){
     subjs=subjs[subjs!=s]
   }
 }
 # convert masterdf to df with complete observations for cognition
 masterdf=masterdf[masterdf$subjectkey %in% subjs,]
-
-newDim6=dim(masterdf)
-print(paste0(newDim6[1],' after retaining only subjs with vars of int at BOTH timepoints, ',(newDim5[1]- newDim6[1]),' lost after removing'))
+newList4=length(unique(masterdf$subjectkey))
+print(paste0(newList4,' after retaining only subjs with Cognitive vars of int at BOTH timepoints, ',(newList3- newList4),' lost after removing'))
 
 print(dim(masterdf))
 
+# populated included subjs df
+includedSubjects$CogBoth=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CogBoth=1
+```
+
+```{r}
 ### ∆∆∆
 # finish cleaning data for sherlock runs: one family member per family to facilitate random sample
 masterdf$id_fam = NULL
@@ -253,8 +356,7 @@ for(f in 1:length(unique(masterdf$rel_family_id))){
     keeper=famIDs[kept]
     left=famIDs[-c(kept)]
     # leave rest
-    masterdf=masterdf[masterdf$subjectkey!=left,] 
-    #print(paste0('left ',left))
+    masterdf=masterdf[!masterdf$subjectkey %in% left,] 
     # calc index of family
     ind=ind+1	
     # set index of family
@@ -265,12 +367,13 @@ for(f in 1:length(unique(masterdf$rel_family_id))){
 # make family ID for those with families represented in ABCD
 masterdf$rel_family_id=masterdf$id_fam
 
-newDim7=dim(masterdf)
-print(paste0(newDim7[1],' after retaining only one subjs per family, ',(newDim6[1]- newDim7[1]),' lost after removing'))
+newList5=length(unique(masterdf$subjectkey))
+print(paste0(newList5,' after retaining only one subjs per family, ',(newList4- newList5),' lost after removing'))
 
-#       NOW 
-# THAT'S WHAT I CALL PCAPREP
-#       271
+# included subjects DF to track subj loss
+includedSubjects$OnePerFamily=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$OnePerFamily=1
+
 # pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
 pcaDf<-masterdf[,pcVars]
 ```
@@ -295,26 +398,29 @@ masterdf$g<-Yextended$g
 ```
 
 ```{r}
-# save out all timepoints df for bootstrapping both-tp-fits
-saveRDS(masterdf,'~/DfWithGrades.rds')
-print(dim(masterdf))
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## merges subjects with data at both timepoints##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # exclude subjs without data for both timepoints
-OutDF=masterdf
-dimOutDF=dim(OutDF)
-OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')
-OutDF2Y=subset(OutDF,eventname=='2_year_follow_up_y_arm_1')
+OutDFsubjects=length(unique(masterdf$subjectkey))
+OutDFBV=subset(masterdf,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(masterdf,eventname=='2_year_follow_up_y_arm_1')
 # intersection of subjs in both
 BothTPsubjs=intersect(OutDFBV$subjectkey,OutDF2Y$subjectkey)
-# index out intersection from non tp-split df
-OutDF=OutDF[OutDF$subjectkey %in% BothTPsubjs,]
-outDf2dim=dim(OutDF)
-print(outDf2dim)
-dif=dimOutDF[1]-outDf2dim[1]
+Different=setdiff(unique(masterdf$subjectkey),BothTPsubjs)
+# print sanity check subjs lost to another check of both tps populated
+newList6=length(unique(BothTPsubjs))
+dif=newList5-newList6
 print(paste0(dif,' rows lost from only using subjs with both timepoints'))
 ```
 
 ```{r}
+
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## handles adult p factor                     ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 # make count version of adult P
 ASRdfNum<-as.data.frame(lapply(asr[-1,11:141],as.numeric))
 ASRtotal=rowSums(ASRdfNum)
@@ -337,12 +443,22 @@ asr$interview_age=as.numeric(asr$interview_age)/12
 # set subjectkey to factor for merge
 asr$subjectkey<-as.factor(asr$subjectkey)
 
+# ensure none are missing
+paste0(length(unique(masterdf$subjectkey)))
+# collapse to just variables of interest to prevent duplicate variables
+asr=asr[,c('parentPcount','subjectkey','eventname','interview_age')]
 # merge
-OutDF=merge(OutDF,asr,by=c('subjectkey','eventname','interview_age'))
-print(dim(OutDF))
+masterdf=merge(masterdf,asr,by=c('subjectkey','eventname','interview_age'))
+# ensure none are missing
+paste0(length(unique(masterdf$subjectkey)))
+
 ```
 
 ```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Handles participants TSV from              ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 ### LOAD in ParticipantsTSV for parent income and edu background
 # ordained sample split
 participantsTSV=read.delim('~/Downloads/participants.tsv',sep="\t")
@@ -372,24 +488,41 @@ participantsTSV = participantsTSV[,!(names(participantsTSV) %in% 'eventname')]
 # convert sex to M/F in particpants tsv
 participantsTSV$sex[participantsTSV$sex==1]="M"
 participantsTSV$sex[participantsTSV$sex==2]="F"
-### merge in for fam income and parent edu
-OutDF=merge(OutDF,participantsTSV,by=c('subjectkey','sex'))
+
 # take out na incomes
-OutDF=OutDF[OutDF$income!=777,]
-OutDF=OutDF[OutDF$income!=999,]
+participantsTSV=participantsTSV[participantsTSV$income!=777,]
+participantsTSV=participantsTSV[participantsTSV$income!=999,]
 # race
-OutDF=OutDF[OutDF$race_ethnicity!=888,]
-OutDF$race_ethnicity<-as.factor(OutDF$race_ethnicity)
+participantsTSV=participantsTSV[participantsTSV$race_ethnicity!=888,]
+participantsTSV$race_ethnicity<-as.factor(participantsTSV$race_ethnicity)
 # parental edu
-OutDF=OutDF[OutDF$parental_education!=888,]
-OutDF=OutDF[OutDF$parental_education!=777,]
-OutDF$parental_education<-as.ordered(OutDF$parental_education)
-dim(OutDF)
+participantsTSV=participantsTSV[participantsTSV$parental_education!=888,]
+participantsTSV=participantsTSV[participantsTSV$parental_education!=777,]
+participantsTSV$parental_education<-as.ordered(participantsTSV$parental_education)
+
+### merge in for fam income and parent edu
+masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
+
+# new merge and count
+participantsTSVSubjs=length(unique(masterdf$subjectkey))
+# add to included subjs DF
+includedSubjects$pTSV=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$pTSV=1
+
+print(paste0(newList6-participantsTSVSubjs,' participants lost after needing complete data in participantstsv'))
+paste0(participantsTSVSubjs,' remain')
 ```
 
+
 ```{r}
+
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Handles YLE                                ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
+
 #### LOAD in youth life events. Unfortunately this also appears to be missing for most participants, but is populated for slightly more than residential deprivation
-yle=read.delim('~/Downloads/Package_1209596/abcd_yle01.txt')
+yle=read.delim('~/Downloads/Package_1210940/abcd_yle01.txt')
 yleColnames=colnames(yle)
 yleColDescrip=yle[1,]
 # note yle's are labeled ple's in the colnames, but end with a _y extension (ples end with _p extension)
@@ -398,12 +531,6 @@ yleColDescrip=yle[1,]
 #### Some will need to be retrospective. Use PLE and YLE instances of "not in past year" to get starting point for ACEs (assumed prior to tp1 scan)
 # so to reconstruct whether or not this happened before timepoint 1 scan, we will need _past_yr variables
 ylePastYearcols=yleColnames[grep('_past_yr',yleColnames)]
-
-# verify with descriptions
-# yleColDescrip[grep('_past_yr',yleColnames)]
-# remove _past_yr to get list of assayed youth life events
-###yles=gsub('_past_yr','',ylePastYearcols)
-# this approach does not work because columns are misnamed (idiosyncratic missing characters between past year vs. not past year versions)
 
 # remove "past year?" from column names to boil down to binary variables of interest
 yle_No_PastYearcols=yleColnames[-which(yleColnames %in% ylePastYearcols)]
@@ -421,10 +548,19 @@ yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad[-which(yl
 
 ```{r}
 
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Handles errors in yle                     ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 #### make outdf for cross-sectional analyses w/ bootstrapping
 
 # extract just tp1 (really timepoint 1.5, 1-year in) for yle's
 yle1=subset(yle,eventname=='1_year_follow_up_y_arm_1')
+# will need tp2 eventually doe
+yle2=subset(yle,eventname=='2_year_follow_up_y_arm_1')
+# and subset of both that have full data
+subsetOfBoth=merge(yle1,yle2,by='subjectkey')
+subsetOfBoth=subsetOfBoth$subjectkey
 
 # need an exception for suicide follow ups (which appear to be blank) and collection ID
 yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad_No_EvAff[-c(43,44,46)]
@@ -504,13 +640,16 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
 # ∆∆ now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a different predictive context)
 # ∆∆ BUT this only captures baseline ABCD visit. Now we need to merge two-year FUP life events with the rest of the two years for cross-sectional analyses
-OutDFBV=subset(OutDF,eventname=='baseline_year_1_arm_1')
-OutDF2Y=subset(OutDF,eventname=='2_year_follow_up_y_arm_1')
-# we have one valid reconstruction from code above to merge into bv
-OutDFBVyle=merge(OutDFBV,preBVdf,by=c('subjectkey'))
-# and now we need to get the two year yles to merge in
+OutDFBV=subset(masterdf,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(masterdf,eventname=='2_year_follow_up_y_arm_1')
+# we have one valid reconstruction from code above to merge into bv - but remove subjects already removed from master df
+preBVdf=preBVdf[preBVdf$subjectkey %in% masterdf$subjectkey,]
+# for merging purposes to avoid doubling
+preBVdf$eventname='baseline_year_1_arm_1'
+OutDFBVyle=merge(masterdf,preBVdf,by=c('subjectkey','eventname'))
+# and now we need to get the two year yles to merge in - but remove subjects already removed from master df
+yle2=yle2[yle2$subjectkey %in% masterdf$subjectkey,]
 yle2=subset(yle,eventname=='2_year_follow_up_y_arm_1')
-
 #### extract same columns of interest - 2 YEAR
 # for iterative dataset construct
 Y2df=data.frame(as.factor(yle2$subjectkey))
@@ -526,12 +665,39 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 }  
 # and now we can merge it in
 OutDF2Yyle=merge(OutDF2Y,Y2df,by=c('subjectkey'))
+# remove redundant colnames
+redundantColnames=setdiff(colnames(OutDF2Yyle),colnames(OutDFBVyle))
+OutDF2Yyle=OutDF2Yyle[, !names(OutDF2Yyle) %in%  redundantColnames]
+# remove duplicated column names
+OutDFBVyle <- OutDFBVyle[, !duplicated(colnames(OutDFBVyle))]
 # now we can recombine them
 OutDFyle=rbind(OutDFBVyle,OutDF2Yyle)
 
-# so if we use the events recorded that happened prior to the baseline visit, and those that are included at 2 year FUP how much missingness does that imbue?
-print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost from requiring those with yle at both timepoints with full data'))
+# only use subjects with both timepoints as complete cases
+# cols of interest to guage over
+varsOfInt=yle_No_PastYearcols_No_Goodbad_No_EvAff[10:34]
+subjs=unique(OutDFyle$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(OutDFyle[OutDFyle$subjectkey==s,c(varsOfInt)]))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+# convert masterdf to df with complete observations for cognition
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
 
+# new count after merge
+masterdf=merge(masterdf,OutDFyle,by=c('subjectkey','sex','eventname','interview_age','Grades','g','income','parental_education','race_ethnicity','matched_group','parentPcount','cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r'))
+YLESubjs=length(unique(masterdf$subjectkey))
+# add to included subjs DF
+includedSubjects$YLESubjs=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$YLESubjs=1
+
+# so if we use the events recorded that happened prior to the baseline visit, and those that are included at 2 year FUP how much missingness does that imbue?
+print(paste0(participantsTSVSubjs-YLESubjs,' lost from requiring those with yle at both timepoints with full data'))
+```
+
+```{r}
 # gauge consistency of responses across visits: happened at al in past should be reflected at tp 2 if it is at tp1
 tmpdf=merge(OutDFBVyle,OutDF2Yyle,by='subjectkey')
 
@@ -556,19 +722,21 @@ for (i in 10:34){
 }
 
 # and if we exclude subjs with inconsistent timepoint-to-timepoint answers 
-OutDFyle=OutDFyle[!OutDFyle$subjectkey %in% questionableSubjs,]
-print(paste0(dim(OutDF)[1]-dim(OutDFyle)[1],' lost from requiring those with yle at both timepoints with full data, and kids who inconsistently report yles'))
-print(dim(OutDFyle))
+masterdf=masterdf[!masterdf$subjectkey %in% questionableSubjs,]
+# remaining unique subjs
+ConsistentYleSubjs=length(unique(masterdf$subjectkey))
+print(paste0(YLESubjs-ConsistentYleSubjs,' lost from requiring those with yle at both timepoints with full data, and kids who inconsistently report yles'))
+print(paste0(ConsistentYleSubjs,' participants remain'))
 ```
 
 ```{r}
-##############
-### LOAD IN PLE'S TOO SUCKAAAA SHRINK THAT SAMPLE SIZE
-##############
 
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Handles discrep. in ple~yle, saves out X-sectionaldf ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 # ple QC
 #### LOAD in youth life events. Unfortunately this also appears to be missing for most participants, but is populated for slightly more than residential deprivation
-ple=read.delim('~/Downloads/Package_1209596/abcd_ple01.txt')
+ple=read.delim('~/Downloads/Package_1210940/abcd_ple01.txt')
 pleColnames=colnames(ple)
 pleColDescrip=ple[1,]
 # note yle's are labeled ple's in the colnames, but end with a _y extension (ples end with _p extension)
@@ -641,52 +809,63 @@ for (i in 11:34){
 
 # combine with questionable subjs on the basis of tp1 ysr and tp2 ysr not matching
 questionableSubjs=unique(c(questionableSubjs,ple_based_questionableSubjs))
+masterdf=masterdf[!masterdf$subjectkey %in% questionableSubjs,]
 
-
-OutDFyle2=OutDFyle[!OutDFyle$subjectkey %in% questionableSubjs,]
-print(paste0(dim(OutDFyle2)[1]-dim(OutDFyle2)[1],' lost from cross-referncing parent report of childs life events and removing inconsistents'))
-print(dim(OutDFyle2))
+AgreeingYleSubjs=length(unique(masterdf$subjectkey))
+print(paste0(ConsistentYleSubjs-AgreeingYleSubjs,' lost from cross-referencing parent report of childs life events and removing inconsistents'))
+print(paste0(AgreeingYleSubjs,' Participants remain'))
 
 ###### fix data formats
 # variables of interest
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_totprob_r','ple_died_y','ple_injured_y','ple_crime_y','ple_friend_y','ple_friend_injur_y','ple_arrest_y','ple_friend_died_y','ple_mh_y','ple_sib_y','ple_victim_y','ple_separ_y','ple_law_y','ple_school_y','ple_move_y','ple_jail_y','ple_step_y','ple_new_job_y','ple_new_sib_y','g','subjectkey','interview_age','Grades','parentPcount','income','parental_education','sex','race_ethnicity')
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','ple_died_y','ple_injured_y','ple_crime_y','ple_friend_y','ple_friend_injur_y','ple_arrest_y','ple_friend_died_y','ple_mh_y','ple_sib_y','ple_victim_y','ple_separ_y','ple_law_y','ple_school_y','ple_move_y','ple_jail_y','ple_step_y','ple_new_job_y','ple_new_sib_y','g','subjectkey','interview_age','Grades','parentPcount','income','parental_education','sex','race_ethnicity','eventname')
 
 # convert PLE's to factors
 for (i in 4:21){
   VarOfInt=variablesOfInterest[i]
-  OutDFyle2[,VarOfInt]<-as.factor(OutDFyle2[,VarOfInt])
+  masterdf[,VarOfInt]<-as.factor(masterdf[,VarOfInt])
 }
 
 # convert grades, parent P, income, and parental edu to numeric
 for (i in 25:28){
   VarOfInt=variablesOfInterest[i]
-  OutDFyle2[,VarOfInt]<-as.numeric(OutDFyle2[,VarOfInt])
+  masterdf[,VarOfInt]<-as.numeric(masterdf[,VarOfInt])
 }
 
 # convert sex and race/ethnicity to factors
 for (i in 29:30){
   VarOfInt=variablesOfInterest[i]
-  OutDFyle2[,VarOfInt]<-as.factor(OutDFyle2[,VarOfInt])
+  masterdf[,VarOfInt]<-as.factor(masterdf[,VarOfInt])
 }
 
+#### ∆∆∆
+# last catch: eliminate rows with NAs
+#### ∆∆∆
+# variables of interest redux
+masterdf=masterdf[,c(variablesOfInterest)]
+# na omitted version
+masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ] 
+print(dim(masterdf))
 
 # save ouput
-saveRDS(OutDFyle2,'~/OutDfxc.rds')
+saveRDS(masterdf,'~/OutDfxc.rds')
 
 ```
 
 ```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Handles tp1 (not bv) yle, tempPrec df ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # remove prior YLE columns for clarity (except for subjectkey and eventname, items 4 and 9)
 yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad_No_EvAff[-c(4,9)]
-OutDFyle2=OutDFyle2[,!colnames(OutDFyle2) %in% yle_No_PastYearcols_No_Goodbad_No_EvAff]
-##### make outdf FULL retrospective for temporal precedence analyses
+OutDFyle2_nao=OutDFyle2_nao[,!colnames(OutDFyle2_nao) %in% yle_No_PastYearcols_No_Goodbad_No_EvAff]
+##### make outdf absolute retrospective for temporal precedence analyses
 ## for iterative dataset construct
 preBVdf=data.frame(as.factor(yle1$subjectkey))
 colnames(preBVdf)<-'subjectkey'
 
 # OK, now lets remove instances of these things happening in the past year
-for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
   # extract column name
   currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
   # extract corresponding "was this in the past year?" boolean, which is always right after
@@ -754,10 +933,13 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 # ditto, ple_shot_y
 # ditto, ple_suicide_y
 
-# now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
+# now that events reported refer to prior to the baseline visit, we can consider them as BV (not for "since" variables, which can be interpreted differently as below)
 # no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
 #preBVdf$eventname='baseline_year_1_arm_1'
-OutDFyle3=merge(OutDFyle2,preBVdf,by=c('subjectkey'))
+
+# remove OutDFyle2 ple columns for clarity
+OutDFyle2=OutDFyle2[,-grep('ple',colnames(OutDFyle2))]
+OutDFyle3=merge(preBVdf,OutDFyle2,by=c('subjectkey'))
 print(dim(OutDFyle3))
 
 # convert to one row per subj for temporal precedence analyses
@@ -766,25 +948,50 @@ OutDF2Y=subset(OutDFyle3,eventname=='2_year_follow_up_y_arm_1')
 OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
 print(dim(OutDFTmpPrec))
 
-saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_FullRetro.rds')
+#### ∆∆∆
+# last catch: eliminate rows with NAs
+#### ∆∆∆
+# na omitted version - columns
+OutDFTmpPrec_nao=OutDFTmpPrec[,colSums(is.na(OutDFTmpPrec)) < 20] 
+# na omitted version - rows
+OutDFTmpPrec_nao=OutDFTmpPrec_nao[rowSums(is.na(OutDFTmpPrec_nao)) == 0,] 
+
+print(dim(OutDFTmpPrec_nao))
+
+saveRDS(OutDFTmpPrec_nao,'~/OutDFTmpPrec_FullRetro.rds')
 ```
 
 ```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Calculates events-since-bv, saves tempPrec df ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 #### make outdf retrospective PLUS for temporal precedence analyses (includes YLE's that happened before tp2 measurement. Sep. measure)
 ##### make outdf FULL retrospective for temporal precedence analyses
+# but for this, we need to subselect subjects who have data for both timepoints
+yle1=yle1[yle1$subjectkey %in% subsetOfBoth,]
+yle2=yle2[yle2$subjectkey %in% subsetOfBoth,]
 ## for iterative dataset construct
 preBVdf=data.frame(as.factor(yle1$subjectkey))
 colnames(preBVdf)<-'subjectkey'
+# same but for two-year FUP
+y2df=data.frame(as.factor(yle2$subjectkey))
+colnames(y2df)<-'subjectkey'
+
+#### NOTE YOUTH LIFE EVENTS WILL HAVE SLIGHTLY DIFFERENT COEFFICIENTS BECAUSE OF SLIGHTLY DIFFERENT SAMPLE: SMALLER THAN PREVIOUS CHUNK
+# CAN VERIFY EQUIVALENT EXTRACTION OF as.numeric(currCol) into output DF
+# Need to clean this up so there is one column for "occured by baseline" and one for "inter-visit event" for each variable, not this x.x or y.x boggis
 
 # OK, now lets remove instances of these things happening in the past year
-for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
   # extract column name
   currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
   # extract corresponding "was this in the past year?" boolean, which is always right after
   currColIndex=grep(currColName,yleColnames)
   # extract vector of values for PTs
   currCol=yle1[,currColIndex]
+  # extract 2-year values for later
+  currCol2=yle2[,currColIndex]
   # need an exception for le_friend_injur_past_yr_y. Appears to be misnamed without p in ple
   if  (currColName=='ple_friend_injur_y'){
     currColNamePastYear='le_friend_injur_past_yr_y'
@@ -796,13 +1003,13 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
     currColNamePastYear=gsub('_y','_past_yr_y',currColName)
   }
   currColIndexPastYear=grep(currColNamePastYear,yleColnames)
-  # This turned out to not be robust to heterogeneity in questionnaire
   ## "past year"? immediately proceeds question
-  ## currColIndexPastYear=currColIndex+1
   ## extract this vector of values for PTs
   currCol_pastyr=yle1[,currColIndexPastYear]
+  currCol_pastyr2=yle2[,currColIndexPastYear]
   # set empties to 0 in follow up question
   currCol_pastyr[is.empty(currCol_pastyr)]=0
+  currCol_pastyr2[is.empty(currCol_pastyr2)]=0
   # ple_injur_y and ple_injur_y_yr_y are misnamed, need to build catch specifically for these variables
   if (currColIndex[1]==42){
     # set to correct column
@@ -817,14 +1024,26 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
     currCol_pastyr[is.empty(currCol_pastyr)]=0
     # extract "past year"?
     NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
+    # same for 2-year
+    # re-draw currCol
+    currCol2=yle2[,currColIndex]
+    # re-draw past year
+    currColIndexPastYear2=currColIndex+1
+    # re-draw vector of values for PTs
+    currCol_pastyr2=yle2[,currColIndexPastYear2]
+    # set is empty to 0 in follow up question
+    currCol_pastyr2[is.empty(currCol_pastyr2)]=0
+    # extract "past year"?
+    NotPastYr2=as.numeric(currCol2)-as.numeric(currCol_pastyr2)
   } else {
     # if past year, subtract instance
     NotPastYr=as.numeric(currCol)-as.numeric(currCol_pastyr)
   }
-  # print out utilized colum names to ensure they match
+  # print out utilized column names to ensure they match
   print(paste('Variables:',yle[1,currColIndex],yle[1,currColIndexPastYear]))
   # explicitly count instances in past year
   PastYr=as.numeric(currCol)+as.numeric(currCol_pastyr)==2
+  PastYr2=as.numeric(currCol2)+as.numeric(currCol_pastyr2)==2
   # make a plot dataframe for ggplot2
   plotdf=data.frame(as.numeric(yle1[,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]),NotPastYr,as.numeric(PastYr))
   colnames(plotdf)=c('Total','BeforeLastYear','DuringLastYear')
@@ -832,14 +1051,20 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
   a<-ggplot(plotdf, aes(x=value,fill=variable)) + geom_histogram(position="dodge")+theme_classic()+ggtitle(paste(yle[1,yle_No_PastYearcols_No_Goodbad_No_EvAff[i]]))
   print(a)
   # iteratively make a dataframe of yes/no (standard)
-  preBVdf$null<-NotPastYr
+  preBVdf$null<-as.numeric(currCol)
   colnamesMinusNull=head(colnames(preBVdf), -1)
   colnames(preBVdf)<-c(colnamesMinusNull,currColName)
-  # now with happaned in past year
-  preBVdf$null<-as.numeric(PastYr)
-  colnamesMinusNull=head(colnames(preBVdf), -1)
-  currColName_last_year=paste0(currColName,'_lastYr')
-  colnames(preBVdf)<-c(colnamesMinusNull,currColName_last_year)
+  # now a sep. column for recent (meaning inter-visit event: either past year or reported as past year in timepoint 2)
+  InterVisit_event<-as.numeric(PastYr2)+as.numeric(PastYr)
+  # finally, set 2 = 1 for intervisit event, as participants could have truthfully answered yes to past year in both visits given visits can be <1 year apart
+  InterVisit_event[InterVisit_event==2]=1
+  y2df$null<-as.numeric(InterVisit_event)
+  colnamesMinusNull=head(colnames(y2df), -1)
+  currColName_intervisit=paste0(currColName,'_IVE')
+  colnames(y2df)<-c(colnamesMinusNull,currColName_intervisit)
+  # visual QC
+  tmpdf=data.frame(as.numeric(currCol),as.numeric(InterVisit_event))
+  print(ggplot(data=tmpdf,aes(x=as.numeric.currCol.,y=as.numeric.InterVisit_event.))+geom_point()+geom_jitter()+xlab(paste(currColName, '(BV)'))+ylab(currColName_intervisit))
 }
 
 #### for year1 visit
@@ -851,17 +1076,22 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 # ditto, ple_shot_y
 # ditto, ple_suicide_y
 
-# now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a diffferent predictive context)
+# now that these are events stemming from prior to the baseline visit, we can consider them as functionally BV (not for "since" variables, which can be interpreted in a different predictive context)
 # no event name gen. or merging for pure prediction DF, might need to go to ridgePrep
 #preBVdf$eventname='baseline_year_1_arm_1'
-OutDFyle3=merge(OutDFyle2,preBVdf,by=c('subjectkey'))
+colnames(preBVdf)=gsub('_y','_yBV',colnames(preBVdf))
+OutDFyle3=merge(preBVdf,OutDFyle2,by=c('subjectkey'))
+OutDFyle3=merge(y2df,OutDFyle3,by=c('subjectkey'))
 print(dim(OutDFyle3))
 
 # convert to one row per subj for temporal precedence analyses
 OutDFBV=subset(OutDFyle3,eventname=='baseline_year_1_arm_1')
 OutDF2Y=subset(OutDFyle3,eventname=='2_year_follow_up_y_arm_1')
+
 OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
+
 print(dim(OutDFTmpPrec))
 
-saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_FunctionallyRetro.rds')
+# saveout
+saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_IVEandRetro.rds')
 ```
