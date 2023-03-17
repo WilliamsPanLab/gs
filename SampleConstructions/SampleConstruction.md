@@ -1496,10 +1496,8 @@ ggplot(test,aes(x=variable,stratum=sex,alluvium=subj))+geom_stratum(aes(fill=sex
 ## Handles tp1 (not bv) yle, tempPrec df ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
-# remove prior YLE columns for clarity (except for subjectkey and eventname, items 4 and 9)
-yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad_No_EvAff[-c(4,9)]
-
-# DELETE?
+# remove prior YLE columns for clarity (except for subjectkey, eventname, sex, interview_age: items 4,6,8 and 9)
+yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad_No_EvAff[-c(4,6,8,9)]
 masterdf=masterdf[,!colnames(masterdf) %in% yle_No_PastYearcols_No_Goodbad_No_EvAff]
 
 
@@ -1509,7 +1507,7 @@ preBVdf=data.frame(as.factor(yle1$subjectkey))
 colnames(preBVdf)<-'subjectkey'
 
 # OK, now lets remove instances of these things happening in the past year
-for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
   # extract column name
   currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
   # extract corresponding "was this in the past year?" boolean, which is always right after
@@ -1928,7 +1926,7 @@ OutDFyle3=merge(preBVdf,masterdf,by=c('subjectkey'))
 print(dim(OutDFyle3))
 ```
 
-    ## [1] 7818   45
+    ## [1] 7818   47
 
 ``` r
 # convert to one row per subj for temporal precedence analyses
@@ -1938,7 +1936,7 @@ OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 3909   89
+    ## [1] 3909   93
 
 ``` r
 #### ∆∆∆
@@ -1952,9 +1950,13 @@ OutDFTmpPrec_nao=OutDFTmpPrec_nao[rowSums(is.na(OutDFTmpPrec_nao)) == 0,]
 print(dim(OutDFTmpPrec_nao))
 ```
 
-    ## [1] 3909   71
+    ## [1] 3909   75
 
 ``` r
+# make age column name a little more succinct
+OutDFTmpPrec_nao$age.x<-OutDFTmpPrec$interview_age.x
+OutDFTmpPrec_nao$age.y<-OutDFTmpPrec$interview_age.y
+
 saveRDS(OutDFTmpPrec_nao,'~/OutDFTmpPrec_FullRetro.rds')
 ```
 
@@ -1980,7 +1982,7 @@ colnames(y2df)<-'subjectkey'
 # Need to clean this up so there is one column for "occured by baseline" and one for "inter-visit event" for each variable, not this x.x or y.x boggis
 
 # OK, now lets remove instances of these things happening in the past year
-for (i in 8:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
+for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
   # extract column name
   currColName=yle_No_PastYearcols_No_Goodbad_No_EvAff[i]
   # extract corresponding "was this in the past year?" boolean, which is always right after
@@ -2815,7 +2817,7 @@ OutDFyle3=merge(y2df,OutDFyle3,by=c('subjectkey'))
 print(dim(OutDFyle3))
 ```
 
-    ## [1] 7818   79
+    ## [1] 7818   81
 
 ``` r
 # convert to one row per subj for temporal precedence analyses
@@ -2827,9 +2829,13 @@ OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 3909  157
+    ## [1] 3909  161
 
 ``` r
+# make age column name a little more succinct
+OutDFTmpPrec$age.x<-OutDFTmpPrec$interview_age.x
+OutDFTmpPrec$age.y<-OutDFTmpPrec$interview_age.y
+
 # saveout
 saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_IVEandRetro.rds')
 ```
