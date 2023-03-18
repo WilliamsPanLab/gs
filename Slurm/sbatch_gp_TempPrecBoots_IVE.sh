@@ -11,7 +11,7 @@
 # ------------------------------------------
 module load R/4.1
 
-Rscript gp_TempPrecBoots.R
+Rscript gp_TempPrecIVEBoots.R
 
 # echo intermission
 

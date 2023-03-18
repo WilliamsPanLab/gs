@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=TmpPrec
+#SBATCH --job-name=ExtTmpPrec
 #SBATCH --time=7-00:00:00
 #SBATCH -p leanew1  # Queue names you can submit to
 #SBATCH -n 1
@@ -11,8 +11,8 @@
 # ------------------------------------------
 module load R/4.1
 
-Rscript gp_TempPrecBoots.R
+Rscript gExt_TempPrecIVEBoots.R
 
 # echo intermission
 
-# Rscript pg_TemPrecBoots.R
+# Rscript Extg_TemPrecBoots.R
