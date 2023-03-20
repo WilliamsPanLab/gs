@@ -2,7 +2,7 @@ library(mgcv)
 library(testit)
 
 # load in data
-masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/OutDFTmpPrec_FullRetro.rds')
+masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/OutDFTmpPrec_IVEandRetro.rds')
 
 # need to save out reduction in sum of squares, reduction of sum of squares in held-out, deviance explained, AIC, and BIC for all models
 
@@ -156,7 +156,7 @@ devExplained_n_race_ethnicity=rep(0,10000)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up
-masterdf=masterdf[,c('cbcl_scr_syn_external_r.y','cbcl_scr_syn_external_r.x','ple_died_y.x','ple_injured_y.x','ple_crime_y.x','ple_friend_y.x','ple_friend_injur_y.x','ple_arrest_y.x','ple_friend_died_y.x','ple_mh_y.x','ple_sib_y.x','ple_victim_y.x','ple_separ_y.x','ple_law_y.x','ple_school_y.x','ple_move_y.x','ple_jail_y.x','ple_step_y.x','ple_new_job_y.x','ple_new_sib_y.x','g.x','subjectkey','age.x','Grades.x','parentPcount.x','income.x','parental_education.x','sex.x','race_ethnicity.x')]
+masterdf=masterdf[,c('cbcl_scr_syn_external_r.y','cbcl_scr_syn_external_r.x','ple_died_yBV.x','ple_died_y_IVE.y','ple_injured_yBV.x','ple_injured_y_IVE.y','ple_crime_yBV.x','ple_crime_y_IVE.y','ple_friend_yBV.x','ple_friend_y_IVE.y','ple_friend_injur_yBV.x','ple_friend_injur_y_IVE.y','ple_arrest_yBV.x','ple_arrest_y_IVE.y','ple_friend_died_yBV.x','ple_friend_died_y_IVE.y','ple_mh_yBV.x','ple_mh_y_IVE.y','ple_sib_yBV.x','ple_sib_y_IVE.y','ple_sib_y_IVE.y','ple_victim_yBV.x','ple_victim_y_IVE.y','ple_separ_yBV.x','ple_separ_y_IVE.y','ple_law_yBV.x','ple_law_y_IVE.y','ple_school_yBV.x','ple_school_y_IVE.y','ple_move_yBV.x','ple_move_y_IVE.y','ple_jail_yBV.x','ple_jail_y_IVE.y','ple_step_yBV.x','ple_step_y_IVE.y','ple_new_job_yBV.x','ple_new_job_y_IVE.y','ple_new_sib_yBV.x','ple_new_sib_y_IVE.y','g.x','subjectkey','age.x','Grades.x','parentPcount.x','income.x','parental_education.x','sex.x','race_ethnicity.x')]
 # set seed because I'll have to rerun this differently for second 5k
 set.seed(1)
 # loop over manual bootstrap
@@ -177,7 +177,7 @@ for (b in 1:5000){
 	heldOut=masterdf[!(masterdf$subjectkey %in% BootSubjs),]
 	# fit models
 	### full
-	fullModel<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	fullModel<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predictFull=predict.bam(fullModel,bootSamp)
 	sumSq_full[b]=sum((predictFull-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -192,7 +192,7 @@ for (b in 1:5000){
 	devExplained_full[b]=summary(fullModel)$dev.expl
 
 	### died
-	Model_n_died<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_died<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_died=predict.bam(Model_n_died,bootSamp)
 	sumSq_n_died[b]=sum((predict_n_died-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -207,7 +207,7 @@ for (b in 1:5000){
 	devExplained_n_died[b]=summary(Model_n_died)$dev.expl
 
 	### injured
-	Model_n_injured<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_injured<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_injured=predict.bam(Model_n_injured,bootSamp)
 	sumSq_n_injured[b]=sum((predict_n_injured-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -222,7 +222,7 @@ for (b in 1:5000){
 	devExplained_n_injured[b]=summary(Model_n_injured)$dev.expl
 
 	### crime
-	Model_n_crime<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_crime<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_crime=predict.bam(Model_n_crime,bootSamp)
 	sumSq_n_crime[b]=sum((predict_n_crime-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -237,7 +237,7 @@ for (b in 1:5000){
 	devExplained_n_crime[b]=summary(Model_n_crime)$dev.expl
 
 	### friend
-	Model_n_friend<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_friend<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_friend=predict.bam(Model_n_friend,bootSamp)
 	sumSq_n_friend[b]=sum((predict_n_friend-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -252,7 +252,7 @@ for (b in 1:5000){
 	devExplained_n_friend[b]=summary(Model_n_friend)$dev.expl
 
 	### friend_injured
-	Model_n_friend_injured<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_friend_injured<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_friend_injured=predict.bam(Model_n_friend_injured,bootSamp)
 	sumSq_n_friend_injur[b]=sum((predict_n_friend_injured-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -267,7 +267,7 @@ for (b in 1:5000){
 	devExplained_n_friend_injur[b]=summary(Model_n_friend_injured)$dev.expl
 
 	### arrest
-	Model_n_arrest<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_arrest<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_arrest=predict.bam(Model_n_arrest,bootSamp)
 	sumSq_n_arrest[b]=sum((predict_n_arrest-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -282,7 +282,7 @@ for (b in 1:5000){
 	devExplained_n_arrest[b]=summary(Model_n_arrest)$dev.expl
 
 	### friend_died
-	Model_n_friend_died<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_friend_died<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_friend_died=predict.bam(Model_n_friend_died,bootSamp)
 	sumSq_n_friend_died[b]=sum((predict_n_friend_died-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -297,7 +297,7 @@ for (b in 1:5000){
 	devExplained_n_friend_died[b]=summary(Model_n_friend_died)$dev.expl
 
 	### mental_health
-	Model_n_mh<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_mh<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_mh=predict.bam(Model_n_mh,bootSamp)
 	sumSq_n_mh[b]=sum((predict_n_mh-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -312,7 +312,7 @@ for (b in 1:5000){
 	devExplained_n_mh[b]=summary(Model_n_mh)$dev.expl
 	
 	### sibling
-	Model_n_sib<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_sib<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_sib=predict.bam(Model_n_sib,bootSamp)
 	sumSq_n_sib[b]=sum((predict_n_sib-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -327,7 +327,7 @@ for (b in 1:5000){
 	devExplained_n_sib[b]=summary(Model_n_sib)$dev.expl
 
 	### victim
-	Model_n_victim<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_victim<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_victim=predict.bam(Model_n_victim,bootSamp)
 	sumSq_n_victim[b]=sum((predict_n_victim-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -342,7 +342,7 @@ for (b in 1:5000){
 	devExplained_n_victim[b]=summary(Model_n_victim)$dev.expl
 
 	### separation
-	Model_n_separ<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_separ<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_separ_yBV.x+ple_victim_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_separ=predict.bam(Model_n_separ,bootSamp)
 	sumSq_n_separ[b]=sum((predict_n_separ-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -357,7 +357,7 @@ for (b in 1:5000){
 	devExplained_n_separ[b]=summary(Model_n_separ)$dev.expl
 
 	### law
-	Model_n_law<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_law<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_law=predict.bam(Model_n_law,bootSamp)
 	sumSq_n_law[b]=sum((predict_n_law-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -372,7 +372,7 @@ for (b in 1:5000){
 	devExplained_n_law[b]=summary(Model_n_law)$dev.expl
 
 	### school
-	Model_n_school<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_school<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_school=predict.bam(Model_n_school,bootSamp)
 	sumSq_n_school[b]=sum((predict_n_school-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -387,7 +387,7 @@ for (b in 1:5000){
 	devExplained_n_school[b]=summary(Model_n_school)$dev.expl
 
 	### move
-	Model_n_move<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_move<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_move=predict.bam(Model_n_move,bootSamp)
 	sumSq_n_move[b]=sum((predict_n_move-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -402,7 +402,7 @@ for (b in 1:5000){
 	devExplained_n_move[b]=summary(Model_n_move)$dev.expl
 
 	### jail
-	Model_n_jail<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_jail<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_jail=predict.bam(Model_n_jail,bootSamp)
 	sumSq_n_jail[b]=sum((predict_n_jail-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -417,7 +417,7 @@ for (b in 1:5000){
 	devExplained_n_jail[b]=summary(Model_n_jail)$dev.expl
 
 	### step
-	Model_n_step<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_step<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_step=predict.bam(Model_n_step,bootSamp)
 	sumSq_n_step[b]=sum((predict_n_step-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -432,7 +432,7 @@ for (b in 1:5000){
 	devExplained_n_step[b]=summary(Model_n_step)$dev.expl
 
 	### new job
-	Model_n_job<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_job<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_job=predict.bam(Model_n_job,bootSamp)
 	sumSq_n_new_job[b]=sum((predict_n_job-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -447,7 +447,7 @@ for (b in 1:5000){
 	devExplained_n_new_job[b]=summary(Model_n_job)$dev.expl
 
 	### new sib
-	Model_n_new_sib<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_new_sib<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_new_sib=predict.bam(Model_n_new_sib,bootSamp)
 	sumSq_n_new_sib[b]=sum((predict_n_new_sib-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -462,7 +462,7 @@ for (b in 1:5000){
 	devExplained_n_new_sib[b]=summary(Model_n_new_sib)$dev.expl
 
 	### g
-	Model_n_g<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_g<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_g=predict.bam(Model_n_g,bootSamp)
 	sumSq_n_g[b]=sum((predict_n_g-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -477,7 +477,7 @@ for (b in 1:5000){
 	devExplained_n_g[b]=summary(Model_n_g)$dev.expl
 
 	### age
-	Model_n_age<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_age<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_age=predict.bam(Model_n_age,bootSamp)
 	sumSq_n_age[b]=sum((predict_n_age-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -492,7 +492,7 @@ for (b in 1:5000){
 	devExplained_n_age[b]=summary(Model_n_age)$dev.expl
 
 	### grades
-	Model_n_grades<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_grades<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_grades=predict.bam(Model_n_grades,bootSamp)
 	sumSq_n_Grades[b]=sum((predict_n_grades-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -507,7 +507,7 @@ for (b in 1:5000){
 	devExplained_n_Grades[b]=summary(Model_n_grades)$dev.expl
 
 	### parentPcount
-	Model_n_parentPcount<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_parentPcount<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_parentPcount=predict.bam(Model_n_parentPcount,bootSamp)
 	sumSq_n_parentPcount[b]=sum((predict_n_parentPcount-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -522,7 +522,7 @@ for (b in 1:5000){
 	devExplained_n_parentPcount[b]=summary(Model_n_parentPcount)$dev.expl
 
 	### income
-	Model_n_income<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_income<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_income=predict.bam(Model_n_income,bootSamp)
 	sumSq_n_income[b]=sum((predict_n_income-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -537,7 +537,7 @@ for (b in 1:5000){
 	devExplained_n_income[b]=summary(Model_n_income)$dev.expl
 
 	### parental education
-	Model_n_parental_education<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_parental_education<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+sex.x+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_parental_education=predict.bam(Model_n_parental_education,bootSamp)
 	sumSq_n_parental_education[b]=sum((predict_n_parental_education-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -552,7 +552,7 @@ for (b in 1:5000){
 	devExplained_n_parental_education[b]=summary(Model_n_parental_education)$dev.expl
 
 	### sex
-	Model_n_sex<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+race_ethnicity.x,data=bootSamp,family=nb())
+	Model_n_sex<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+race_ethnicity.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_sex=predict.bam(Model_n_sex,bootSamp)
 	sumSq_n_sex[b]=sum((predict_n_sex-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -567,7 +567,7 @@ for (b in 1:5000){
 	devExplained_n_sex[b]=summary(Model_n_sex)$dev.expl
 
 	### race
-	Model_n_race_ethnicity<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_y.x+ple_injured_y.x+ple_crime_y.x+ple_friend_y.x+ple_friend_injur_y.x+ple_arrest_y.x+ple_friend_died_y.x+ple_mh_y.x+ple_sib_y.x+ple_victim_y.x+ple_separ_y.x+ple_law_y.x+ple_school_y.x+ple_move_y.x+ple_jail_y.x+ple_step_y.x+ple_new_job_y.x+ple_new_sib_y.x+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x,data=bootSamp,family=nb())
+	Model_n_race_ethnicity<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x,data=bootSamp,family=nb())
 	# predict to get sum of squares
 	predict_n_race_ethnicity<-predict.bam(Model_n_race_ethnicity,bootSamp)
 	sumSq_n_race_ethnicity[b]<-sum((predict_n_race_ethnicity-bootSamp$cbcl_scr_syn_external_r.y)^2)
@@ -611,16 +611,16 @@ for (b in 1:5000){
 }
 # saveout df of sumSq for plotting
 outdf=data.frame(sumSq_full,sumSq_n_died,sumSq_n_injured,sumSq_n_crime,sumSq_n_friend,sumSq_n_friend_injur,sumSq_n_arrest,sumSq_n_friend_died,sumSq_n_mh,sumSq_n_sib,sumSq_n_victim,sumSq_n_separ,sumSq_n_law,sumSq_n_school,sumSq_n_move,sumSq_n_jail,sumSq_n_step,sumSq_n_new_job,sumSq_n_new_sib,sumSq_n_g,sumSq_n_age,sumSq_n_Grades,sumSq_n_parentPcount,sumSq_n_income,sumSq_n_parental_education,sumSq_n_sex,sumSq_n_race_ethnicity)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/TmpPrec_Ent_sumSq.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/TmpPrec_IVE_p_sumSq.rds')
 #  saveout df of held-out sumSq for plotting
 outdf=data.frame(sumSq_heldout_full,sumSq_heldout_n_died,sumSq_heldout_n_injured,sumSq_heldout_n_crime,sumSq_heldout_n_friend,sumSq_heldout_n_friend_injur,sumSq_heldout_n_arrest,sumSq_heldout_n_friend_died,sumSq_heldout_n_mh,sumSq_heldout_n_sib,sumSq_heldout_n_victim,sumSq_heldout_n_separ,sumSq_heldout_n_law,sumSq_heldout_n_school,sumSq_heldout_n_move,sumSq_heldout_n_jail,sumSq_heldout_n_step,sumSq_heldout_n_new_job,sumSq_heldout_n_new_sib,sumSq_heldout_n_g,sumSq_heldout_n_age,sumSq_heldout_n_Grades,sumSq_heldout_n_parentPcount,sumSq_heldout_n_income,sumSq_heldout_n_parental_education,sumSq_heldout_n_sex,sumSq_heldout_n_race_ethnicity)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/TmpPrec_Ent_sumSqHeldout.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/TmpPrec_IVE_p_sumSqHeldout.rds')
 # saveout df of dev explained for plotting
 outdf=data.frame(devExplained_full,devExplained_n_died,devExplained_n_injured,devExplained_n_crime,devExplained_n_friend,devExplained_n_friend_injur,devExplained_n_arrest,devExplained_n_friend_died,devExplained_n_mh,devExplained_n_sib,devExplained_n_victim,devExplained_n_separ,devExplained_n_law,devExplained_n_school,devExplained_n_move,devExplained_n_jail,devExplained_n_step,devExplained_n_new_job,devExplained_n_new_sib,devExplained_n_g,devExplained_n_age,devExplained_n_Grades,devExplained_n_parentPcount,devExplained_n_income,devExplained_n_parental_education,devExplained_n_sex,devExplained_n_race_ethnicity)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/TmpPrec_Ent_DevExplained.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/TmpPrec_IVE_p_DevExplained.rds')
 # saveout AIC for plotting
 outdf=data.frame(AIC_full,AIC_n_died,AIC_n_injured,AIC_n_crime,AIC_n_friend,AIC_n_friend_injur,AIC_n_arrest,AIC_n_friend_died,AIC_n_mh,AIC_n_sib,AIC_n_victim,AIC_n_separ,AIC_n_law,AIC_n_school,AIC_n_move,AIC_n_jail,AIC_n_step,AIC_n_new_job,AIC_n_new_sib,AIC_n_g,AIC_n_age,AIC_n_Grades,AIC_n_parentPcount,AIC_n_income,AIC_n_parental_education,AIC_n_sex,AIC_n_race_ethnicity)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/TmpPrec_Ent_AIC.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/TmpPrec_IVE_p_AIC.rds')
 # saveout BIC for plotting
 outdf=data.frame(BIC_full,BIC_n_died,BIC_n_injured,BIC_n_crime,BIC_n_friend,BIC_n_friend_injur,BIC_n_arrest,BIC_n_friend_died,BIC_n_mh,BIC_n_sib,BIC_n_victim,BIC_n_separ,BIC_n_law,BIC_n_school,BIC_n_move,BIC_n_jail,BIC_n_step,BIC_n_new_job,BIC_n_new_sib,BIC_n_g,BIC_n_age,BIC_n_Grades,BIC_n_parentPcount,BIC_n_income,BIC_n_parental_education,BIC_n_sex,BIC_n_race_ethnicity)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/TmpPrec_Ent_BIC.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/TmpPrec_IVE_p_BIC.rds')

@@ -11,8 +11,8 @@
 # ------------------------------------------
 module load R/4.1
 
-# Rscript gExt_TempPrecBoots.R
+Rscript gExt_TempPrecBoots.R
 
-echo intermission
+# echo intermission
 
-Rscript Extg_TemPrecBoots.R
+# Rscript Extg_TemPrecBoots.R

@@ -611,16 +611,16 @@ for (b in 1:5000){
 }
 # saveout df of sumSq for plotting
 outdf=data.frame(sumSq_full,sumSq_n_died,sumSq_n_injured,sumSq_n_crime,sumSq_n_friend,sumSq_n_friend_injur,sumSq_n_arrest,sumSq_n_friend_died,sumSq_n_mh,sumSq_n_sib,sumSq_n_victim,sumSq_n_separ,sumSq_n_law,sumSq_n_school,sumSq_n_move,sumSq_n_jail,sumSq_n_step,sumSq_n_new_job,sumSq_n_new_sib,sumSq_n_g,sumSq_n_interview_age,sumSq_n_Grades,sumSq_n_parentPcount,sumSq_n_income,sumSq_n_parental_education,sumSq_n_sex,sumSq_n_race_ethnicity)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/int_sumSq.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/ext_sumSq.rds')
 #  saveout df of held-out sumSq for plotting
-outdf=data.frame(sumSq_fullHeldout,sumSq_n_diedHeldout,sumSq_n_injuredHeldout,sumSq_n_crimeHeldout,sumSq_n_friendHeldout,sumSq_n_friend_injurHeldout,sumSq_n_arrestHeldout,sumSq_n_friend_diedHeldout,sumSq_n_mhHeldout,sumSq_n_sibHeldout,sumSq_n_victimHeldout,sumSq_n_separHeldout,sumSq_n_lawHeldout,sumSq_n_schoolHeldout,sumSq_n_moveHeldout,sumSq_n_jailHeldout,sumSq_n_stepHeldout,sumSq_n_new_jobHeldout,sumSq_n_new_sibHeldout,sumSq_n_gHeldout,sumSq_n_interview_ageHeldout,sumSq_n_GradesHeldout,sumSq_n_parentPcountHeldout,sumSq_n_incomeHeldout,sumSq_n_parental_educationHeldout,sumSq_n_sexHeldout,sumSq_n_race_ethnicityHeldout)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/int_sumSqHeldout.rds')
+outdf=data.frame(sumSq_heldout_full,sumSq_heldout_n_died,sumSq_heldout_n_injured,sumSq_heldout_n_crime,sumSq_heldout_n_friend,sumSq_heldout_n_friend_injur,sumSq_heldout_n_arrest,sumSq_heldout_n_friend_died,sumSq_heldout_n_mh,sumSq_heldout_n_sib,sumSq_heldout_n_victim,sumSq_heldout_n_separ,sumSq_heldout_n_law,sumSq_heldout_n_school,sumSq_heldout_n_move,sumSq_heldout_n_jail,sumSq_heldout_n_step,sumSq_heldout_n_new_job,sumSq_heldout_n_new_sib,sumSq_heldout_n_g,sumSq_heldout_n_interview_age,sumSq_heldout_n_Grades,sumSq_heldout_n_parentPcount,sumSq_heldout_n_income,sumSq_heldout_n_parental_education,sumSq_heldout_n_sex,sumSq_heldout_n_race_ethnicity)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/ext_sumSqHeldout.rds')
 # saveout df of dev explained for plotting
 outdf=data.frame(devExplained_full,devExplained_n_died,devExplained_n_injured,devExplained_n_crime,devExplained_n_friend,devExplained_n_friend_injur,devExplained_n_arrest,devExplained_n_friend_died,devExplained_n_mh,devExplained_n_sib,devExplained_n_victim,devExplained_n_separ,devExplained_n_law,devExplained_n_school,devExplained_n_move,devExplained_n_jail,devExplained_n_step,devExplained_n_new_job,devExplained_n_new_sib,devExplained_n_g,devExplained_n_interview_age,devExplained_n_Grades,devExplained_n_parentPcount,devExplained_n_income,devExplained_n_parental_education,devExplained_n_sex,devExplained_n_race_ethnicity)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/int_DevExplained.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/ext_DevExplained.rds')
 # saveout AIC for plotting
 outdf=data.frame(AIC_full,AIC_n_died,AIC_n_injured,AIC_n_crime,AIC_n_friend,AIC_n_friend_injur,AIC_n_arrest,AIC_n_friend_died,AIC_n_mh,AIC_n_sib,AIC_n_victim,AIC_n_separ,AIC_n_law,AIC_n_school,AIC_n_move,AIC_n_jail,AIC_n_step,AIC_n_new_job,AIC_n_new_sib,AIC_n_g,AIC_n_interview_age,AIC_n_Grades,AIC_n_parentPcount,AIC_n_income,AIC_n_parental_education,AIC_n_sex,AIC_n_race_ethnicity)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/int_AIC.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/ext_AIC.rds')
 # saveout BIC for plotting
 outdf=data.frame(BIC_full,BIC_n_died,BIC_n_injured,BIC_n_crime,BIC_n_friend,BIC_n_friend_injur,BIC_n_arrest,BIC_n_friend_died,BIC_n_mh,BIC_n_sib,BIC_n_victim,BIC_n_separ,BIC_n_law,BIC_n_school,BIC_n_move,BIC_n_jail,BIC_n_step,BIC_n_new_job,BIC_n_new_sib,BIC_n_g,BIC_n_interview_age,BIC_n_Grades,BIC_n_parentPcount,BIC_n_income,BIC_n_parental_education,BIC_n_sex,BIC_n_race_ethnicity)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/int_BIC.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/ext_BIC.rds')
