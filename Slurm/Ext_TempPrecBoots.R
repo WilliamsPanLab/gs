@@ -2,7 +2,7 @@ library(mgcv)
 library(testit)
 
 # load in data
-masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/OutDfxc.rds')
+masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/OutDFTmpPrec_FullRetro.rds')
 
 # need to save out reduction in sum of squares, reduction of sum of squares in held-out, deviance explained, AIC, and BIC for all models
 

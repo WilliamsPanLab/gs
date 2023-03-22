@@ -3,23 +3,23 @@
 
 # DMN
 D1=~/2021-masks/Medial_amPFC_DefaultModeNetwork_n2_50_n6.nii.gz
-D2=~/rois/Defaultmode_AG_L.nii
-D3=~/rois/Defaultmode_AG_R.nii
-D4=~/rois/Defaultmode_PCC_M.nii
+D2=~/2021-masks/Left_AG_DefaultModeNetwork_n46_n70_32.nii.gz
+D3=~/2021-masks/Right_AG_DefaultModeNetwork_50_n62_26.nii.gz
+D4=~/2021-masks/Medial_PCC_DefaultModeNetwork_0_n50_28.nii.gz
 
 # Salience
-S1=~/rois/Salience_AI_L.nii
-S2=~/rois/Salience_AI_R.nii
+S1=~/2021-masks/Left_antInsula_Salience_n38_14_n6.nii.gz
+S2=~/2021-masks/Right_antInsula_Salience_38_18_2.nii.gz
 # amyg already in cifti-space
 
 # Attention
-A1=~/rois/Attention_msPFC_M.nii
-A2=~/rois/Attention_LPFC_L.nii
-A3=~/rois/Attention_LPFC_R.nii
-A4=~/rois/Attention_aIPL_L.nii
-A5=~/rois/Attention_aIPL_R.nii
-A6=~/rois/Attention_PCUN_L.nii
-A7=~/rois/Attention_PCUN_R.nii
+A1=~/2021-masks/Medial_msPFC_Attention_n2_14_52.nii.gz
+A2=~/2021-masks/Left_lPFC_Attention_n44_6_32.nii.gz
+A3=~/2021-masks/Right_lPFC_Attention_50_10_28.nii.gz
+A4=~/2021-masks/Left_aIPL_Attention_n30_n54_40.nii.gz
+A5=~/2021-masks/Right_aIPL_Attention_38_n56_48.nii.gz
+A6=~/2021-masks/Left_precuneus_Attention_n14_n66_52.nii.gz
+A7=~/2021-masks/Right_precuneus_Attention_18_n68_52.nii.gz
 
 # load modules for resampling
 ml biology
