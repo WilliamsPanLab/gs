@@ -2,7 +2,7 @@ library(mgcv)
 library(testit)
 
 # load in data
-masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/OutDfxc.rds')
+masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/OutDFTmpPrec_IVEandRetro.rds')
 
 # need to save out reduction in sum of squares, reduction of sum of squares in held-out, deviance explained, AIC, and BIC for all models
 
@@ -195,7 +195,7 @@ num_new_sib=rep(0,10000)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up
-masterdf=masterdf[,c('cbcl_scr_syn_external_r.x','cbcl_scr_syn_external_r.y','ple_died_yBV.x+ple_died_y_IVE.y','ple_died_y_IVE.y','ple_injured_yBV.x+ple_injured_y_IVE.y','ple_injured_y_IVE.y','ple_crime_yBV.x+ple_crime_y_IVE.y','ple_crime_y_IVE.y','ple_friend_yBV.x+ple_friend_y_IVE.y','ple_friend_y_IVE.y','ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y','ple_friend_injur_y_IVE.y','ple_arrest_yBV.x+ple_arrest_y_IVE.y','ple_arrest_y_IVE.y','ple_friend_died_yBV.x+ple_friend_died_y_IVE.y','ple_friend_died_y_IVE.y','ple_mh_yBV.x+ple_mh_y_IVE.y','ple_mh_y_IVE.y','ple_sib_yBV.x+ple_sib_y_IVE.y','ple_sib_y_IVE.y','ple_sib_y_IVE.y','ple_victim_yBV.x+ple_victim_y_IVE.y','ple_victim_y_IVE.y','ple_separ_yBV.x+ple_separ_y_IVE.y','ple_separ_y_IVE.y','ple_law_yBV.x+ple_law_y_IVE.y','ple_law_y_IVE.y','ple_school_yBV.x+ple_school_y_IVE.y','ple_school_y_IVE.y','ple_move_yBV.x+ple_move_y_IVE.y','ple_move_y_IVE.y','ple_jail_yBV.x+ple_jail_y_IVE.y','ple_jail_y_IVE.y','ple_step_yBV.x+ple_step_y_IVE.y','ple_step_y_IVE.y','ple_new_job_yBV.x+ple_new_job_y_IVE.y','ple_new_job_y_IVE.y','ple_new_sib_yBV.x+ple_new_sib_y_IVE.y','ple_new_sib_y_IVE.y','g.x','subjectkey','interview_age.x','Grades.x','parentPcount.x','income.x','parental_education.x','sex.x','race_ethnicity.x','weight.x','waist.x','height.x','BMI.x')]
+masterdf=masterdf[,c('cbcl_scr_syn_external_r.x','cbcl_scr_syn_external_r.y','ple_died_yBV.x','ple_died_y_IVE.y','ple_died_y_IVE.y','ple_injured_yBV.x','ple_injured_y_IVE.y','ple_injured_y_IVE.y','ple_crime_yBV.x','ple_crime_y_IVE.y','ple_crime_y_IVE.y','ple_friend_yBV.x','ple_friend_y_IVE.y','ple_friend_y_IVE.y','ple_friend_injur_yBV.x','ple_friend_injur_y_IVE.y','ple_friend_injur_y_IVE.y','ple_arrest_yBV.x','ple_arrest_y_IVE.y','ple_arrest_y_IVE.y','ple_friend_died_yBV.x','ple_friend_died_y_IVE.y','ple_friend_died_y_IVE.y','ple_mh_yBV.x','ple_mh_y_IVE.y','ple_mh_y_IVE.y','ple_sib_yBV.x','ple_sib_y_IVE.y','ple_sib_y_IVE.y','ple_sib_y_IVE.y','ple_victim_yBV.x','ple_victim_y_IVE.y','ple_victim_y_IVE.y','ple_separ_yBV.x','ple_separ_y_IVE.y','ple_separ_y_IVE.y','ple_law_yBV.x','ple_law_y_IVE.y','ple_law_y_IVE.y','ple_school_yBV.x','ple_school_y_IVE.y','ple_school_y_IVE.y','ple_move_yBV.x','ple_move_y_IVE.y','ple_move_y_IVE.y','ple_jail_yBV.x','ple_jail_y_IVE.y','ple_jail_y_IVE.y','ple_step_yBV.x','ple_step_y_IVE.y','ple_step_y_IVE.y','ple_new_job_yBV.x','ple_new_job_y_IVE.y','ple_new_job_y_IVE.y','ple_new_sib_yBV.x','ple_new_sib_y_IVE.y','ple_new_sib_y_IVE.y','g.x','subjectkey','interview_age.x','Grades.x','parentPcount.x','income.x','parental_education.x','sex.x','race_ethnicity.x','weight.x','waist.x','height.x','BMI.x')]
 # set seed because I'll have to rerun this differently for second 5k
 set.seed(1)
 # loop over manual bootstrap
@@ -245,7 +245,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_died[b]=summary(Model_n_died)$dev.expl
 	# get number
-	num_died[b]=sum(as.numeric(ple_died_y_IVE.y))
+	num_died[b]=sum(as.numeric(bootSamp$ple_died_y_IVE.y))
 
 	### injured
 	Model_n_injured<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -262,7 +262,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_injured[b]=summary(Model_n_injured)$dev.expl
 	# get number
-	num_injured[b]=sum(as.numeric(ple_injured_y_IVE.y))
+	num_injured[b]=sum(as.numeric(bootSamp$ple_injured_y_IVE.y))
 
 	### crime
 	Model_n_crime<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -279,7 +279,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_crime[b]=summary(Model_n_crime)$dev.expl
 	# get number
-	num_crime[b]=sum(as.numeric(ple_crime_y_IVE.y))
+	num_crime[b]=sum(as.numeric(bootSamp$ple_crime_y_IVE.y))
 
 	### friend
 	Model_n_friend<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -296,7 +296,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_friend[b]=summary(Model_n_friend)$dev.expl
 	# get number
-	num_friend[b]=sum(as.numeric(ple_friend_y_IVE.y))
+	num_friend[b]=sum(as.numeric(bootSamp$ple_friend_y_IVE.y))
 
 	### friend_injured
 	Model_n_friend_injured<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -313,7 +313,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_friend_injur[b]=summary(Model_n_friend_injured)$dev.expl
 	# get number
-	num_friend_injur[b]=sum(as.numeric(ple_friend_injur_y_IVE.y))
+	num_friend_injur[b]=sum(as.numeric(bootSamp$ple_friend_injur_y_IVE.y))
 
 	### arrest
 	Model_n_arrest<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -330,7 +330,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_arrest[b]=summary(Model_n_arrest)$dev.expl
 	# get number
-	num_arrest[b]=sum(as.numeric(ple_arrest_y_IVE.y))
+	num_arrest[b]=sum(as.numeric(bootSamp$ple_arrest_y_IVE.y))
 
 	### friend_died
 	Model_n_friend_died<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -347,7 +347,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_friend_died[b]=summary(Model_n_friend_died)$dev.expl
 	# get number
-	num_friend_died[b]=sum(as.numeric(ple_friend_died_y_IVE.y))
+	num_friend_died[b]=sum(as.numeric(bootSamp$ple_friend_died_y_IVE.y))
 
 	### mental_health
 	Model_n_mh<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -364,7 +364,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_mh[b]=summary(Model_n_mh)$dev.expl
 	# get number	
-	num_mh[b]=sum(as.numeric(ple_mh_y_IVE.y))
+	num_mh[b]=sum(as.numeric(bootSamp$ple_mh_y_IVE.y))
 
 	### sibling
 	Model_n_sib<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -381,7 +381,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_sib[b]=summary(Model_n_sib)$dev.expl
 	# get number
-	num_sib[b]=sum(as.numeric(ple_sib_y_IVE.y))
+	num_sib[b]=sum(as.numeric(bootSamp$ple_sib_y_IVE.y))
 
 	### victim
 	Model_n_victim<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -398,7 +398,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_victim[b]=summary(Model_n_victim)$dev.expl
 	# get number
-	num_victim[b]=sum(as.numeric(ple_victim_y_IVE.y))
+	num_victim[b]=sum(as.numeric(bootSamp$ple_victim_y_IVE.y))
 
 	### separation
 	Model_n_separ<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -415,7 +415,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_separ[b]=summary(Model_n_separ)$dev.expl
 	# get number
-	num_separ[b]=sum(as.numeric(ple_separ_y_IVE.y))
+	num_separ[b]=sum(as.numeric(bootSamp$ple_separ_y_IVE.y))
 
 	### law
 	Model_n_law<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -432,7 +432,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_law[b]=summary(Model_n_law)$dev.expl
 	# get number
-	num_law[b]=sum(as.numeric(ple_law_y_IVE.y))
+	num_law[b]=sum(as.numeric(bootSamp$ple_law_y_IVE.y))
 
 	### school
 	Model_n_school<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -449,7 +449,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_school[b]=summary(Model_n_school)$dev.expl
 	# get number
-	num_school[b]=sum(as.numeric(ple_school_y_IVE.y))
+	num_school[b]=sum(as.numeric(bootSamp$ple_school_y_IVE.y))
 
 	### move
 	Model_n_move<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -466,7 +466,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_move[b]=summary(Model_n_move)$dev.expl
 	# get number
-	num_move[b]=sum(as.numeric(ple_move_y_IVE.y))
+	num_move[b]=sum(as.numeric(bootSamp$ple_move_y_IVE.y))
 
 	### jail
 	Model_n_jail<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -483,7 +483,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_jail[b]=summary(Model_n_jail)$dev.expl
 	# get number
-	num_jail[b]=sum(as.numeric(ple_jail_y_IVE.y))
+	num_jail[b]=sum(as.numeric(bootSamp$ple_jail_y_IVE.y))
 
 	### step
 	Model_n_step<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -500,7 +500,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_step[b]=summary(Model_n_step)$dev.expl
 	# get number
-	num_step[b]=sum(as.numeric(ple_step_y_IVE.y))
+	num_step[b]=sum(as.numeric(bootSamp$ple_step_y_IVE.y))
 
 	### new job
 	Model_n_job<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -517,7 +517,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_new_job[b]=summary(Model_n_job)$dev.expl
 	# get number
-	num_new_job[b]=sum(as.numeric(ple_new_job_y_IVE.y))
+	num_new_job[b]=sum(as.numeric(bootSamp$ple_new_job_y_IVE.y))
 
 	### new sib
 	Model_n_new_sib<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
@@ -534,7 +534,7 @@ for (b in 1:5000){
 	# get deviance explained
 	devExplained_n_new_sib[b]=summary(Model_n_new_sib)$dev.expl
 	# get number
-	num_new_sib[b]=sum(as.numeric(ple_new_sib_y_IVE.y))
+	num_new_sib[b]=sum(as.numeric(bootSamp$ple_new_sib_y_IVE.y))
 
 	### g
 	Model_n_g<-bam(cbcl_scr_syn_external_r.y~cbcl_scr_syn_external_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp,family=nb())
