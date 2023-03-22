@@ -189,7 +189,7 @@ num_move=rep(0,10000)
 num_jail=rep(0,10000)
 num_step=rep(0,10000)
 num_new_job=rep(0,10000)
-num_n_new_sib=rep(0,10000)
+num_new_sib=rep(0,10000)
 
 # garner num subjs for bootstrapping
 subjs=unique(masterdf$subjectkey)
