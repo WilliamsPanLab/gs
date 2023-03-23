@@ -26,6 +26,9 @@ ml biology
 ml workbench
 
 ### resample each
+
+# sink some more time into seeing if there is a better approach for MNI->FSLR
+
 # DMN
 wb_command -volume-to-surface-mapping ${D1} ~/S1200_MSMAll3T1071.L.inflated_MSMAll.32k_fs_LR.surf.gii ${D1}_L.shape.gii -trilinear
 wb_command -volume-to-surface-mapping ${D1} ~/S1200_MSMAll3T1071.R.inflated_MSMAll.32k_fs_LR.surf.gii ${D1}_R.shape.gii -trilinear

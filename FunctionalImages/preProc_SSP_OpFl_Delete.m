@@ -1,5 +1,6 @@
 function preProc_SSP_Delete(subj)
-%%% This function will take a single subject's NDAR name, download their fMRI data and motion masks, concatenate the fMRI data, mask according to Robert's instructions (.2mm FD, power outliers out), derive a single-subject parcellation based on Pines et al. 2022's group templates, and delete the input fMRI data.
+
+%%% This function will take a single subject's NDAR name, download their fMRI data and motion masks, concatenate the fMRI data, mask according to Robert's paper (.2mm FD, power outliers out), derive a single-subject parcellation based on Pines et al. 2022's group templates,  and delete the input fMRI data.
 
 % print subject being ran
 subj
@@ -7,23 +8,70 @@ subj
 % add matlab path for used functions
 addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/PersonalCircuits/scripts/code_nmf_cifti/tool_folder'));
 
+% echo subj name into a .txt
+subjTxtCommand=['echo ' subj ' >> /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt'];
+system(subjTxtCommand)
+
+% download this participant's data
+subjDlCommand=['python3 /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/download.py -dp 1210784 -m /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/datastructure_manifest.txt -o /scratch/users/apines/abcd_images -s /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt -l /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/dl_logs -b /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/data_subsets_Final.txt &']
+system(subjDlCommand)
+% add a pause to let it download
+pause(260)
+
+%%% Motion mask
+apply_motion_mask(subj)
+
+%%% Concatenate scans
+concat_TS(subj)
+
+%%% SSP Workflow
+addpath('/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages/Networks')
+
+% SSP
+PersonalizeNetworks(subj)
+
+% FC 
+
+% Sulc extract
+
+% MM extract
+
+%%% OpFl Workflow
+
+% Additional Motion mask
+
+% OpFl
+
+% Downsample networks
+
+% Props relative to networks
+
+%%% Circuit workflow
+
+% circuit scores from resting state
+
+%%% combine features into vector, save to permanent storage
+
+%%% delete input data
+
+% comment out deletion for a few subjs to QC
+
 % tell it where AWS tools are for downloads
 %system('export PATH=/cbica/projects/abcdfnets/aws/dist/:$PATH')
-
-% echo subj name into a .txt
 %subjTxtCommand=['echo ' subj ' >> /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt'];
-%system(subjTxtCommand)
 
 % download that one subject's data
 % ∆∆∆∆∆∆
 % keep looking at github for updates on authent. fix
 % ∆∆∆∆∆∆
+%%% it works suckkkaaaas
+
+
 % subjDlCommand=['python3 /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/download.py -i /scratch/users/apines/datastructure_manifest.txt -o /scratch/users/apines/ -s /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt -l /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/dl_logs -d /oak/stanford/groups/leanew1/users/apines/data_subsets_3_9_21_from9620.txt &']
 
 % note: downloader tool does not seem to communicate when it is done to matlab
 % added '&' and 'pause' so that matlab waits 5 minutes to proceed rather than getting caught up indefinitely
 system(subjDlCommand)
-pause(300)
 
 % set parent file path
 parentFP=['/scratch/users/apines/derivatives/abcd-hcp-pipeline/ses-baselineYear1Arm1/func/' subj ];
@@ -33,7 +81,6 @@ mkdir(childFP)
 
 % now the matlab portions. Apply the motion mask to the downloaded data
 %%% probably will lose psychopathology instances if we do this
-%%% apply_motion_mask(subj)
 
 %%%%%% extract FD and TRs passing threshold
 

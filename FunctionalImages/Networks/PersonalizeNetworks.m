@@ -1,6 +1,6 @@
 function PersonalizeNetworks(inputTS_fp,K,ID_Str)
 % Based on the group atlas, creating each subject's individual specific atlas
-ProjectFolder = '/scratch/users/apines/derivatives/abcd-hcp-pipeline/'
+project=['/scratch/users/apines/abcd_images/derivatives/abcd-hcp-pipeline/' sname '/ses-baselineYear1Arm1/func/'];
 ResultantFolder = [ProjectFolder '/SingleParcel_1by1'];
 mkdir(ResultantFolder);
 % load in "prep data file"
