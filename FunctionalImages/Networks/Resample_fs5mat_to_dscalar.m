@@ -1,5 +1,3 @@
-function Resample_fs5mat_to_dscalar(subj)
-
 % add paths
 addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/PersonalCircuits/scripts/code_nmf_cifti/tool_folder'));
 
@@ -50,8 +48,9 @@ for n=1:k
 	system(commandR)
 	% downsampled and upsampled func.gii's should be done for this network
 end
+
+
 % next step is to convert upsampled into init.mat again, next loop
-% add path for cifti read!!!!
 % initialize initmat
 initmat=zeros(59412,k);
 for n=1:k
@@ -67,10 +66,20 @@ for n=1:k
 	cmd2 = ['wb_command -cifti-create-dense-from-template ' dtsTemplateFP ' ' outFN ' -cifti ' combinedFn];
 	system(cmd2);
 	% read it back in
-	combined=cifti_read(outFN);
+	combined=read_cifti(outFN);
 	combinedHemis=combined.cdata;
 	% populate initmat with each upsampled gifti
-	initmat(:,n)=combinedHemis(1:59412,:);
+	initmat(:,n)=combinedHemis(1:59412,n);
 end
+% match initmat format
+V={initmat};
 % saveout initmat
-save('/oak/stanford/groups/leanew1/users/apines/maps/initmat_18fslr.mat','initmat');
+save('/oak/stanford/groups/leanew1/users/apines/maps/initmat_18fslr.mat','V');
+
+% and make a group consensus hard parcellation for reference
+[~, AtlasLabel_NoMedialWall] = max(initmat, [], 2);
+
+% cifti to replace cdata in
+combined.cdata(1:59412)=AtlasLabel_NoMedialWall;
+outputfile=['~/K18_Parcel.dscalar.nii'];
+write_cifti(combined,outputfile)

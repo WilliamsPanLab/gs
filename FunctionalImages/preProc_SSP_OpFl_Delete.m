@@ -30,6 +30,8 @@ addpath('/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages/N
 % SSP
 PersonalizeNetworks(subj)
 
+% re-mask with SNR to be sure: looks like 1's could be getting de-facto'ed into SNR empties
+
 % FC 
 
 % Sulc extract
