@@ -1,5 +1,7 @@
 # convert MNI-coordinate surface-circuit ROIs to cifti-space
-
+ml biology
+ml workbench
+ml ants/2.4.0
 
 # DMN
 D1=~/2021-masks/Medial_amPFC_DefaultModeNetwork_n2_50_n6.nii.gz
@@ -25,6 +27,9 @@ A7=~/2021-masks/Right_precuneus_Attention_18_n68_52.nii.gz
 ml biology
 ml workbench
 
+# A4 needs dilation
+ImageMath 3 ${A4}_dil.nii.gz GD ${A4} 1
+
 ### resample each
 
 # sink some more time into seeing if there is a better approach for MNI->FSLR
@@ -49,8 +54,9 @@ wb_command -volume-to-surface-mapping ${A1} ~/S1200_MSMAll3T1071.R.inflated_MSMA
 
 wb_command -volume-to-surface-mapping ${A2} ~/S1200_MSMAll3T1071.L.inflated_MSMAll.32k_fs_LR.surf.gii ${A2}.shape.gii -trilinear
 wb_command -volume-to-surface-mapping ${A3} ~/S1200_MSMAll3T1071.R.inflated_MSMAll.32k_fs_LR.surf.gii ${A3}.shape.gii -trilinear
-wb_command -volume-to-surface-mapping ${A4} ~/S1200_MSMAll3T1071.L.inflated_MSMAll.32k_fs_LR.surf.gii ${A4}.shape.gii -trilinear
+wb_command -volume-to-surface-mapping ${A4}_dil.nii.gz ~/S1200_MSMAll3T1071.L.inflated_MSMAll.32k_fs_LR.surf.gii ${A4}.shape.gii -trilinear
 wb_command -volume-to-surface-mapping ${A5} ~/S1200_MSMAll3T1071.R.inflated_MSMAll.32k_fs_LR.surf.gii ${A5}.shape.gii -trilinear
 wb_command -volume-to-surface-mapping ${A6} ~/S1200_MSMAll3T1071.L.inflated_MSMAll.32k_fs_LR.surf.gii ${A6}.shape.gii -trilinear
 wb_command -volume-to-surface-mapping ${A7} ~/S1200_MSMAll3T1071.R.inflated_MSMAll.32k_fs_LR.surf.gii ${A7}.shape.gii -trilinear
 
+# great, now lets make them parcellations so we can extract from em

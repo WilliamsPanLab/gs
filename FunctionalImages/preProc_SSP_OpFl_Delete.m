@@ -82,14 +82,39 @@ PersonalizeNetworks(TSfp,18,subj)
 % Props relative to networks
 
 %%% Circuit workflow
+% extract circuit time series
+Extract_CircuitTS.sh subj
 
-% circuit scores from resting state
+% combine into circuit scores from resting state
 
 %%% combine features into vector, save to permanent storage
 
 %%% delete input data
 
 % comment out deletion for a few subjs to QC
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 % tell it where AWS tools are for downloads
 %system('export PATH=/cbica/projects/abcdfnets/aws/dist/:$PATH')

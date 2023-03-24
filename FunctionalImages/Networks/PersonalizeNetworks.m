@@ -11,7 +11,7 @@ resId = 'IndividualParcel_Final';
 initName=['/oak/stanford/groups/leanew1/users/apines/maps/initmat_18fslr.mat'];
 % Use parameter in Hongming's NeuroImage paper, except for alphaL which we have expanded to account for the reduced smoothin in DCAN's pipeline
 alphaS21 = 1;
-alphaL = 1000;
+alphaL = 2500;
 vxI = 1;
 spaR = 1;
 ard = 0;

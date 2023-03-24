@@ -9,7 +9,7 @@ OutputFolder = ['/scratch/users/apines/abcd_images/derivatives/abcd-hcp-pipeline
 %%%
 
 % resampled V of interest (group or individ - CHANGE AS FIT TO MATCH NAME)
-finalUVFile=[OutputFolder 'IndividualParcel_Final_sbj1_comp18_alphaS21_1_alphaL300_vxInfo1_ard0_eta0/final_UV.mat'];
+finalUVFile=[OutputFolder 'IndividualParcel_Final_sbj1_comp18_alphaS21_1_alphaL2500_vxInfo1_ard0_eta0/final_UV.mat'];
 Loading_Mat=load(finalUVFile);
 V=Loading_Mat.V;
 % extract from struct
