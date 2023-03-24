@@ -59,4 +59,19 @@ wb_command -volume-to-surface-mapping ${A5} ~/S1200_MSMAll3T1071.R.inflated_MSMA
 wb_command -volume-to-surface-mapping ${A6} ~/S1200_MSMAll3T1071.L.inflated_MSMAll.32k_fs_LR.surf.gii ${A6}.shape.gii -trilinear
 wb_command -volume-to-surface-mapping ${A7} ~/S1200_MSMAll3T1071.R.inflated_MSMAll.32k_fs_LR.surf.gii ${A7}.shape.gii -trilinear
 
-# great, now lets make them parcellations so we can extract from em
+### great, now lets make them parcellations so we can extract from em
+# convert shape giis to dlabels
+#DMN
+wb_command -label-convert -from-nifti ${A1}_L.shape.gii -to-label lh.dlabel.nii
+wb_command -label-convert -from-nifti lh.shape.gii -to-label lh.dlabel.nii
+# 
+
+# concatenate shape giis
+
+
+
+# convert dscalar subcortex to dlabel
+
+
+
+
