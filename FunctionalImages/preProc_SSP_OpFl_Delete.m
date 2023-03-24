@@ -65,7 +65,8 @@ PersonalizeNetworks(TSfp,18,subj)
 % re-mask with SNR to be sure: looks like 1's could be getting de-facto'ed into SNR empties after the actual NMF fit
 %
 
-% FC 
+% FC (personalized networks, subcortical Tian S1, Circuits) 
+Extract_FC(subj)
 
 % Sulc extract
 
@@ -81,9 +82,6 @@ PersonalizeNetworks(TSfp,18,subj)
 
 % Props relative to networks
 
-%%% Circuit workflow
-% extract circuit time series
-Extract_CircuitTS.sh subj
 
 % combine into circuit scores from resting state
 
