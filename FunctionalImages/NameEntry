@@ -1,0 +1,9 @@
+#!/usr/bin/expect
+
+set prompt "Enter your NIMH Data Archives username: "
+
+# Wait for the prompt
+expect "$prompt"
+
+# Send the phrase
+send "apines\r"

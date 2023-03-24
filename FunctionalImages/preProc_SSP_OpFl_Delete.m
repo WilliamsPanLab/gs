@@ -1,5 +1,11 @@
 function preProc_SSP_Delete(subj)
 
+%%% CALL ml R/4.1
+% ml biology
+% ml workbench
+% ml python/3
+%%%% IN .SH CALLER SCRIPT
+
 %%% This function will take a single subject's NDAR name, download their fMRI data and motion masks, concatenate the fMRI data, mask according to Robert's paper (.2mm FD, power outliers out), derive a single-subject parcellation based on Pines et al. 2022's group templates,  and delete the input fMRI data.
 
 % print subject being ran
@@ -7,16 +13,40 @@ subj
 
 % add matlab path for used functions
 addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/PersonalCircuits/scripts/code_nmf_cifti/tool_folder'));
+addpath('/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages');
 
 % echo subj name into a .txt
 subjTxtCommand=['echo ' subj ' >> /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt'];
 system(subjTxtCommand)
 
 % download this participant's data
-subjDlCommand=['python3 /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/download.py -dp 1210784 -m /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/datastructure_manifest.txt -o /scratch/users/apines/abcd_images -s /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt -l /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/dl_logs -b /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/data_subsets_Final.txt &']
-system(subjDlCommand)
-% add a pause to let it download
-pause(260)
+subjDlCommand=['python3 /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/download.py -dp 1210784 -m /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/datastructure_manifest.txt -o /scratch/users/apines/abcd_images -s /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt -l /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/dl_logs -b /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/data_subsets_Final.txt']
+
+% Define the expect script
+expect_script = ['~/expect_script_' subj '.exp'];
+% Create the expect script file
+fid = fopen(expect_script, 'w');
+fprintf(fid, '#!/usr/bin/expect -f\n');
+fprintf(fid, 'set prompt "Enter your NIMH Data Archives username:"\n');
+fprintf(fid, 'set timeout 300\n');
+fprintf(fid, 'set pattern "Completed download:"\n');
+fprintf(fid, 'spawn %s\n', subjDlCommand);
+fprintf(fid, 'expect $prompt\n');
+fprintf(fid, 'send "apines\\r"\n');
+fprintf(fid, 'expect {\n');
+fprintf(fid, '  timeout { \n');
+fprintf(fid, '    puts "Timed out waiting for pattern"\n');
+fprintf(fid, '    exit 1 \n');
+fprintf(fid, '  }\n');
+fprintf(fid, '  $pattern { \n');
+fprintf(fid, '    expect eof\n');
+fprintf(fid, '  }\n');
+fprintf(fid, '}\n');
+fclose(fid);
+% Make the expect script executable
+system(sprintf('chmod +x %s', expect_script));
+% Call the expect script from MATLAB
+system(sprintf('%s', expect_script));
 
 %%% Motion mask
 apply_motion_mask(subj)
@@ -26,11 +56,14 @@ concat_TS(subj)
 
 %%% SSP Workflow
 addpath('/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages/Networks')
+% input TS
+TSfp=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '_ses-baselineYear1Arm1_p2mm_masked_concat.dtseries.nii'];
+%% SSP
+PersonalizeNetworks(TSfp,18,subj)
 
-% SSP
-PersonalizeNetworks(subj)
-
-% re-mask with SNR to be sure: looks like 1's could be getting de-facto'ed into SNR empties
+% this can go in FC .m script
+% re-mask with SNR to be sure: looks like 1's could be getting de-facto'ed into SNR empties after the actual NMF fit
+%
 
 % FC 
 
@@ -86,12 +119,6 @@ mkdir(childFP)
 
 %%%%%% extract FD and TRs passing threshold
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%% CONCATENATE PRIOR TO LOADING INTO PARCCOMMAND
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% time series filepath
-TS=
 % make output dir
 mkdir(['/scratch/users/apines/' subj '/subcort.ptseries.nii'])
 % cifti-parcellate to get subcortical time series

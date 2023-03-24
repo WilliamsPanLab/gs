@@ -4,7 +4,7 @@ topleveldir='/scratch/users/apines/abcd_images/derivatives/abcd-hcp-pipeline/sub
 direc=dir(topleveldir);
 % deep gmless cifti for template
 sname=subj;
-parentfp=['/scratch/users/apines/abcd_images/derivatives/abcd-hcp-pipeline/' sname '/ses-baselineYear1Arm1/func/'];
+parentfp=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' sname '/ses-baselineYear1Arm1/func/'];
 rsfp=[parentfp sname '_ses-baselineYear1Arm1_task-rest_p2mm_masked.dtseries.nii'];
 sstfp=[parentfp sname '_ses-baselineYear1Arm1_task-SST_p2mm_masked.dtseries.nii'];
 nbackfp=[parentfp sname '_ses-baselineYear1Arm1_task-nback_p2mm_masked.dtseries.nii'];
