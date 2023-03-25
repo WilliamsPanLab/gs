@@ -14,7 +14,7 @@ cfp=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipel
 D1=['~/2021-masks/Medial_amPFC_DefaultModeNetwork_n2_50_n6.nii.gz.shape.gii'];
 D2=['~/2021-masks/Left_AG_DefaultModeNetwork_n46_n70_32.nii.gz.shape.gii'];
 D3=['~/2021-masks/Right_AG_DefaultModeNetwork_50_n62_26.nii.gz.shape.gii'];
-D4=['~/2021-masks/Medial_PCC_DefaultModeNetwork_0_n50_28.nii.gz.shape.gii']'
+D4=['~/2021-masks/Medial_PCC_DefaultModeNetwork_0_n50_28.nii.gz.shape.gii'];
 % Salience
 S1=['~/2021-masks/Left_antInsula_Salience_n38_14_n6.nii.gz.shape.gii'];
 S2=['~/2021-masks/Right_antInsula_Salience_38_18_2.nii.gz.shape.gii'];
@@ -30,7 +30,6 @@ A7=['~/2021-masks/Right_precuneus_Attention_18_n68_52.nii.gz.shape.gii'];
 
 % load in concatenated timne series
 cts=read_cifti(cfp);
-rts=read_cifti(rsfp);
 % load in single subject parcellation
 sspFP=['/scratch/users/apines/abcd_images/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/SingleParcel_1by1/k18/' subj '/IndividualParcel_Final_sbj1_comp18_alphaS21_1_alphaL2500_vxInfo1_ard0_eta0/final_UV.mat'];
 ssp=load(sspFP);
@@ -43,7 +42,7 @@ indices=sum(fV,2)==0;
 S1=read_cifti('~/Tian_Subcortex_S1_3T_32k.dscalar.nii')
 % add subcort indices to network indices so we have 34 uniquely labeled ROIs
 HardParcel=HardParcel+max(S1.cdata);
-print('Do not forget you added 16 to all network indices, Adam.') 
+disp('Do not forget you added 16 to all network indices, Adam.') 
 % 0-indices to 0-network assignment
 HardParcel(indices)=0;
 % combine this participants functional networks with subcortical parcellations
@@ -54,7 +53,9 @@ S1.cdata(1:59412)=HardParcel;
 %%%% calculate FC
 
 %% add parallel labels like you have previously 
-
+% initialize output FC table/struct/vector
+FCvec=[];
+stringVec={};
 % because each network is treated as an ROI, we are going to treat the subcortical labels the same way for a total of 18 cortical networks + 16 subcortical rois for a 34x34 fc matrix, and then remove the diagonal/one triangles
 for N=1:34
 	% get indices of this network
@@ -68,10 +69,45 @@ for N=1:34
 		% get time series matrix
 		OtherNetworkTS=cts.cdata(ONetInds,:);
 		% get correlation matrix
-		GrayordCoords=corr(OtherNetworkTS',NetworkTS');
+		GrayordCoors=corr(OtherNetworkTS',NetworkTS');
 		% return average
+		a=mean(mean(GrayordCoors));
+		% delineate string 
+		label=[num2str(N) '_' num2str(OtherNetNumber) '_FC'];
+		% plug both in
+		FCvec=[FCvec a];
+		stringVec=[stringVec label];	
 	end
 end
 
+% load in circuit ROIs, manually mask
+% DMN
+rD1=gifti(D1);
+r
+D1=['~/2021-masks/Medial_amPFC_DefaultModeNetwork_n2_50_n6.nii.gz.shape.gii'];
+D2=['~/2021-masks/Left_AG_DefaultModeNetwork_n46_n70_32.nii.gz.shape.gii'];
+D3=['~/2021-masks/Right_AG_DefaultModeNetwork_50_n62_26.nii.gz.shape.gii'];
+D4=['~/2021-masks/Medial_PCC_DefaultModeNetwork_0_n50_28.nii.gz.shape.gii'];
+% Salience
+S1=['~/2021-masks/Left_antInsula_Salience_n38_14_n6.nii.gz.shape.gii'];
+S2=['~/2021-masks/Right_antInsula_Salience_38_18_2.nii.gz.shape.gii'];
+% use coarse Tian to extract amyg
+% Attention
+A1=['~/2021-masks/Medial_msPFC_Attention_n2_14_52.nii.gz.shape.gii'];
+A2=['~/2021-masks/Left_lPFC_Attention_n44_6_32.nii.gz.shape.gii'];
+A3=['~/2021-masks/Right_lPFC_Attention_50_10_28.nii.gz.shape.gii'];
+A4=['~/2021-masks/Left_aIPL_Attention_n30_n54_40.nii.gz.shape.gii'];
+A5=['~/2021-masks/Right_aIPL_Attention_38_n56_48.nii.gz.shape.gii'];
+A6=['~/2021-masks/Left_precuneus_Attention_n14_n66_52.nii.gz.shape.gii'];
+A7=['~/2021-masks/Right_precuneus_Attention_18_n68_52.nii.gz.shape.gii'];
+% Salience
+% Attention
 
-% calculate circuit scores
+% load in concatenated resting-state TS, overwrite variable name of all-data ts
+cts=read_cifti(rsfp);
+
+% DMN
+% Salience
+% Amyg number in subcort
+% Attention
+
