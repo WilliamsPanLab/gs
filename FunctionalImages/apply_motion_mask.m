@@ -38,6 +38,10 @@ for t=1:4
 	% write out motion masked cifti
 	write_cifti(ts_cif,ofp);
 	% write out format_string for use in optical flow segmentation later
+	% note the meaning of this mask: https://github.com/DCAN-Labs/dcan_bold_processing/blob/eda67d1c1eed2b31e6a14781d7ab075561314dd4/matlab_code/framewise_displacement/format_generator.m
+	% initial 7 are 1s, subsequent x's indicate include the following "v" volumes (or exlcude the following from the motion mask) conversely, +'s indicate exclude the following v volumes (or inc. in motmask)
+	% numbers are length of sequence, which is culmatively additive. NOT what is starting TR w/r/t global sequence
+	% it also includes between-run frames, which aligns with what we want to exclude
 	writelines(mask.motion_data{1,21}.format_string,strjoin([fpParent 'MotionSegments_' task '.txt']),''))
 	else
 	missingDir=['/oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/MissingDataReports/' sname];
