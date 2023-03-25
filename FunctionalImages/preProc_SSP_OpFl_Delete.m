@@ -62,7 +62,6 @@ TSfp=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipe
 PersonalizeNetworks(TSfp,18,subj)
 
 % this can go in FC .m script
-% re-mask with SNR to be sure: looks like 1's could be getting de-facto'ed into SNR empties after the actual NMF fit
 %
 
 % FC (personalized networks, subcortical Tian S1, Circuits) 
