@@ -8,7 +8,7 @@ for t=1:4
 	sname=subj;
 	fpParent=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' sname '/ses-baselineYear1Arm1/func/'];
 	fp=strjoin([fpParent sname '_ses-baselineYear1Arm1_task-' task '_bold_desc-filtered_timeseries.dtseries.nii'],'');
-	% not flagging missing tasks for now, added this conditional to reflect that
+	% not flagging missing tasks in this script, added this conditional to reflect that
 	if exist(fp,'file')
 	ts_cif=read_cifti(fp);
 	ts=ts_cif.cdata;

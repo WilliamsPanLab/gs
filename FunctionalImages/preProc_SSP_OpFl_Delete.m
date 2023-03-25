@@ -53,7 +53,7 @@ toc
 disp('Δ applying motion masks and concatenating scans')
 tic
 
-%%% Motion mask
+%%% Motion mask + flag missing tasks
 apply_motion_mask(subj)
 
 %%% Concatenate scans
@@ -88,8 +88,28 @@ tic
 
 %%% OpFl Workflow
 % downsample time series
+DScommand=['DS_surf_ts ' subj];
+system(DScommand)
+
+% convert personalized networks to dscalar to downsample
+mat_to_dscalar(subj)
+
+% Downsample networks with workbench
+DSCommand=['DS_surf_Networks ' subj];
+system(DSCommand)
+
 % OpFl
-% Downsample networks
+tasks=["rest","MID","SST","nback"];
+for t=task 
+	task=tasks(t);
+	% set filepaths
+	LeftTS=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_L_AggTS_3k.func.gii'];
+	RightTS=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_R_AggTS_3k.func.gii'];
+	% if files exist, run optical flow
+	if exist(LeftTS,'file') && exist(RightTS,'file')
+	% run OpFl
+	OpFl_abcd(LeftTS,RightTS,['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_OpFl_3k.func.gii'])
+end
 % Props relative to networks
 
 
