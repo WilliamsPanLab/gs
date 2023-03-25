@@ -159,7 +159,7 @@ stringVec=[stringVec 'DMNscore' 'SalienceScore' 'Attentionscore'];
 % save out as csv
 T=table(FCvec','RowNames',stringVec);
 % calc outFP
-outFP=['/oak/stanford/groups/leanew1/users/apines/scripts/gp/data/FC_Feats/' subj];
+outFP=['/oak/stanford/groups/leanew1/users/apines/data/gp/FC_Feats/' subj];
 % make out filepath
 system(['mkdir ' outFP]);
 % write out

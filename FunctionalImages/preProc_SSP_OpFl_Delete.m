@@ -15,13 +15,14 @@ subj
 addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/PersonalCircuits/scripts/code_nmf_cifti/tool_folder'));
 addpath('/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages');
 
+disp('Δ Downloading data')
+tic
+
 % echo subj name into a .txt
 subjTxtCommand=['echo ' subj ' >> /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt'];
 system(subjTxtCommand)
-
 % download this participant's data
 subjDlCommand=['python3 /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/download.py -dp 1210784 -m /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/datastructure_manifest.txt -o /scratch/users/apines/abcd_images -s /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt -l /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/dl_logs -b /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/data_subsets_Final.txt']
-
 % Define the expect script
 expect_script = ['~/expect_script_' subj '.exp'];
 % Create the expect script file
@@ -48,11 +49,19 @@ system(sprintf('chmod +x %s', expect_script));
 % Call the expect script from MATLAB
 system(sprintf('%s', expect_script));
 
+toc
+disp('Δ applying motion masks and concatenating scans')
+tic
+
 %%% Motion mask
 apply_motion_mask(subj)
 
 %%% Concatenate scans
 concat_TS(subj)
+
+toc
+disp('Δ mapping individual functional neuroanatomy')
+tic
 
 %%% SSP Workflow
 addpath('/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages/Networks')
@@ -61,37 +70,45 @@ TSfp=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipe
 %% SSP
 PersonalizeNetworks(TSfp,18,subj)
 
-% this can go in FC .m script
-%
+toc
+disp('Δ Extracting structural features')
+tic
 
 % FC (personalized networks, subcortical Tian S1, Circuits) 
 Extract_FC(subj)
-
 % CT extract
 Extract_CT(subj)
-
 % MM extract
 Extract_MM(subj)
 
+toc
+disp('Δ Running OpFl workflow')
+tic
+
 
 %%% OpFl Workflow
-
-% Additional Motion mask
-
 % OpFl
-
 % Downsample networks
-
 % Props relative to networks
 
 
+toc
+disp('Δ combining participant data')
+tic
 % combine into circuit scores from resting state
 
 %%% combine features into vector, save to permanent storage
 
-%%% delete input data
 
+toc
+disp('Δ deleting neuroimages')
+tic
+%%% delete input data
 % comment out deletion for a few subjs to QC
+
+
+disp('Δ done Δ')
+
 
 
 

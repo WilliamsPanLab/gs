@@ -1,7 +1,4 @@
 function apply_motion_mask(subj)
-% load in subj
-topleveldir='/scratch/users/apines/abcd_images/derivatives/abcd-hcp-pipeline/sub-*';
-direc=dir(topleveldir);
 % initialize empty vector for average length
 TRvecNum=[];
 % for each "task"
@@ -40,6 +37,8 @@ for t=1:4
 	ofp=convertStringsToChars(ofp);
 	% write out motion masked cifti
 	write_cifti(ts_cif,ofp);
+	% write out format_string for use in optical flow segmentation later
+	writelines(mask.motion_data{1,21}.format_string,strjoin([fpParent 'MotionSegments_' task '.txt']),''))
 	else
 	missingDir=['/oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/MissingDataReports/' sname];
 	mkdir(missingDir);

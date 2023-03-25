@@ -40,7 +40,7 @@ end
 % save out as csv
 T=table(MMvec','RowNames',stringVec);
 % calc outFP
-outFP=['/oak/stanford/groups/leanew1/users/apines/scripts/gp/data/anat_Feats/' subj];
+outFP=['/oak/stanford/groups/leanew1/users/apines/data/gp/anat_Feats/' subj];
 % make out filepath
 system(['mkdir ' outFP]);
 % write out
