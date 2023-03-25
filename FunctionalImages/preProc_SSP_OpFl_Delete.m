@@ -67,9 +67,12 @@ PersonalizeNetworks(TSfp,18,subj)
 % FC (personalized networks, subcortical Tian S1, Circuits) 
 Extract_FC(subj)
 
-% Sulc extract
+% CT extract
+Extract_CT(subj)
 
 % MM extract
+Extract_MM(subj)
+
 
 %%% OpFl Workflow
 

@@ -73,7 +73,7 @@ for N=1:34
 		% return average
 		a=mean(mean(GrayordCoors));
 		% delineate string 
-		label=[num2str(N) '_' num2str(OtherNetNumber) '_FC'];
+		label=['FC'num2str(N) '_' num2str(OtherNetNumber)];
 		% plug both in
 		FCvec=[FCvec a];
 		stringVec=[stringVec label];	
@@ -163,5 +163,5 @@ outFP=['/oak/stanford/groups/leanew1/users/apines/scripts/gp/data/FC_Feats/' sub
 % make out filepath
 system(['mkdir ' outFP]);
 % write out
-writetable(T,[outFP '/FC_Feats.csv')
+writetable(T,[outFP '/FC_Feats.csv'],'WriteRowNames',true)
 
