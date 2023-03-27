@@ -14,6 +14,8 @@ subj
 % add matlab path for used functions
 addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/PersonalCircuits/scripts/code_nmf_cifti/tool_folder'));
 addpath('/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages');
+addpath('/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages/Networks');
+addpath('/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages/Props');
 
 disp('Δ Downloading data')
 tic
@@ -88,19 +90,19 @@ tic
 
 %%% OpFl Workflow
 % downsample time series
-DScommand=['DS_surf_ts ' subj];
+DScommand=['./DS_surf_ts.sh ' subj];
 system(DScommand)
 
 % convert personalized networks to dscalar to downsample
 mat_to_dscalar(subj)
 
 % Downsample networks with workbench
-DSCommand=['DS_surf_Networks ' subj];
+DSCommand=['Networks/DS_surf_Networks.sh ' subj];
 system(DSCommand)
 
 % OpFl
 tasks=["rest","MID","SST","nback"];
-for t=task 
+for t=tasks
 	task=tasks(t);
 	% set filepaths
 	LeftTS=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_L_AggTS_3k.func.gii'];
@@ -108,7 +110,7 @@ for t=task
 	% if files exist, run optical flow
 	if exist(LeftTS,'file') && exist(RightTS,'file')
 	% run OpFl
-	OpFl_abcd(LeftTS,RightTS,['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_OpFl_3k.func.gii'])
+	OpFl_abcd(subj,t,LeftTS,RightTS,['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_OpFl_3k.func.gii'])
 end
 % Props relative to networks
 

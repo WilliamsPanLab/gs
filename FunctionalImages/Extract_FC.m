@@ -11,16 +11,19 @@ cfp=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipel
 
 % circuit ROI fps
 % DMN
-D1=['~/2021-masks/Medial_amPFC_DefaultModeNetwork_n2_50_n6.nii.gz.shape.gii'];
+D1_L=['~/2021-masks/Medial_amPFC_DefaultModeNetwork_n2_50_n6.nii.gz_L.shape.gii'];
+D1_R=['~/2021-masks/Medial_amPFC_DefaultModeNetwork_n2_50_n6.nii.gz_R.shape.gii'];
 D2=['~/2021-masks/Left_AG_DefaultModeNetwork_n46_n70_32.nii.gz.shape.gii'];
 D3=['~/2021-masks/Right_AG_DefaultModeNetwork_50_n62_26.nii.gz.shape.gii'];
-D4=['~/2021-masks/Medial_PCC_DefaultModeNetwork_0_n50_28.nii.gz.shape.gii'];
+D4_L=['~/2021-masks/Medial_PCC_DefaultModeNetwork_0_n50_28.nii.gz_L.shape.gii'];
+D4_R=['~/2021-masks/Medial_PCC_DefaultModeNetwork_0_n50_28.nii.gz_R.shape.gii'];
 % Salience
 S1=['~/2021-masks/Left_antInsula_Salience_n38_14_n6.nii.gz.shape.gii'];
 S2=['~/2021-masks/Right_antInsula_Salience_38_18_2.nii.gz.shape.gii'];
 % use coarse Tian to extract amyg
 % Attention
-A1=['~/2021-masks/Medial_msPFC_Attention_n2_14_52.nii.gz.shape.gii'];
+A1_L=['~/2021-masks/Medial_msPFC_Attention_n2_14_52.nii.gz_L.shape.gii'];
+A1_R=['~/2021-masks/Medial_msPFC_Attention_n2_14_52.nii.gz_R.shape.gii'];
 A2=['~/2021-masks/Left_lPFC_Attention_n44_6_32.nii.gz.shape.gii'];
 A3=['~/2021-masks/Right_lPFC_Attention_50_10_28.nii.gz.shape.gii'];
 A4=['~/2021-masks/Left_aIPL_Attention_n30_n54_40.nii.gz.shape.gii'];
@@ -73,7 +76,7 @@ for N=1:34
 		% return average
 		a=mean(mean(GrayordCoors));
 		% delineate string 
-		label=['FC'num2str(N) '_' num2str(OtherNetNumber)];
+		label=['FC' num2str(N) '_' num2str(OtherNetNumber)];
 		% plug both in
 		FCvec=[FCvec a];
 		stringVec=[stringVec label];	
@@ -82,15 +85,18 @@ end
 
 % load in circuit ROIs, manually mask
 % DMN
-rD1=gifti(D1);
+rD1_L=gifti(D1_L);
+rD1_R=gifti(D1_R);
 rD2=gifti(D2);
 rD3=gifti(D3);
-rD4=gifti(D4);
+rD4_L=gifti(D4_L);
+rD4_R=gifti(D4_R);
 % Salience
 rS1=gifti(S1);
 rS2=gifti(S2);
 % Attention
-rA1=gifti(A1);
+rA1_L=gifti(A1_L);
+rA1_R=gifti(A1_R);
 rA2=gifti(A2);
 rA3=gifti(A3);
 rA4=gifti(A4);
@@ -98,13 +104,16 @@ rA5=gifti(A5);
 rA6=gifti(A6);
 rA7=gifti(A7);
 % extract cdata
-rD1=rD1.cdata;
+rD1_L=rD1_L.cdata;
+rD1_R=rD1_R.cdata;
 rD2=rD2.cdata;
 rD3=rD3.cdata;
-rD4=rD4.cdata;
+rD4_L=rD4_L.cdata;
+rD4_R=rD4_R.cdata;
 rS1=rS1.cdata;
 rS2=rS2.cdata;
-rA1=rA1.cdata;
+rA1_L=rA1_L.cdata;
+rA1_R=rA1_R.cdata;
 rA2=rA2.cdata;
 rA3=rA3.cdata;
 rA4=rA4.cdata;
@@ -113,13 +122,16 @@ rA6=rA6.cdata;
 rA7=rA7.cdata;
 
 % extract indices where > 0 for ROI
-rD1=rD1>0;
+rD1_L=rD1_L>0;
+rD1_R=rD1_R>0;
 rD2=rD2>0;
 rD3=rD3>0;
-rD4=rD4>0;
+rD4_L=rD4_L>0;
+rD4_R=rD4_R>0;
 rS1=rS1>0;
 rS2=rS2>0;
-rA1=rA1>0;
+rA1_L=rA1_L>0;
+rA1_R=rA1_R>0;
 rA2=rA2>0;
 rA3=rA3>0;
 rA4=rA4>0;
@@ -133,29 +145,29 @@ rS4=S1.cdata==10;
 % load in concatenated resting-state TS, overwrite variable name of all-data ts
 cts=read_cifti(rsfp);
 % DMN circuit score: sum of ROI edges (except 2-3) /5
-D1D2=corr(cts.cdata(rD1,:)',cts.cdata(rD2,:)');
-D1D3=corr(cts.cdata(rD1,:)',cts.cdata(rD3,:)');
-D1D4=corr(cts.cdata(rD1,:)',cts.cdata(rD4,:)');
-D2D4=corr(cts.cdata(rD2,:)',cts.cdata(rD4,:)');
-D3D4=corr(cts.cdata(rD3,:)',cts.cdata(rD4,:)');
-DMNscore=mean([D1D2 D1D3 D1D4 D2D4 D3D4]);
+%D1D2=corr(cts.cdata(rD1,:)',cts.cdata(rD2,:)');
+%D1D3=corr(cts.cdata(rD1,:)',cts.cdata(rD3,:)');
+%D1D4=corr(cts.cdata(rD1,:)',cts.cdata(rD4,:)');
+%D2D4=corr(cts.cdata(rD2,:)',cts.cdata(rD4,:)');
+%D3D4=corr(cts.cdata(rD3,:)',cts.cdata(rD4,:)');
+%DMNscore=mean([D1D2 D1D3 D1D4 D2D4 D3D4]);
 % Salience circuit score: negative sum of S1-S2, S1-S3, and S2-S4 edges /3
-S1S2=corr(cts.cdata(rS1,:)',cts.cdata(rS2,:)');
-S1S3=corr(cts.cdata(rS1,:)',cts.cdata(rS3,:)');
-S2S4=corr(cts.cdata(rS2,:)',cts.cdata(rS4,:)');
+%S1S2=corr(cts.cdata(rS1,:)',cts.cdata(rS2,:)');
+%S1S3=corr(cts.cdata(rS1,:)',cts.cdata(rS3,:)');
+%S2S4=corr(cts.cdata(rS2,:)',cts.cdata(rS4,:)');
 %% CHECK/FIX LATER
-SalienceScore=mean([S1S2 S1S3 S2S4]);
+%SalienceScore=mean([S1S2 S1S3 S2S4]);
 % Attention circuit score: negative sum of A1-A2, A1-A3, A2-A4, A3-A4, A4-A5, A4-A6, A4-A7 edges /7
-A1A2=corr(cts.cdata(rA1,:)',cts.cdata(rA2,:)');
-A1A3=corr(cts.cdata(rA1,:)',cts.cdata(rA3,:)');
-A2A4=corr(cts.cdata(rA2,:)',cts.cdata(rA4,:)');
-A3A5=corr(cts.cdata(rA3,:)',cts.cdata(rA5,:)');
-A4A6=corr(cts.cdata(rA4,:)',cts.cdata(rA6,:)');
-A5A7=corr(cts.cdata(rA5,:)',cts.cdata(rA7,:)');
-Attentionscore=mean([A1A2 A1A3 A2A4 A3A5 A4A6 A5A7]);
+%A1A2=corr(cts.cdata(rA1,:)',cts.cdata(rA2,:)');
+%A1A3=corr(cts.cdata(rA1,:)',cts.cdata(rA3,:)');
+%A2A4=corr(cts.cdata(rA2,:)',cts.cdata(rA4,:)');
+%A3A5=corr(cts.cdata(rA3,:)',cts.cdata(rA5,:)');
+%A4A6=corr(cts.cdata(rA4,:)',cts.cdata(rA6,:)');
+%A5A7=corr(cts.cdata(rA5,:)',cts.cdata(rA7,:)');
+%Attentionscore=mean([A1A2 A1A3 A2A4 A3A5 A4A6 A5A7]);
 % append those to fc and label vectors
-FCvec=[FCvec DMNscore SalienceScore Attentionscore];
-stringVec=[stringVec 'DMNscore' 'SalienceScore' 'Attentionscore'];
+%FCvec=[FCvec DMNscore SalienceScore Attentionscore];
+%stringVec=[stringVec 'DMNscore' 'SalienceScore' 'Attentionscore'];
 % save out as csv
 T=table(FCvec','RowNames',stringVec);
 % calc outFP

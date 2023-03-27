@@ -1,4 +1,8 @@
 function PersonalizeNetworks(inputTS_fp,K,ID_Str)
+
+% add paths
+addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/PersonalCircuits/scripts/code_nmf_cifti/tool_folder'));
+
 sname=ID_Str;
 % Based on the group atlas, creating each subject's individual specific atlas
 ProjectFolder=['/scratch/users/apines/abcd_images/derivatives/abcd-hcp-pipeline/' sname '/ses-baselineYear1Arm1/func/'];

@@ -8,13 +8,13 @@ export SUBJECTS_DIR=/share/software/user/open/freesurfer/6.0.0/subjects
 export FS_LICENSE=/oak/stanford/groups/leanew1/users/apines/license.txt
 ## time series filepaths: each task
 # parent dir
-parentfp=/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/${subj}/ses-baselineYear1Arm1/func/
+parentfp=/scratch/users/apines/abcd_images/derivatives/abcd-hcp-pipeline/${subj}/ses-baselineYear1Arm1/func
 # child dir is parent dir, all files in this script are intermediate files
-childfp=parentfp
+childfp=${parentfp}
 
 
 # subject's aggregated network maps (dscalar)
-AgNet=${childfp}/SingeParcel_1by1/k18/${subj}/SoftParcel.dscalar.nii
+AgNet=${childfp}/SingleParcel_1by1/k18/${subj}/SoftParcel.dscalar.nii
 
 # separate hemispheres - left
 wb_command -cifti-separate $AgNet COLUMN -metric CORTEX_LEFT ${childfp}/${subj}_L_AggNets.func.gii 
