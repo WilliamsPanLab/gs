@@ -107,35 +107,42 @@ if numTRsVS ~= TR_n
         return
 end
 
+% remove any segments <5 TRs that didn't get thresholded in midb pipeline
+mask=CSI.Var2>4;
+CSI=CSI(mask,:);
+% recompute segNum
+SegNum=height(CSI);
+
 % addpath for OF to not confuse height function earlier on
 addpath(genpath('/oak/stanford/groups/leanew1/users/apines/libs/lukaslang-ofd-614a2ffc50d6'))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% compute optical flow on every pair of sequential TRs
 % initialize output struct
 us=struct;
-disp('Computing optical flow');
+disp('Computing optical flow זְרִימָה  प्रवाहः  دفق');
 
 % initialize TRP counter: for plopping u outputs into master struct w/o/r/t their segment
 % note trp = tr pair
 TRPC=1;
 
-% loop over each TR-Pair: 1 fewer pair than number of TRs
-for TRP=1:(TR_n-1)
-	% print TR pair iter
-	TRP
-	% Compute decomposition.
-	tic;
-	% pull out adjacent frames
-	u = of(N, faces_l, vx_l, fl.TRs{TRP}, fl.TRs{TRP+1}, h, alpha, s);
-	% throw u into struct
-	us.vf_left{TRPC}=u;
-	% now right hemi
-	u = of(N, faces_r, vx_r, fr.TRs{TRP}, fr.TRs{TRP+1}, h, alpha, s);
-	toc;
-	% throw u into struct
-	us.vf_right{TRPC}=u;
-	% update TR pair counter, which should increase +1 across segments
-	TRPC=TRPC+1;
+% for each segment
+for seg=1:SegNum;
+	% loop over each TR-Pair: 1 fewer pair than number of TRs
+	for TRP=1:(TR_n-1)
+		% print TR pair iter
+		TRP
+		% Compute decomposition.
+		% pull out adjacent frames
+		u = of(N, faces_l, vx_l, fl.TRs{TRP}, fl.TRs{TRP+1}, h, alpha, s);
+		% throw u into struct
+		us.vf_left{TRPC}=u;
+		% now right hemi
+		u = of(N, faces_r, vx_r, fr.TRs{TRP}, fr.TRs{TRP+1}, h, alpha, s);
+		% tihrow u into struct
+		us.vf_right{TRPC}=u;
+		% update TR pair counter, which should increase +1 across segments
+		TRPC=TRPC+1;
+	end
 end
 % save
 save(tsOut,'us')

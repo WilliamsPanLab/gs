@@ -100,6 +100,9 @@ mat_to_dscalar(subj)
 DSCommand=['Networks/DS_surf_Networks.sh ' subj];
 system(DSCommand)
 
+% convert them to .mat so it works in compiled matlab scripts
+Netgiis_2_mat(subj)
+
 % OpFl
 tasks=["rest","MID","SST","nback"];
 for t=tasks
@@ -107,124 +110,19 @@ for t=tasks
 	% set filepaths
 	LeftTS=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_L_AggTS_3k.func.gii'];
 	RightTS=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_R_AggTS_3k.func.gii'];
+	OpFlOut=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_OpFl_3k.mat'];
 	% if files exist, run optical flow
 	if exist(LeftTS,'file') && exist(RightTS,'file')
 	% run OpFl
-	OpFl_abcd(subj,t,LeftTS,RightTS,['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_OpFl_3k.func.gii'])
+	OpFl_abcd(subj,t,LeftTS,RightTS,['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_OpFl_3k.mat'])
 end
 % Props relative to networks
-
-
-toc
-disp('Δ combining participant data')
-tic
-% combine into circuit scores from resting state
-
-%%% combine features into vector, save to permanent storage
-
-
+Extract_BUTD_ResultantVecs_PL(subj,OpFlOut,infileAngD,outfile_L,outfile_R)
+% note this might be a compiled script
 toc
 disp('Δ deleting neuroimages')
 tic
 %%% delete input data
-% comment out deletion for a few subjs to QC
-
-
-disp('Δ done Δ')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-% tell it where AWS tools are for downloads
-%system('export PATH=/cbica/projects/abcdfnets/aws/dist/:$PATH')
-%subjTxtCommand=['echo ' subj ' >> /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt'];
-
-% download that one subject's data
-% ∆∆∆∆∆∆
-% keep looking at github for updates on authent. fix
-% ∆∆∆∆∆∆
-%%% it works suckkkaaaas
-
-
-% subjDlCommand=['python3 /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/download.py -i /scratch/users/apines/datastructure_manifest.txt -o /scratch/users/apines/ -s /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/nda-abcd-s3-downloader/' subj '.txt -l /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/dl_logs -d /oak/stanford/groups/leanew1/users/apines/data_subsets_3_9_21_from9620.txt &']
-
-% note: downloader tool does not seem to communicate when it is done to matlab
-% added '&' and 'pause' so that matlab waits 5 minutes to proceed rather than getting caught up indefinitely
-system(subjDlCommand)
-
-% set parent file path
-parentFP=['/scratch/users/apines/derivatives/abcd-hcp-pipeline/ses-baselineYear1Arm1/func/' subj ];
-% and child file path
-childFP=['/scratch/users/apines/derivatives/pinespipe/' subj '/'];
-mkdir(childFP)
-
-% now the matlab portions. Apply the motion mask to the downloaded data
-%%% probably will lose psychopathology instances if we do this
-
-%%%%%% extract FD and TRs passing threshold
-
-% make output dir
-mkdir(['/scratch/users/apines/' subj '/subcort.ptseries.nii'])
-% cifti-parcellate to get subcortical time series
-ParcCommand=['wb_command -cifti-parcellate ' TS '/oak/stanford/groups/leanew1/users/apines/maps/Tian_Subcortex_S2_3T_32k.dlabel.nii COLUMN /scratch/users/apines/' subj '/subcort.ptseries.nii'];
-system(ParcCommand)
-
-% downsample to fsaverage5
-subjDSCommand=['DS_surf_ts_fs5.sh ' subj ' &']
-system(subjDSCommand)
-pause(45)
-
-% this will become concatenate only as download works
-% concatenate masked time series and isolate the cortex (for cortical surface only SSP)
-%concat_TS_and_IsoCort(subj)
-
-inputTS_fp=['/scratch/users/apines/derivatives/abcd-hcp-pipeline/ses-baselineYear1Arm1/func/' subj ];
-
-% derive an indivudalized parcellation (just parent filepath for inputTS_fp, g_ls will find 10k mgh extension within folder
-for k=2:30
-	PersonalizeNetworks(inputTS_fp,k,subj)
-end
-
-% for "cifti_read", interferes if added earlier
-addpath(genpath('/oak/stanford/groups/leanew1/users/apines/scripts/cifti-matlab/'));
-
-% calculate multiscale FC
-CalcFC(['/scratch/users/apines/' subj '/subcort.ptseries.nii'],CortTS_L,CortTS_R,subj,outFP)
-
-% run optical flow pipeline ∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆
-%%% calculate optical flow
-OpFl_abcd(tsIn_L,tsIn_R,tsOut)
-% set output filepaths to calculcate angular distances
-rsOut=[childfp '/' subj '_' '_PGGDist_fs5.mat'];
-
-% needed?
-% calculate angular distances (change output filepath to something meaningful)
-AngDCalcCmd=['/oak/stanford/groups/leanew1/users/apines/scripts/OpFl_CDys/scripts/fs_5/run_Extract_BUTD_ResultantVecs_Gran_fs5.sh /share/software/user/restricted/matlab/R2018a/ ' tsOut ' ' childFP 'OpFl_timeseries_L_fs5.mat' ' ' childFP 'OpFl_timeseries_R_fs5.mat'];
-system(AngDCalcCmd)
-
-%%%%% VECTORIZE DATA
-
-
-% delete input data
+% comment out deletion to QC a few runs
 Delete_input_data(subj)
+disp('Δ done Δ')
