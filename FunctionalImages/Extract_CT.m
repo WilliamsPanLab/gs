@@ -15,9 +15,9 @@ indices=sum(fV,2)==0;
 HardParcel(indices)=0;
 
 % load in CT
-CTFP=['/scratch/users/apines/abcd_images/imagingcollection01/derivatives/abcd-hcp-pipeline/sub-NDARINV1JGK90HZ/ses-baselineYear1Arm1/anat/' subj '_ses-baselineYear1Arm1_space-fsLR32k_thickness.dscalar.nii'];
+CTFP=['/scratch/users/apines/abcd_images/imagingcollection01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/anat/' subj '_ses-baselineYear1Arm1_space-fsLR32k_thickness.dscalar.nii'];
 
-% initialize output FC table/struct/vector
+% initialize output CT table/struct/vector
 CTvec=[];
 stringVec={};
 

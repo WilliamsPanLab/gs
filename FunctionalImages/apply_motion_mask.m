@@ -42,7 +42,7 @@ for t=1:4
 	% initial 7 are 1s, subsequent x's indicate include the following "v" volumes (or exlcude the following from the motion mask) conversely, +'s indicate exclude the following v volumes (or inc. in motmask)
 	% numbers are length of sequence, which is culmatively additive. NOT what is starting TR w/r/t global sequence
 	% it also includes between-run frames, which aligns with what we want to exclude
-	writelines(mask.motion_data{1,21}.format_string,strjoin([fpParent 'MotionSegments_' task '.txt']),''))
+	writelines(mask.motion_data{1,21}.format_string,strjoin([fpParent 'MotionSegments_' task '.txt'],''))
 	else
 	missingDir=['/oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/MissingDataReports/' sname];
 	mkdir(missingDir);

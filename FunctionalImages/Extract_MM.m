@@ -15,9 +15,9 @@ indices=sum(fV,2)==0;
 HardParcel(indices)=0;
 
 % load in MM
-MMFP=['/scratch/users/apines/abcd_images/imagingcollection01/derivatives/abcd-hcp-pipeline/sub-NDARINV1JGK90HZ/ses-baselineYear1Arm1/anat/' subj '_ses-baselineYear1Arm1_space-fsLR32k_desc-smoothed_myelinmap.dscalar.nii'];
+MMFP=['/scratch/users/apines/abcd_images/imagingcollection01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/anat/' subj '_ses-baselineYear1Arm1_space-fsLR32k_desc-smoothed_myelinmap.dscalar.nii'];
 
-% initialize output FC table/struct/vector
+% initialize output MM table/struct/vector
 MMvec=[];
 stringVec={};
 

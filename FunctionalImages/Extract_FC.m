@@ -144,30 +144,26 @@ rS4=S1.cdata==10;
 
 % load in concatenated resting-state TS, overwrite variable name of all-data ts
 cts=read_cifti(rsfp);
-% DMN circuit score: sum of ROI edges (except 2-3) /5
-%D1D2=corr(cts.cdata(rD1,:)',cts.cdata(rD2,:)');
-%D1D3=corr(cts.cdata(rD1,:)',cts.cdata(rD3,:)');
-%D1D4=corr(cts.cdata(rD1,:)',cts.cdata(rD4,:)');
-%D2D4=corr(cts.cdata(rD2,:)',cts.cdata(rD4,:)');
-%D3D4=corr(cts.cdata(rD3,:)',cts.cdata(rD4,:)');
-%DMNscore=mean([D1D2 D1D3 D1D4 D2D4 D3D4]);
-% Salience circuit score: negative sum of S1-S2, S1-S3, and S2-S4 edges /3
-%S1S2=corr(cts.cdata(rS1,:)',cts.cdata(rS2,:)');
-%S1S3=corr(cts.cdata(rS1,:)',cts.cdata(rS3,:)');
-%S2S4=corr(cts.cdata(rS2,:)',cts.cdata(rS4,:)');
-%% CHECK/FIX LATER
-%SalienceScore=mean([S1S2 S1S3 S2S4]);
-% Attention circuit score: negative sum of A1-A2, A1-A3, A2-A4, A3-A4, A4-A5, A4-A6, A4-A7 edges /7
-%A1A2=corr(cts.cdata(rA1,:)',cts.cdata(rA2,:)');
-%A1A3=corr(cts.cdata(rA1,:)',cts.cdata(rA3,:)');
-%A2A4=corr(cts.cdata(rA2,:)',cts.cdata(rA4,:)');
-%A3A5=corr(cts.cdata(rA3,:)',cts.cdata(rA5,:)');
-%A4A6=corr(cts.cdata(rA4,:)',cts.cdata(rA6,:)');
-%A5A7=corr(cts.cdata(rA5,:)',cts.cdata(rA7,:)');
-%Attentionscore=mean([A1A2 A1A3 A2A4 A3A5 A4A6 A5A7]);
+% DMN circuit score to be calculated from these edges
+D1D2=corr(cts.cdata(rD1,:)',cts.cdata(rD2,:)');
+D1D3=corr(cts.cdata(rD1,:)',cts.cdata(rD3,:)');
+D1D4=corr(cts.cdata(rD1,:)',cts.cdata(rD4,:)');
+D2D4=corr(cts.cdata(rD2,:)',cts.cdata(rD4,:)');
+D3D4=corr(cts.cdata(rD3,:)',cts.cdata(rD4,:)');
+% Salience circuit score to be calculated from these edges
+S1S2=corr(cts.cdata(rS1,:)',cts.cdata(rS2,:)');
+S1S3=corr(cts.cdata(rS1,:)',cts.cdata(rS3,:)');
+S2S4=corr(cts.cdata(rS2,:)',cts.cdata(rS4,:)');
+% Attention circuit score to be caluclated from these edges
+A1A2=corr(cts.cdata(rA1,:)',cts.cdata(rA2,:)');
+A1A3=corr(cts.cdata(rA1,:)',cts.cdata(rA3,:)');
+A2A4=corr(cts.cdata(rA2,:)',cts.cdata(rA4,:)');
+A3A5=corr(cts.cdata(rA3,:)',cts.cdata(rA5,:)');
+A4A6=corr(cts.cdata(rA4,:)',cts.cdata(rA6,:)');
+A5A7=corr(cts.cdata(rA5,:)',cts.cdata(rA7,:)');
 % append those to fc and label vectors
-%FCvec=[FCvec DMNscore SalienceScore Attentionscore];
-%stringVec=[stringVec 'DMNscore' 'SalienceScore' 'Attentionscore'];
+FCvec=[D1D2 D1D3 D1D4 D2D4 D3D4 S1S2 S1S3 S2S4 A1A2 A1A3 A2A4 A3A5 A4A6 A5A7];
+stringVec=[stringVec 'D1D2' 'D1D3' 'D1D4' 'D2D4' 'D3D4' 'S1S2' 'S1S3' 'S2S4' 'A1A2' 'A1A3' 'A2A4' 'A3A5' 'A4A6' 'A5A7'];
 % save out as csv
 T=table(FCvec','RowNames',stringVec);
 % calc outFP

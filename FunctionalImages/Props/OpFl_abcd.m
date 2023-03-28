@@ -12,11 +12,8 @@ s = 1; % R(u), regularizing functional, scales Tikhonov regularization more rapi
 % load in data
 fpL=tsIn_L;
 fpR=tsIn_R;
-dataL=MRIread(fpL).vol;
-dataR=MRIread(fpR).vol;
-% squeeze to get rid of extra dimensions
-TRs_l_g=squeeze(dataL);
-TRs_r_g=squeeze(dataR);
+TRs_l=load(fpL).data;
+TRs_r=load(fpR).data;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% uptake surface data
 SubjectsFolder = '/oak/stanford/groups/leanew1/users/apines/surf';
@@ -40,8 +37,8 @@ vx_r(numV+1:end, :) = VecNormalize(vx_r(numV+1:end, :));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% uptake functional data (on surface)
 % handle input data
 disp('Size of input data')
-sizeInDl=size(TRs_l_g)
-sizeInDr=size(TRs_r_g)
+sizeInDl=size(TRs_l)
+sizeInDr=size(TRs_r)
 disp('Number of TRs detected L and R')
 TR_n=sizeInDl(2)
 sizeInDr(2)
@@ -52,14 +49,14 @@ disp('converting left hemi to struct')
 fl=struct;
 % populate struct
 for TRP=1:TR_n;
-	fl.TRs{TRP}=TRs_l_g(:,TRP);
+	fl.TRs{TRP}=TRs_l(:,TRP);
 end
 
 % r h
 disp('converting right hemi to struct')
 fr=struct;
 for TRP=1:TR_n;
-	fr.TRs{TRP}=TRs_r_g(:,TRP);
+	fr.TRs{TRP}=TRs_r(:,TRP);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% load in continuous segment indices
@@ -99,7 +96,7 @@ CSI=table(Var1',Var2');
 % extract numbers of TRs
 segLengths=strsplit(MotString,{'x','+'});
 % assure that TR count is the same between time series and valid segments txt
-SegNum=height(CSI);
+SegNum=size(CSI,1);
 % trailing -1 is because the count column (,2) is inclusive of the start TR (,1)
 numTRsVS=CSI{SegNum,1}+CSI{SegNum,2}-1;
 if numTRsVS ~= TR_n
@@ -111,10 +108,11 @@ end
 mask=CSI.Var2>4;
 CSI=CSI(mask,:);
 % recompute segNum
-SegNum=height(CSI);
+SegNum=size(CSI,1);
 
 % addpath for OF to not confuse height function earlier on
-addpath(genpath('/oak/stanford/groups/leanew1/users/apines/libs/lukaslang-ofd-614a2ffc50d6'))
+% commented out for compile
+% addpath(genpath('/oak/stanford/groups/leanew1/users/apines/libs/lukaslang-ofd-614a2ffc50d6'))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% compute optical flow on every pair of sequential TRs
 % initialize output struct
@@ -124,13 +122,14 @@ disp('Computing optical flow זְרִימָה  प्रवाहः  دفق');
 % initialize TRP counter: for plopping u outputs into master struct w/o/r/t their segment
 % note trp = tr pair
 TRPC=1;
-
+disp([num2str(SegNum) ' Segments'])
 % for each segment
 for seg=1:SegNum;
+	SegStart=CSI{seg,1};
+	SegSpan=CSI{seg,2};
+	seg
 	% loop over each TR-Pair: 1 fewer pair than number of TRs
-	for TRP=1:(TR_n-1)
-		% print TR pair iter
-		TRP
+	for TRP=1:(SegSpan-1)
 		% Compute decomposition.
 		% pull out adjacent frames
 		u = of(N, faces_l, vx_l, fl.TRs{TRP}, fl.TRs{TRP+1}, h, alpha, s);

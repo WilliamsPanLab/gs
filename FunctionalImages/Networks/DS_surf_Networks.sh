@@ -12,7 +12,6 @@ parentfp=/scratch/users/apines/abcd_images/derivatives/abcd-hcp-pipeline/${subj}
 # child dir is parent dir, all files in this script are intermediate files
 childfp=${parentfp}
 
-
 # subject's aggregated network maps (dscalar)
 AgNet=${childfp}/SingleParcel_1by1/k18/${subj}/SoftParcel.dscalar.nii
 

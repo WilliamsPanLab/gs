@@ -4,6 +4,7 @@ function preProc_SSP_Delete(subj)
 % ml biology
 % ml workbench
 % ml python/3
+% ml freesurfer
 %%%% IN .SH CALLER SCRIPT
 
 %%% This function will take a single subject's NDAR name, download their fMRI data and motion masks, concatenate the fMRI data, mask according to Robert's paper (.2mm FD, power outliers out), derive a single-subject parcellation based on Pines et al. 2022's group templates,  and delete the input fMRI data.
@@ -55,6 +56,10 @@ toc
 disp('Δ applying motion masks and concatenating scans')
 tic
 
+%%% make missing data reports folder
+missFoldcmd=['mkdir -p /oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/MissingDataReports/' subj];
+system(missFoldcmd);
+
 %%% Motion mask + flag missing tasks
 apply_motion_mask(subj)
 
@@ -73,7 +78,7 @@ TSfp=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipe
 PersonalizeNetworks(TSfp,18,subj)
 
 toc
-disp('Δ Extracting structural features')
+disp('Δ Extracting FC and structural features')
 tic
 
 % FC (personalized networks, subcortical Tian S1, Circuits) 
@@ -82,6 +87,8 @@ Extract_FC(subj)
 Extract_CT(subj)
 % MM extract
 Extract_MM(subj)
+% SubcortVolumes Extract
+Extract_SCV(subj)
 
 toc
 disp('Δ Running OpFl workflow')
@@ -90,31 +97,38 @@ tic
 
 %%% OpFl Workflow
 % downsample time series
-DScommand=['./DS_surf_ts.sh ' subj];
+DScommand=['/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages/DS_surf_ts.sh ' subj];
 system(DScommand)
 
 % convert personalized networks to dscalar to downsample
 mat_to_dscalar(subj)
 
 % Downsample networks with workbench
-DSCommand=['Networks/DS_surf_Networks.sh ' subj];
+DSCommand=['/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages/Networks/DS_surf_Networks.sh ' subj];
 system(DSCommand)
 
-% convert them to .mat so it works in compiled matlab scripts
+% convert networks to .mat so it works in compiled matlab scripts
 Netgiis_2_mat(subj)
 
+
 % OpFl
-tasks=["rest","MID","SST","nback"];
+tasks={'rest','MID','SST','nback'};
 for t=tasks
-	task=tasks(t);
+	task=t{:};
 	% set filepaths
-	LeftTS=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_L_AggTS_3k.func.gii'];
-	RightTS=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_R_AggTS_3k.func.gii'];
-	OpFlOut=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_OpFl_3k.mat'];
+	LeftTS=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '_' task '_L_AggTS_3k.mgh'];
+	RightTS=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '_' task '_R_AggTS_3k.mgh'];
+	% convert time series to .mat so it works in compiled matlab scripts
+	TSmghs_2_mat(LeftTS)
+	TSmghs_2_mat(RightTS)
+	LeftTSmat=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '_' task '_L_AggTS_3k.mgh.mat'];
+	RightTSmat=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '_' task '_R_AggTS_3k.mgh.mat'];
+	OpFlOut=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '_' task '_OpFl_3k.mat'];
 	% if files exist, run optical flow
-	if exist(LeftTS,'file') && exist(RightTS,'file')
+	if exist(LeftTSmat,'file') && exist(RightTSmat,'file')
 	% run OpFl
-	OpFl_abcd(subj,t,LeftTS,RightTS,['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_OpFl_3k.mat'])
+	OpFl_abcd(subj,task,LeftTSmat,RightTSmat,['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_OpFl_3k.mat'])
+	end
 end
 % Props relative to networks
 Extract_BUTD_ResultantVecs_PL(subj,OpFlOut,infileAngD,outfile_L,outfile_R)
@@ -124,5 +138,5 @@ disp('Δ deleting neuroimages')
 tic
 %%% delete input data
 % comment out deletion to QC a few runs
-Delete_input_data(subj)
+% Delete_input_data(subj)
 disp('Δ done Δ')
