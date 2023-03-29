@@ -51,7 +51,7 @@ HardParcel(indices)=0;
 % combine this participants functional networks with subcortical parcellations
 S1.cdata(1:59412)=HardParcel;
 % temp test
-%write_cifti(S1,'~/Tian_Subcortex_S1_3T_32k_wHP.dscalar.nii');
+write_cifti(S1,'~/Tian_Subcortex_S1_3T_32k_wHP.dscalar.nii');
 
 %%%% calculate FC
 
@@ -138,6 +138,10 @@ rA4=rA4>0;
 rA5=rA5>0;
 rA6=rA6>0;
 rA7=rA7>0;
+% combine bilateral ROIs into single ROI
+rD1=or(rD1_L,rD1_R);
+rD4=or(rD4_L+rD4_R);
+rA1=or(rA1_L+rA1_R);
 % now extract amygdalar indices for S3 and S4
 rS3=S1.cdata==2;
 rS4=S1.cdata==10;

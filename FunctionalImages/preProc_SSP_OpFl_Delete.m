@@ -5,6 +5,7 @@ function preProc_SSP_Delete(subj)
 % ml workbench
 % ml python/3
 % ml freesurfer
+% ml matlab
 %%%% IN .SH CALLER SCRIPT
 
 %%% This function will take a single subject's NDAR name, download their fMRI data and motion masks, concatenate the fMRI data, mask according to Robert's paper (.2mm FD, power outliers out), derive a single-subject parcellation based on Pines et al. 2022's group templates,  and delete the input fMRI data.
@@ -109,7 +110,6 @@ system(DSCommand)
 
 % convert networks to .mat so it works in compiled matlab scripts
 Netgiis_2_mat(subj)
-
 
 % OpFl
 tasks={'rest','MID','SST','nback'};
