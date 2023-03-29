@@ -559,8 +559,11 @@ yle1=subset(yle,eventname=='1_year_follow_up_y_arm_1')
 # will need tp2 eventually doe
 yle2=subset(yle,eventname=='2_year_follow_up_y_arm_1')
 # and subset of both that have full data
+
+### ∆∆∆ This will soon be redundant, updating by placing lower down
 subsetOfBoth=merge(yle1,yle2,by='subjectkey')
 subsetOfBoth=subsetOfBoth$subjectkey
+### ∆∆∆ 
 
 # need an exception for suicide follow ups (which appear to be blank) and collection ID
 yle_No_PastYearcols_No_Goodbad_No_EvAff=yle_No_PastYearcols_No_Goodbad_No_EvAff[-c(43,44,46)]
@@ -882,6 +885,45 @@ print(paste0(PhysCharSubjs,' Participants remain'))
 includedSubjects$PhysCharSubjs=0
 includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$PhysCharSubjs=1
 ```
+```{r}
+# rope in salimetrics - section commented out for excessive exclusion - can provide same illustration for RDI if needed
+
+#hss=read.delim('~/Downloads/Package_1211427/abcd_hsss01.txt')
+#hssColname=colnames(hss)
+#hssColDescrip=hss[1,]
+#
+## sep out baseline and two-year visits by removing 1 and 3 year followups
+#hss=hss[hss$eventname!='1_year_follow_up_y_arm_1',]
+#hss=hss[hss$eventname!='3_year_follow_up_y_arm_1',]
+#
+## cool. Lets chose the variables of interest (factor scores, consistent w/ rest of project)
+#hss=hss[,c('hormone_scr_dhea_mean','hormone_scr_hse_mean','hormone_scr_ert_mean','subjectkey','eventname','sex')]
+#
+## guage how many are missing/NA
+## now omit the empties and NAs now and see what we lose
+#hssNum<-data.frame(lapply(hss[-1,1:3],as.numeric))
+## colsums is empty
+#EmptyRows_dhea=sum(is.na(hssNum$hormone_scr_dhea_mean))
+#EmptyRows_hse=sum(is.na(hssNum$hormone_scr_hse_mean))
+#EmptyRows_ert=sum(is.na(hssNum$hormone_scr_ert_mean))
+#
+#hss=hss[rowSums(is.empty(hss))==0,]
+#
+## merge in
+#masterdf=merge(masterdf,hss,by=c('subjectkey','eventname','sex'))
+#
+#hsssubjs=length(unique(masterdf$subjectkey))
+#print(paste0(PhysCharSubjs-hsssubjs,' lost from requiring hss data'))
+#print(paste0(hsssubjs,' Participants remain (troublesome)'))
+#
+#
+## add to included subjs DF
+#includedSubjects$hss=0
+#includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$hss=1
+
+```
+
+
 
 ```{r}
 # rope in teacher self-report - section commented out for excessive exclusion - can provide same illustration for RDI if needed
@@ -915,6 +957,36 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$PhysCh
 #includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$TSR=1
 ```
 
+```{r}
+# rope in screen time 
+# rope in physical characteristic
+#stq=read.delim('~/Downloads/Package_1211427/abcd_stq01.txt')
+#stqColnames=colnames(stq)
+#stqColDescrip=stq[1,]
+#
+## sep out baseline and two-year visits by removing 1 and 3 year followups
+#stq=stq[stq$eventname!='1_year_follow_up_y_arm_1',]
+#stq=stq[stq$eventname!='3_year_follow_up_y_arm_1',]
+#
+## cool. Lets chose the variables of interest (factor scores, consistent w/ rest of project)
+#stq=stq[,c('screentime_wkdy_typical_hr','subjectkey','eventname','sex')]
+#
+#
+## now omit the empties and NAs now and see what we lose
+#stq=stq[rowSums(is.empty(stq))==0,]
+#
+#
+## merge in
+#masterdf=merge(masterdf,stq,by=c('subjectkey','eventname','sex'))
+#
+#stqsubjs=length(unique(masterdf$subjectkey))
+#print(paste0(stqsubjs,' Participants remain (troublesome)'))
+#
+#
+## add to included subjs DF
+#includedSubjects$stq=0
+#includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$stq=1
+```
 
 ```{r}
 ###### fix data formats
@@ -951,6 +1023,12 @@ print(dim(masterdf))
 twoTPsubjs=names(table(masterdf$subjectkey)[table(masterdf$subjectkey)>1])
 masterdf=masterdf[masterdf$subj %in% twoTPsubjs,]
 
+# now set subsets to use for yle for temporal precedence analyses 
+df1=masterdf[masterdf$eventname=='baseline_year_1_arm_1',]
+df2=masterdf[masterdf$eventname=='2_year_follow_up_y_arm_1',]
+subsetOfBoth=merge(df1,df2,by='subjectkey')
+subsetOfBoth=subsetOfBoth$subjectkey
+
 # complete included Subjects df
 includedSubjects$twoTP=0
 includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$twoTP=1
@@ -960,7 +1038,7 @@ saveRDS(masterdf,'~/OutDfxc.rds')
 ```
 
 ```{r}
-# make alluvial: in theory no other subjects excluded
+# make alluvial
 library(ggplot2)
 library(ggalluvial)
 library(scales)
@@ -981,6 +1059,29 @@ test$RaceEthn<-factor(test$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Blac
 test$RaceEthn[test$value==0]="Missing"
 
 ggplot(test,aes(x=variable,stratum=RaceEthn,alluvium=subj))+geom_stratum(aes(fill=RaceEthn))+geom_flow(aes(fill=RaceEthn))+theme_bw(base_size=18)
+
+# can overlay two pie charts: starting raceEth Comp and Ending. Tuck into area that is pink now
+startingdf=test[test$variable=='cbclInclude',]
+startingdf=startingdf[startingdf$value==1,]
+endingdf=test[test$variable=='twoTP',]
+endingdf=endingdf[endingdf$value==1,]
+# now tabulate them to get in proper plotting format
+startingdfTab=tabulate(startingdf$RaceEthn)
+endingdfTab=tabulate(endingdf$RaceEthn)
+
+# starting df
+startingdf=data.frame(startingdfTab,c("White","Black","Hispanic","Asian","Other"))
+colnames(startingdf)<-c('value','RaceEthnicity')
+ggplot(startingdf, aes(x="", y=value, fill=RaceEthnicity)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)+ggtitle('Before Exclusions')
+
+# plot df is both with race labels
+endingdf=data.frame(endingdfTab,c("White","Black","Hispanic","Asian","Other"))
+colnames(endingdf)<-c('value','RaceEthnicity')
+ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)+ggtitle('After Exclusions')
 
 
 ### and equivalent for sex
