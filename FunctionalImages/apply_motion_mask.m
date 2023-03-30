@@ -1,5 +1,12 @@
 function apply_motion_mask(subj)
-% initialize empty vector for average length
+% Initialize qc features to saveout
+FDvec=zeros(1,4);
+FDstringVec={'restFD','MIDFD','SSTFD','nbackFD'};
+Missvec=zeros(1,4);
+MissstringVec={'restM','MIDM','SSTM','nbackM'};
+RemTRs=0;
+Remstring={'RemainingTRs'};
+% initiailize empty vector for average length
 TRvecNum=[];
 % for each "task"
 tasks=["rest","MID","SST","nback"];
@@ -31,6 +38,10 @@ for t=1:4
 	ts_cif.diminfo{2}.length=newTRnum;
 	% overwrite TRs for new file
 	ts_cif.cdata=masked_trs;
+	% add to remaining TRs
+	RemTRs=RemTRs+newTRnum;
+	% add remaining FD
+	FDvec(t)=mask.motion_data{1,21}.remaining_frame_mean_FD;
 	% set output filepath
 	ofp=strjoin([fpParent sname '_ses-baselineYear1Arm1_task-' task '_p2mm_masked.dtseries.nii'],'');
 	% There is no reason this should be a requried step
@@ -48,7 +59,17 @@ for t=1:4
 	mkdir(missingDir);
 	missingFile=[missingDir '/MissingData.txt'];
 	system(['echo motionMask_missing >> ' missingFile]);
+	% add to missing vec
+	Missvec(t)=1;
 	end
 	else
 	end
 end
+% save out QC features
+qcDir=['/oak/stanford/groups/leanew1/users/apines/data/gp/QC_Feats/' sname];
+mkdir(qcDir)
+ValuesVec=[FDvec Missvec RemTRs];
+StringsVec=[FDstringVec MissstringVec Remstring];
+T=table(ValuesVec','RowNames',StringsVec);
+writetable(T,[qcDir '/QC_Feats.csv'],'WriteRowNames',true)
+

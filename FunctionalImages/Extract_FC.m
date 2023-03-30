@@ -140,8 +140,8 @@ rA6=rA6>0;
 rA7=rA7>0;
 % combine bilateral ROIs into single ROI
 rD1=or(rD1_L,rD1_R);
-rD4=or(rD4_L+rD4_R);
-rA1=or(rA1_L+rA1_R);
+rD4=or(rD4_L,rD4_R);
+rA1=or(rA1_L,rA1_R);
 % now extract amygdalar indices for S3 and S4
 rS3=S1.cdata==2;
 rS4=S1.cdata==10;
