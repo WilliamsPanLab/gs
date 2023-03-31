@@ -794,7 +794,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Family member was seriously injured? Did this happen in the past year?"
 
@@ -804,7 +804,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Saw crime or accident? Did this happen in the past year?"
 
@@ -814,7 +814,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Lost a close friend? Did this happen in the past year?"
 
@@ -824,7 +824,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Close friend was seriously sick/injured? Did this happen in the past year?"
 
@@ -834,7 +834,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Negative change in parent's financial situation? Did this happen in the past year?"
 
@@ -844,7 +844,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Family member had drug and/or alcohol problem? Did this happen in the past year?"
 
@@ -854,7 +854,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: You got seriously sick? Did this happen in the past year?"
 
@@ -864,7 +864,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: You got seriously injured? Did this happen in the past year?"
 
@@ -874,7 +874,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 24 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 24 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parents argued more than previously? Did this happen in the past year?"
 
@@ -884,7 +884,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Mother/father figure lost job? Did this happen in the past year?"
 
@@ -894,7 +894,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: One parent was away from home more often? Did this happen in the past year?"
 
@@ -904,7 +904,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Someone in the family was arrested? Did this happen in the past year?"
 
@@ -914,7 +914,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Close friend died? Did this happen in the past year?"
 
@@ -924,7 +924,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Family member had mental/emotional problem? Did this happen in the past year?"
 
@@ -934,7 +934,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Brother or sister left home? Did this happen in the past year?"
 
@@ -944,7 +944,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Was a victim of crime/violence/assault? Did this happen in the past year?"
 
@@ -954,7 +954,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parents separated or divorced? Did this happen in the past year?"
 
@@ -964,7 +964,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parents/caregiver got into trouble with the law? Did this happen in the past year?"
 
@@ -974,7 +974,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Attended a new school? Did this happen in the past year?"
 
@@ -984,7 +984,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Family moved? Did this happen in the past year?"
 
@@ -994,7 +994,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: One of the parents/caregivers went to jail? Did this happen in the past year?"
 
@@ -1004,7 +1004,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Got new stepmother or stepfather? Did this happen in the past year?"
 
@@ -1014,7 +1014,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parent/caregiver got a new job? Did this happen in the past year?"
 
@@ -1024,7 +1024,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Got new brother or sister? Did this happen in the past year?"
 
@@ -1034,7 +1034,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: You were placed in foster care? Did this happen in the past year?"
 
@@ -1044,7 +1044,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Saw or heard someone getting hit Did this happen in the past year?"
 
@@ -1054,7 +1054,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Your family was homeless? Did this happen in the past year?"
 
@@ -1064,7 +1064,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parent or caregiver hospitalized? Did this happen in the past year?"
 
@@ -1074,7 +1074,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Had a lockdown at your school due to concerns about a school shooting or violence? Did this happen in the past year?"
 
@@ -1084,7 +1084,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Please indicate how instrument was administered: Please indicate how instrument was administered:"
 
@@ -1094,7 +1094,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Saw or heard someone being shot at (but not actually wounded) in your school or neighborhood? Did this happen in the past year?"
 
@@ -1104,7 +1104,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Do you know someone who has attempted suicide? Did this happen in the past year?"
 
@@ -1114,7 +1114,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parent or caregiver deported? Did this happen in the past year?"
 
@@ -1124,7 +1124,7 @@ for (i in 10:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-34.png)<!-- -->
 
@@ -1230,8 +1230,8 @@ tmpdf=merge(OutDFBVyle,OutDF2Yyle,by='subjectkey')
 ggplot(data=tmpdf,aes(x=ple_arrest_y.x,y=ple_arrest_y.y))+geom_point()+geom_jitter()+xlab('Has a family member ever been arrested? timepoint 1')+ylab('Has a family member ever been arrested? timepoint 2')
 ```
 
-    ## Warning: Removed 3 rows containing missing values (geom_point).
-    ## Removed 3 rows containing missing values (geom_point).
+    ## Warning: Removed 3 rows containing missing values (`geom_point()`).
+    ## Removed 3 rows containing missing values (`geom_point()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
@@ -1829,7 +1829,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Family member was seriously injured? Did this happen in the past year?"
 
@@ -1839,7 +1839,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Saw crime or accident? Did this happen in the past year?"
 
@@ -1849,7 +1849,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Lost a close friend? Did this happen in the past year?"
 
@@ -1859,7 +1859,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Close friend was seriously sick/injured? Did this happen in the past year?"
 
@@ -1869,7 +1869,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Negative change in parent's financial situation? Did this happen in the past year?"
 
@@ -1879,7 +1879,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 18 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 18 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Family member had drug and/or alcohol problem? Did this happen in the past year?"
 
@@ -1889,7 +1889,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: You got seriously sick? Did this happen in the past year?"
 
@@ -1899,7 +1899,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: You got seriously injured? Did this happen in the past year?"
 
@@ -1909,7 +1909,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 24 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 24 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parents argued more than previously? Did this happen in the past year?"
 
@@ -1919,7 +1919,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Mother/father figure lost job? Did this happen in the past year?"
 
@@ -1929,7 +1929,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: One parent was away from home more often? Did this happen in the past year?"
 
@@ -1939,7 +1939,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Someone in the family was arrested? Did this happen in the past year?"
 
@@ -1949,7 +1949,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Close friend died? Did this happen in the past year?"
 
@@ -1959,7 +1959,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Family member had mental/emotional problem? Did this happen in the past year?"
 
@@ -1969,7 +1969,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Brother or sister left home? Did this happen in the past year?"
 
@@ -1979,7 +1979,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Was a victim of crime/violence/assault? Did this happen in the past year?"
 
@@ -1989,7 +1989,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parents separated or divorced? Did this happen in the past year?"
 
@@ -1999,7 +1999,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parents/caregiver got into trouble with the law? Did this happen in the past year?"
 
@@ -2009,7 +2009,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Attended a new school? Did this happen in the past year?"
 
@@ -2019,7 +2019,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Family moved? Did this happen in the past year?"
 
@@ -2029,7 +2029,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: One of the parents/caregivers went to jail? Did this happen in the past year?"
 
@@ -2039,7 +2039,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Got new stepmother or stepfather? Did this happen in the past year?"
 
@@ -2049,7 +2049,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parent/caregiver got a new job? Did this happen in the past year?"
 
@@ -2059,7 +2059,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Got new brother or sister? Did this happen in the past year?"
 
@@ -2069,7 +2069,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 21 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: You were placed in foster care? Did this happen in the past year?"
 
@@ -2079,7 +2079,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Saw or heard someone getting hit Did this happen in the past year?"
 
@@ -2089,7 +2089,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Your family was homeless? Did this happen in the past year?"
 
@@ -2099,7 +2099,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parent or caregiver hospitalized? Did this happen in the past year?"
 
@@ -2109,7 +2109,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Had a lockdown at your school due to concerns about a school shooting or violence? Did this happen in the past year?"
 
@@ -2119,7 +2119,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Please indicate how instrument was administered: Please indicate how instrument was administered:"
 
@@ -2129,7 +2129,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Saw or heard someone being shot at (but not actually wounded) in your school or neighborhood? Did this happen in the past year?"
 
@@ -2139,7 +2139,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Do you know someone who has attempted suicide? Did this happen in the past year?"
 
@@ -2149,7 +2149,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
     ## [1] "Variables: Parent or caregiver deported? Did this happen in the past year?"
 
@@ -2159,7 +2159,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 33570 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 33570 rows containing non-finite values (`stat_bin()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-24-34.png)<!-- -->
 
@@ -2579,7 +2579,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 11529 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 11529 rows containing non-finite values (`stat_bin()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-25-51.png)<!-- -->
 
@@ -2607,8 +2607,8 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 3843 rows containing missing values (geom_point).
-    ## Removed 3843 rows containing missing values (geom_point).
+    ## Warning: Removed 3843 rows containing missing values (`geom_point()`).
+    ## Removed 3843 rows containing missing values (`geom_point()`).
 
     ## [1] "Variables: Saw or heard someone getting hit Did this happen in the past year?"
 
@@ -2618,7 +2618,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 11529 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 11529 rows containing non-finite values (`stat_bin()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-25-53.png)<!-- -->
 
@@ -2646,8 +2646,8 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 3843 rows containing missing values (geom_point).
-    ## Removed 3843 rows containing missing values (geom_point).
+    ## Warning: Removed 3843 rows containing missing values (`geom_point()`).
+    ## Removed 3843 rows containing missing values (`geom_point()`).
 
     ## [1] "Variables: Your family was homeless? Did this happen in the past year?"
 
@@ -2657,7 +2657,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 11529 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 11529 rows containing non-finite values (`stat_bin()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-25-55.png)<!-- -->
 
@@ -2685,8 +2685,8 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 3843 rows containing missing values (geom_point).
-    ## Removed 3843 rows containing missing values (geom_point).
+    ## Warning: Removed 3843 rows containing missing values (`geom_point()`).
+    ## Removed 3843 rows containing missing values (`geom_point()`).
 
     ## [1] "Variables: Parent or caregiver hospitalized? Did this happen in the past year?"
 
@@ -2696,7 +2696,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 11529 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 11529 rows containing non-finite values (`stat_bin()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-25-57.png)<!-- -->
 
@@ -2724,8 +2724,8 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 3843 rows containing missing values (geom_point).
-    ## Removed 3843 rows containing missing values (geom_point).
+    ## Warning: Removed 3843 rows containing missing values (`geom_point()`).
+    ## Removed 3843 rows containing missing values (`geom_point()`).
 
     ## [1] "Variables: Had a lockdown at your school due to concerns about a school shooting or violence? Did this happen in the past year?"
 
@@ -2735,7 +2735,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 11529 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 11529 rows containing non-finite values (`stat_bin()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-25-59.png)<!-- -->
 
@@ -2763,8 +2763,8 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 3843 rows containing missing values (geom_point).
-    ## Removed 3843 rows containing missing values (geom_point).
+    ## Warning: Removed 3843 rows containing missing values (`geom_point()`).
+    ## Removed 3843 rows containing missing values (`geom_point()`).
 
     ## [1] "Variables: Please indicate how instrument was administered: Please indicate how instrument was administered:"
 
@@ -2774,7 +2774,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 11529 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 11529 rows containing non-finite values (`stat_bin()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-25-61.png)<!-- -->
 
@@ -2802,8 +2802,8 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 3843 rows containing missing values (geom_point).
-    ## Removed 3843 rows containing missing values (geom_point).
+    ## Warning: Removed 3843 rows containing missing values (`geom_point()`).
+    ## Removed 3843 rows containing missing values (`geom_point()`).
 
     ## [1] "Variables: Saw or heard someone being shot at (but not actually wounded) in your school or neighborhood? Did this happen in the past year?"
 
@@ -2813,7 +2813,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 11529 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 11529 rows containing non-finite values (`stat_bin()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-25-63.png)<!-- -->
 
@@ -2841,8 +2841,8 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 3843 rows containing missing values (geom_point).
-    ## Removed 3843 rows containing missing values (geom_point).
+    ## Warning: Removed 3843 rows containing missing values (`geom_point()`).
+    ## Removed 3843 rows containing missing values (`geom_point()`).
 
     ## [1] "Variables: Do you know someone who has attempted suicide? Did this happen in the past year?"
 
@@ -2852,7 +2852,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 11529 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 11529 rows containing non-finite values (`stat_bin()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-25-65.png)<!-- -->
 
@@ -2880,8 +2880,8 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 3843 rows containing missing values (geom_point).
-    ## Removed 3843 rows containing missing values (geom_point).
+    ## Warning: Removed 3843 rows containing missing values (`geom_point()`).
+    ## Removed 3843 rows containing missing values (`geom_point()`).
 
     ## [1] "Variables: Parent or caregiver deported? Did this happen in the past year?"
 
@@ -2891,7 +2891,7 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 11529 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 11529 rows containing non-finite values (`stat_bin()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-25-67.png)<!-- -->
 
@@ -2919,8 +2919,8 @@ for (i in 6:length(yle_No_PastYearcols_No_Goodbad_No_EvAff)){
 
     ## Warning in stats::runif(length(x), -amount, amount): NAs produced
 
-    ## Warning: Removed 3843 rows containing missing values (geom_point).
-    ## Removed 3843 rows containing missing values (geom_point).
+    ## Warning: Removed 3843 rows containing missing values (`geom_point()`).
+    ## Removed 3843 rows containing missing values (`geom_point()`).
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-25-68.png)<!-- -->
 
@@ -2965,3 +2965,54 @@ OutDFTmpPrec$age.y<-OutDFTmpPrec$interview_age.y
 # saveout
 saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_IVEandRetro.rds')
 ```
+
+``` r
+# pull out subjs passing T1 qc
+# t1 include (thank you Safia and Josh!)
+ndaIncl=read.delim('~/Downloads/Package_1210940/abcd_imgincl01.txt')
+# isolate timepoint1
+ndaInclBV=ndaIncl[ndaIncl$eventname=='baseline_year_1_arm_1',]
+# convert fmri to numeric for adding, remove column names
+ndaInclBV$imgincl_rsfmri_include<-as.numeric(ndaInclBV$imgincl_rsfmri_include)
+ndaInclBV$imgincl_nback_include<-as.numeric(ndaInclBV$imgincl_nback_include)
+ndaInclBV$imgincl_mid_include<-as.numeric(ndaInclBV$imgincl_mid_include)
+ndaInclBV$imgincl_sst_include<-as.numeric(ndaInclBV$imgincl_sst_include)
+# evaluate which of subjects included in tempPrec have t1s that are passing at timepoint1
+tempPrecNDA=merge(OutDFTmpPrec_nao,ndaInclBV,by='subjectkey')
+# exclude subjects without passing T1 or T2 quality
+tempPrecNDA=tempPrecNDA[tempPrecNDA$imgincl_t1w_include=="1",]
+tempPrecNDA=tempPrecNDA[tempPrecNDA$imgincl_t2w_include=="1",]
+# at least two surviving fmr scans, conver to numeric to add and remove column label row (1)
+sums=tempPrecNDA$imgincl_rsfmri_include+tempPrecNDA$imgincl_mid_include+tempPrecNDA$imgincl_nback_include+tempPrecNDA$imgincl_sst_include
+# 0 for first rowname row
+tempPrecNDA$sumFmrIncl<-sums
+tempPrecNDA=tempPrecNDA[tempPrecNDA$sumFmrIncl>1,]
+# add to alluvial df for plotting
+includedSubjects$NDA_QC=0
+includedSubjects[includedSubjects$subj %in% unique(tempPrecNDA$subjectkey),]$NDA_QC=1
+
+
+# melt the plot df to get in proper format
+plotdf=melt(includedSubjects)
+```
+
+    ## Using subj as id variables
+
+``` r
+plotdf$value<-as.factor(plotdf$value)
+plotdf$subj<-as.factor(plotdf$subj)
+
+# merge in raceEth of each subj
+raceEth=participantsTSV$race_ethnicity
+subjectsInPtsv=participantsTSV$subjectkey
+infoDf=data.frame(raceEth,subjectsInPtsv)
+colnames(infoDf)<-c('RaceEthn','subj')
+test=merge(plotdf,infoDf,by='subj')
+# overwrite race with "empty" if missing after each checkpoint
+test$RaceEthn<-factor(test$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
+test$RaceEthn[test$value==0]="Missing"
+
+ggplot(test,aes(x=variable,stratum=RaceEthn,alluvium=subj))+geom_stratum(aes(fill=RaceEthn))+geom_flow(aes(fill=RaceEthn))+theme_bw(base_size=18)
+```
+
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
