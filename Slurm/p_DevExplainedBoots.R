@@ -423,7 +423,7 @@ for (b in 1:3000){
 	# get number
 	num_arrest[b]=sum(as.numeric(bootSamp$ple_arrest_y))
 	# get MAE
-	MAE_n_arrest[b]=median(abs((exp(predict_n_arrest)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))
+	MAE_n_arrest[b]=median(abs((exp(predict_n_arrest)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1)))
 	# get MAE in heldout
 	hMAE_n_arrest[b]=median(abs((exp(predict_n_arrestHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 

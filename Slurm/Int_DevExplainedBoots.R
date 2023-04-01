@@ -791,7 +791,7 @@ for (b in 1:3000){
 	# get MAE
 	MAE_n_parental_education[b]=median(abs((exp(predict_n_parental_education)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
 	# get hMAE
-	hMAE_n_parental_education[b]=median(abs((exp(predict_n_incomeHeldout)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
+	hMAE_n_parental_education[b]=median(abs((exp(predict_n_parental_educationHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### sex
 	Model_n_sex<-bam(cbcl_scr_syn_internal_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
@@ -829,7 +829,7 @@ for (b in 1:3000){
 	# get MAE
 	MAE_n_race_ethnicity[b]=median(abs((exp(predict_n_race_ethnicity)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
 	# get hMAE
-	hMAE_n_race_ethnicity[b]=median(abs((exp(predict+m+race+ethnicityHeldout)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
+	hMAE_n_race_ethnicity[b]=median(abs((exp(predict_n_race_ethnicityHeldout)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### weight
 	Model_n_weight<-bam(cbcl_scr_syn_internal_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)	
@@ -845,6 +845,10 @@ for (b in 1:3000){
         BIC_n_weight[b]=BIC(Model_n_weight)
         # get deviance explained
         devExplained_n_weight[b]=summary(Model_n_weight)$dev.expl
+	# get MAE
+	MAE_n_weight[b]=median(abs((exp(predict_n_weight)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get hMAE
+	hMAE_n_weight[b]=median(abs((exp(predict_n_weightHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### waist
 	Model_n_waist<-bam(cbcl_scr_syn_internal_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
@@ -863,7 +867,7 @@ for (b in 1:3000){
 	# get MAE
 	MAE_n_waist[b]=median(abs((exp(predict_n_waist)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
 	# get hMAE
-	hMAE_n_waist[b]=median(abs((exp(predict+m+waist+Heldout)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
+	hMAE_n_waist[b]=median(abs((exp(predict_n_waistHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### height
 	Model_n_height<-bam(cbcl_scr_syn_internal_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(BMI,k=4),data=bootSamp)
