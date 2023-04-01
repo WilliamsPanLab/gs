@@ -401,6 +401,8 @@ for (b in 1:3000){
 	devExplained_n_friend_injur[b]=summary(Model_n_friend_injured)$dev.expl
 	# get number
 	num_friend_injur[b]=sum(as.numeric(bootSamp$ple_friend_injur_y))
+	# get MAE
+	MAE_n_friend_injur[b]=median(abs((exp(predict_n_friend_injured)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1)))
 	# get MAE in heldout
 	hMAE_n_friend_injur[b]=median(abs((exp(predict_n_friend_injuredHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
@@ -504,6 +506,8 @@ for (b in 1:3000){
 	devExplained_n_victim[b]=summary(Model_n_victim)$dev.expl
 	# get number
 	num_victim[b]=sum(as.numeric(bootSamp$ple_victim_y))
+	# get MAE
+	MAE_n_victim[b]=median(abs((exp(predict_n_victim)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1)))
 	# get MAE in heldout
 	hMAE_n_victim[b]=median(abs((exp(predict_n_victimHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
@@ -544,6 +548,8 @@ for (b in 1:3000){
 	devExplained_n_law[b]=summary(Model_n_law)$dev.expl
 	# get number
 	num_law[b]=sum(as.numeric(bootSamp$ple_law_y))
+	# get MAE
+	MAE_n_law[b]=median(abs((exp(predict_n_law)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1)))
 	# get MAE in heldout
 	hMAE_n_law[b]=median(abs((exp(predict_n_lawHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
@@ -565,6 +571,8 @@ for (b in 1:3000){
 	num_school[b]=sum(as.numeric(bootSamp$ple_school_y))
 	# get MAE
 	MAE_n_school[b]=median(abs((exp(predict_n_school)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1)))
+	# get MAE in heldout
+	hMAE_n_school[b]=median(abs((exp(predict_n_schoolHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### move
 	Model_n_move<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
@@ -603,6 +611,8 @@ for (b in 1:3000){
 	devExplained_n_jail[b]=summary(Model_n_jail)$dev.expl
 	# get number
 	num_jail[b]=sum(as.numeric(bootSamp$ple_jail_y))
+	# get MAE
+	MAE_n_jail[b]=median(abs((exp(predict_n_jail)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1)))
 	# get MAE in heldout
 	hMAE_n_jail[b]=median(abs((exp(predict_n_jailHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
@@ -641,6 +651,8 @@ for (b in 1:3000){
 	devExplained_n_new_job[b]=summary(Model_n_job)$dev.expl
 	# get number
 	num_new_job[b]=sum(as.numeric(bootSamp$ple_new_job_y))
+	# get MAE
+	MAE_n_new_job[b]=median(abs((exp(predict_n_job)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1)))
 	# get MAE in heldout
 	hMAE_n_new_job[b]=median(abs((exp(predict_n_jobHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
