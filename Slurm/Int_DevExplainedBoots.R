@@ -829,7 +829,11 @@ for (b in 1:3000){
 	# get MAE
 	MAE_n_race_ethnicity[b]=median(abs((exp(predict_n_race_ethnicity)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
 	# get hMAE
+<<<<<<< HEAD
 	hMAE_n_race_ethnicity[b]=median(abs((exp(predict_n_race_ethnicityHeldout)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
+=======
+	hMAE_n_race_ethnicity[b]=median(abs((exp(predic_n_race_ethnicityHeldout)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
+>>>>>>> a9444d518fab3af2566312af3d0f286589fc7f8a
 
 	### weight
 	Model_n_weight<-bam(cbcl_scr_syn_internal_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)	
