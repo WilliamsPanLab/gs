@@ -171,6 +171,72 @@ devExplained_n_waist=rep(0,10000)
 devExplained_n_height=rep(0,10000)
 devExplained_n_BMI=rep(0,10000)
 
+#£ median absolute error vectors for all models
+MAE_full=rep(0,10000)
+MAE_n_died=rep(0,10000)
+MAE_n_injured=rep(0,10000)
+MAE_n_crime=rep(0,10000)
+MAE_n_friend=rep(0,10000)
+MAE_n_friend_injur=rep(0,10000)
+MAE_n_arrest=rep(0,10000)
+MAE_n_friend_died=rep(0,10000)
+MAE_n_mh=rep(0,10000)
+MAE_n_sib=rep(0,10000)
+MAE_n_victim=rep(0,10000)
+MAE_n_separ=rep(0,10000)
+MAE_n_law=rep(0,10000)
+MAE_n_school=rep(0,10000)
+MAE_n_move=rep(0,10000)
+MAE_n_jail=rep(0,10000)
+MAE_n_step=rep(0,10000)
+MAE_n_new_job=rep(0,10000)
+MAE_n_new_sib=rep(0,10000)
+MAE_n_g=rep(0,10000)
+MAE_n_interview_age=rep(0,10000)
+MAE_n_Grades=rep(0,10000)
+MAE_n_parentPcount=rep(0,10000)
+MAE_n_income=rep(0,10000)
+MAE_n_parental_education=rep(0,10000)
+MAE_n_sex=rep(0,10000)
+MAE_n_race_ethnicity=rep(0,10000)
+MAE_n_weight=rep(0,10000)
+MAE_n_waist=rep(0,10000)
+MAE_n_height=rep(0,10000)
+MAE_n_BMI=rep(0,10000)
+
+# MAE in heldout
+hMAE_full=rep(0,10000)
+hMAE_n_died=rep(0,10000)
+hMAE_n_injured=rep(0,10000)
+hMAE_n_crime=rep(0,10000)
+hMAE_n_friend=rep(0,10000)
+hMAE_n_friend_injur=rep(0,10000)
+hMAE_n_arrest=rep(0,10000)
+hMAE_n_friend_died=rep(0,10000)
+hMAE_n_mh=rep(0,10000)
+hMAE_n_sib=rep(0,10000)
+hMAE_n_victim=rep(0,10000)
+hMAE_n_separ=rep(0,10000)
+hMAE_n_law=rep(0,10000)
+hMAE_n_school=rep(0,10000)
+hMAE_n_move=rep(0,10000)
+hMAE_n_jail=rep(0,10000)
+hMAE_n_step=rep(0,10000)
+hMAE_n_new_job=rep(0,10000)
+hMAE_n_new_sib=rep(0,10000)
+hMAE_n_g=rep(0,10000)
+hMAE_n_interview_age=rep(0,10000)
+hMAE_n_Grades=rep(0,10000)
+hMAE_n_parentPcount=rep(0,10000)
+hMAE_n_income=rep(0,10000)
+hMAE_n_parental_education=rep(0,10000)
+hMAE_n_sex=rep(0,10000)
+hMAE_n_race_ethnicity=rep(0,10000)
+hMAE_n_weight=rep(0,10000)
+hMAE_n_waist=rep(0,10000)
+hMAE_n_height=rep(0,10000)
+hMAE_n_BMI=rep(0,10000)
+
 # number of impacted subjects for sparsely-represented variable quantification
 num_died=rep(0,10000)
 num_injured=rep(0,10000)
@@ -229,6 +295,10 @@ for (b in 1:5000){
 	BIC_full[b]=BIC(fullModel)
 	# get deviance explained
 	devExplained_full[b]=summary(fullModel)$dev.expl
+	# get MAE
+	MAE_full[b]=median(abs((exp(predictFull)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_full[b]=median(abs((exp(predictFullHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### died
 	Model_n_died<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -246,6 +316,10 @@ for (b in 1:5000){
 	devExplained_n_died[b]=summary(Model_n_died)$dev.expl
 	# get number
 	num_died[b]=sum(as.numeric(bootSamp$ple_died_y_IVE.y))
+	# get MAE
+	MAE_n_died[b]=median(abs((exp(predict_n_died)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_died[b]=median(abs((exp(predict_n_diedHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### injured
 	Model_n_injured<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -263,6 +337,10 @@ for (b in 1:5000){
 	devExplained_n_injured[b]=summary(Model_n_injured)$dev.expl
 	# get number
 	num_injured[b]=sum(as.numeric(bootSamp$ple_injured_y_IVE.y))
+	# get MAE
+	MAE_n_injured[b]=median(abs((exp(predict_n_injured)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_injured[b]=median(abs((exp(predict_n_injuredHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### crime
 	Model_n_crime<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -280,6 +358,10 @@ for (b in 1:5000){
 	devExplained_n_crime[b]=summary(Model_n_crime)$dev.expl
 	# get number
 	num_crime[b]=sum(as.numeric(bootSamp$ple_crime_y_IVE.y))
+	# get MAE
+	MAE_n_crime[b]=median(abs((exp(predict_n_crime)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_crime[b]=median(abs((exp(predict_n_crimeHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### friend
 	Model_n_friend<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -297,6 +379,10 @@ for (b in 1:5000){
 	devExplained_n_friend[b]=summary(Model_n_friend)$dev.expl
 	# get number
 	num_friend[b]=sum(as.numeric(bootSamp$ple_friend_y_IVE.y))
+	# get MAE
+	MAE_n_friend[b]=median(abs((exp(predict_n_friend)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_friend[b]=median(abs((exp(predict_n_friendHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### friend_injured
 	Model_n_friend_injured<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -314,6 +400,10 @@ for (b in 1:5000){
 	devExplained_n_friend_injur[b]=summary(Model_n_friend_injured)$dev.expl
 	# get number
 	num_friend_injur[b]=sum(as.numeric(bootSamp$ple_friend_injur_y_IVE.y))
+	# get MAE
+	MAE_n_friend_injur[b]=median(abs((exp(predict_n_friend_injured)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_friend_injur[b]=median(abs((exp(predict_n_friend_injuredHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### arrest
 	Model_n_arrest<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -331,6 +421,10 @@ for (b in 1:5000){
 	devExplained_n_arrest[b]=summary(Model_n_arrest)$dev.expl
 	# get number
 	num_arrest[b]=sum(as.numeric(bootSamp$ple_arrest_y_IVE.y))
+	# get MAE
+	MAE_n_arrest[b]=median(abs((exp(predict_n_arrest)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_arrest[b]=median(abs((exp(predict_n_arrestHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### friend_died
 	Model_n_friend_died<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -348,6 +442,10 @@ for (b in 1:5000){
 	devExplained_n_friend_died[b]=summary(Model_n_friend_died)$dev.expl
 	# get number
 	num_friend_died[b]=sum(as.numeric(bootSamp$ple_friend_died_y_IVE.y))
+	# get MAE
+	MAE_n_friend_died[b]=median(abs((exp(predict_n_friend_died)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_friend_died[b]=median(abs((exp(predict_n_friend_diedHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### mental_health
 	Model_n_mh<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -365,6 +463,10 @@ for (b in 1:5000){
 	devExplained_n_mh[b]=summary(Model_n_mh)$dev.expl
 	# get number	
 	num_mh[b]=sum(as.numeric(bootSamp$ple_mh_y_IVE.y))
+	# get MAE
+	MAE_n_mh[b]=median(abs((exp(predict_n_mh)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_mh[b]=median(abs((exp(predict_n_mhHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### sibling
 	Model_n_sib<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -382,6 +484,10 @@ for (b in 1:5000){
 	devExplained_n_sib[b]=summary(Model_n_sib)$dev.expl
 	# get number
 	num_sib[b]=sum(as.numeric(bootSamp$ple_sib_y_IVE.y))
+	# get MAE
+	MAE_n_sib[b]=median(abs((exp(predict_n_sib)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_sib[b]=median(abs((exp(predict_n_sibHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### victim
 	Model_n_victim<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -399,6 +505,10 @@ for (b in 1:5000){
 	devExplained_n_victim[b]=summary(Model_n_victim)$dev.expl
 	# get number
 	num_victim[b]=sum(as.numeric(bootSamp$ple_victim_y_IVE.y))
+	# get MAE
+	MAE_n_victim[b]=median(abs((exp(predict_n_victim)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_victim[b]=median(abs((exp(predict_n_victimHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### separation
 	Model_n_separ<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -416,6 +526,10 @@ for (b in 1:5000){
 	devExplained_n_separ[b]=summary(Model_n_separ)$dev.expl
 	# get number
 	num_separ[b]=sum(as.numeric(bootSamp$ple_separ_y_IVE.y))
+	# get MAE
+	MAE_n_separ[b]=median(abs((exp(predict_n_separ)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_separ[b]=median(abs((exp(predict_n_separHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### law
 	Model_n_law<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -433,6 +547,10 @@ for (b in 1:5000){
 	devExplained_n_law[b]=summary(Model_n_law)$dev.expl
 	# get number
 	num_law[b]=sum(as.numeric(bootSamp$ple_law_y_IVE.y))
+	# get MAE
+	MAE_n_law[b]=median(abs((exp(predict_n_law)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_law[b]=median(abs((exp(predict_n_lawHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### school
 	Model_n_school<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -450,6 +568,10 @@ for (b in 1:5000){
 	devExplained_n_school[b]=summary(Model_n_school)$dev.expl
 	# get number
 	num_school[b]=sum(as.numeric(bootSamp$ple_school_y_IVE.y))
+	# get MAE
+	MAE_n_school[b]=median(abs((exp(predict_n_school)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_school[b]=median(abs((exp(predict_n_schoolHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### move
 	Model_n_move<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -467,6 +589,10 @@ for (b in 1:5000){
 	devExplained_n_move[b]=summary(Model_n_move)$dev.expl
 	# get number
 	num_move[b]=sum(as.numeric(bootSamp$ple_move_y_IVE.y))
+	# get MAE
+	MAE_n_move[b]=median(abs((exp(predict_n_move)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_move[b]=median(abs((exp(predict_n_moveHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### jail
 	Model_n_jail<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -484,6 +610,10 @@ for (b in 1:5000){
 	devExplained_n_jail[b]=summary(Model_n_jail)$dev.expl
 	# get number
 	num_jail[b]=sum(as.numeric(bootSamp$ple_jail_y_IVE.y))
+	# get MAE
+	MAE_n_jail[b]=median(abs((exp(predict_n_jail)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_jail[b]=median(abs((exp(predict_n_jailHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### step
 	Model_n_step<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -501,6 +631,10 @@ for (b in 1:5000){
 	devExplained_n_step[b]=summary(Model_n_step)$dev.expl
 	# get number
 	num_step[b]=sum(as.numeric(bootSamp$ple_step_y_IVE.y))
+	# get MAE
+	MAE_n_step[b]=median(abs((exp(predict_n_step)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_step[b]=median(abs((exp(predict_n_stepHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### new job
 	Model_n_job<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -518,6 +652,10 @@ for (b in 1:5000){
 	devExplained_n_new_job[b]=summary(Model_n_job)$dev.expl
 	# get number
 	num_new_job[b]=sum(as.numeric(bootSamp$ple_new_job_y_IVE.y))
+	# get MAE
+	MAE_n_new_job[b]=median(abs((exp(predict_n_job)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_new_job[b]=median(abs((exp(predict_n_jobHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### new sib
 	Model_n_new_sib<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -535,6 +673,10 @@ for (b in 1:5000){
 	devExplained_n_new_sib[b]=summary(Model_n_new_sib)$dev.expl
 	# get number
 	num_new_sib[b]=sum(as.numeric(bootSamp$ple_new_sib_y_IVE.y))
+	# get MAE
+	MAE_n_new_sib[b]=median(abs((exp(predict_n_new_sib)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_new_sib[b]=median(abs((exp(predict_n_new_sibHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### g
 	Model_n_g<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -550,6 +692,10 @@ for (b in 1:5000){
 	BIC_n_g[b]=BIC(Model_n_g)
 	# get deviance explained
 	devExplained_n_g[b]=summary(Model_n_g)$dev.expl
+	# get MAE
+	MAE_n_g[b]=median(abs((exp(predict_n_g)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_g[b]=median(abs((exp(predict_n_gHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### age
 	Model_n_age<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -565,6 +711,10 @@ for (b in 1:5000){
 	BIC_n_interview_age[b]=BIC(Model_n_age)
 	# get deviance explained
 	devExplained_n_interview_age[b]=summary(Model_n_age)$dev.expl
+	# get MAE
+	MAE_n_interview_age[b]=median(abs((exp(predict_n_age)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_interview_age[b]=median(abs((exp(predict_n_ageHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### grades
 	Model_n_grades<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -580,6 +730,10 @@ for (b in 1:5000){
 	BIC_n_Grades[b]=BIC(Model_n_grades)
 	# get deviance explained
 	devExplained_n_Grades[b]=summary(Model_n_grades)$dev.expl
+	# get MAE
+	MAE_n_Grades[b]=median(abs((exp(predict_n_grades)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_Grades[b]=median(abs((exp(predict_n_gradesHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### parentPcount
 	Model_n_parentPcount<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -595,6 +749,10 @@ for (b in 1:5000){
 	BIC_n_parentPcount[b]=BIC(Model_n_parentPcount)
 	# get deviance explained
 	devExplained_n_parentPcount[b]=summary(Model_n_parentPcount)$dev.expl
+	# get MAE
+	MAE_n_parentPcount[b]=median(abs((exp(predict_n_parentPcount)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_parentPcount[b]=median(abs((exp(predict_n_parentPcountHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### income
 	Model_n_income<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -610,6 +768,10 @@ for (b in 1:5000){
 	BIC_n_income[b]=BIC(Model_n_income)
 	# get deviance explained
 	devExplained_n_income[b]=summary(Model_n_income)$dev.expl
+	# get MAE
+	MAE_n_income[b]=median(abs((exp(predict_n_income)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_income[b]=median(abs((exp(predict_n_incomeHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### parental education
 	Model_n_parental_education<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -625,6 +787,10 @@ for (b in 1:5000){
 	BIC_n_parental_education[b]=BIC(Model_n_parental_education)
 	# get deviance explained
 	devExplained_n_parental_education[b]=summary(Model_n_parental_education)$dev.expl
+	# get MAE
+	MAE_n_parental_education[b]=median(abs((exp(predict_n_parental_education)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_parental_education[b]=median(abs((exp(predict_n_parental_educationHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### sex
 	Model_n_sex<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -640,6 +806,10 @@ for (b in 1:5000){
 	BIC_n_sex[b]=BIC(Model_n_sex)
 	# get deviance explained
 	devExplained_n_sex[b]=summary(Model_n_sex)$dev.expl
+	# get MAE
+	MAE_n_sex[b]=median(abs((exp(predict_n_sex)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get held out MAE
+	hMAE_n_sex[b]=median(abs((exp(predict_n_sexHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### race
 	Model_n_race_ethnicity<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -655,6 +825,10 @@ for (b in 1:5000){
 	BIC_n_race_ethnicity[b]=BIC(Model_n_race_ethnicity)
 	# get deviance explained
 	devExplained_n_race_ethnicity[b]=summary(Model_n_race_ethnicity)$dev.expl
+	# get MAE
+	MAE_n_race_ethnicity[b]=median(abs((exp(predict_n_race_ethnicity)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get hMAE
+	hMAE_n_race_ethnicity[b]=median(abs((exp(predict_n_race_ethnicityHeldout)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### weight
 	Model_n_weight<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)	
@@ -670,6 +844,10 @@ for (b in 1:5000){
         BIC_n_weight[b]=BIC(Model_n_weight)
         # get deviance explained
         devExplained_n_weight[b]=summary(Model_n_weight)$dev.expl
+	# get MAE
+	MAE_n_weight[b]=median(abs((exp(predict_n_weight)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get hMAE
+	hMAE_n_weight[b]=median(abs((exp(predict_n_weightHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### waist
 	Model_n_waist<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -685,6 +863,10 @@ for (b in 1:5000){
         BIC_n_waist[b]=BIC(Model_n_waist)
         # get deviance explained
         devExplained_n_waist[b]=summary(Model_n_waist)$dev.expl
+	# get MAE
+	MAE_n_waist[b]=median(abs((exp(predict_n_waist)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get hMAE
+	hMAE_n_waist[b]=median(abs((exp(predict_n_waistHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### height
 	Model_n_height<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(BMI.x,k=4),data=bootSamp)
@@ -700,6 +882,10 @@ for (b in 1:5000){
         BIC_n_height[b]=BIC(Model_n_height)
         # get deviance explained
         devExplained_n_height[b]=summary(Model_n_height)$dev.expl
+	# get MAE
+	MAE_n_height[b]=median(abs((exp(predict_n_height)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get hMAE
+	hMAE_n_height[b]=median(abs((exp(predict_n_heightHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### BMI
 	Model_n_BMI<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+s(income.x,k=4)+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4),data=bootSamp)
@@ -715,6 +901,10 @@ for (b in 1:5000){
         BIC_n_BMI[b]=BIC(Model_n_BMI)
         # get deviance explained
         devExplained_n_BMI[b]=summary(Model_n_BMI)$dev.expl
+	# get MAE
+	MAE_n_BMI[b]=median(abs((exp(predict_n_BMI)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r)-1)))
+	# get hMAE
+	hMAE_n_BMI[b]=median(abs((exp(predict_n_BMIHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r)-1)))
 
 	### verify same number of terms in each model (except first because it is full/+1)
 	assert((length(fullModel$var.summary)-1)==length(Model_n_died$var.summary))
@@ -766,4 +956,9 @@ saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/Int_TempPrec_IV
 # save number of impacted subjs for life events in each iteration
 outdf=data.frame(num_died,num_injured,num_crime,num_friend,num_friend_injur,num_arrest,num_friend_died,num_mh,num_sib,num_victim,num_separ,num_law,num_school,num_move,num_jail,num_step,num_new_job,num_new_sib)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/Int_TempPrec_IVE_number.rds')
-
+# save MAE of fitted data
+outdf=data.frame(MAE_full,MAE_n_died,MAE_n_injured,MAE_n_crime,MAE_n_friend,MAE_n_friend_injur,MAE_n_arrest,MAE_n_friend_died,MAE_n_mh,MAE_n_sib,MAE_n_victim,MAE_n_separ,MAE_n_law,MAE_n_school,MAE_n_move,MAE_n_jail,MAE_n_step,MAE_n_new_job,MAE_n_new_sib,MAE_n_g,MAE_n_interview_age,MAE_n_Grades,MAE_n_parentPcount,MAE_n_income,MAE_n_parental_education,MAE_n_sex,MAE_n_race_ethnicity,MAE_n_weight,MAE_n_waist,MAE_n_height,MAE_n_BMI)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/Int_TempPrec_IVE_MAE.rds')
+# save MAE of heldout data
+outdf=data.frame(hMAE_full,hMAE_n_died,hMAE_n_injured,hMAE_n_crime,hMAE_n_friend,hMAE_n_friend_injur,hMAE_n_arrest,hMAE_n_friend_died,hMAE_n_mh,hMAE_n_sib,hMAE_n_victim,hMAE_n_separ,hMAE_n_law,hMAE_n_school,hMAE_n_move,hMAE_n_jail,hMAE_n_step,hMAE_n_new_job,hMAE_n_new_sib,hMAE_n_g,hMAE_n_interview_age,hMAE_n_Grades,hMAE_n_parentPcount,hMAE_n_income,hMAE_n_parental_education,hMAE_n_sex,hMAE_n_race_ethnicity,hMAE_n_weight,hMAE_n_waist,hMAE_n_height,hMAE_n_BMI)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/Int_TempPrec_IVE_hMAE.rds')
