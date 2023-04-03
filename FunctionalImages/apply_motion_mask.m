@@ -2,8 +2,8 @@ function apply_motion_mask(subj)
 % Initialize qc features to saveout
 FDvec=zeros(1,4);
 FDstringVec={'restFD','MIDFD','SSTFD','nbackFD'};
-Missvec=zeros(1,4);
-MissstringVec={'restM','MIDM','SSTM','nbackM'};
+Missvec=zeros(1,7);
+MissstringVec={'restM','MIDM','SSTM','nbackM','CTM','MMM','SCVM'};
 RemTRs=0;
 Remstring={'RemainingTRs'};
 % initiailize empty vector for average length
@@ -64,6 +64,22 @@ for t=1:4
 	end
 	else
 	end
+end
+% check for missing structural data to keep QC feats + missingness in same writes
+CTFP=['/scratch/users/apines/abcd_images/imagingcollection01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/anat/' subj '_ses-baselineYear1Arm1_space-fsLR32k_thickness.dscalar.nii'];
+if ~exist(CTFP,'file')
+	Missvec(5)=1;
+else
+end
+MMFP=['/scratch/users/apines/abcd_images/imagingcollection01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/anat/' subj '_ses-baselineYear1Arm1_space-fsLR32k_desc-smoothed_myelinmap.dscalar.nii'];
+if ~exist(MMFP,'file')
+	Missvec(6)=1;
+else
+end
+SCVFP=['/scratch/users/apines/abcd_images/imagingcollection01/derivatives/freesurfer-5.3.0-HCP/' subj '/ses-baselineYear1Arm1/stats/aseg.stats'];
+if ~exist(SCVFP,'file')
+	Missvec(7)=1;
+else
 end
 % save out QC features
 qcDir=['/oak/stanford/groups/leanew1/users/apines/data/gp/QC_Feats/' sname];
