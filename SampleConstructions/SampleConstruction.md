@@ -1646,6 +1646,12 @@ subsetOfBoth=subsetOfBoth$subjectkey
 includedSubjects$twoTP=0
 includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$twoTP=1
 
+# log-transform psychopathology outputs
+masterdf$cbcl_scr_syn_totprob_r<-log(masterdf$cbcl_scr_syn_totprob_r+1)
+masterdf$cbcl_scr_syn_external_r<-log(masterdf$cbcl_scr_syn_external_r+1)
+masterdf$cbcl_scr_syn_internal_r<-log(masterdf$cbcl_scr_syn_internal_r+1)
+masterdf$parentPcount<-log(masterdf$parentPcount+1)
+
 # save ouput
 saveRDS(masterdf,'~/OutDfxc.rds')
 ```
@@ -1685,7 +1691,7 @@ test=merge(plotdf,infoDf,by='subj')
 test$RaceEthn<-factor(test$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
 test$RaceEthn[test$value==0]="Missing"
 
-ggplot(test,aes(x=variable,stratum=RaceEthn,alluvium=subj))+geom_stratum(aes(fill=RaceEthn))+geom_flow(aes(fill=RaceEthn))+theme_bw(base_size=18)
+ggplot(test,aes(x=variable,stratum=RaceEthn,alluvium=subj))+geom_stratum(aes(fill=RaceEthn))+geom_flow(aes(fill=RaceEthn))+theme_bw(base_size=40)+theme(axis.text.x = element_text(angle=90))
 ```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
@@ -1705,7 +1711,7 @@ startingdf=data.frame(startingdfTab,c("White","Black","Hispanic","Asian","Other"
 colnames(startingdf)<-c('value','RaceEthnicity')
 ggplot(startingdf, aes(x="", y=value, fill=RaceEthnicity)) +
   geom_bar(stat="identity", width=1) +
-  coord_polar("y", start=0)+ggtitle('Before Exclusions')
+  coord_polar("y", start=0)+ggtitle('Before Exclusions')+theme_minimal(base_size=40)
 ```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
@@ -1716,7 +1722,7 @@ endingdf=data.frame(endingdfTab,c("White","Black","Hispanic","Asian","Other"))
 colnames(endingdf)<-c('value','RaceEthnicity')
 ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
   geom_bar(stat="identity", width=1) +
-  coord_polar("y", start=0)+ggtitle('After Exclusions')
+  coord_polar("y", start=0)+ggtitle('After Exclusions')+theme_minimal(base_size=40)
 ```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-23-3.png)<!-- -->
@@ -1742,7 +1748,7 @@ test=merge(plotdf,infoDf,by='subj')
 test$sex<-factor(test$sex,levels=c("M","F","Missing"))
 test$sex[test$value==0]="Missing"
 
-ggplot(test,aes(x=variable,stratum=sex,alluvium=subj))+geom_stratum(aes(fill=sex))+geom_flow(aes(fill=sex))+theme_bw(base_size=18)
+ggplot(test,aes(x=variable,stratum=sex,alluvium=subj))+geom_stratum(aes(fill=sex))+geom_flow(aes(fill=sex))+theme_bw(base_size=40)
 ```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-23-4.png)<!-- -->
@@ -3016,3 +3022,18 @@ ggplot(test,aes(x=variable,stratum=RaceEthn,alluvium=subj))+geom_stratum(aes(fil
 ```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+
+``` r
+# save out subject list for downloading - convert to bids naming convention
+DL_list=gsub('R_I','RI',includedSubjects$subj[includedSubjects$NDA_QC==1])
+DL_list=gsub('NDAR','sub-NDAR',DL_list)
+write.table(DL_list,'~/DL_list.txt',sep='\r',row.names = F,col.names = F,quote = F)
+print(length(DL_list))
+```
+
+    ## [1] 3140
+
+``` r
+# run first 100
+write.table(DL_list[1:100],'~/DL_list100.txt',sep='\r',row.names = F,col.names = F,quote = F)
+```
