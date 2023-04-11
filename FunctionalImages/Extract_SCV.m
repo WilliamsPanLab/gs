@@ -8,6 +8,8 @@ asfp=[asFold 'aseg.stats'];
 asegCmd=['cat ' asfp ' | grep -v "#" > ' asFold 'aseg_stats.csv'];
 system(asegCmd);
 
+% if file exists
+try
 % load in parsed as table
 stats=readtable([asFold 'aseg_stats.csv']);
 
@@ -26,3 +28,7 @@ outFP=['/oak/stanford/groups/leanew1/users/apines/data/gp/anat_Feats/' subj];
 system(['mkdir ' outFP]);
 % write out
 writetable(T,[outFP '/SCV_Feats.csv'],'WriteRowNames',true)
+% if file doesn't exist
+catch ME
+	disp('No SCV bucko')
+end

@@ -127,11 +127,10 @@ for t=tasks
 	% if files exist, run optical flow
 	if exist(LeftTSmat,'file') && exist(RightTSmat,'file')
 	% run OpFl
-	OpFl_abcd(subj,task,LeftTSmat,RightTSmat,['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '/' subj '_' task '_OpFl_3k.mat'])
+	OpFl_abcd(subj,task,LeftTSmat,RightTSmat,OpFlOut)
+	Extract_RelativeAngles(subj,OpFlOut)
 	end
 end
-% Props relative to networks
-Extract_BUTD_ResultantVecs_PL(subj,OpFlOut,infileAngD,outfile_L,outfile_R)
 % note this might be a compiled script
 toc
 disp('Δ deleting neuroimages')

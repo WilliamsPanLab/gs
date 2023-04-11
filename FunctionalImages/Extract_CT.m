@@ -21,12 +21,15 @@ CTFP=['/scratch/users/apines/abcd_images/imagingcollection01/derivatives/abcd-hc
 CTvec=[];
 stringVec={};
 
+% if CT Data exists
+try
+CTvals=read_cifti(CTFP)
+
 % extract the 18 CT values
 for N=1:18
     % get the indices for this parcel
     parcelInds=find(HardParcel==N);
     % get the CT values for this parcel
-    CTvals=read_cifti(CTFP)
     CTNetVals=CTvals.cdata(parcelInds);
     % average across the parcel
     CTvals=mean(CTNetVals);
@@ -45,3 +48,7 @@ outFP=['/oak/stanford/groups/leanew1/users/apines/data/gp/anat_Feats/' subj];
 system(['mkdir ' outFP]);
 % write out
 writetable(T,[outFP '/CT_Feats.csv'],'WriteRowNames',true)
+% if file doesn't exist
+catch ME
+	disp('No CT bucko')
+end

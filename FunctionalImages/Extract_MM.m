@@ -21,12 +21,14 @@ MMFP=['/scratch/users/apines/abcd_images/imagingcollection01/derivatives/abcd-hc
 MMvec=[];
 stringVec={};
 
+% if MM data exists
+try
+MMvals=read_cifti(MMFP)
 % extract the 18 CT values
 for N=1:18
     % get the indices for this parcel
     parcelInds=find(HardParcel==N);
     % get the CT values for this parcel
-    MMvals=read_cifti(MMFP)
     MMNetVals=MMvals.cdata(parcelInds);
     % average across the parcel
     MMvals=mean(MMNetVals);
@@ -45,3 +47,7 @@ outFP=['/oak/stanford/groups/leanew1/users/apines/data/gp/anat_Feats/' subj];
 system(['mkdir ' outFP]);
 % write out
 writetable(T,[outFP '/MM_Feats.csv'],'WriteRowNames',true)
+% if file doesn't exist
+catch ME
+        disp('No MM bucko')
+end

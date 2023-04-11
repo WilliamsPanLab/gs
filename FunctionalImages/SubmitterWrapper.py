@@ -11,8 +11,8 @@ content_list.pop()
 subjects = content_list
 for x in range(100):
   newsub = subjects.pop()
-  subprocess.run(["sbatch sbatchABCDProc.sh",newsub])
-  time.sleep(3600) #wait an hour
+  subprocess.call(["sbatch","/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages/sbatchABCDProc.sh",newsub])
+  time.sleep(1200) #wait 20 minutes
 
 
 # while there are more than 0 subjects left to run
