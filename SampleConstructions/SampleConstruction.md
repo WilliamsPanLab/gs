@@ -1599,7 +1599,7 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$PhysCh
 ``` r
 ###### fix data formats
 # variables of interest
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','ple_died_y','ple_injured_y','ple_crime_y','ple_friend_y','ple_friend_injur_y','ple_arrest_y','ple_friend_died_y','ple_mh_y','ple_sib_y','ple_victim_y','ple_separ_y','ple_law_y','ple_school_y','ple_move_y','ple_jail_y','ple_step_y','ple_new_job_y','ple_new_sib_y','g','subjectkey','interview_age','Grades','parentPcount','income','parental_education','sex','race_ethnicity','weight','waist','height','BMI','eventname')
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','ple_died_y','ple_injured_y','ple_crime_y','ple_friend_y','ple_friend_injur_y','ple_arrest_y','ple_friend_died_y','ple_mh_y','ple_sib_y','ple_victim_y','ple_separ_y','ple_law_y','ple_school_y','ple_move_y','ple_jail_y','ple_step_y','ple_new_job_y','ple_new_sib_y','g','subjectkey','interview_age','Grades','parentPcount','income','parental_education','sex','race_ethnicity','weight','waist','height','BMI','matched_group','eventname')
 
 # convert PLE's to factors
 for (i in 4:21){
@@ -1629,7 +1629,7 @@ masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ]
 print(dim(masterdf))
 ```
 
-    ## [1] 7752   35
+    ## [1] 7752   36
 
 ``` r
 # and two-timepoint check
@@ -1652,8 +1652,11 @@ masterdf$cbcl_scr_syn_external_r<-log(masterdf$cbcl_scr_syn_external_r+1)
 masterdf$cbcl_scr_syn_internal_r<-log(masterdf$cbcl_scr_syn_internal_r+1)
 masterdf$parentPcount<-log(masterdf$parentPcount+1)
 
+# induce sample split in saveout to avoid overloading r with stored variables
+
 # save ouput
-saveRDS(masterdf,'~/OutDfxc.rds')
+saveRDS(masterdf[masterdf$matched_group==1,],'~/OutDfxc.rds')
+saveRDS(masterdf[masterdf$matched_group!=1,],'~/OutDfxc_heldout.rds')
 ```
 
 ``` r
@@ -2188,7 +2191,7 @@ OutDFyle3=merge(preBVdf,masterdf,by=c('subjectkey'))
 print(dim(OutDFyle3))
 ```
 
-    ## [1] 7686   51
+    ## [1] 7686   52
 
 ``` r
 # convert to one row per subj for temporal precedence analyses
@@ -2198,7 +2201,7 @@ OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 3843  101
+    ## [1] 3843  103
 
 ``` r
 #### ∆∆∆
@@ -2212,14 +2215,16 @@ OutDFTmpPrec_nao=OutDFTmpPrec_nao[rowSums(is.na(OutDFTmpPrec_nao)) == 0,]
 print(dim(OutDFTmpPrec_nao))
 ```
 
-    ## [1] 3843   83
+    ## [1] 3843   85
 
 ``` r
 # make age column name a little more succinct
 OutDFTmpPrec_nao$age.x<-OutDFTmpPrec$interview_age.x
 OutDFTmpPrec_nao$age.y<-OutDFTmpPrec$interview_age.y
 
-saveRDS(OutDFTmpPrec_nao,'~/OutDFTmpPrec_FullRetro.rds')
+# save matched group out to avoid overburdening r with another variable
+saveRDS(OutDFTmpPrec_nao[masterdf$matched_group.x==1,],'~/OutDFTmpPrec_FullRetro.rds')
+saveRDS(OutDFTmpPrec_nao[masterdf$matched_group.x!=1,],'~/OutDFTmpPrec_FullRetro_heldout.rds')
 ```
 
 ``` r
@@ -2949,7 +2954,7 @@ OutDFyle3=merge(y2df,OutDFyle3,by=c('subjectkey'))
 print(dim(OutDFyle3))
 ```
 
-    ## [1] 7686   85
+    ## [1] 7686   86
 
 ``` r
 # convert to one row per subj for temporal precedence analyses
@@ -2961,7 +2966,7 @@ OutDFTmpPrec<-merge(OutDFBV,OutDF2Y,by='subjectkey')
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 3843  169
+    ## [1] 3843  171
 
 ``` r
 # make age column name a little more succinct
@@ -2969,7 +2974,8 @@ OutDFTmpPrec$age.x<-OutDFTmpPrec$interview_age.x
 OutDFTmpPrec$age.y<-OutDFTmpPrec$interview_age.y
 
 # saveout
-saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec_IVEandRetro.rds')
+saveRDS(OutDFTmpPrec[masterdf$matched_group.x==1,],'~/OutDFTmpPrec_IVEandRetro.rds')
+saveRDS(OutDFTmpPrec[masterdf$matched_group.x!=1,],'~/OutDFTmpPrec_IVEandRetro_heldout.rds')
 ```
 
 ``` r
