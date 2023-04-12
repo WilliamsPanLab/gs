@@ -197,7 +197,7 @@ for k=1:18
 	avgD=mean([NangDs_L(:)' NangDs_R(:)'],2);
 	Propvec=[Propvec avgD];
 	% add label - adding 16 to be consistent with 
-	stringVec=[stringVec ['AngD' num2str(N+16)]];
+	stringVec=[stringVec ['AngD' num2str(k+16)]];
 end
 % save out as csv
 T=table(Propvec','RowNames',stringVec);
