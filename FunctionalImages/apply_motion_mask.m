@@ -15,7 +15,7 @@ for t=1:4
 	sname=subj;
 	fpParent=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' sname '/ses-baselineYear1Arm1/func/'];
 	fp=strjoin([fpParent sname '_ses-baselineYear1Arm1_task-' task '_bold_desc-filtered_timeseries.dtseries.nii'],'');
-	% not flagging missing tasks in this script, added this conditional to reflect that
+	% flagging missing tasks in this script, added this conditional to reflect that
 	if exist(fp,'file')
 	ts_cif=read_cifti(fp);
 	ts=ts_cif.cdata;
@@ -54,15 +54,18 @@ for t=1:4
 	% numbers are length of sequence, which is culmatively additive. NOT what is starting TR w/r/t global sequence
 	% it also includes between-run frames, which aligns with what we want to exclude
 	writelines(mask.motion_data{1,21}.format_string,strjoin([fpParent 'MotionSegments_' task '.txt'],''))
+	% this else is for the not-yet observed case of if functional data exists but mask doesnt
 	else
+	end
+	% this else is for if the file does not exist
+	else
+	% if data is missing, record it as missing
 	missingDir=['/oak/stanford/groups/leanew1/users/apines/scripts/abcdImages/MissingDataReports/' sname];
 	mkdir(missingDir);
 	missingFile=[missingDir '/MissingData.txt'];
 	system(['echo motionMask_missing >> ' missingFile]);
 	% add to missing vec
 	Missvec(t)=1;
-	end
-	else
 	end
 end
 % check for missing structural data to keep QC feats + missingness in same writes
