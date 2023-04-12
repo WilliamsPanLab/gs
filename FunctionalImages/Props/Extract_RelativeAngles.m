@@ -74,8 +74,11 @@ nets_RH=networks.nets.Rnets;
 % initialize out dataframes
 Propvec=[];
 stringVec={};
-Thetas_L=zeros(length(g_noMW_combined_L),lenOpFl);
-Thetas_R=zeros(length(g_noMW_combined_R),lenOpFl);
+% and azez and els for opflow vectors
+OpF_azes_L=zeros(length(g_noMW_combined_L),lenOpFl);
+OpF_els_L=zeros(length(g_noMW_combined_L),lenOpFl);
+OpF_azes_R=zeros(length(g_noMW_combined_R),lenOpFl);
+OpF_els_R=zeros(length(g_noMW_combined_R),lenOpFl);
 
 % translate xyz spherical coordinates to az/el/r
 [az_L,el_L,r_L]=cart2sph(P_L(:,1),P_L(:,2),P_L(:,3));
@@ -101,11 +104,16 @@ for F=g_noMW_combined_L
 		% convert to spherical coord system
         	vs_L=cart2sphvec(double([xComp_L;yComp_L;zComp_L]),azd_L(F),eld_L(F));
 		% convert to spherical coordinates
-       		OpFlVec_L= [vs_L(1) vs_L(2)];
-        	% store in output vector (r is redundant across all vecs, only using az and el)
-		[Thetas_L(F,fr),~]=cart2pol(vs_L(1),vs_L(2));
+       		%OpFlVec_L= [vs_L(1) vs_L(2)];
+		OpF_azes_L(F,fr)=vs_L(1);
+		OpF_els_L(F,fr)=vs_L(2);
+		% store in output vector (r is redundant across all vecs, only using az and el)
+		%[Thetas_L(F,fr),~]=cart2pol(vs_L(1),vs_L(2));
 	end
 end
+% mask mw out of angles
+OpF_azes_L=OpF_azes_L(g_noMW_combined_L,:);
+OpF_els_L=OpF_els_L(g_noMW_combined_L,:);
 
 % for each face
 for F=g_noMW_combined_R
@@ -120,14 +128,27 @@ for F=g_noMW_combined_R
 		% convert to spherical coord system
 		vs_R=cart2sphvec(double([xComp_R;yComp_R;zComp_R]),azd_R(F),eld_R(F));
 		% convert to spherical coordinates
-       		OpFlVec_R= [vs_R(1) vs_R(2)];
+       		%OpFlVec_R= [vs_R(1) vs_R(2)];
+		OpF_azes_R(F,fr)=vs_R(1);
+		OpF_els_R(F,fr)=vs_R(2);
 		% store in output vector (r is redundant across all vecs, only using az and el)
-		[Thetas_R(F,fr),~]=cart2pol(vs_R(1),vs_R(2));
+		%[Thetas_R(F,fr),~]=cart2pol(vs_R(1),vs_R(2));
 	end
 end
+% mask mw out of angles
+OpF_azes_R=OpF_azes_R(g_noMW_combined_R,:);
+OpF_els_R=OpF_els_R(g_noMW_combined_R,:);
+
 % add lukas lang functions
 addpath(genpath('/oak/stanford/groups/leanew1/users/apines/libs/lukaslang-ofd-614a2ffc50d6'))
-% use thetas to calculate angular distance
+
+% convert azs and els to only those within MW mask
+az_L=az_L(g_noMW_combined_L);
+el_L=el_L(g_noMW_combined_L);
+az_R=az_R(g_noMW_combined_R);
+el_R=el_R(g_noMW_combined_R);
+
+% get network gradient to calculate relative angles
 % for each network
 for k=1:18
 	% network of interest
@@ -136,65 +157,101 @@ for k=1:18
 	% calculate network gradients on sphere
 	ng_L = grad(F_L, V_L, n_LH);
 	ng_R = grad(F_R, V_R, n_RH);
+	% use medial wall mask as common starting point (from which to mask both opfl vecs and net grads further)
+	ng_L=ng_L(g_noMW_combined_L,:);
+	ng_R=ng_R(g_noMW_combined_R,:);
 	% get NA vertices
         sumLeft=sum(ng_L,2);
 	sumRight=sum(ng_R,2);
 	% finds 0s in left and right network gradients
 	emptyLeft=find(~sumLeft);
 	emptyRight=find(~sumRight);
+	InclLeft=find(sumLeft);
+	InclRight=find(sumRight);
+	% not InclLeft and Right presume mw mask already applied!
+
 	% mask them out of medial wall mask (medial wall mask indicates what to include, emptyLeft indicates what to exclude. setdiff excludes what should be excluded (from eL) from what should be incl. (noMW)
-	n_and_g_noMW_combined_L=setdiff(g_noMW_combined_L,emptyLeft);
-	n_and_g_noMW_combined_R=setdiff(g_noMW_combined_R,emptyRight);
+	%n_and_g_noMW_combined_L=setdiff(g_noMW_combined_L,emptyLeft);
+	%n_and_g_noMW_combined_R=setdiff(g_noMW_combined_R,emptyRight);
 	% extract face-wise vector cartesian vector components
-	nx_L=ng_L(n_and_g_noMW_combined_L,1);
-	ny_L=ng_L(n_and_g_noMW_combined_L,2);
-	nz_L=ng_L(n_and_g_noMW_combined_L,3);
-	nx_R=ng_R(n_and_g_noMW_combined_R,1);
-	ny_R=ng_R(n_and_g_noMW_combined_R,2);
-	nz_R=ng_R(n_and_g_noMW_combined_R,3);
+	
+	nx_L=ng_L(InclLeft,1);
+	ny_L=ng_L(InclLeft,2);
+	nz_L=ng_L(InclLeft,3);
+	nx_R=ng_R(InclRight,1);
+	ny_R=ng_R(InclRight,2);
+	nz_R=ng_R(InclRight,3);
 
 	% translate xyz spherical coordinates to az/el/r
-	[az_L,el_L,r_L]=cart2sph(P_L(n_and_g_noMW_combined_L,1),P_L(n_and_g_noMW_combined_L,2),P_L(n_and_g_noMW_combined_L,3));
-	[az_R,el_R,r_R]=cart2sph(P_R(n_and_g_noMW_combined_R,1),P_R(n_and_g_noMW_combined_R,2),P_R(n_and_g_noMW_combined_R,3));
-
-	% convert from radians to degrees
-	azd_L=rad2deg(az_L);
-	eld_L=rad2deg(el_L);
-	azd_R=rad2deg(az_R);
-	eld_R=rad2deg(el_R);
+	%[az_L,el_L,r_L]=cart2sph(P_L(n_and_g_noMW_combined_L,1),P_L(n_and_g_noMW_combined_L,2),P_L(n_and_g_noMW_combined_L,3));
+	%[az_R,el_R,r_R]=cart2sph(P_R(n_and_g_noMW_combined_R,1),P_R(n_and_g_noMW_combined_R,2),P_R(n_and_g_noMW_combined_R,3));
+	% get spherical coordinates (az/el/r, r equal in sphere) relevant to this network
+	az_L_n=az_L(InclLeft);
+	el_L_n=el_L(InclLeft);
+	az_R_n=az_R(InclRight);
+	el_R_n=el_R(InclRight);
 	
-	% now same mask for the thetas
-	nThetas_L=Thetas_L(n_and_g_noMW_combined_L,:);
-	nThetas_R=Thetas_R(n_and_g_noMW_combined_R,:);
+	% now same mask for the opfl vectors
+	OpF_azes_L_n=OpF_azes_L(InclLeft,:);
+	OpF_els_L_n=OpF_els_L(InclLeft,:);
+	OpF_azes_R_n=OpF_azes_R(InclRight,:);
+	OpF_els_R_n=OpF_els_R(InclRight,:);
 
 	% translate xyz vector components at coordinates to az/el/r
-	gazes_L=zeros(length(azd_L),1);
-	gels_L=zeros(length(eld_L),1);
-	for i=1:length(azd_L)
-	    gvs_L=cart2sphvec(double([nx_L(i);ny_L(i);nz_L(i)]),azd_L(i),eld_L(i));
-	    gazes_L(i)=gvs_L(1);
-	    gels_L(i)=gvs_L(2);
+	nazes_L=zeros(length(az_L_n),1);
+	nels_L=zeros(length(el_L_n),1);
+	for i=1:length(az_L_n)
+	    nvs_L=cart2sphvec(double([nx_L(i);ny_L(i);nz_L(i)]),az_L_n(i),el_L_n(i));
+	    nazes_L(i)=nvs_L(1);
+	    nels_L(i)=nvs_L(2);
 	end
 	% right hemi
-	gazes_R=zeros(length(azd_R),1);
-	gels_R=zeros(length(eld_R),1);
-	for i=1:length(azd_R)
-	    gvs_R=cart2sphvec(double([nx_R(i);ny_R(i);nz_R(i)]),azd_R(i),eld_R(i));
-	    gazes_R(i)=gvs_R(1);
-	    gels_R(i)=gvs_R(2);
+	nazes_R=zeros(length(az_R_n),1);
+	nels_R=zeros(length(el_R_n),1);
+	for i=1:length(az_R_n)
+	    nvs_R=cart2sphvec(double([nx_R(i);ny_R(i);nz_R(i)]),az_R_n(i),el_R_n(i));
+	    nazes_R(i)=nvs_R(1);
+	    nels_R(i)=nvs_R(2);
 	end
 
-	% calculate angular distances
-	Nangs_L=cart2pol(gazes_L,gels_L);
-	% CONSIDER CONVERTING TO ANGULAR DISTANCE IN DEGREES HERE
-	% include masking
-	NangDs_L=abs(nThetas_L-Nangs_L);
-	% right
-	Nangs_R=cart2pol(gazes_R,gels_R);
-	% include masking
-	NangDs_R=abs(nThetas_R-Nangs_R);
+	% initialize angular distance vector for each network (l and r) above
+	NangDs_L=zeros(length(InclLeft),lenOpFl);
+	NangDs_R=zeros(length(InclRight),lenOpFl);
+	% get angular distance for each face for each timepoint
+	for F=1:length(InclLeft);
+		% get vector for each face (network vector)
+		nVec=[nazes_L(F) nels_L(F)];
+		% loop over each tp
+		for fr=1:lenOpFl
+			% get optical flow vector
+			OpFlVec=[OpF_azes_L_n(F,fr) OpF_els_L_n(F,fr)];
+			% get angular distance at that timepoint (degrees)
+			a = acosd(min(1,max(-1, nVec(:).' *OpFlVec(:) / norm(nVec) / norm(OpFlVec) )));
+			% populate vector
+			NangDs_L(F,fr)=a;
+		% end tp loop
+		end
+	% end each face loop
+	end
+	for F=1:length(InclRight);
+                % get vector for each face (network vector)
+                nVec=[nazes_R(F) nels_R(F)];
+                % loop over each tp
+                for fr=1:lenOpFl
+                        % get optical flow vector
+                        OpFlVec=[OpF_azes_R_n(F,fr) OpF_els_R_n(F,fr)];
+                        % get angular distance at that timepoint (degrees)
+                        a = acosd(min(1,max(-1, nVec(:).' *OpFlVec(:) / norm(nVec) / norm(OpFlVec) )));
+                        % populate vector
+                        NangDs_R(F,fr)=a;
+                % end tp loop
+                end
+        % end each face loop
+        end	
+	% average for this network before proceeding to next network loop
+	AllAngs=[NangDs_R(:)' NangDs_L(:)'];
 	% average angular distances across hemispheres
-	avgD=mean([NangDs_L(:)' NangDs_R(:)'],2);
+	avgD=mean(AllAngs);
 	Propvec=[Propvec avgD];
 	% add label - adding 16 to be consistent with 
 	stringVec=[stringVec ['AngD' num2str(k+16)]];
