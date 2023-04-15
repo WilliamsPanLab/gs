@@ -1,0 +1,529 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-03-17"
+---
+
+```{r}
+library(reshape2)
+library(ggplot2)
+plot_dev_explained <- function(file_path,label) {
+  # Load data
+  DevExpl <- readRDS(file_path)
+  
+  # Calculate deviance explained by each term
+  devExplEachTerm <- matrix(
+    data = NA,
+    nrow = 10000,
+    ncol = length(colnames(DevExpl))
+  )
+  for (r in 2:length(colnames(DevExpl))) {
+    columnOfInt <- DevExpl[, r]
+    propDev <- 1 - (columnOfInt / DevExpl$devExplained_full)
+    devExplEachTerm[, r] <- propDev
+  }
+  
+  # Remove prefix for plotting
+  columnname <- colnames(DevExpl)
+  columnname <- gsub('devExplained_', '', columnname)
+  colnames(devExplEachTerm) <- columnname
+  
+  # Melt data for plotting
+  plotdf <- melt(data.frame(devExplEachTerm))
+  # and variable category labels
+  categories=c('None','Events','Performance','Demographic','Body')
+  plotdf$cat<-rep('None',dim(plotdf)[1])
+  plotdf$cat<-factor(plotdf$cat,levels=categories)
+  # Events
+  plotdf$cat[plotdf$variable==c('n_died')]<-'Events'
+  plotdf$cat[plotdf$variable==c('n_injured')]='Events'
+  plotdf$cat[plotdf$variable==c('n_crime')]='Events'
+  plotdf$cat[plotdf$variable==c('n_friend')]='Events'
+  plotdf$cat[plotdf$variable==c('n_friend_injur')]='Events'
+  plotdf$cat[plotdf$variable==c('n_arrest')]='Events'
+  plotdf$cat[plotdf$variable==c('n_friend_died')]='Events'
+  plotdf$cat[plotdf$variable==c('n_mh')]='Events'
+  plotdf$cat[plotdf$variable==c('n_sib')]='Events'
+  plotdf$cat[plotdf$variable==c('n_victim')]='Events'
+  plotdf$cat[plotdf$variable==c('n_separ')]='Events'
+  plotdf$cat[plotdf$variable==c('n_law')]='Events'
+  plotdf$cat[plotdf$variable==c('n_school')]='Events'
+  plotdf$cat[plotdf$variable==c('n_move')]='Events'
+  plotdf$cat[plotdf$variable==c('n_jail')]='Events'
+  plotdf$cat[plotdf$variable==c('n_step')]='Events'
+  plotdf$cat[plotdf$variable==c('n_new_job')]='Events'
+  plotdf$cat[plotdf$variable==c('n_new_sib')]='Events'
+
+  # Performance
+  plotdf$cat[plotdf$variable==c('n_g')]='Performance'
+  plotdf$cat[plotdf$variable==c('n_Grades')]='Performance'
+  
+  # Demographics
+  plotdf$cat[plotdf$variable==c('n_interview_age')]='Demographic'
+  plotdf$cat[plotdf$variable==c('n_income')]='Demographic'
+  plotdf$cat[plotdf$variable==c('n_parental_education')]='Demographic'
+  plotdf$cat[plotdf$variable==c('n_sex')]='Demographic'
+  plotdf$cat[plotdf$variable==c('n_race_ethnicity')]='Demographic'
+  
+  # Body
+  plotdf$cat[plotdf$variable==c('n_weight')]='Body'
+  plotdf$cat[plotdf$variable==c('n_waist')]='Body'
+  plotdf$cat[plotdf$variable==c('n_height')]='Body'
+  plotdf$cat[plotdf$variable==c('n_BMI')]='Body'
+  
+  # Define custom color scheme for the categories
+  colors <- c("Events" = "#FFD700", "Performance" = "#FFA500", "Demographic" = "#808080", "Body" = "#CD853F")
+  
+  # Get levels of factor
+  fct_levels <- levels(plotdf$variable)
+  # Reorder levels with n_interview_age after n_Grades
+  new_levels <- c(fct_levels[1:20], fct_levels[22], fct_levels[21], fct_levels[23:length(fct_levels)])
+  # and n_ removal
+  new_levels<- gsub("n_", "", new_levels)
+  new_variable_names=gsub("n_", "", plotdf$variable)
+  plotdf$variable <-factor(new_variable_names,levels=new_levels)
+  # last take-outs
+  plotdf=subset(plotdf, variable != "full")
+  plotdf=subset(plotdf, variable != "parentPcount")
+  
+ # Plot deviance explained by each term with grouping and coloration by 'cat'
+  ggplot(data = plotdf, aes(x = variable, y = value,color=cat))  +
+  geom_boxplot(width = 0.4, position = position_nudge(x = 0.5)) +
+  geom_jitter(aes(color = cat), alpha = 0.01, size = 2, width = 0.2, height = 0.01) +
+  scale_color_manual(values = colors) +
+  scale_fill_manual(values = colors) +
+  ylab("Value") +
+  xlab("Covariate") +
+  theme_minimal(base_size = 35) +
+  theme(axis.text.x = element_text(angle = 45)) +
+  ylim(c(-0.005, 0.14)) +
+  labs(color = "Category")+coord_flip()
+  
+  
+  
+  
+  # ggplot(data = plotdf, aes(x = factor(variable, levels = new_levels), y = value, fill = cat))  +
+  # geom_boxplot(aes(fill=cat)) +
+  # scale_color_manual(values = colors) +
+  # #scale_fill_manual(values = colors) +
+  # ylab(label) +
+  # xlab('Covariate') +
+  # theme_minimal(base_size = 35) +
+  # theme(axis.text.x = element_text(angle = 45)) +
+  #   ylim(c(-0.005,.14))+
+  #   labs(fill = "Category") 
+}
+
+```
+
+```{r}
+# load in sq
+SumSq=readRDS('~/int_sumSq.rds')
+# load in sq_heldout
+SumSqH=readRDS('~/Desktop/g_p/int_sumSqHeldout.rds')
+# load in deviance explained
+DevExpl=readRDS('~/Desktop/g_p/int_DevExplained.rds')
+# load in AIC
+AICs=readRDS('~/Desktop/g_p/int_AIC.rds')
+# get proportion of rows with lower AIC with each variable added
+for (r in 1:length(colnames(AICs))){
+  columnOfInt=AICs[1:35,r]
+  # if removing item increases AIC (relative to full model), the item was helpful to have in the model
+  propAIC=sum(columnOfInt[1:35]>AICs$AIC_full[1:35])/35
+  print(colnames(AICs[r]))
+  print(propAIC)
+}
+
+# visualize deviance explained by each term
+# deviance explained by each term
+devExplEachTerm=NULL
+for (r in 1:length(colnames(DevExpl))){
+  columnOfInt=DevExpl[1:35,r]
+  propDev=1-(columnOfInt/DevExpl$devExplained_full[1:35])
+  devExplEachTerm[r]=mean(propDev)
+}
+
+# remove prefix for plotting
+columnname=colnames(DevExpl)
+columnname=gsub('devExplained_','',columnname)
+plotdf=data.frame(devExplEachTerm,columnname)
+library(ggplot2)
+# Basic barplot
+ggplot(data=plotdf, aes(x=columnname, y=-devExplEachTerm)) +
+  geom_bar(stat="identity")+ylab('Prop. Deviance Explained Lost Excluding Cov.')+xlab('Covariate')+theme(axis.text.x = element_text(angle=45))
+
+```
+
+```{r}
+Int_TPDevExpl=readRDS('~/Int_TempPrec_DevExplained.rds')
+# only have first 5k for now
+Int_TPDevExpl=Int_TPDevExpl[1:5000,]
+# visualize deviance explained by each term
+# deviance explained by each term
+devExplEachTerm=matrix(data=NA,nrow=5000,ncol=length(colnames(Int_TPDevExpl)))
+for (r in 1:length(colnames(Int_TPDevExpl))){
+  columnOfInt=Int_TPDevExpl[,r]
+  propDev=1-(columnOfInt/Int_TPDevExpl$devExplained_full)
+  devExplEachTerm[,r]=propDev
+}
+
+# remove prefix for plotting
+columnname=colnames(Int_TPDevExpl)
+columnname=gsub('devExplained_','',columnname)
+colnames(devExplEachTerm)<-columnname
+library(reshape2)
+plotdf=melt(data.frame(devExplEachTerm))
+library(ggplot2)
+# Basic barplot
+ggplot(data=plotdf, aes(x=variable, y=value)) +
+  geom_boxplot()+ylab('Prop. Deviance Explained in TP2 Int. w/ Covariate')+xlab('Covariate')+theme(axis.text.x = element_text(angle=45))+theme_minimal()
+```
+
+```{r}
+# eval AIC/BIC for temp prec
+AICs=readRDS('~/p_TempPrec_AIC.rds')
+AICs=AICs[1:5000,]
+# get proportion of rows with lower AIC with each variable added
+for (r in 1:length(colnames(AICs))){
+  columnOfInt=AICs[,r]
+  # if removing item increases AIC (relative to full model), the item was helpful to have in the model
+  propAIC=sum(columnOfInt>AICs$AIC_full)/5000
+  print(colnames(AICs[r]))
+  print(propAIC)
+}
+
+```
+
+```{r}
+# sum of squares held-out temporal precedence p
+int_TPDevExpl_IVE=readRDS('~/p_DevExplained.rds')
+# only have first 5k for now
+int_TPDevExpl_IVE=int_TPDevExpl_IVE[1:3000,]
+# visualize deviance explained by each term
+# deviance explained by each term
+devExplEachTerm=matrix(data=NA,nrow=3000,ncol=length(colnames(int_TPDevExpl_IVE)))
+for (r in 1:length(colnames(int_TPDevExpl_IVE))){
+  columnOfInt=int_TPDevExpl_IVE[,r]
+  propDev=1-(columnOfInt/int_TPDevExpl_IVE$devExplained_full)
+  devExplEachTerm[,r]=propDev
+}
+# remove prefix for plotting
+columnname=colnames(int_TPDevExpl_IVE)
+columnname=gsub('devExplained_','',columnname)
+colnames(devExplEachTerm)<-columnname
+library(reshape2)
+plotdf=melt(data.frame(devExplEachTerm))
+library(ggplot2)
+# Basic barplot
+ggplot(data=plotdf, aes(x=variable, y=value)) +
+  geom_boxplot()+ylab(expression('Prop. Deviance Explained: p'))+xlab('Covariate')+theme_bw(base_size=40)+theme(axis.text.x = element_text(angle=90))+ylim(c(0,1))
+# comparison plot
+plotdf2<-data.frame(int_TPDevExpl_IVE$devExplained_full)
+colnames(plotdf2)<-'FullModel'
+ggplot(data=plotdf2, aes(y=FullModel)) +
+  geom_boxplot()+theme_bw(base_size=40)+ylim(c(0,1))+ylab('Deviance Explained: p')+
+  scale_x_continuous(breaks = NULL)
+```
+
+
+```{r}
+# sum of squares held-out temporal precedence p
+int_TPDevExpl_IVE=readRDS('~/Int_DevExplained.rds')
+# only have first 5k for now
+int_TPDevExpl_IVE=int_TPDevExpl_IVE[1:3000,]
+# visualize deviance explained by each term
+# deviance explained by each term
+devExplEachTerm=matrix(data=NA,nrow=3000,ncol=length(colnames(int_TPDevExpl_IVE)))
+for (r in 1:length(colnames(int_TPDevExpl_IVE))){
+  columnOfInt=int_TPDevExpl_IVE[,r]
+  propDev=1-(columnOfInt/int_TPDevExpl_IVE$devExplained_full)
+  devExplEachTerm[,r]=propDev
+}
+# remove prefix for plotting
+columnname=colnames(int_TPDevExpl_IVE)
+columnname=gsub('devExplained_','',columnname)
+colnames(devExplEachTerm)<-columnname
+library(reshape2)
+plotdf=melt(data.frame(devExplEachTerm))
+library(ggplot2)
+# Basic barplot
+ggplot(data=plotdf, aes(x=variable, y=value)) +
+  geom_boxplot()+ylab(expression('Prop. Deviance Explained: Internalizing'))+xlab('Covariate')+theme_bw(base_size=40)+theme(axis.text.x = element_text(angle=90))+ylim(c(0,1))
+# comparison plot
+plotdf2<-data.frame(int_TPDevExpl_IVE$devExplained_full)
+colnames(plotdf2)<-'FullModel'
+ggplot(data=plotdf2, aes(y=FullModel)) +
+  geom_boxplot()+theme_bw(base_size=40)+ylim(c(0,1))+ylab('Deviance Explained: Internalizing')+
+  scale_x_continuous(breaks = NULL)
+```
+
+
+```{r}
+# sum of squares held-out temporal precedence p
+int_TPDevExpl_IVE=readRDS('~/Ext_DevExplained.rds')
+# only have first 5k for now
+int_TPDevExpl_IVE=int_TPDevExpl_IVE[1:3000,]
+# visualize deviance explained by each term
+# deviance explained by each term
+devExplEachTerm=matrix(data=NA,nrow=3000,ncol=length(colnames(int_TPDevExpl_IVE)))
+for (r in 1:length(colnames(int_TPDevExpl_IVE))){
+  columnOfInt=int_TPDevExpl_IVE[,r]
+  propDev=1-(columnOfInt/int_TPDevExpl_IVE$devExplained_full)
+  devExplEachTerm[,r]=propDev
+}
+# remove prefix for plotting
+columnname=colnames(int_TPDevExpl_IVE)
+columnname=gsub('devExplained_','',columnname)
+colnames(devExplEachTerm)<-columnname
+library(reshape2)
+plotdf=melt(data.frame(devExplEachTerm))
+library(ggplot2)
+# Basic barplot
+ggplot(data=plotdf, aes(x=variable, y=value)) +
+  geom_boxplot()+ylab(expression('Prop. Deviance Explained: Externalizing'))+xlab('Covariate')+theme_bw(base_size=40)+theme(axis.text.x = element_text(angle=90))+ylim(c(0,1))
+# comparison plot
+plotdf2<-data.frame(int_TPDevExpl_IVE$devExplained_full)
+colnames(plotdf2)<-'FullModel'
+ggplot(data=plotdf2, aes(y=FullModel)) +
+  geom_boxplot()+theme_bw(base_size=40)+ylim(c(0,1))+ylab('Deviance Explained: Externalizing')+
+  scale_x_continuous(breaks = NULL)
+```
+
+###### 
+###### 
+###### PLOT DEV EXPL BY # afflicted
+###### 
+###### 
+
+```{r}
+# sum of squares held-out temporal precedence p
+int_TPDevExpl_IVE=readRDS('~/p_TempPrec_DevExplained.rds.rds')
+NumAfflicted=readRDS('~/p_number.rds')
+# correct
+NumAfflicted=NumAfflicted-7686
+#2-19 are relevant columns
+# only have first 5k for now
+int_TPDevExpl_IVE=int_TPDevExpl_IVE[1:3000,]
+NumAfflicted=NumAfflicted[1:3000,]
+# visualize deviance explained by each term
+# deviance explained by each term
+devExplEachTermPer=matrix(data=NA,nrow=3000,ncol=length(colnames(int_TPDevExpl_IVE)))
+for (r in 2:19){
+  columnOfInt=int_TPDevExpl_IVE[,r]
+  propDev=1-(columnOfInt/int_TPDevExpl_IVE$devExplained_full)
+  # r-1 because it starts on col1 where other df starts on col 2
+  propDevPer=propDev/(NumAfflicted[,r-1])
+  # 7,500 to guess what is would be like if everyone had it?
+  devExplEachTermPer[,r]=propDevPer
+}
+# same rules for full-coverage terms
+for (r in 20:31){
+  columnOfInt=int_TPDevExpl_IVE[,r]
+  propDev=1-(columnOfInt/int_TPDevExpl_IVE$devExplained_full)
+  # r-1 because it starts on col1 where other df starts on col 2
+  propDevPer=propDev/7686
+  # 7,500 to guess what is would be like if everyone had it?
+  devExplEachTermPer[,r]=propDevPer
+}
+# remove prefix for plotting
+columnname=colnames(int_TPDevExpl_IVE)
+columnname=gsub('devExplained_','',columnname)
+colnames(devExplEachTermPer)<-columnname
+library(reshape2)
+plotdf=melt(data.frame(devExplEachTermPer))
+library(ggplot2)
+# Basic barplot
+ggplot(data=plotdf, aes(x=variable, y=value))+ geom_boxplot()+ylab(expression('Prop. Deviance Explained Per Subj: p'))+xlab('Covariate')+theme_bw(base_size=40)+theme(axis.text.x = element_text(angle=90))+ylim(c(0,1/7686))
+# comparison plot
+plotdf2<-data.frame(int_TPDevExpl_IVE$devExplained_full)
+colnames(plotdf2)<-'FullModel'
+ggplot(data=plotdf2, aes(y=FullModel)) +
+  geom_boxplot()+theme_bw(base_size=40)+ylim(c(0,1/7686))+ylab('Deviance Explained: p')+
+  scale_x_continuous(breaks = NULL)
+```
+
+
+```{r}
+# sum of squares held-out temporal precedence p
+int_TPDevExpl_IVE=readRDS('~/Int_DevExplained.rds')
+NumAfflicted=readRDS('~/Int_number.rds')
+# correct
+NumAfflicted=NumAfflicted-7686
+#2-19 are relevant columns
+# only have first 5k for now
+int_TPDevExpl_IVE=int_TPDevExpl_IVE[1:3000,]
+NumAfflicted=NumAfflicted[1:3000,]
+# visualize deviance explained by each term
+# deviance explained by each term
+devExplEachTermPer=matrix(data=NA,nrow=3000,ncol=length(colnames(int_TPDevExpl_IVE)))
+for (r in 2:19){
+  columnOfInt=int_TPDevExpl_IVE[,r]
+  propDev=1-(columnOfInt/int_TPDevExpl_IVE$devExplained_full)
+  # r-1 because it starts on col1 where other df starts on col 2
+  propDevPer=propDev/(NumAfflicted[,r-1])
+  # 7,500 to guess what is would be like if everyone had it?
+  devExplEachTermPer[,r]=propDevPer
+}
+# same rules for full-coverage terms
+for (r in 20:31){
+  columnOfInt=int_TPDevExpl_IVE[,r]
+  propDev=1-(columnOfInt/int_TPDevExpl_IVE$devExplained_full)
+  # r-1 because it starts on col1 where other df starts on col 2
+  propDevPer=propDev/7686
+  # 7,500 to guess what is would be like if everyone had it?
+  devExplEachTermPer[,r]=propDevPer
+}
+# remove prefix for plotting
+columnname=colnames(int_TPDevExpl_IVE)
+columnname=gsub('devExplained_','',columnname)
+colnames(devExplEachTermPer)<-columnname
+library(reshape2)
+plotdf=melt(data.frame(devExplEachTermPer))
+library(ggplot2)
+# Basic barplot
+ggplot(data=plotdf, aes(x=variable, y=value))+ geom_boxplot()+ylab(expression('Prop. Deviance Explained Per Subj: Internalizing'))+xlab('Covariate')+theme_bw(base_size=40)+theme(axis.text.x = element_text(angle=90))+ylim(c(0,1/7686))
+# comparison plot
+plotdf2<-data.frame(int_TPDevExpl_IVE$devExplained_full)
+colnames(plotdf2)<-'FullModel'
+ggplot(data=plotdf2, aes(y=FullModel)) +
+  geom_boxplot()+theme_bw(base_size=40)+ylim(c(0,1/7686))+ylab('Deviance Explained: Internalizing')+
+  scale_x_continuous(breaks = NULL)
+```
+
+```{r}
+# sum of squares held-out temporal precedence p
+int_TPDevExpl_IVE=readRDS('~/Ext_DevExplained.rds')
+NumAfflicted=readRDS('~/Ext_number.rds')
+# correct
+NumAfflicted=NumAfflicted-7686
+#2-19 are relevant columns
+# only have first 5k for now
+int_TPDevExpl_IVE=int_TPDevExpl_IVE[1:3000,]
+NumAfflicted=NumAfflicted[1:3000,]
+# visualize deviance explained by each term
+# deviance explained by each term
+devExplEachTermPer=matrix(data=NA,nrow=3000,ncol=length(colnames(int_TPDevExpl_IVE)))
+for (r in 2:19){
+  columnOfInt=int_TPDevExpl_IVE[,r]
+  propDev=1-(columnOfInt/int_TPDevExpl_IVE$devExplained_full)
+  # r-1 because it starts on col1 where other df starts on col 2
+  propDevPer=propDev/(NumAfflicted[,r-1])
+  # 7,500 to guess what is would be like if everyone had it?
+  devExplEachTermPer[,r]=propDevPer
+}
+# same rules for full-coverage terms
+for (r in 20:31){
+  columnOfInt=int_TPDevExpl_IVE[,r]
+  propDev=1-(columnOfInt/int_TPDevExpl_IVE$devExplained_full)
+  # r-1 because it starts on col1 where other df starts on col 2
+  propDevPer=propDev/7686
+  # 7,500 to guess what is would be like if everyone had it?
+  devExplEachTermPer[,r]=propDevPer
+}
+# remove prefix for plotting
+columnname=colnames(int_TPDevExpl_IVE)
+columnname=gsub('devExplained_','',columnname)
+colnames(devExplEachTermPer)<-columnname
+library(reshape2)
+plotdf=melt(data.frame(devExplEachTermPer))
+library(ggplot2)
+# Basic barplot
+ggplot(data=plotdf, aes(x=variable, y=value))+ geom_boxplot()+ylab(expression('Prop. Deviance Explained Per Subj: Externalizing'))+xlab('Covariate')+theme_bw(base_size=40)+theme(axis.text.x = element_text(angle=90))+ylim(c(0,1/7686))
+# comparison plot
+plotdf2<-data.frame(int_TPDevExpl_IVE$devExplained_full)
+colnames(plotdf2)<-'FullModel'
+ggplot(data=plotdf2, aes(y=FullModel)) +
+  geom_boxplot()+theme_bw(base_size=40)+ylim(c(0,1/7686))+ylab('Deviance Explained: Externalizing')+
+  scale_x_continuous(breaks = NULL)
+```
+
+```{r}
+# sum of squares held-out temporal precedence p
+int_TPDevExpl_IVE=readRDS('~/p_DevExplained.rds')
+# only have first 5k for now
+int_TPDevExpl_IVE=int_TPDevExpl_IVE[1:3000,]
+# visualize deviance explained by each term
+# deviance explained by each term
+devExplEachTerm=matrix(data=NA,nrow=3000,ncol=length(colnames(int_TPDevExpl_IVE)))
+for (r in 1:length(colnames(int_TPDevExpl_IVE))){
+  columnOfInt=int_TPDevExpl_IVE[,r]
+  propDev=1-(columnOfInt/int_TPDevExpl_IVE$devExplained_full)
+  devExplEachTerm[,r]=propDev
+}
+# remove prefix for plotting
+columnname=colnames(int_TPDevExpl_IVE)
+columnname=gsub('devExplained_','',columnname)
+colnames(devExplEachTerm)<-columnname
+library(reshape2)
+plotdf=melt(data.frame(devExplEachTerm))
+library(ggplot2)
+# Basic barplot
+ggplot(data=plotdf, aes(x=variable, y=value)) +
+  geom_boxplot()+ylab(expression('Prop. Deviance Explained: p'))+xlab('Covariate')+theme_bw(base_size=40)+theme(axis.text.x = element_text(angle=90))+ylim(c(0,1))
+# comparison plot
+plotdf2<-data.frame(int_TPDevExpl_IVE$devExplained_full)
+colnames(plotdf2)<-'FullModel'
+ggplot(data=plotdf2, aes(y=FullModel)) +
+  geom_boxplot()+theme_bw(base_size=40)+ylim(c(0,1))+ylab('Deviance Explained: p')+
+  scale_x_continuous(breaks = NULL)
+```
+
+
+```{r}
+# sum of squares held-out temporal precedence p
+int_TPDevExpl_IVE=readRDS('~/p_TempPrec_DevExplained.rds')
+# only have first 5k for now
+int_TPDevExpl_IVE=int_TPDevExpl_IVE[1:5000,]
+# visualize deviance explained by each term
+# deviance explained by each term
+devExplEachTerm=matrix(data=NA,nrow=5000,ncol=length(colnames(int_TPDevExpl_IVE)))
+for (r in 1:length(colnames(int_TPDevExpl_IVE))){
+  columnOfInt=int_TPDevExpl_IVE[,r]
+  propDev=1-(columnOfInt/int_TPDevExpl_IVE$devExplained_full)
+  devExplEachTerm[,r]=propDev
+}
+# remove prefix for plotting
+columnname=colnames(int_TPDevExpl_IVE)
+columnname=gsub('devExplained_','',columnname)
+colnames(devExplEachTerm)<-columnname
+library(reshape2)
+plotdf=melt(data.frame(devExplEachTerm))
+library(ggplot2)
+# Basic barplot
+ggplot(data=plotdf, aes(x=variable, y=value)) +
+  geom_boxplot()+ylab(expression('Prop. Deviance Explained TP2: p'))+xlab('Covariate')+theme_bw(base_size=40)+theme(axis.text.x = element_text(angle=90))+ylim(c(0,1))
+# comparison plot
+plotdf2<-data.frame(int_TPDevExpl_IVE$devExplained_full)
+colnames(plotdf2)<-'FullModel'
+ggplot(data=plotdf2, aes(y=FullModel)) +
+  geom_boxplot()+theme_bw(base_size=40)+ylim(c(0,1))+ylab('Deviance Explained: TP2 p')+
+  scale_x_continuous(breaks = NULL)
+```
+
+```{r}
+# intervisit events versus happened before baseline
+yleCols=colnames(int_TPDevExpl_IVE)[2:19]
+b4=Int_TPDevExpl[,c(yleCols)]
+# normalize to variance explained in that boot
+for (r in 1:5000){
+  b4[r,]=b4[r,]/ Int_TPDevExpl$devExplained_full[r]
+}
+# now for ive
+IVE=int_TPDevExpl_IVE[,c(yleCols)]
+for (r in 1:5000){
+  IVE[r,]=IVE[r,]/ int_TPDevExpl_IVE$devExplained_full[r]
+}
+mb4=melt(b4)
+mb4$when='Before'
+mIve=melt(IVE)
+mIve$when='After'
+merged=rbind(mb4,mIve)
+
+# plot difference in deviance explained
+ggplot(data=merged, aes(x=variable, y=value, color=when)) +
+  geom_boxplot()+ylab('Deviance Explained in TP2 Int. w/ event occuring')+xlab('Covariate')+theme(axis.text.x = element_text(angle=45))+theme_minimal()
+```
+
+```{r}
+
+```
