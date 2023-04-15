@@ -128,9 +128,14 @@ for t=tasks
 	if exist(LeftTSmat,'file') && exist(RightTSmat,'file')
 	% run OpFl
 	OpFl_abcd(subj,task,LeftTSmat,RightTSmat,OpFlOut)
-	Extract_RelativeAngles(subj,OpFlOut)
 	end
 end
+% concatenate optical flow output
+ConcatOpFl(subj)
+% OpFl concatenated file name
+OpFlFile=['/scratch/users/apines/abcd_images/fmriresults01/derivatives/abcd-hcp-pipeline/' subj '/ses-baselineYear1Arm1/func/' subj '_concat_OpFl_3k.mat'];
+% extract relative angles
+Extract_RelativeAngles(subj,OpFlFile)
 % note this might be a compiled script
 toc
 disp('Δ deleting neuroimages')
