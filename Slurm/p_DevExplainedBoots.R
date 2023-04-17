@@ -257,6 +257,9 @@ num_step=rep(0,10000)
 num_new_job=rep(0,10000)
 num_new_sib=rep(0,10000)
 
+# and one for betas: include betanames
+stdbetas=matrix(24,10000)
+stdbetas=data.frame(betas)
 # garner num subjs for bootstrapping
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
@@ -265,7 +268,7 @@ masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','ple_died_y','ple_injured_y','ple_
 # set seed because I'll have to rerun this differently for second 5k
 set.seed(1)
 # loop over manual bootstrap
-for (b in 1:10000){
+for (b in 1:100){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -280,9 +283,37 @@ for (b in 1:10000){
 	bootSamp=resampled_df
 	# held out sample
 	heldOut=masterdf[!(masterdf$subjectkey %in% BootSubjs),]
+
+	#### get SDs to evaluate standardized betas in full model over each iteration
+	# extract column names of interest that correspond to desired standardized beta coefficients
+	colsOfint=colnames(bootSamp)[2:19]
+	# abvoe only overs yle's need sex, raceEth # TAG ON INCOME LATER, NOT A FACTOR
+	colsOfint=c(colsOfint,'sex','race_ethnicity')
+	# get dummy variables for the 20 variables (not income, which is continuous)
+	dummies <- lapply(bootSamp[,colsOfint], function(x) model.matrix(~x - 1))
+	# combine all dummy variables into a single data frame
+	dummies_df <- do.call(cbind, dummies)	
+	# calculate the standard deviations for columns of interest
+	# (each level of the factor varible)
+	sds <- apply(dummies_df, 2, sd)
+	# calculate SD for income (also column of interest)
+	incomeSD=sd(bootSamp$income)
+	# remove duplicate SDS (model.matrix defaults to two columns for a single boolean variable, SD is the same in both columns)
+	sds<-sds[names(sds)!='x1']
+	# and then remove "male" designation (captured by female)
+	sds<-sds[names(sds)!='xM']
+	# need to perserve ordering, first 18 are yles, 19 is income, 20 is sex, 21-24 is raceEth
+	sds<-c(sds[1:18],incomeSD,sds[19:23])
+	# get names of ple and raceEth dummy variables. each ple_ variable has a 1 sex has M (F as default factor), and race_eth has 2 3 4 and 5)
+	namesOfint=colsOfint;
+	namesOfint[1:18]=gsub('_y','_y1',namesOfint[1:18])
+	namesOfint[19]='income'
+	namesOfint[20]='sexM'
+	namesOfint[21:24]=c('race_ethnicity2','race_ethnicity3','race_ethnicity4','race_ethnicity5')
+
 	# fit models
 	### full
-	fullModel<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	fullModel<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predictFull=predict.bam(fullModel,bootSamp)
 	sumSq_full[b]=sum(((exp(predictFull)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -299,6 +330,15 @@ for (b in 1:10000){
 	MAE_full[b]=median(abs((exp(predictFull)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1)))
 	# get MAE in heldout
 	hMAE_full[b]=median(abs((exp(predictFullHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
+
+	###########################
+	# extract coefficients from columns of interest for standardized betas
+	betas=subset(coef(fullModel), names(coef(fullModel)) %in% namesOfint)
+	# get standardized beta coefficients
+	std_betas=betas/sds
+	# record standardized betas
+	stdbetas[,b]=std_betas
+	###########################
 
 	### died
 	Model_n_died<-bam(cbcl_scr_syn_totprob_r~ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
@@ -961,3 +1001,7 @@ saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/p_MAE.rds')
 # saveout heldout MAE
 outdf=data.frame(hMAE_full,hMAE_n_died,hMAE_n_injured,hMAE_n_crime,hMAE_n_friend,hMAE_n_friend_injur,hMAE_n_arrest,hMAE_n_friend_died,hMAE_n_mh,hMAE_n_sib,hMAE_n_victim,hMAE_n_separ,hMAE_n_law,hMAE_n_school,hMAE_n_move,hMAE_n_jail,hMAE_n_step,hMAE_n_new_job,hMAE_n_new_sib,hMAE_n_g,hMAE_n_interview_age,hMAE_n_Grades,hMAE_n_parentPcount,hMAE_n_income,hMAE_n_parental_education,hMAE_n_sex,hMAE_n_race_ethnicity,hMAE_n_weight,hMAE_n_waist,hMAE_n_height,hMAE_n_BMI)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/p_hMAE.rds')
+
+# set colnames of betas prior to saveout (from last iteration)
+colnames(stdbetas)=namesOfint
+saveRDS(stdbetas,'/oak/stanford/groups/leanew1/users/apines/data/gp/p_betas.rds')
