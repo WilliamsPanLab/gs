@@ -291,21 +291,6 @@ for (b in 1:10000){
         colsOfint=colnames(bootSamp)[3:20]
         # abvoe only overs yle's need sex, raceEth # TAG ON INCOME LATER, NOT A FACTOR
         colsOfint=c(colsOfint,'sex.x','race_ethnicity.x')
-        # get dummy variables for the 20 variables (not income, which is continuous)
-        dummies <- lapply(bootSamp[,colsOfint], function(x) model.matrix(~x - 1))
-        # combine all dummy variables into a single data frame
-        dummies_df <- do.call(cbind, dummies)
-        # calculate the standard deviations for columns of interest
-        # (each level of the factor varible)
-        sds <- apply(dummies_df, 2, sd)
-        # calculate SD for income (also column of interest)
-        incomeSD=sd(bootSamp$income.x)
-        # remove duplicate SDS (model.matrix defaults to two columns for a single boolean variable, SD is the same in both columns)
-        sds<-sds[names(sds)!='x1']
-        # and then remove "male" designation (captured by female)
-        sds<-sds[names(sds)!='xM']
-        # need to perserve ordering, first 18 are yles, 19 is income, 20 is sex, 21-24 is raceEth
-        sds<-c(sds[1:18],incomeSD,sds[19:23])
         # get names of ple and raceEth dummy variables. each ple_ variable has a 1 sex has M (F as default factor), and race_eth has 2 3 4 and 5)
         namesOfint=colsOfint;
         #namesOfint[1:18]=gsub('_y','_y1',namesOfint[1:18])
@@ -335,10 +320,8 @@ for (b in 1:10000){
 	###########################
         # extract coefficients from columns of interest for standardized betas
         betas=subset(coef(fullModel), names(coef(fullModel)) %in% namesOfint)
-        # get standardized beta coefficients
-        std_betas=betas/sds
         # record standardized betas
-        stdbetas[b,]=std_betas
+        stdbetas[b,]=betas
         ###########################
 
 	### died

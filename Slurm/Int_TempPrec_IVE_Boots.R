@@ -294,21 +294,6 @@ for (b in 1:10000){
         colsOfint=colsOfint[-grep('.y.2',colsOfint)]
         # abvoe only overs yle's need sex, raceEth # TAG ON INCOME LATER, NOT A FACTOR
         colsOfint=c(colsOfint,'sex.x','race_ethnicity.x')
-        # get dummy variables for the 20 variables (not income, which is continuous)
-        dummies <- lapply(bootSamp[,colsOfint], function(x) model.matrix(~x - 1))
-        # combine all dummy variables into a single data frame
-        dummies_df <- do.call(cbind, dummies)
-        # calculate the standard deviations for columns of interest
-        # (each level of the factor varible)
-        sds <- apply(dummies_df, 2, sd)
-        # calculate SD for income (also column of interest)
-        incomeSD=sd(bootSamp$income.x)
-        # remove duplicate SDS (model.matrix defaults to two columns for a single boolean variable, SD is the same in both columns)
-        sds<-sds[names(sds)!='x1']
-        # and then remove "male" designation (captured by female)
-        sds<-sds[names(sds)!='xM']
-        # need to perserve ordering, first 18 are yles, 19 is income, 20 is sex, 21-24 is raceEth
-        sds<-c(sds[1:18],incomeSD,sds[19:23])
         # get names of ple and raceEth dummy variables. each ple_ variable has a 1 sex has M (F as default factor), and race_eth has 2 3 4 and 5)
         namesOfint=colsOfint;
         #namesOfint[1:18]=gsub('_y','_y1',namesOfint[1:18])
@@ -335,6 +320,13 @@ for (b in 1:10000){
 	# get held out MAE
 	hMAE_full[b]=median(abs((exp(predictFullHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r.y)-1)))
 
+	##########################
+	# extract coefficients from columns of interest for standardized betas
+        betas=subset(coef(fullModel), names(coef(fullModel)) %in% namesOfint)
+        # record standardized betas
+        stdbetas[b,]=betas
+        ###########################
+
 	### died
 	Model_n_died<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_injured_yBV.x+ple_injured_y_IVE.y+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+income.x+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)
 	# predict to get sum of squares
@@ -355,15 +347,6 @@ for (b in 1:10000){
 	MAE_n_died[b]=median(abs((exp(predict_n_died)-1)-(exp(bootSamp$cbcl_scr_syn_internal_r.y)-1)))
 	# get held out MAE
 	hMAE_n_died[b]=median(abs((exp(predict_n_diedHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_internal_r.y)-1)))
-
-	###########################
-        # extract coefficients from columns of interest for standardized betas
-        betas=subset(coef(fullModel), names(coef(fullModel)) %in% namesOfint)
-        # get standardized beta coefficients
-        std_betas=betas/sds
-        # record standardized betas
-        stdbetas[b,]=std_betas
-        ###########################
 
 	### injured
 	Model_n_injured<-bam(cbcl_scr_syn_internal_r.y~cbcl_scr_syn_internal_r.x+ple_died_yBV.x+ple_died_y_IVE.y+ple_injured_yBV.x+ple_crime_yBV.x+ple_crime_y_IVE.y+ple_friend_yBV.x+ple_friend_y_IVE.y+ple_friend_injur_yBV.x+ple_friend_injur_y_IVE.y+ple_arrest_yBV.x+ple_arrest_y_IVE.y+ple_friend_died_yBV.x+ple_friend_died_y_IVE.y+ple_mh_yBV.x+ple_mh_y_IVE.y+ple_sib_yBV.x+ple_sib_y_IVE.y+ple_victim_yBV.x+ple_victim_y_IVE.y+ple_separ_yBV.x+ple_separ_y_IVE.y+ple_law_yBV.x+ple_law_y_IVE.y+ple_school_yBV.x+ple_school_y_IVE.y+ple_move_yBV.x+ple_move_y_IVE.y+ple_jail_yBV.x+ple_jail_y_IVE.y+ple_step_yBV.x+ple_step_y_IVE.y+ple_new_job_yBV.x+ple_new_job_y_IVE.y+ple_new_sib_yBV.x+ple_new_sib_y_IVE.y+s(g.x,k=4)+s(interview_age.x,k=4)+s(Grades.x,k=4)+s(parentPcount.x,k=4)+income.x+s(parental_education.x,k=4)+sex.x+race_ethnicity.x+s(weight.x,k=4)+s(waist.x,k=4)+s(height.x,k=4)+s(BMI.x,k=4),data=bootSamp)

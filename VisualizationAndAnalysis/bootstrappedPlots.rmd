@@ -86,8 +86,12 @@ plot_dev_explained <- function(file_path,label) {
   plotdf=subset(plotdf, variable != "full")
   plotdf=subset(plotdf, variable != "parentPcount")
   
+  
+  # take out events for now: will plot std betas instead
+  plotdf=plotdf[plotdf$cat!='Events',]
+  
  # Plot deviance explained by each term with grouping and coloration by 'cat'
-  ggplot(data = plotdf, aes(x = variable, y = value,color=cat))  +
+  ggplot(data = plotdf, aes(x = factor(variable,levels=rev(c('g','Grades','interview_age','sex','income','race_ethnicity','parental_education','height','weight','waist','BMI'))), y = value,color=cat))  +
   geom_boxplot(width = 0.4, position = position_nudge(x = 0.5)) +
   geom_jitter(aes(color = cat), alpha = 0.01, size = 2, width = 0.2, height = 0.01) +
   scale_color_manual(values = colors) +
@@ -96,7 +100,7 @@ plot_dev_explained <- function(file_path,label) {
   xlab("Covariate") +
   theme_minimal(base_size = 35) +
   theme(axis.text.x = element_text(angle = 45)) +
-  ylim(c(-0.005, 0.14)) +
+  ylim(c(-0.005, 0.15)) +
   labs(color = "Category")+coord_flip()
   
   
