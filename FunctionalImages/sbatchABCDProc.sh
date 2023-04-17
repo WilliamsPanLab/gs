@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --job-name=ABCDParticipant
-#SBATCH --time=2:00:00
+#SBATCH --time=4:00:00
 #SBATCH -p normal,leanew1  # Queue names you can submit to
 #SBATCH -n 1
 #SBATCH --mem=30G

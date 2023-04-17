@@ -258,8 +258,8 @@ num_new_job=rep(0,10000)
 num_new_sib=rep(0,10000)
 
 # and one for betas: include betanames
-stdbetas=matrix(24,10000)
-stdbetas=data.frame(betas)
+stdbetas=matrix(0,1000,24)
+stdbetas=data.frame(stdbetas)
 # garner num subjs for bootstrapping
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
@@ -337,7 +337,7 @@ for (b in 1:100){
 	# get standardized beta coefficients
 	std_betas=betas/sds
 	# record standardized betas
-	stdbetas[,b]=std_betas
+	stdbetas[b,]=std_betas
 	###########################
 
 	### died
