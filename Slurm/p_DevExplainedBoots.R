@@ -265,10 +265,9 @@ subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up
 masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','ple_died_y','ple_injured_y','ple_crime_y','ple_friend_y','ple_friend_injur_y','ple_arrest_y','ple_friend_died_y','ple_mh_y','ple_sib_y','ple_victim_y','ple_separ_y','ple_law_y','ple_school_y','ple_move_y','ple_jail_y','ple_step_y','ple_new_job_y','ple_new_sib_y','g','subjectkey','interview_age','Grades','parentPcount','income','parental_education','sex','race_ethnicity','weight','waist','height','BMI')]
-# set seed because I'll have to rerun this differently for second 5k
 set.seed(1)
 # loop over manual bootstrap
-for (b in 1:100){
+for (b in 1:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -341,7 +340,7 @@ for (b in 1:100){
 	###########################
 
 	### died
-	Model_n_died<-bam(cbcl_scr_syn_totprob_r~ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_died<-bam(cbcl_scr_syn_totprob_r~ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_died=predict.bam(Model_n_died,bootSamp)
 	sumSq_n_died[b]=sum(((exp(predict_n_died)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -363,7 +362,7 @@ for (b in 1:100){
 
 
 	### injured
-	Model_n_injured<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_injured<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_injured=predict.bam(Model_n_injured,bootSamp)
 	sumSq_n_injured[b]=sum(((exp(predict_n_injured)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -384,7 +383,7 @@ for (b in 1:100){
 	hMAE_n_injured[b]=median(abs((exp(predict_n_injuredHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### crime
-	Model_n_crime<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_crime<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_crime=predict.bam(Model_n_crime,bootSamp)
 	sumSq_n_crime[b]=sum(((exp(predict_n_crime)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -405,7 +404,7 @@ for (b in 1:100){
 	hMAE_n_crime[b]=median(abs((exp(predict_n_crimeHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### friend
-	Model_n_friend<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_friend<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_friend=predict.bam(Model_n_friend,bootSamp)
 	sumSq_n_friend[b]=sum(((exp(predict_n_friend)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -426,7 +425,7 @@ for (b in 1:100){
 	hMAE_n_friend[b]=median(abs((exp(predict_n_friendHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### friend_injured
-	Model_n_friend_injured<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_friend_injured<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_friend_injured=predict.bam(Model_n_friend_injured,bootSamp)
 	sumSq_n_friend_injur[b]=sum(((exp(predict_n_friend_injured)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -447,7 +446,7 @@ for (b in 1:100){
 	hMAE_n_friend_injur[b]=median(abs((exp(predict_n_friend_injuredHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### arrest
-	Model_n_arrest<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_arrest<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_arrest=predict.bam(Model_n_arrest,bootSamp)
 	sumSq_n_arrest[b]=sum(((exp(predict_n_arrest)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -468,7 +467,7 @@ for (b in 1:100){
 	hMAE_n_arrest[b]=median(abs((exp(predict_n_arrestHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### friend_died
-	Model_n_friend_died<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_friend_died<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_friend_died=predict.bam(Model_n_friend_died,bootSamp)
 	sumSq_n_friend_died[b]=sum(((exp(predict_n_friend_died)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -489,7 +488,7 @@ for (b in 1:100){
 	hMAE_n_friend_died[b]=median(abs((exp(predict_n_friend_diedHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### mental_health
-	Model_n_mh<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_mh<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_mh=predict.bam(Model_n_mh,bootSamp)
 	sumSq_n_mh[b]=sum(((exp(predict_n_mh)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -510,7 +509,7 @@ for (b in 1:100){
 	hMAE_n_mh[b]=median(abs((exp(predict_n_mhHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### sibling
-	Model_n_sib<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_sib<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_sib=predict.bam(Model_n_sib,bootSamp)
 	sumSq_n_sib[b]=sum(((exp(predict_n_sib)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -531,7 +530,7 @@ for (b in 1:100){
 	hMAE_n_sib[b]=median(abs((exp(predict_n_sibHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### victim
-	Model_n_victim<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_victim<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_victim=predict.bam(Model_n_victim,bootSamp)
 	sumSq_n_victim[b]=sum(((exp(predict_n_victim)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -552,7 +551,7 @@ for (b in 1:100){
 	hMAE_n_victim[b]=median(abs((exp(predict_n_victimHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### separation
-	Model_n_separ<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_separ<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_separ=predict.bam(Model_n_separ,bootSamp)
 	sumSq_n_separ[b]=sum(((exp(predict_n_separ)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -573,7 +572,7 @@ for (b in 1:100){
 	hMAE_n_separ[b]=median(abs((exp(predict_n_separHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### law
-	Model_n_law<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_law<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_law=predict.bam(Model_n_law,bootSamp)
 	sumSq_n_law[b]=sum(((exp(predict_n_law)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -594,7 +593,7 @@ for (b in 1:100){
 	hMAE_n_law[b]=median(abs((exp(predict_n_lawHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### school
-	Model_n_school<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_school<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_school=predict.bam(Model_n_school,bootSamp)
 	sumSq_n_school[b]=sum(((exp(predict_n_school)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -615,7 +614,7 @@ for (b in 1:100){
 	hMAE_n_school[b]=median(abs((exp(predict_n_schoolHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### move
-	Model_n_move<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_move<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_move=predict.bam(Model_n_move,bootSamp)
 	sumSq_n_move[b]=sum(((exp(predict_n_move)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -636,7 +635,7 @@ for (b in 1:100){
 	hMAE_n_move[b]=median(abs((exp(predict_n_moveHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### jail
-	Model_n_jail<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_jail<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_jail=predict.bam(Model_n_jail,bootSamp)
 	sumSq_n_jail[b]=sum(((exp(predict_n_jail)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -657,7 +656,7 @@ for (b in 1:100){
 	hMAE_n_jail[b]=median(abs((exp(predict_n_jailHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### step
-	Model_n_step<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_step<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_step=predict.bam(Model_n_step,bootSamp)
 	sumSq_n_step[b]=sum(((exp(predict_n_step)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -676,7 +675,7 @@ for (b in 1:100){
 	MAE_n_step[b]=median(abs((exp(predict_n_step)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1)))
 
 	### new job
-	Model_n_job<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_job<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_job=predict.bam(Model_n_job,bootSamp)
 	sumSq_n_new_job[b]=sum(((exp(predict_n_job)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -697,7 +696,7 @@ for (b in 1:100){
 	hMAE_n_new_job[b]=median(abs((exp(predict_n_jobHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### new sib
-	Model_n_new_sib<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_new_sib<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_new_sib=predict.bam(Model_n_new_sib,bootSamp)
 	sumSq_n_new_sib[b]=sum(((exp(predict_n_new_sib)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -718,7 +717,7 @@ for (b in 1:100){
 	hMAE_n_new_sib[b]=median(abs((exp(predict_n_new_sibHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### g
-	Model_n_g<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_g<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_g=predict.bam(Model_n_g,bootSamp)
 	sumSq_n_g[b]=sum(((exp(predict_n_g)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -737,7 +736,7 @@ for (b in 1:100){
 	hMAE_n_g[b]=median(abs((exp(predict_n_gHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### age
-	Model_n_age<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_age<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_age=predict.bam(Model_n_age,bootSamp)
 	sumSq_n_interview_age[b]=sum(((exp(predict_n_age)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -756,7 +755,7 @@ for (b in 1:100){
 	hMAE_n_interview_age[b]=median(abs((exp(predict_n_ageHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### grades
-	Model_n_grades<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_grades<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_grades=predict.bam(Model_n_grades,bootSamp)
 	sumSq_n_Grades[b]=sum(((exp(predict_n_grades)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -775,7 +774,7 @@ for (b in 1:100){
 	hMAE_n_Grades[b]=median(abs((exp(predict_n_gradesHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### parentPcount
-	Model_n_parentPcount<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_parentPcount<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_parentPcount=predict.bam(Model_n_parentPcount,bootSamp)
 	sumSq_n_parentPcount[b]=sum(((exp(predict_n_parentPcount)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -813,7 +812,7 @@ for (b in 1:100){
 	hMAE_n_income[b]=median(abs((exp(predict_n_incomeHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### parental education
-	Model_n_parental_education<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_parental_education<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_parental_education=predict.bam(Model_n_parental_education,bootSamp)
 	sumSq_n_parental_education[b]=sum(((exp(predict_n_parental_education)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -832,7 +831,7 @@ for (b in 1:100){
 	hMAE_n_parental_education[b]=median(abs((exp(predict_n_parental_educationHeldOut)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### sex
-	Model_n_sex<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_sex<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_sex=predict.bam(Model_n_sex,bootSamp)
 	sumSq_n_sex[b]=sum(((exp(predict_n_sex)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -851,7 +850,7 @@ for (b in 1:100){
 	hMAE_n_sex[b]=median(abs((exp(predict_n_sex)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### race
-	Model_n_race_ethnicity<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_race_ethnicity<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
 	predict_n_race_ethnicity<-predict.bam(Model_n_race_ethnicity,bootSamp)
 	sumSq_n_race_ethnicity[b]<-sum(((exp(predict_n_race_ethnicity)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -870,7 +869,7 @@ for (b in 1:100){
 	hMAE_n_race_ethnicity[b]=median(abs((exp(predict_n_race_ethnicity)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### weight
-	Model_n_weight<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)	
+	Model_n_weight<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)	
 	# predict to get sum of squares
         predict_n_weight=predict.bam(Model_n_weight,bootSamp)
         sumSq_n_weight[b]=sum(((exp(predict_n_weight)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -889,7 +888,7 @@ for (b in 1:100){
 	hMAE_n_weight[b]=median(abs((exp(predict_n_weight)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### waist
-	Model_n_waist<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_waist<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(height,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
         predict_n_waist=predict.bam(Model_n_waist,bootSamp)
         sumSq_n_waist[b]=sum(((exp(predict_n_waist)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -908,7 +907,7 @@ for (b in 1:100){
 	hMAE_n_waist[b]=median(abs((exp(predict_n_waist)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### height
-	Model_n_height<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(BMI,k=4),data=bootSamp)
+	Model_n_height<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(BMI,k=4),data=bootSamp)
 	# predict to get sum of squares
         predict_n_height=predict.bam(Model_n_height,bootSamp)
         sumSq_n_height[b]=sum(((exp(predict_n_height)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
@@ -927,7 +926,7 @@ for (b in 1:100){
 	hMAE_n_height[b]=median(abs((exp(predict_n_height)-1)-(exp(heldOut$cbcl_scr_syn_totprob_r)-1)))
 
 	### BMI
-	Model_n_BMI<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+s(income,k=4)+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4),data=bootSamp)
+	Model_n_BMI<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(Grades,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4),data=bootSamp)
 	# predict to get sum of squares
         predict_n_BMI=predict.bam(Model_n_BMI,bootSamp)
         sumSq_n_BMI[b]=sum(((exp(predict_n_BMI)-1)-(exp(bootSamp$cbcl_scr_syn_totprob_r)-1))^2)
