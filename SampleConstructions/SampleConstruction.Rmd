@@ -89,8 +89,10 @@ gradesInfoBV=subset(gradesInfoBV,eventname=='baseline_year_1_arm_1')
 gradesInfoBV$Grades<-as.numeric(gradesInfoBV$kbi_p_grades_in_school)
 # convert ndar value to R
 gradesInfoBV$Grades[gradesInfoBV$Grades==-1]=NA
+# ungraded NA for these analyses
+gradesInfoBV$Grades[gradesInfoBV$Grades==6]=NA
 # convert ndar colnames to other ndar colnames
-# for tp2, the key is 1 = A's, 2 = B's, 3 = C's, 4 = D's, 5 = F's, -1 = NA
+# for tp2, the key is 1 = A's, 2 = B's, 3 = C's, 4 = D's, 5 = F's, 6 = ungraded, -1 = NA
 gradesInfoY2=read.delim('~/Downloads/Package_1210940/abcd_saag01.txt')
 gradesInfoY2=subset(gradesInfoY2,eventname=='2_year_follow_up_y_arm_1')
 gradesInfoY2$sag_grade_type<-as.numeric(gradesInfoY2$sag_grade_type)
@@ -1052,6 +1054,10 @@ library(ggplot2)
 library(ggalluvial)
 library(scales)
 
+# add sample split to included Subjects
+includedSubjects$SampleSplit=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey[masterdf$matched_group==1]),]$SampleSplit=1
+
 # melt the plot df to get in proper format
 plotdf=melt(includedSubjects)
 plotdf$value<-as.factor(plotdf$value)
@@ -1078,20 +1084,29 @@ endingdf=endingdf[endingdf$value==1,]
 startingdfTab=tabulate(startingdf$RaceEthn)
 endingdfTab=tabulate(endingdf$RaceEthn)
 
-# starting df
-startingdf=data.frame(startingdfTab,c("White","Black","Hispanic","Asian","Other"))
+# starting df: adding 0 for placeholder for missing category (consistent coloration)
+startingdf=data.frame(c(startingdfTab,0),factor(c("White","Black","Hispanic","Asian","Other","Missing"),levels=c("White","Black","Hispanic","Asian","Other","Missing")))
 colnames(startingdf)<-c('value','RaceEthnicity')
 ggplot(startingdf, aes(x="", y=value, fill=RaceEthnicity)) +
   geom_bar(stat="identity", width=1) +
-  coord_polar("y", start=0)+ggtitle('Before Exclusions')+theme_minimal(base_size=40)
+  coord_polar("y", start=0)+ggtitle('Before Exclusions')+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid  = element_blank(),panel.background = element_blank(),
+        plot.title = element_text(size = 40),
+        legend.text = element_text(size=40),legend.title = element_text(size=40))
 
 # plot df is both with race labels
-endingdf=data.frame(endingdfTab,c("White","Black","Hispanic","Asian","Other"))
+endingdf=data.frame(c(endingdfTab,0),factor(c("White","Black","Hispanic","Asian","Other","Missing"),levels=c("White","Black","Hispanic","Asian","Other","Missing")))
 colnames(endingdf)<-c('value','RaceEthnicity')
 ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
   geom_bar(stat="identity", width=1) +
-  coord_polar("y", start=0)+ggtitle('After Exclusions')+theme_minimal(base_size=40)
-
+  coord_polar("y", start=0)+ggtitle('After Exclusions')+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid  = element_blank(),panel.background = element_blank(),
+        plot.title = element_text(size = 40),
+        legend.text = element_text(size=40),legend.title = element_text(size=40))
 
 ### and equivalent for sex
 plotdf=melt(includedSubjects)
@@ -1224,8 +1239,8 @@ OutDFTmpPrec_nao$age.x<-OutDFTmpPrec$interview_age.x
 OutDFTmpPrec_nao$age.y<-OutDFTmpPrec$interview_age.y
 
 # save matched group out to avoid overburdening r with another variable
-saveRDS(OutDFTmpPrec_nao[masterdf$matched_group.x==1,],'~/OutDFTmpPrec_FullRetro.rds')
-saveRDS(OutDFTmpPrec_nao[masterdf$matched_group.x!=1,],'~/OutDFTmpPrec_FullRetro_heldout.rds')
+saveRDS(OutDFTmpPrec_nao[OutDFTmpPrec_nao$matched_group.x==1,],'~/OutDFTmpPrec_FullRetro.rds')
+saveRDS(OutDFTmpPrec_nao[OutDFTmpPrec_nao$matched_group.x!=1,],'~/OutDFTmpPrec_FullRetro_heldout.rds')
 ```
 
 
@@ -1366,15 +1381,17 @@ OutDFTmpPrec$age.x<-OutDFTmpPrec$interview_age.x
 OutDFTmpPrec$age.y<-OutDFTmpPrec$interview_age.y
 
 # saveout
-saveRDS(OutDFTmpPrec[masterdf$matched_group.x==1,],'~/OutDFTmpPrec_IVEandRetro.rds')
-saveRDS(OutDFTmpPrec[masterdf$matched_group.x!=1,],'~/OutDFTmpPrec_IVEandRetro_heldout.rds')
+saveRDS(OutDFTmpPrec[OutDFTmpPrec$matched_group.x==1,],'~/OutDFTmpPrec_IVEandRetro.rds')
+saveRDS(OutDFTmpPrec[OutDFTmpPrec$matched_group.x!=1,],'~/OutDFTmpPrec_IVEandRetro_heldout.rds')
 ```
 
 
 ```{r}
 # pull out subjs passing T1 qc
-# t1 include (thank you Safia and Josh!)
+# t1 include: NDA
 ndaIncl=read.delim('~/Downloads/Package_1210940/abcd_imgincl01.txt')
+# t1 include: thank you Safia, Keiko, and Josh!
+SKJInclBV=read.csv('~/Downloads/Package_1211968/results/baseline_qc_mqcdef.csv')
 # isolate timepoint1
 ndaInclBV=ndaIncl[ndaIncl$eventname=='baseline_year_1_arm_1',]
 # convert fmri to numeric for adding, remove column names
@@ -1382,6 +1399,7 @@ ndaInclBV$imgincl_rsfmri_include<-as.numeric(ndaInclBV$imgincl_rsfmri_include)
 ndaInclBV$imgincl_nback_include<-as.numeric(ndaInclBV$imgincl_nback_include)
 ndaInclBV$imgincl_mid_include<-as.numeric(ndaInclBV$imgincl_mid_include)
 ndaInclBV$imgincl_sst_include<-as.numeric(ndaInclBV$imgincl_sst_include)
+
 # evaluate which of subjects included in tempPrec have t1s that are passing at timepoint1
 tempPrecNDA=merge(OutDFTmpPrec_nao,ndaInclBV,by='subjectkey')
 # exclude subjects without passing T1 or T2 quality
@@ -1395,6 +1413,20 @@ tempPrecNDA=tempPrecNDA[tempPrecNDA$sumFmrIncl>1,]
 # add to alluvial df for plotting
 includedSubjects$NDA_QC=0
 includedSubjects[includedSubjects$subj %in% unique(tempPrecNDA$subjectkey),]$NDA_QC=1
+# now include SKJ qc
+colnames(SKJInclBV)[1]<-'subjectkey'
+tempPrecSKJ=merge(tempPrecNDA,SKJInclBV,by='subjectkey')
+# only want 1s and 2s
+tempPrecSKJ=tempPrecSKJ[tempPrecSKJ$MQC_BL!=0,]
+tempPrecSKJ=tempPrecSKJ[tempPrecSKJ$MQC_BL!=3,]
+tempPrecSKJ=tempPrecSKJ[tempPrecSKJ$MQC_BL!=4,]
+tempPrecSKJ=tempPrecSKJ[tempPrecSKJ$MQC_BL!=5,]
+tempPrecSKJ=tempPrecSKJ[tempPrecSKJ$MQC_BL!=10,]
+tempPrecSKJ=tempPrecSKJ[tempPrecSKJ$MQC_BL!=11,]
+tempPrecSKJ=tempPrecSKJ[tempPrecSKJ$MQC_BL!=12,]
+# add to alluvial df for plotting
+includedSubjects$SKJ_QC=0
+includedSubjects[includedSubjects$subj %in% unique(tempPrecSKJ$subjectkey),]$SKJ_QC=1
 
 
 # melt the plot df to get in proper format
@@ -1415,10 +1447,9 @@ test$RaceEthn[test$value==0]="Missing"
 ggplot(test,aes(x=variable,stratum=RaceEthn,alluvium=subj))+geom_stratum(aes(fill=RaceEthn))+geom_flow(aes(fill=RaceEthn))+theme_bw(base_size=18)
 
 # save out subject list for downloading - convert to bids naming convention
-DL_list=gsub('R_I','RI',includedSubjects$subj[includedSubjects$NDA_QC==1])
+DL_list=gsub('R_I','RI',includedSubjects$subj[includedSubjects$SKJ_QC==1])
 DL_list=gsub('NDAR','sub-NDAR',DL_list)
 write.table(DL_list,'~/DL_list.txt',sep='\r',row.names = F,col.names = F,quote = F)
 print(length(DL_list))
-# run first 100
-write.table(DL_list[1:100],'~/DL_list100.txt',sep='\r',row.names = F,col.names = F,quote = F)
+
 ```

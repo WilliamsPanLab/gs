@@ -396,7 +396,7 @@ ggplot(data=plotdf2, aes(y=FullModel)) +
 
 ```{r}
 # sum of squares held-out temporal precedence p
-int_TPDevExpl_IVE=readRDS('~/Ext_DevExplained.rds')
+int_TPDevExpl_IVE=readRDS('~/Int_DevExplained.rds')
 NumAfflicted=readRDS('~/Ext_number.rds')
 # correct
 NumAfflicted=NumAfflicted-7686
@@ -437,8 +437,8 @@ ggplot(data=plotdf, aes(x=variable, y=value))+ geom_boxplot()+ylab(expression('P
 plotdf2<-data.frame(int_TPDevExpl_IVE$devExplained_full)
 colnames(plotdf2)<-'FullModel'
 ggplot(data=plotdf2, aes(y=FullModel)) +
-  geom_boxplot()+theme_bw(base_size=40)+ylim(c(0,1/7686))+ylab('Deviance Explained: Externalizing')+
-  scale_x_continuous(breaks = NULL)
+  geom_boxplot()+theme_bw(base_size=40)+ylab('Deviance Explained: Internalizing')+
+  scale_x_continuous(breaks = NULL)+ylim(c(0,.5))
 ```
 
 ```{r}
