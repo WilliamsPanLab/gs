@@ -7,14 +7,21 @@ date: "2023-03-17"
 ```{r}
 library(reshape2)
 library(ggplot2)
-plot_dev_explained <- function(file_path,label) {
+plot_dev_explained <- function(file_path,aic_path) {
   # Load data
   DevExpl <- readRDS(file_path)
+  
+  # DETERMINE SIGNIFICANCE WITH AIC
+  AICs <- readRDS(aic_path)
+  
+  # TEMP
+  DevExpl=DevExpl[1:5000,]
+  AICs=AICs[1:5000,] 
   
   # Calculate deviance explained by each term
   devExplEachTerm <- matrix(
     data = NA,
-    nrow = 10000,
+    nrow = 5000,
     ncol = length(colnames(DevExpl))
   )
   for (r in 2:length(colnames(DevExpl))) {
@@ -23,16 +30,34 @@ plot_dev_explained <- function(file_path,label) {
     devExplEachTerm[, r] <- propDev
   }
   
+  # is it "significant"? (more than 99% of runs)
+  SigEachTerm <- matrix(
+    data = NA,
+    nrow = 5000,
+    ncol = length(colnames(AICs))
+  )
+  for (r in 2:length(colnames(AICs))) {
+    columnOfInt <- AICs[, r]
+    propSig <- (5000-sum((AICs[, 1]<(AICs[, r]))))/5000
+    SigEachTerm[, r] <- propSig
+  }
+  
   # Remove prefix for plotting
   columnname <- colnames(DevExpl)
   columnname <- gsub('devExplained_', '', columnname)
   colnames(devExplEachTerm) <- columnname
+  colnames(SigEachTerm)<-columnname
   
   # Melt data for plotting
   plotdf <- melt(data.frame(devExplEachTerm))
+  # aic df
+  aicdf <- melt(data.frame(SigEachTerm))
+  colnames(aicdf)<-c('variable','Sig')
+  plotdf<-cbind(plotdf,aicdf)
+
   # and variable category labels
-  categories=c('None','Events','Performance','Demographic','Body')
-  plotdf$cat<-rep('None',dim(plotdf)[1])
+  categories=c('No Association','Events','Performance','Demographic','Body')
+  plotdf$cat<-rep('No Association',dim(plotdf)[1])
   plotdf$cat<-factor(plotdf$cat,levels=categories)
   # Events
   plotdf$cat[plotdf$variable==c('n_died')]<-'Events'
@@ -72,7 +97,7 @@ plot_dev_explained <- function(file_path,label) {
   plotdf$cat[plotdf$variable==c('n_BMI')]='Body'
   
   # Define custom color scheme for the categories
-  colors <- c("Events" = "#FFD700", "Performance" = "#FFA500", "Demographic" = "#808080", "Body" = "#CD853F")
+  colors <- c("Events" = "#FFD700", "Performance" = "#EA4335", "Demographic" = "#4285F4", "Body" = "#34A853", "No Association" = "grey")
   
   # Get levels of factor
   fct_levels <- levels(plotdf$variable)
@@ -90,18 +115,20 @@ plot_dev_explained <- function(file_path,label) {
   # take out events for now: will plot std betas instead
   plotdf=plotdf[plotdf$cat!='Events',]
   
+  # set cat insignificant to null color
+  plotdf$cat[plotdf$Sig>0.01]='No Association'
+  
  # Plot deviance explained by each term with grouping and coloration by 'cat'
   ggplot(data = plotdf, aes(x = factor(variable,levels=rev(c('g','Grades','interview_age','sex','income','race_ethnicity','parental_education','height','weight','waist','BMI'))), y = value,color=cat))  +
-  geom_boxplot(width = 0.4, position = position_nudge(x = 0.5)) +
-  geom_jitter(aes(color = cat), alpha = 0.01, size = 2, width = 0.2, height = 0.01) +
+  geom_boxplot(width = 0.2, position = position_nudge(x = 0.5)) +
+  geom_jitter(aes(alpha = 0.01), size = 3, width = 0.2, height = 0.01) +
   scale_color_manual(values = colors) +
   scale_fill_manual(values = colors) +
   ylab("Value") +
   xlab("Covariate") +
-  theme_minimal(base_size = 35) +
-  theme(axis.text.x = element_text(angle = 45)) +
-  ylim(c(-0.005, 0.15)) +
-  labs(color = "Category")+coord_flip()
+  theme_minimal(base_size = 70) +
+  ylim(c(-0.01, 0.15)) +
+  labs(color = "Category")
   
   
   
@@ -119,6 +146,187 @@ plot_dev_explained <- function(file_path,label) {
 }
 
 ```
+
+```{r}
+plot_betas <- function(file_path,Signifvec) {
+  # Load data
+  betas <- readRDS(file_path)
+ 
+  # TEMP
+  betas=betas[1:5000,]
+  
+  ## DETERMINE SIGNIFICANCE WITH AIC
+  #AICs <- readRDS(aic_path)
+  #AICs=AICs[1:5000,] 
+  ## match AIC columns to betas in this instance
+  ## YLES are 2:19, income is 24, sex is 26, race is 27
+  #AICs=AICs[,c(2:19,24,26,27)]
+  ## and apply race AIC to all race factor levels
+  #AICs$AIC_n_race_ethnicity_2=AICs[,21]
+  #AICs$AIC_n_race_ethnicity_3=AICs[,21]
+  #AICs$AIC_n_race_ethnicity_4=AICs[,21]
+
+  
+  ## is it "significant"? (more than 99% of runs)
+  #SigEachTerm <- matrix(
+  #  data = NA,
+  #  nrow = 5000,
+  #  ncol = length(colnames(AICs))
+  #)
+  #for (r in 2:length(colnames(AICs))) {
+  #  columnOfInt <- AICs[, r]
+  #  propSig <- (5000-sum((AICs[, 1]<(AICs[, r]))))/5000
+  #  SigEachTerm[, r] <- propSig
+  #}
+  
+  # if it's a temporal precedence file, add catch 
+  if (length(grep('TempPrec',file_path))>0){
+    # nest to detect inter-vist events
+    if (grep('IVE',filepath)==1){
+    # Remove prefix for plotting
+    columnname <- colnames(betas)
+    columnname <- gsub('ple_', '', columnname)
+    columnname <- gsub('_y_IVE.y', '', columnname)
+    colnames(betas) <- columnname
+    }else{
+    # Remove prefix for plotting
+    columnname <- colnames(betas)
+    columnname <- gsub('ple_', '', columnname)
+    columnname <- gsub('_y.x', '', columnname)
+    colnames(betas) <- columnname
+    colnames(SigEachTerm)<-columnname
+    }
+  }else{
+    
+  # Remove prefix for plotting
+  columnname <- colnames(betas)
+  columnname <- gsub('ple_', '', columnname)
+  columnname <- gsub('_y1', '', columnname)
+  colnames(betas) <- columnname
+  colnames(SigEachTerm)<-columnname
+  }
+  
+  # Melt data for plotting
+  plotdf <- melt(data.frame(betas))
+  # aic df
+  #aicdf <- melt(data.frame(SigEachTerm))
+  #colnames(aicdf)<-c('variable','Sig')
+  #plotdf<-cbind(plotdf,aicdf)
+  plotdf$Sig<-rep(Signifvec,each=5000)
+
+  # and variable category labels
+  categories=c('No Association','Events','Performance','Demographic','Body')
+  plotdf$cat<-rep('No Association',dim(plotdf)[1])
+  plotdf$cat<-factor(plotdf$cat,levels=categories)
+  # Events
+  plotdf$cat[plotdf$variable==c('died')]<-'Events'
+  plotdf$cat[plotdf$variable==c('injured')]='Events'
+  plotdf$cat[plotdf$variable==c('crime')]='Events'
+  plotdf$cat[plotdf$variable==c('friend')]='Events'
+  plotdf$cat[plotdf$variable==c('friend_injur')]='Events'
+  plotdf$cat[plotdf$variable==c('arrest')]='Events'
+  plotdf$cat[plotdf$variable==c('friend_died')]='Events'
+  plotdf$cat[plotdf$variable==c('mh')]='Events'
+  plotdf$cat[plotdf$variable==c('sib')]='Events'
+  plotdf$cat[plotdf$variable==c('victim')]='Events'
+  plotdf$cat[plotdf$variable==c('separ')]='Events'
+  plotdf$cat[plotdf$variable==c('law')]='Events'
+  plotdf$cat[plotdf$variable==c('school')]='Events'
+  plotdf$cat[plotdf$variable==c('move')]='Events'
+  plotdf$cat[plotdf$variable==c('jail')]='Events'
+  plotdf$cat[plotdf$variable==c('step')]='Events'
+  plotdf$cat[plotdf$variable==c('new_job')]='Events'
+  plotdf$cat[plotdf$variable==c('new_sib')]='Events'
+
+  # Performance
+  plotdf$cat[plotdf$variable==c('n_g')]='Performance'
+  plotdf$cat[plotdf$variable==c('n_Grades')]='Performance'
+  
+  # if it's a temporal precedence file, add catch 
+  if (length(grep('TempPrec',file_path))>0){
+  # Demographics
+  plotdf$cat[plotdf$variable==c('n_interview_age')]='Demographic'
+  plotdf$cat[plotdf$variable==c('income.x')]='Demographic'
+  plotdf$cat[plotdf$variable==c('n_parental_education')]='Demographic'
+  plotdf$cat[plotdf$variable==c('sex.xM')]='Demographic'
+  plotdf$cat[plotdf$variable==c('n_race_ethnicity')]='Demographic'
+  
+  # swap levels of race for meaningful factor names
+  levels(plotdf$variable)=c(levels(plotdf$variable),'Other','Asian','Hispanic','African American')
+  plotdf$variable[plotdf$variable=='race_ethnicity.x5']='Other'
+  plotdf$variable[plotdf$variable=='race_ethnicity.x4']='Asian'
+  plotdf$variable[plotdf$variable=='race_ethnicity.x3']='Hispanic'
+  plotdf$variable[plotdf$variable=='race_ethnicity.x2']='African American'
+  }else{
+  # Demographics
+  plotdf$cat[plotdf$variable==c('n_interview_age')]='Demographic'
+  plotdf$cat[plotdf$variable==c('n_income')]='Demographic'
+  plotdf$cat[plotdf$variable==c('n_parental_education')]='Demographic'
+  plotdf$cat[plotdf$variable==c('sexM')]='Demographic'
+  plotdf$cat[plotdf$variable==c('n_race_ethnicity')]='Demographic'
+  
+  # swap levels of race for meaningful factor names
+  levels(plotdf$variable)=c(levels(plotdf$variable),'Other','Asian','Hispanic','African American')
+  plotdf$variable[plotdf$variable=='race_ethnicity5']='Other'
+  plotdf$variable[plotdf$variable=='race_ethnicity4']='Asian'
+  plotdf$variable[plotdf$variable=='race_ethnicity3']='Hispanic'
+  plotdf$variable[plotdf$variable=='race_ethnicity2']='African American'
+  }
+  
+  
+  # Body
+  plotdf$cat[plotdf$variabe==c('n_weight')]='Body'
+  plotdf$cat[plotdf$variable==c('n_waist')]='Body'
+  plotdf$cat[plotdf$variable==c('n_height')]='Body'
+  plotdf$cat[plotdf$variable==c('n_BMI')]='Body'
+  
+  # Define custom color scheme for the categories
+  colors <- c("Events" = "#FFD700", "Performance" = "#EA4335", "Demographic" = "#4285F4", "Body" = "#34A853", "No Association" = "grey")
+  
+  # Get levels of factor
+  fct_levels <- levels(plotdf$variable)
+  # Reorder levels with n_interview_age after n_Grades
+  new_levels <- c(fct_levels[1:20], fct_levels[22], fct_levels[21], fct_levels[23:length(fct_levels)])
+  # and n_ removal
+  new_levels<- gsub("n_", "", new_levels)
+  new_variable_names=gsub("n_", "", plotdf$variable)
+  plotdf$variable <-factor(new_variable_names,levels=new_levels)
+  # last take-outs
+  plotdf=subset(plotdf, variable != "full")
+  plotdf=subset(plotdf, variable != "income")
+  
+  # set cat insignificant to null color
+  plotdf$cat[plotdf$Sig<1]='No Association'
+  
+ # Plot deviance explained by each term with grouping and coloration by 'cat'
+  ggplot(data = plotdf, aes(x = factor(variable,levels=unique(plotdf$variable)), y = value,color=cat))  +
+  geom_boxplot(width = 0.4, position = position_nudge(x = 0.5)) +
+  geom_jitter(aes(color = cat), alpha = 0.01, size = 2, width = 0.2, height = 0.01) +
+  scale_color_manual(values = colors) +
+  scale_fill_manual(values = colors) +
+  ylab("Value") +
+  xlab("Covariate") +
+  theme_minimal(base_size = 50) +
+  ylim(c(-0.8, 0.8)) +
+  labs(color = "Category")
+  
+  
+  
+  
+  # ggplot(data = plotdf, aes(x = factor(variable, levels = new_levels), y = value, fill = cat))  +
+  # geom_boxplot(aes(fill=cat)) +
+  # scale_color_manual(values = colors) +
+  # #scale_fill_manual(values = colors) +
+  # ylab(label) +
+  # xlab('Covariate') +
+  # theme_minimal(base_size = 35) +
+  # theme(axis.text.x = element_text(angle = 45)) +
+  #   ylim(c(-0.005,.14))+
+  #   labs(fill = "Category") 
+}
+
+```
+
 
 ```{r}
 # load in sq
@@ -475,7 +683,7 @@ ggplot(data=plotdf2, aes(y=FullModel)) +
 
 ```{r}
 # sum of squares held-out temporal precedence p
-int_TPDevExpl_IVE=readRDS('~/p_TempPrec_DevExplained.rds')
+int_TPDevExpl_IVE=readRDS('~/DevExpl/Ext_TempPrec_IVE_DevExplained.rds')
 # only have first 5k for now
 int_TPDevExpl_IVE=int_TPDevExpl_IVE[1:5000,]
 # visualize deviance explained by each term
@@ -499,9 +707,10 @@ ggplot(data=plotdf, aes(x=variable, y=value)) +
 # comparison plot
 plotdf2<-data.frame(int_TPDevExpl_IVE$devExplained_full)
 colnames(plotdf2)<-'FullModel'
-ggplot(data=plotdf2, aes(y=FullModel)) +
-  geom_boxplot()+theme_bw(base_size=40)+ylim(c(0,1))+ylab('Deviance Explained: TP2 p')+
-  scale_x_continuous(breaks = NULL)
+
+ggplot(aes(y=FullModel),data=plotdf2)+geom_boxplot()+theme_minimal(base_size=40)+ylab('Deviance Explained')+ylim(c(.23,.65))
+
+
 ```
 
 ```{r}
@@ -529,5 +738,165 @@ ggplot(data=merged, aes(x=variable, y=value, color=when)) +
 ```
 
 ```{r}
+min_one_exp <- function(x) {
+        exp(x - 1)
+    }
+```
+
+```{r}
+masterdf$Grades<-as.ordered(masterdf$Grades)
+
+# plot g with grades incldued
+
+fullModel<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4)+GradesO,data=masterdf)
+
+visreg(fullModel,"g",gg=TRUE,ylab="Total Symptoms (Residualized)",xlab="g (Grades accounted for)",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+ylim(c(-.2,6.2))
+
+visreg(fullModel,"Grades",gg=TRUE,ylab="Total Symptoms (Residualized)",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+ylim(c(-.2,6.2))
+
+
+# plot g without grades
+
+fullModel<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=masterdf)
+
+visreg(fullModel,"g",gg=TRUE,ylab="Total Symptoms (Residualized)",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+ylim(c(-.2,6.2))
+```
+
+
+```{r}
+# p
+fullModel<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4)+GradesO,data=masterdf)
+a<-summary(fullModel)
+SignifvecP=rep(0,24)
+SignifvecP[a$p.pv[2:25]<0.01]=1
+plot_betas('~/Betas/p_betas.rds',SignifvecP)
+# internalizing
+fullModel<-bam(cbcl_scr_syn_internal_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4)+GradesO,data=masterdf)
+a<-summary(fullModel)
+SignifvecI=rep(0,24)
+SignifvecI[a$p.pv[2:25]<0.01]=1
+plot_betas('~/Betas/Int_betas.rds',SignifvecI)
+# externalizing
+fullModel<-bam(cbcl_scr_syn_external_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4)+GradesO,data=masterdf)
+a<-summary(fullModel)
+SignifvecE=rep(0,24)
+SignifvecE[a$p.pv[2:25]<0.01]=1
+plot_betas('~/Betas/Ext_betas.rds',Signifvec)
+```
+
+```{r}
+# plot deviance explained with extra terms
+Pmodel<-bam(cbcl_scr_syn_totprob_r.y~cbcl_scr_syn_totprob_r.x,data=masterdf)
+nullDev=summary(Pmodel)$dev.expl
+Pdevs=readRDS('~/DevExpl/p_TempPrec_IVE_DevExplained.rds')[1:5000,]
+# Create histogram
+p <- ggplot(data = data.frame(x = Pdevs[,1]), aes(x = x)) + 
+    geom_histogram(aes(y = ..density..), bins = 30, fill = "white", color = "black")
+
+# Add vertical line at nullDev
+p + geom_vline(xintercept = nullDev, color = "#4285F4", size = 1)+theme_minimal(base_size=30)+xlab('Deviance explained with all other measures: p')
+```
+
+
+# plot grades
+
+# Predict values and standard errors
+df <- data.frame(Grades = factor(1:5), 
+                 preds = predict(fullModel, newdata = data.frame(Grades = factor(1:5)), se.fit = TRUE)$fit, 
+                 se = predict(fullModel, newdata = data.frame(Grades = factor(1:5)), se.fit = TRUE)$se.fit)
+
+
+
+
+
+masterdf$preds <- predict(fullModel, masterdf)
+masterdf$Grades <- factor(masterdf$Grades, levels = unique(masterdf$Grades))
+
+# Calculate standard errors for predicted values
+se <- sqrt(diag(vcov(fullModel)))
+
+# Plot predicted values as horizontal lines
+ggplot(masterdf, aes(x = as.numeric(Grades), y = min_one_exp(preds))) +
+  geom_pointrange(aes(ymin = lower, ymax = upper))
+ #geom_errorbar(aes(ymin = preds - se, ymax = preds + se), width = 0.2, color = "#2C3E50", size = 1) +
+  geom_point(aes(y = 'cbcl_scr_syn_totprob_r'), alpha = 0.5, color = "#A3B56B", size = 3) +
+  geom_line(color = "#2C3E50", size = 1) +
+  ylim(c(0, 40)) +
+  ylab("Total Symptoms") +
+  theme_minimal(base_size = 25)
+
+
+
+
+
+
+# Get predicted values from model
+preds <- predict(fullModel, type = "response")
+
+# Create a data frame with residuals and predicted values
+df <- data.frame(Grades = factor(masterdf$Grades, levels = 1:5), 
+                 preds = preds, 
+                 reside = residuals(fullModel, type = "response"))
+
+# Order the data by Grades
+df <- df[order(df$Grades), ]
+
+f# Create the plot
+ggplot(df, aes(x = Grades, y = preds)) +
+  geom_hline(yintercept = (df$preds + df$reside)) +
+  scale_x_discrete(labels = c("1", "2", "3", "4", "5")) +
+  ylim(c(0, 40)) +
+  ylab("Total Symptoms") +
+  theme_minimal(base_size = 25)
+
+```
+
+```{r}
+library(ggplot2)
+
+# Create a data frame with predicted values and residuals
+masterdf$predicted=predict(fullModel, type = "response")
+masterdf$resids=residuals(fullModel)
+
+# Extract the coefficients from the model
+coefs <- coef(fullModel)
+intcpt <- coefs[1]
+Grades_coefs <- coefs[2:length(coefs)]
+
+# Create a sequence of values for x-axis
+Grades_seq<-c(1,2,3,4,5)
+
+# Create a data frame with predicted values for each factor level
+pred_df <- data.frame(Grades = Grades_seq)
+for (i in 1:length(Grades_coefs)) {
+  pred_df[[paste0("pred_", i)]] <- predict(fullModel, newdata = data.frame(Grades = factor(Grades_seq, levels = levels(masterdf$Grades))), type = "response") - intcpt + Grades_coefs[i]
+}
+
+# Convert data to long format for plotting
+pred_df_long <- reshape2::melt(pred_df, id.vars = "Grades", variable.name = "group", value.name = "preds")
+
+# Add standard errors to predicted values
+pred_df_long$se <- summary(fullModel)$sigma
+
+# Plot predicted values with standard errors and residuals
+ggplot(masterdf, aes(x = Grades, y = preds)) +
+  geom_point(alpha = 0.5, size = 3, aes(color = resids)) +
+  geom_errorbar(data = pred_df_long, aes(x = Grades, y = preds, ymin = preds - se, ymax = preds + se, group = group), width = 0.1, color = "#2C3E50", size = 2) +
+  scale_x_discrete(labels = c("1", "2", "3", "4", "5")) +
+  ylim(c(0, 40)) +
+  ylab("Total Symptoms") +
+  theme_minimal(base_size = 25)
+
+```
+
+masterdf
+fullModel<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4)+Grades,data=masterdf)
+
+visreg(fullModel,"Grades",gg=TRUE,ylab="Total Symptoms",trans=min_one_exp,rug=FALSE,line.par=list(size=2,col='black'))+geom_point(alpha=0.05,size=3,color='#1d6628')+theme_minimal(base_size=25)+ylim(c(0,40))
+
+fullModel<-bam(cbcl_scr_syn_totprob_r~ple_died_y+ple_injured_y+ple_crime_y+ple_friend_y+ple_friend_injur_y+ple_arrest_y+ple_friend_died_y+ple_mh_y+ple_sib_y+ple_victim_y+ple_separ_y+ple_law_y+ple_school_y+ple_move_y+ple_jail_y+ple_step_y+ple_new_job_y+ple_new_sib_y+s(g,k=4)+s(interview_age,k=4)+s(parentPcount,k=4)+income+s(parental_education,k=4)+sex+race_ethnicity+s(weight,k=4)+s(waist,k=4)+s(height,k=4)+s(BMI,k=4),data=masterdf)
+
+visreg(fullModel,"g",gg=TRUE,ylab="Total Symptoms",trans=min_one_exp,rug=FALSE,line.par=list(size=2,col='black'))+geom_point(alpha=0.05,size=3,color='#1d6628')+theme_minimal(base_size=25)+ylim(c(0,40))
+
 
 ```
