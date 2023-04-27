@@ -1,12 +1,14 @@
 import subprocess
 import time
 import datetime
-# grab first 100 participants
+# grab unran participants
 my_file = open("/oak/stanford/groups/leanew1/users/apines/data/gp/DL_list2.txt", "r")
 content = my_file.read()
 content_list = content. split("\n")
 # remove last line (blank)
 content_list.pop()
+# reverse the list
+content_list.reverse()
 # feed em' in as subjects
 subjects = content_list
 for x in range(len(subjects)):

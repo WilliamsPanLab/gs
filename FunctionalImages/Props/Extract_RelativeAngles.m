@@ -149,7 +149,7 @@ az_R=az_R(g_noMW_combined_R);
 el_R=el_R(g_noMW_combined_R);
 
 % initialize matrix for each face over each of k=18 networks to saveout to scratch
-faceMatrix=zeros(18,(length(g_noMW_combined_L)+length(g_noMW_combined_R));
+faceMatrix=zeros((length(g_noMW_combined_L)+length(g_noMW_combined_R)),18);
 % get network gradient to calculate relative angles
 % for each network
 for k=1:18
@@ -253,8 +253,8 @@ for k=1:18
 	% average for this network before proceeding to next network loop
 	AllAngs=[NangDs_R(:)' NangDs_L(:)'];
 	% average left-hemisphere values over time and plop into facematrix for this participant
-	faceMatrix(InclLeft,K)=mean(NangDs_L,2);
-	faceMatrix(InclRight,K)=mean(NangDs_R,2);
+	faceMatrix(InclLeft,k)=mean(NangDs_L,2);
+	faceMatrix((InclRight+length(InclLeft)),k)=mean(NangDs_R,2);
 	% average angular distances across hemispheres
 	avgD=mean(AllAngs);
 	Propvec=[Propvec avgD];
@@ -270,4 +270,4 @@ system(['mkdir ' outFP]);
 % write out
 writetable(T,[outFP '/Prop_Feats.csv'],'WriteRowNames',true)
 % save out faceMatrix with subject ID as csv to /scratch/users/apines/gp/PropFeatsTemp
-writetable(faceMatrix,['/scratch/uesers/apines/gp/PropFeats/' subj '_faceMatrix.csv'],'WriteRowNames',true)
+writematrix(faceMatrix,['/scratch/users/apines/gp/PropFeats/' subj '_faceMatrix.csv'])

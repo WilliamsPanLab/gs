@@ -269,7 +269,7 @@ masterdf=masterdf[,c('cbcl_scr_syn_external_r.x','cbcl_scr_syn_external_r.y','pl
 # set seed because I'll have to rerun this differently for second 5k
 set.seed(1)
 # loop over manual bootstrap
-for (b in 1:10000){
+for (b in 1:5000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
