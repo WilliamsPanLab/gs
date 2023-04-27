@@ -1,6 +1,6 @@
 function Extract_RelativeAngles(subj,infileOpFl)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Take optical flow results, get a bottom-up and top-down resultant vector in x,y coords for each face. Measured relative to gPGG.
+% Take optical flow results, get a bottom-up and top-down resultant vector in x,y coords for each face. Measured relative to gPercyNets.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % set assumed network input directory
@@ -148,6 +148,8 @@ el_L=el_L(g_noMW_combined_L);
 az_R=az_R(g_noMW_combined_R);
 el_R=el_R(g_noMW_combined_R);
 
+% initialize matrix for each face over each of k=18 networks to saveout to scratch
+faceMatrix=zeros(18,(length(g_noMW_combined_L)+length(g_noMW_combined_R));
 % get network gradient to calculate relative angles
 % for each network
 for k=1:18
@@ -168,7 +170,7 @@ for k=1:18
 	emptyRight=find(~sumRight);
 	InclLeft=find(sumLeft);
 	InclRight=find(sumRight);
-	% not InclLeft and Right presume mw mask already applied!
+	% note InclLeft and Right presume mw mask already applied!
 
 	% mask them out of medial wall mask (medial wall mask indicates what to include, emptyLeft indicates what to exclude. setdiff excludes what should be excluded (from eL) from what should be incl. (noMW)
 	%n_and_g_noMW_combined_L=setdiff(g_noMW_combined_L,emptyLeft);
@@ -250,6 +252,9 @@ for k=1:18
         end	
 	% average for this network before proceeding to next network loop
 	AllAngs=[NangDs_R(:)' NangDs_L(:)'];
+	% average left-hemisphere values over time and plop into facematrix for this participant
+	faceMatrix(InclLeft,K)=mean(NangDs_L,2);
+	faceMatrix(InclRight,K)=mean(NangDs_R,2);
 	% average angular distances across hemispheres
 	avgD=mean(AllAngs);
 	Propvec=[Propvec avgD];
@@ -264,3 +269,5 @@ outFP=['/oak/stanford/groups/leanew1/users/apines/data/gp/PropFeats/' subj];
 system(['mkdir ' outFP]);
 % write out
 writetable(T,[outFP '/Prop_Feats.csv'],'WriteRowNames',true)
+% save out faceMatrix with subject ID as csv to /scratch/users/apines/gp/PropFeatsTemp
+writetable(faceMatrix,['/scratch/uesers/apines/gp/PropFeats/' subj '_faceMatrix.csv'],'WriteRowNames',true)
