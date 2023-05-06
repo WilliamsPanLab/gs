@@ -1,0 +1,122 @@
+---
+title: "FIgure2"
+output: github_document
+date: "2023-05-06"
+---
+
+```{r}
+# figure 2
+library(mgcv)
+library(visreg)
+library(gratia)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(data.table)
+```
+
+```{r}
+# load in from sample construction
+masterdf=masterdf
+# calculate 99.9th percentile of P int and Ext
+p999<-quantile(masterdf$cbcl_scr_syn_totprob_r,.999)
+i999<-quantile(masterdf$cbcl_scr_syn_internal_r,.999)
+e999<-quantile(masterdf$cbcl_scr_syn_external_r,.999)
+g999<-quantile(masterdf$g,.999)
+gLow999<-quantile(masterdf$g,.001)
+```
+
+```{r}
+# model GP
+# can use pctinle for xlim
+print(p999)
+#
+model<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
+visreg(model,"cbcl_scr_syn_totprob_r",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+xlim(c(0,p999))+ylim(c(gLow999,g999))
+get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_totprob_r")
+# comparison of normalized (log-transformed) p
+masterdf$cbcl_scr_syn_totprob_rL<-log(masterdf$cbcl_scr_syn_totprob_r+1)
+modelL<-gam(g~s(cbcl_scr_syn_totprob_rL)+s(interview_age),data=masterdf)
+visreg(modelL,"cbcl_scr_syn_totprob_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)
+get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_totprob_rL")
+```
+
+```{r}
+# can use pctinle for xlim
+print(i999)
+#
+model<-gam(g~s(cbcl_scr_syn_internal_r)+s(interview_age),data=masterdf)
+visreg(model,"cbcl_scr_syn_internal_r",gg=TRUE,ylab="g",xlab="Int",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+xlim(c(0,i999))+ylim(c(gLow999,g999))
+get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_internal_r")
+# comparison of normalized (log-transformed) p
+masterdf$cbcl_scr_syn_internal_rL<-log(masterdf$cbcl_scr_syn_internal_r+1)
+modelL<-gam(g~s(cbcl_scr_syn_internal_rL)+s(interview_age),data=masterdf)
+visreg(modelL,"cbcl_scr_syn_internal_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)
+get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_internal_rL")
+```
+
+```{r}
+# model G~ext
+model<-gam(g~s(cbcl_scr_syn_external_r)+s(interview_age),data=masterdf)
+visreg(model,"cbcl_scr_syn_external_r",gg=TRUE,ylab="g",xlab="Ext",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+xlim(c(0,e999))+ylim(c(gLow999,g999))
+get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_external_r")
+# comparison of normalized (log-transformed) p
+masterdf$cbcl_scr_syn_external_rL<-log(masterdf$cbcl_scr_syn_external_r+1)
+modelL<-gam(g~s(cbcl_scr_syn_external_rL)+s(interview_age),data=masterdf)
+visreg(modelL,"cbcl_scr_syn_external_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)
+get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_external_rL")
+```
+
+```{r}
+# model G~grades
+model<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
+visreg(model,"cbcl_scr_syn_totprob_r",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+xlim(c(0,p999))+ylim(c(gLow999,g999))
+get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_totprob_r")
+# comparison of normalized (log-transformed) p
+masterdf$cbcl_scr_syn_totprob_rL<-log(masterdf$cbcl_scr_syn_totprob_r+1)
+modelL<-gam(g~s(cbcl_scr_syn_totprob_rL)+s(interview_age),data=masterdf)
+visreg(modelL,"cbcl_scr_syn_totprob_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)
+get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_totprob_rL")
+```
+
+```{r}
+# model Grades~p
+# percentile 99.9th
+# plot G
+
+```
+
+```{r}
+# model Grades~int
+# percentile 99.9th
+# plot G
+
+```
+
+```{r}
+# model Grades~ext
+# percentile 99.9th
+# plot G
+
+```
+
+```{r}
+# grades dev. expl p vs g dev. expl p: will need bootstraps
+
+```
+
+```{r}
+# grades dev. expl int vs g dev. expl int: will need bootstraps
+
+```
+
+```{r}
+# grades dev. expl ext vs g dev. expl ext: will need bootstraps
+
+```
+
+
+```{r}
+# temporal precedence analyses
+
+```

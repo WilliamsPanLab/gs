@@ -11,7 +11,7 @@ get_derivs_and_plot <- function(modobj,smooth_var,low_color=NULL,hi_color=NULL,x
   if (is.null(low_color)){low_color = "white"}
   if (is.null(hi_color)){hi_color = "grey20"}
 
-  derv<-derivatives(modobj,term=sprintf('s(%s)',smooth_var),partial_match = TRUE,level=0.95)
+  derv<-derivatives(modobj,term=sprintf('s(%s)',smooth_var),partial_match = TRUE,level=0.99)
   derv<- derv %>%
     mutate(sig = !(0 >lower & 0 < upper))
   derv$sig_deriv = derv$derivative*derv$sig
