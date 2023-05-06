@@ -644,6 +644,10 @@ participantsTSV=participantsTSV[participantsTSV$parental_education!=888,]
 participantsTSV=participantsTSV[participantsTSV$parental_education!=777,]
 participantsTSV$parental_education<-as.ordered(participantsTSV$parental_education)
 
+#########################
+#########################
+#########################
+#########################
 ### merge in for fam income and parent edu
 masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
 ```
@@ -657,6 +661,12 @@ masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
     ## result
 
 ``` r
+# this dataframe is now your working data frame for all figure RMDs
+####################
+#########################
+#########################
+#########################
+
 # new merge and count
 participantsTSVSubjs=length(unique(masterdf$subjectkey))
 # add to included subjs DF
