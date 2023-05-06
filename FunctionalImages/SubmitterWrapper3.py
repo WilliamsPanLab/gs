@@ -1,20 +1,17 @@
 import subprocess
 import time
 import datetime
-# grab unran participants
 my_file = open("/oak/stanford/groups/leanew1/users/apines/data/gp/DL_list2.txt", "r")
 content = my_file.read()
 content_list = content. split("\n")
 # remove last line (blank)
 content_list.pop()
-# reverse the list
-content_list.reverse()
 # feed em' in as subjects
 subjects = content_list
 for x in range(599,len(subjects)):
   newsub = subjects.pop()
   subprocess.call(["sbatch","/oak/stanford/groups/leanew1/users/apines/scripts/gp/FunctionalImages/sbatchABCDProc.sh",newsub])
-  time.sleep(900) #wait 20 minutes
+  time.sleep(700) #wait 20 minutes
 
 
 # while there are more than 0 subjects left to run
