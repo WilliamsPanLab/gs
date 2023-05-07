@@ -25,7 +25,7 @@ dim(masterdf)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up
-masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','g','subjectkey','interview_age','cbcl_q61_p')]
+masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','g','subjectkey','interview_age','Grades')]
 # get length of df for later
 lenDF=dim(masterdf)[1]
 
@@ -60,20 +60,20 @@ for (b in 1:10000){
 	#### g as response variable
 	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=bootSamp)
 	# use DERIVATIVES of model fit for saving
-	forSpline=derivatives(pgAge,term='s(cbcl_scr_syn_totprob_r)',partial_match = TRUE,level=0.95)
+	forSpline=derivatives(pgAge,term='s(cbcl_scr_syn_totprob_r)',partial_match = TRUE)
 	# deriv is col 4
 	forSpline<-forSpline[,4]
 	# save out forspline to a matrix
 	predCIs[b,]=unlist(forSpline)
+	# CORRECT DERIVATIVE MAX  (200) FOR MAXIMUM CBCL SCORE FOUND IN THIS BOOTSTRAP
+
 	######## II FORMALLY TEST FOR NON-LINEARITY
 	#### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
 	pgAge<-bam(g~cbcl_scr_syn_totprob_r+s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age)+ti(cbcl_scr_syn_totprob_r,interview_age),data=bootSamp)
 	linBoots[b]=summary(pgAge)$s.pv[1]
-	####### III TEST INTERACTION
-	### interaction test
-	gpAge_intrxn<-bam(cbcl_scr_syn_totprob_r~s(g)+s(interview_age)+g*interview_age,data=bootSamp,family=nb())
-	intrxnBootsStat[b]=summary(gpAge_intrxn)$p.coeff[4]
-	intrxnBootsP[b]=summary(gpAge_intrxn)$s.pv[4]
+	######## GRADES DEV EXPLAINED VS G DEV EXPLAINED
+
+
 	###### FULL VS REDUCED ANOVA: P AND DR2
 	no_g_Gam<-bam(cbcl_scr_syn_totprob_r~s(interview_age),data=bootSamp,family=nb())
 	no_g_Sum<-summary(no_g_Gam)

@@ -118,5 +118,17 @@ get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_totprob_rL")
 
 ```{r}
 # temporal precedence analyses
+pred_df <- with(masterdf, expand.grid(cbcl_scr_syn_totprob_r = seq(min(cbcl_scr_syn_totprob_r), max(cbcl_scr_syn_totprob_r), length.out = 100),
+                                        interview_age = seq(min(interview_age), max(interview_age), length.out = 100),
+                                        sex = levels(sex)))
 
+pred_df$g <- predict(model, newdata = pred_df)
+
+# Create separate plots for each sex
+ggplot(pred_df, aes(x = cbcl_scr_syn_totprob_r, y = g, color = sex)) +
+  geom_line() +
+  facet_wrap(~sex, nrow = 1, scales = "free_x") +
+  xlab("cbcl_scr_syn_totprob_r") +
+  ylab("Predicted value of g") +
+  theme_bw(base_size = 18)
 ```
