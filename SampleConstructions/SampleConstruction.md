@@ -662,6 +662,7 @@ masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
 
 ``` r
 # this dataframe is now your working data frame for all figure RMDs
+saveRDS(masterdf,'~/gp_masterdf.rds')
 ####################
 #########################
 #########################
@@ -756,3 +757,41 @@ ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
 ```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
+
+``` r
+#### ∆∆∆
+# temporal precedence df
+#### ∆∆∆
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','Grades','parentPcount','income','sex','race_ethnicity','matched_group','eventname')
+# eliminate rows with NAs and ensure none without two-timepoint data
+# variables of interest redux
+masterdf=masterdf[,c(variablesOfInterest)]
+# na omitted version
+masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ] 
+print(dim(masterdf))
+```
+
+    ## [1] 9564   13
+
+``` r
+# and two-timepoint check
+twoTPsubjs=names(table(masterdf$subjectkey)[table(masterdf$subjectkey)>1])
+masterdf=masterdf[masterdf$subj %in% twoTPsubjs,]
+
+# now set subsets to use for temporal precedence analyses 
+df1=masterdf[masterdf$eventname=='baseline_year_1_arm_1',]
+df2=masterdf[masterdf$eventname=='2_year_follow_up_y_arm_1',]
+subsetOfBoth=merge(df1,df2,by='subjectkey')
+subsetOfBoth=subsetOfBoth$subjectkey
+
+# convert to one row per subj for temporal precedence analyses
+OutDFTmpPrec<-merge(df1,df2,by='subjectkey')
+print(dim(OutDFTmpPrec))
+```
+
+    ## [1] 4782   25
+
+``` r
+# save it out
+saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec.rds')
+```
