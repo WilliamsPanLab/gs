@@ -509,6 +509,7 @@ participantsTSV$parental_education<-as.ordered(participantsTSV$parental_educatio
 ### merge in for fam income and parent edu
 masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
 # this dataframe is now your working data frame for all figure RMDs
+saveRDS(masterdf,'~/gp_masterdf.rds')
 ####################
 #########################
 #########################
@@ -524,6 +525,7 @@ print(paste0(newList6-participantsTSVSubjs,' participants lost after needing com
 paste0(participantsTSVSubjs,' remain')
 
 ```
+
 ```{r}
 library(ggalluvial)
 # melt the plot df to get in proper format
@@ -584,3 +586,4 @@ ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
         panel.grid  = element_blank(),panel.background = element_blank(),
         plot.title = element_text(size = 40),
         legend.text = element_text(size=40),legend.title = element_text(size=40))
+```

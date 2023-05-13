@@ -132,3 +132,205 @@ ggplot(pred_df, aes(x = cbcl_scr_syn_totprob_r, y = g, color = sex)) +
   ylab("Predicted value of g") +
   theme_bw(base_size = 18)
 ```
+
+
+```{r}
+
+#### Load in bootstrap output
+gpPredBoots=readRDS('~/gpPredictedBoots.rds')
+gpBoots=readRDS('~/gpBoots.rds')
+
+# GP with bootstraps filled in
+pDerivs=gpPredBoots[,1:200]
+iDerivs=gpPredBoots[,201:400]
+eDerivs=gpPredBoots[,401:600]
+
+
+library(ggplot2)
+library(visreg)
+
+model <- gam(g ~ s(cbcl_scr_syn_totprob_r) + s(interview_age), data = masterdf)
+
+# Create a data frame of predictor values for plotting
+p_values <- seq(0, 113, length.out = 200)
+plot_data <- data.frame(cbcl_scr_syn_totprob_r = p_values)
+new_data <- data.frame(cbcl_scr_syn_totprob_r = plot_data$cbcl_scr_syn_totprob_r,
+                       interview_age = mean(masterdf$interview_age))
+# Predict response values using the model
+plot_data$g <- predict(model, newdata = new_data)
+
+# Create the plot
+ggplot(plot_data, aes(x = cbcl_scr_syn_totprob_r, y = g)) +
+  geom_line(size = 2, color = "black") +
+  ylim(c(gLow999, g999)) +
+  xlim(c(0, p999)) +
+  labs(x = "p", y = "g") +
+  theme_minimal(base_size = 25)
+
+#### now plot version with color-coded slope
+
+
+# temp 
+pDerivs=pDerivs[1:199]
+
+# Count the number of positive, negative, and zero derivatives at each bin
+n_positive <- colSums(pDerivs > 0)
+n_negative <- colSums(pDerivs < 0)
+n_zero <- colSums(pDerivs == 0)
+
+# Determine the color for each bin based on the direction of the majority of derivatives
+bin_color <- ifelse(n_positive > 0.999 * n_bootstrap, "Increasing",
+                    ifelse(n_negative > 0.999 * n_bootstrap, "Decreasing:", "<99.9"))
+# temp
+bin_color[200]<-"<99.9"
+
+# Predict response values using the model
+new_data <- data.frame(cbcl_scr_syn_totprob_r = plot_data$cbcl_scr_syn_totprob_r,
+                       interview_age = mean(masterdf$interview_age))
+plot_data$g <- predict(model, newdata = new_data)
+
+# Create the plot
+ggplot(plot_data, aes(x = cbcl_scr_syn_totprob_r, y = g, color = bin_color)) +
+  geom_line(size = 2) +
+  ylim(c(gLow999, g999)) +
+  xlim(c(0, p999)) +
+  labs(x = "p", y = "g") +
+  scale_color_manual(values = c("black", "red", "blue")) +
+  theme_minimal(base_size = 25)
+
+# ITS BROKE 
+```
+
+```{r}
+model <- gam(g ~ s(cbcl_scr_syn_internal_r) + s(interview_age), data = masterdf)
+
+# temp 
+pDerivs=iDerivs[1:199]
+
+# Count the number of positive, negative, and zero derivatives at each bin
+n_positive <- colSums(iDerivs > 0)
+n_negative <- colSums(iDerivs < 0)
+n_zero <- colSums(iDerivs == 0)
+
+# Determine the color for each bin based on the direction of the majority of derivatives
+bin_color <- ifelse(n_positive > 0.999 * n_bootstrap, "Increasing",
+                    ifelse(n_negative > 0.999 * n_bootstrap, "Decreasing:", "<99.9"))
+# temp
+bin_color[200]<-"<99.9"
+
+# Predict response values using the model
+# Create a data frame of predictor values for plotting
+i_values <- seq(0, i999, length.out = 200)
+plot_data <- data.frame(cbcl_scr_syn_internal_r = p_values)
+new_data <- data.frame(cbcl_scr_syn_internal_r = plot_data$cbcl_scr_syn_internal_r,
+                       interview_age = mean(masterdf$interview_age))
+plot_data$g <- predict(model, newdata = new_data)
+
+# Create the plot
+ggplot(plot_data, aes(x = cbcl_scr_syn_internal_r, y = g, color = bin_color)) +
+  geom_line(size = 2) +
+  ylim(c(gLow999, g999)) +
+  xlim(c(0, p999)) +
+  labs(x = "p", y = "g") +
+  scale_color_manual(values = c("black", "red", "blue")) +
+  theme_minimal(base_size = 25)
+
+
+```
+
+```{r}
+# temp 
+eDerivs=eDerivs[1:199]
+
+# Count the number of positive, negative, and zero derivatives at each bin
+n_positive <- colSums(eDerivs > 0)
+n_negative <- colSums(eDerivs < 0)
+n_zero <- colSums(Derivs == 0)
+
+# Determine the color for each bin based on the direction of the majority of derivatives
+bin_color <- ifelse(n_positive > 0.999 * n_bootstrap, "Increasing",
+                    ifelse(n_negative > 0.999 * n_bootstrap, "Decreasing:", "<99.9"))
+# temp
+bin_color[200]<-"<99.9"
+
+# Predict response values using the model
+
+new_data <- data.frame(cbcl_scr_syn_totprob_r = plot_data$cbcl_scr_syn_totprob_r,
+                       interview_age = mean(masterdf$interview_age))
+plot_data$g <- predict(model, newdata = new_data)
+
+# Create the plot
+ggplot(plot_data, aes(x = cbcl_scr_syn_totprob_r, y = g, color = bin_color)) +
+  geom_line(size = 2) +
+  ylim(c(gLow999, g999)) +
+  xlim(c(0, p999)) +
+  labs(x = "p", y = "g") +
+  scale_color_manual(values = c("black", "red", "blue")) +
+  theme_minimal(base_size = 25)
+
+```
+
+```{r}
+library(mgcv)
+library(ggplot2)
+
+# Create a vector of the span values for the predictor variable
+span_values <- seq(0, 1, length.out = 200)
+
+# Determine which portions of the smooth have a significantly positive or negative slope
+significant_mask <- apply(pDerivs, 2, function(col) {
+  pos_prop <- sum(col > 0) / length(col)
+  neg_prop <- sum(col < 0) / length(col)
+  pos_prop > 0.999 | neg_prop > 0.999
+})
+
+# get the average of each 200 segment
+avg200=colMeans(pDerivs)
+# correct it with mask
+sig200=avg200*significant_mask
+
+# Create a data frame with the x and y values for the smooth
+smooth_data <- data.frame(x = span_values, y = significant_mask * eDerivs)
+
+# Add a column to the data frame indicating which portions of the smooth are significant
+smooth_data$significant <- as.logical(significant_mask)
+
+# Plot the smooth with only the significant portions colored
+ggplot(smooth_data, aes(x = x, y = y)) +
+  geom_line(aes(color = significant), size = 1) +
+  scale_color_manual(values = c("black", "red")) +
+  theme_classic() +
+  labs(y = "Slope of smooth")
+
+
+
+```
+
+
+```{r}
+library(ggplot2)
+
+# Create a vector of the span values for the predictor variable
+span_values <- seq(0, 1, length.out = 200)
+
+# Determine which portions of the smooth have a significantly positive or negative slope
+significant_mask <- apply(pDerivs, 2, function(col) {
+  pos_prop <- sum(col > 0) / length(col)
+  neg_prop <- sum(col < 0) / length(col)
+  pos_prop > 0.999 | neg_prop > 0.999
+})
+
+# Calculate the slope at each point in the smooth
+slope_values <- apply(pDerivs, 2, function(col) {
+  approx(span_values, col, n = length(span_values))$y
+})
+
+# Create a data frame with the x and y values for the significant portions of the smooth
+smooth_data <- data.frame(x = span_values[significant_mask], y = slope_values[significant_mask])
+
+# Plot the significant portions of the smooth with their exact slope
+ggplot(smooth_data, aes(x = x, y = y)) +
+  geom_line(size = 1) +
+  theme_classic()
+
+```
