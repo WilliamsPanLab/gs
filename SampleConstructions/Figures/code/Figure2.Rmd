@@ -15,6 +15,7 @@ library(stringr)
 library(data.table)
 ```
 
+
 ```{r}
 # load in from sample construction
 masterdf=masterdf
@@ -101,8 +102,28 @@ gLow999<-quantile(masterdf$g,.001)
 ```
 
 ```{r}
+gpBoots=readRDS('~/Desktop/g_p/gpBoots.rds')
 # grades dev. expl p vs g dev. expl p: will need bootstraps
+gpBoots_melted <- melt(gpBoots)
 
+# Create a boxplot for pDevExpl_g and pDevExpl_grades
+ggplot(gpBoots_melted[gpBoots_melted$variable %in% c("pDevExpl_g", "nbpDevExpl_g","logpDevExpl_g","pDevExpl_grades","nbpDevExpl_grades","logpDevExpl_grades"),], aes(x = variable, y = value)) +
+  geom_boxplot() +
+ scale_x_discrete(labels = c("g", "g (nb link)","g (logp)","grades", "grades (nb link)","grades (logp)")) +
+  labs(x = "Covariate", y = "Deviance") +
+  theme_bw(base_size=20)+ylim(c(0,.13))
+
+ggplot(gpBoots_melted[gpBoots_melted$variable %in% c("intDevExpl_g", "nbintDevExpl_g","logintDevExpl_g","intDevExpl_grades","nbintDevExpl_grades","logintDevExpl_grades"),], aes(x = variable, y = value)) +
+  geom_boxplot() +
+ scale_x_discrete(labels = c("g", "g (nb link)","g (logInt)","grades", "grades (nb link)","grades (logInt)")) +
+  labs(x = "Covariate", y = "Deviance") +
+  theme_bw(base_size=20)+ylim(c(0,.13))
+
+ggplot(gpBoots_melted[gpBoots_melted$variable %in% c("extDevExpl_g", "nbextDevExpl_g","logextDevExpl_g","extDevExpl_grades","nbextDevExpl_grades","logextDevExpl_grades"),], aes(x = variable, y = value)) +
+  geom_boxplot() +
+ scale_x_discrete(labels = c("g", "g (nb link)","g (logExt)","grades", "grades (nb link)","grades (logExt)")) +
+  labs(x = "Covariate", y = "Deviance") +
+  theme_bw(base_size=20)+ylim(c(0,.13))
 ```
 
 ```{r}
