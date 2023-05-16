@@ -29,54 +29,54 @@ gLow999<-quantile(masterdf$g,.001)
 ```{r}
 # model GP
 # can use pctinle for xlim
-print(p999)
+#print(p999)
+##
+#model<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
+#visreg(model,"cbcl_scr_syn_totprob_r",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+#xlim(c(0,p999))+ylim(c(gLow999,g999))
+#get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_totprob_r")
+## comparison of normalized (log-transformed) p
+#masterdf$cbcl_scr_syn_totprob_rL<-log(masterdf$cbcl_scr_syn_totprob_r+1)
+#modelL<-gam(g~s(cbcl_scr_syn_totprob_rL)+s(interview_age),data=masterdf)
+#visreg(modelL,"cbcl_scr_syn_totprob_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25#)
+#get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_totprob_rL")
+#```
 #
-model<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
-visreg(model,"cbcl_scr_syn_totprob_r",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+xlim(c(0,p999))+ylim(c(gLow999,g999))
-get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_totprob_r")
-# comparison of normalized (log-transformed) p
-masterdf$cbcl_scr_syn_totprob_rL<-log(masterdf$cbcl_scr_syn_totprob_r+1)
-modelL<-gam(g~s(cbcl_scr_syn_totprob_rL)+s(interview_age),data=masterdf)
-visreg(modelL,"cbcl_scr_syn_totprob_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)
-get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_totprob_rL")
-```
-
-```{r}
-# can use pctinle for xlim
-print(i999)
+#```{r}
+## can use pctinle for xlim
+#print(i999)
+##
+#model<-gam(g~s(cbcl_scr_syn_internal_r)+s(interview_age),data=masterdf)
+#visreg(model,"cbcl_scr_syn_internal_r",gg=TRUE,ylab="g",xlab="Int",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=2#5)+xlim(c(0,i999))+ylim(c(gLow999,g999))
+#get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_internal_r")
+## comparison of normalized (log-transformed) p
+#masterdf$cbcl_scr_syn_internal_rL<-log(masterdf$cbcl_scr_syn_internal_r+1)
+#modelL<-gam(g~s(cbcl_scr_syn_internal_rL)+s(interview_age),data=masterdf)
+#visreg(modelL,"cbcl_scr_syn_internal_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=2#5)
+#get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_internal_rL")
+#```
 #
-model<-gam(g~s(cbcl_scr_syn_internal_r)+s(interview_age),data=masterdf)
-visreg(model,"cbcl_scr_syn_internal_r",gg=TRUE,ylab="g",xlab="Int",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+xlim(c(0,i999))+ylim(c(gLow999,g999))
-get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_internal_r")
-# comparison of normalized (log-transformed) p
-masterdf$cbcl_scr_syn_internal_rL<-log(masterdf$cbcl_scr_syn_internal_r+1)
-modelL<-gam(g~s(cbcl_scr_syn_internal_rL)+s(interview_age),data=masterdf)
-visreg(modelL,"cbcl_scr_syn_internal_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)
-get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_internal_rL")
-```
-
-```{r}
-# model G~ext
-model<-gam(g~s(cbcl_scr_syn_external_r)+s(interview_age),data=masterdf)
-visreg(model,"cbcl_scr_syn_external_r",gg=TRUE,ylab="g",xlab="Ext",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+xlim(c(0,e999))+ylim(c(gLow999,g999))
-get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_external_r")
-# comparison of normalized (log-transformed) p
-masterdf$cbcl_scr_syn_external_rL<-log(masterdf$cbcl_scr_syn_external_r+1)
-modelL<-gam(g~s(cbcl_scr_syn_external_rL)+s(interview_age),data=masterdf)
-visreg(modelL,"cbcl_scr_syn_external_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)
-get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_external_rL")
-```
-
-```{r}
-# model G~grades
-model<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
-visreg(model,"cbcl_scr_syn_totprob_r",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+xlim(c(0,p999))+ylim(c(gLow999,g999))
-get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_totprob_r")
-# comparison of normalized (log-transformed) p
-masterdf$cbcl_scr_syn_totprob_rL<-log(masterdf$cbcl_scr_syn_totprob_r+1)
-modelL<-gam(g~s(cbcl_scr_syn_totprob_rL)+s(interview_age),data=masterdf)
-visreg(modelL,"cbcl_scr_syn_totprob_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)
-get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_totprob_rL")
+#```{r}
+## model G~ext
+#model<-gam(g~s(cbcl_scr_syn_external_r)+s(interview_age),data=masterdf)
+#visreg(model,"cbcl_scr_syn_external_r",gg=TRUE,ylab="g",xlab="Ext",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=2#5)+xlim(c(0,e999))+ylim(c(gLow999,g999))
+#get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_external_r")
+## comparison of normalized (log-transformed) p
+#masterdf$cbcl_scr_syn_external_rL<-log(masterdf$cbcl_scr_syn_external_r+1)
+#modelL<-gam(g~s(cbcl_scr_syn_external_rL)+s(interview_age),data=masterdf)
+#visreg(modelL,"cbcl_scr_syn_external_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=2#5)
+#get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_external_rL")
+#```
+#
+#```{r}
+## model G~grades
+#model<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
+#visreg(model,"cbcl_scr_syn_totprob_r",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+#xlim(c(0,p999))+ylim(c(gLow999,g999))
+#get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_totprob_r")
+## comparison of normalized (log-transformed) p
+#masterdf$cbcl_scr_syn_totprob_rL<-log(masterdf$cbcl_scr_syn_totprob_r+1)
+#modelL<-gam(g~s(cbcl_scr_syn_totprob_rL)+s(interview_age),data=masterdf)
+#visreg(modelL,"cbcl_scr_syn_totprob_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25#)
+#get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_totprob_rL")
 ```
 
 ```{r}
@@ -117,33 +117,15 @@ get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_totprob_rL")
 
 
 ```{r}
-# temporal precedence analyses
-pred_df <- with(masterdf, expand.grid(cbcl_scr_syn_totprob_r = seq(min(cbcl_scr_syn_totprob_r), max(cbcl_scr_syn_totprob_r), length.out = 100),
-                                        interview_age = seq(min(interview_age), max(interview_age), length.out = 100),
-                                        sex = levels(sex)))
-
-pred_df$g <- predict(model, newdata = pred_df)
-
-# Create separate plots for each sex
-ggplot(pred_df, aes(x = cbcl_scr_syn_totprob_r, y = g, color = sex)) +
-  geom_line() +
-  facet_wrap(~sex, nrow = 1, scales = "free_x") +
-  xlab("cbcl_scr_syn_totprob_r") +
-  ylab("Predicted value of g") +
-  theme_bw(base_size = 18)
-```
-
-
-```{r}
 
 #### Load in bootstrap output
-gpPredBoots=readRDS('~/gpPredictedBoots.rds')
-gpBoots=readRDS('~/gpBoots.rds')
+gpBoots=readRDS('~/Desktop/g_p/gpBoots.rds')
+gpDerivBoots=readRDS('~/Desktop/g_p/gpRawDerivBoots.rds')
 
 # GP with bootstraps filled in
-pDerivs=gpPredBoots[,1:200]
-iDerivs=gpPredBoots[,201:400]
-eDerivs=gpPredBoots[,401:600]
+pDerivs=gpDerivBoots[,1:200]
+iDerivs=gpDerivBoots[,201:400]
+eDerivs=gpDerivBoots[,401:600]
 
 
 library(ggplot2)
@@ -334,3 +316,110 @@ ggplot(smooth_data, aes(x = x, y = y)) +
   theme_classic()
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+#### TEMPORAL PRECEDENCE TABLE
+library(mgcv)
+# load temporal precedence data from SampleConstruction.Rmd
+tpdf=OutDFTmpPrec
+
+```
+
+```{r}
+# Load the "lavaan" package
+library(lavaan)
+
+
+# Define the model syntax for the cross-lagged panel analysis
+model <- '
+  # Autoregressive effects
+  g.y ~ g.x
+  cbcl_scr_syn_totprob_r.y ~ cbcl_scr_syn_totprob_r.x
+  
+  # Cross-lagged effects
+  g.y ~ cbcl_scr_syn_totprob_r.x
+  cbcl_scr_syn_totprob_r.y ~ g.x
+  
+  # Residual covariances
+  g.x ~~ cbcl_scr_syn_totprob_r.x
+  g.y ~~ cbcl_scr_syn_totprob_r.y
+  
+  # Residual variances
+  g.x ~~ g.x
+  g.y ~~ g.y
+  cbcl_scr_syn_totprob_r.x ~~ cbcl_scr_syn_totprob_r.x
+  cbcl_scr_syn_totprob_r.y ~~ cbcl_scr_syn_totprob_r.y
+'
+
+# Fit the model to the data using maximum likelihood estimation
+pfit <- sem(model, data = tpdf)
+
+# Define the model syntax for the cross-lagged panel analysis
+model <- '
+  # Autoregressive effects
+  g.y ~ g.x
+  cbcl_scr_syn_internal_r.y ~ cbcl_scr_syn_internal_r.x
+  
+  # Cross-lagged effects
+  g.y ~ cbcl_scr_syn_internal_r.x
+  cbcl_scr_syn_internal_r.y ~ g.x
+  
+  # Residual covariances
+  g.x ~~ cbcl_scr_syn_internal_r.x
+  g.y ~~ cbcl_scr_syn_internal_r.y
+  
+  # Residual variances
+  g.x ~~ g.x
+  g.y ~~ g.y
+  cbcl_scr_syn_internal_r.x ~~ cbcl_scr_syn_internal_r.x
+  cbcl_scr_syn_internal_r.y ~~ cbcl_scr_syn_internal_r.y
+'
+
+# Fit the model to the data using maximum likelihood estimation
+ifit <- sem(model, data = tpdf)
+
+# Define the model syntax for the cross-lagged panel analysis
+model <- '
+  # Autoregressive effects
+  g.y ~ g.x
+  cbcl_scr_syn_external_r.y ~ cbcl_scr_syn_external_r.x
+  
+  # Cross-lagged effects
+  g.y ~ cbcl_scr_syn_external_r.x
+  cbcl_scr_syn_external_r.y ~ g.x
+  
+  # Residual covariances
+  g.x ~~ cbcl_scr_syn_external_r.x
+  g.y ~~ cbcl_scr_syn_external_r.y
+  
+  # Residual variances
+  g.x ~~ g.x
+  g.y ~~ g.y
+  cbcl_scr_syn_external_r.x ~~ cbcl_scr_syn_external_r.x
+  cbcl_scr_syn_external_r.y ~~ cbcl_scr_syn_external_r.y
+'
+
+# Fit the model to the data using maximum likelihood estimation
+efit <- sem(model, data = tpdf)
+
+```
+
+
