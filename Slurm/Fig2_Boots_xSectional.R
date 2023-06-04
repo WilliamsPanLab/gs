@@ -37,9 +37,10 @@ emaxVal=max(masterdf$cbcl_scr_syn_external_r)
 pDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
 intDeriv=matrix(0,nrow=10000,ncol=iMaxVal)
 extDeriv=matrix(0,nrow=10000,ncol=emaxVal)
-pDerivRaw=matrix(0,nrow=10000,ncol=pMaxVal)
-intDerivRaw=matrix(0,nrow=10000,ncol=iMaxVal)
-extDerivRaw=matrix(0,nrow=10000,ncol=emaxVal)
+# predicted values: set to maximum value for ncol
+pFit=matrix(0,nrow=10000,ncol=pMaxVal)
+intFit=matrix(0,nrow=10000,ncol=iMaxVal)
+extFit=matrix(0,nrow=10000,ncol=emaxVal)
 pMax=rep(0,10000)
 intMax=rep(0,10000)
 extMax=rep(0,10000)
@@ -73,15 +74,34 @@ for (b in 1:10000){
 	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=bootSamp)
 	intgAge<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age),data=bootSamp)
 	extgAge<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age),data=bootSamp)
-	# use PREDICTED VALUES of model fit for saving
+	# use PREDICTED VALUES of model fit for each symptom count for saving
+	eachPcount=seq(1:bpmax)
+	eachIntcount=seq(1:bimax)
+	eachExtcount=seq(1:bemax)
+	# set age to to median for predict df
+	predictDFp=data.frame(eachPcount,rep(median(bootSamp$interview_age),bpmax))
+	predictDFint=data.frame(eachIntcount,rep(median(bootSamp$interview_age),bimax))
+	predictDFext=data.frame(eachExtcount,rep(median(bootSamp$interview_age),bemax))
+	# set colnames so predict can work
+	colnames(predictDFp)=c('cbcl_scr_syn_totprob_r','interview_age')
+	colnames(predictDFint)=c('cbcl_scr_syn_internal_r','interview_age')
+	colnames(predictDFext)=c('cbcl_scr_syn_external_r','interview_age')
+	# predict
+	forFitP=predict(pgAge,predictDFp)
+	forFitInt=predict(intgAge,predictDFint)
+	forFitExt=predict(extgAge,predictDFext)
+	# print out fit
+	pFit[b,1:bpmax]=forFitP
+	intFit[b,1:bimax]=forFitInt
+	extFit[b,1:bemax]=forFitExt
 	# use DERIVATIVES of model fit for saving
 	forSplinep=derivatives(pgAge,term='s(cbcl_scr_syn_totprob_r)',partial_match = TRUE,n=bpmax)
 	forSplineint=derivatives(intgAge,term='s(cbcl_scr_syn_internal_r)',partial_match = TRUE,n=bimax)
 	forSplineext=derivatives(extgAge,term='s(cbcl_scr_syn_external_r)',partial_match = TRUE,n=bemax)
-	# print out unconverted version
-	pDerivRaw[b,1:bpmax]=forSplinep$derivative
-	intDerivRaw[b,1:bimax]=forSplineint$derivative
-	extDerivRaw[b,1:bemax]=forSplineext$derivative
+	# print out fit derivatives
+	pDeriv[b,1:bpmax]=forSplinep$derivative
+	intDeriv[b,1:bimax]=forSplineint$derivative
+	extDeriv[b,1:bemax]=forSplineext$derivative
 	# print out max of unconverted versions to anchor em later
 	pMax[b]=bpmax
 	intMax[b]=bimax
@@ -90,6 +110,6 @@ for (b in 1:10000){
 # SAVEOUT
 outdf=data.frame(plinBoots,intlinBoots,extlinBoots,pMax,intMax,extMax)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots.rds')
-outdf=data.frame(pDerivRaw,intDerivRaw,extDerivRaw)
+outdf=data.frame(pDeriv,intDeriv,extDeriv)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpRawDerivBoots.rds')
 print('done with g~p fit bootstrapping!')
