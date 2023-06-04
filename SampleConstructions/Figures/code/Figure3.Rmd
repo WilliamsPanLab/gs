@@ -1,0 +1,26 @@
+---
+title: "Figure3"
+output: html_document
+date: "2023-05-16"
+---
+
+```{r}
+#Figure 3
+library(mgcv)
+library(ggplot2)
+
+# as factor
+masterdf$sex<-as.factor(masterdf$sex)
+model<-gam(g~s(cbcl_scr_syn_totprob_r,sex,bs="fs",k=5),data=masterdf)
+# plot it
+mycol <- c("blue", "pink")
+mylty <- c(1, 2)
+
+# Plot the GAM with different colors and line types for each level of 'sex'
+plot.gam(model, se = TRUE, col = mycol, lty = mylty)
+
+# Add legend to the plot
+legend("topleft", legend = levels(masterdf$sex), col = mycol, lty = mylty)
+
+
+```
