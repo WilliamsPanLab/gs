@@ -130,21 +130,21 @@ for (b in 1:3){
 	extgAge<-bam(g~cbcl_scr_syn_external_r+s(cbcl_scr_syn_external_r,m=c(2,0))+s(interview_age),data=bootSamp)
 	extlinBoots[b]=summary(extgAge)$s.pv[1]
 	somgAge<-bam(g~cbcl_scr_syn_somatic_r+s(cbcl_scr_syn_somatic_r,m=c(2,0))+s(interview_age),data=bootSamp)
-	somlinBoots[b]=summary(somgAge)$s.pv[1]
+	somLinBoots[b]=summary(somgAge)$s.pv[1]
 	anxgAge<-bam(g~cbcl_scr_syn_anxdep_r+s(cbcl_scr_syn_anxdep_r,m=c(2,0))+s(interview_age),data=bootSamp)
-	anxlinBoots[b]=summary(anxgAge)$s.pv[1]
+	anxLinBoots[b]=summary(anxgAge)$s.pv[1]
 	thogAge<-bam(g~cbcl_scr_syn_thought_r+s(cbcl_scr_syn_thought_r,m=c(2,0))+s(interview_age),data=bootSamp)
-	tholinBoots[b]=summary(thogAge)$s.pv[1]
+	thoLinBoots[b]=summary(thogAge)$s.pv[1]
 	witgAge<-bam(g~cbcl_scr_syn_withdep_r+s(cbcl_scr_syn_withdep_r,m=c(2,0))+s(interview_age),data=bootSamp)
-	witlinBoots[b]=summary(witgAge)$s.pv[1]
+	witLinBoots[b]=summary(witgAge)$s.pv[1]
 	socgAge<-bam(g~cbcl_scr_syn_social_r+s(cbcl_scr_syn_social_r,m=c(2,0))+s(interview_age),data=bootSamp)
-	soclinBoots[b]=summary(socgAge)$s.pv[1]
+	socLinBoots[b]=summary(socgAge)$s.pv[1]
 	attgAge<-bam(g~cbcl_scr_syn_attention_r+s(cbcl_scr_syn_attention_r,m=c(2,0))+s(interview_age),data=bootSamp)
-	attlinBoots[b]=summary(attgAge)$s.pv[1]
+	attLinBoots[b]=summary(attgAge)$s.pv[1]
 	rulgAge<-bam(g~cbcl_scr_syn_rulebreak_r+s(cbcl_scr_syn_rulebreak_r,m=c(2,0))+s(interview_age),data=bootSamp)
-	rullinBoots[b]=summary(rulgAge)$s.pv[1]
+	rulLinBoots[b]=summary(rulgAge)$s.pv[1]
 	agggAge<-bam(g~cbcl_scr_syn_aggressive_r+s(cbcl_scr_syn_aggressive_r,m=c(2,0))+s(interview_age),data=bootSamp)
-	agglinBoots[b]=summary(agggAge)$s.pv[1]
+	aggLinBoots[b]=summary(agggAge)$s.pv[1]
 	######## II PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
 	#### g as response variable
 	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=bootSamp)
