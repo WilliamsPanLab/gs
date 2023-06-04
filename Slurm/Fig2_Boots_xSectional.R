@@ -111,5 +111,8 @@ for (b in 1:10000){
 outdf=data.frame(plinBoots,intlinBoots,extlinBoots,pMax,intMax,extMax)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots.rds')
 outdf=data.frame(pDeriv,intDeriv,extDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpRawDerivBoots.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots.rds')
+outdf=data.frame(pFit,intFit,extFit)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots.rds')
+
 print('done with g~p fit bootstrapping!')
