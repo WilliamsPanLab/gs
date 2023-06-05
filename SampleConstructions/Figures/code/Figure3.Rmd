@@ -21,17 +21,118 @@ model<-gam(g~ti(cbcl_scr_syn_totprob_r,income)+s(cbcl_scr_syn_totprob_r)+s(incom
 masterdf$poverty=0
 masterdf$poverty[masterdf$income<5]=1
 masterdf$poverty=as.ordered(masterdf$poverty)
-model<-gam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r)+poverty+s(interview_age),data=masterdf)
-
-# plot it
-mycol <- c("blue", "pink")
-mylty <- c(1, 2)
-
+model<-gam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r)+poverty+s(interview_age)+poverty*cbcl_scr_syn_totprob_r*sex+sex,data=masterdf)
 # Plot the GAM with different colors and line types for each level of 'sex'
-plot.gam(model, se = TRUE, col = mycol, lty = mylty)
+plot.gam(model, se = TRUE)
 
 # Add legend to the plot
 legend("topleft", legend = levels(masterdf$sex), col = mycol, lty = mylty)
 
+# triple interaction
+model<-gam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=sex)+sex*poverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(sex, poverty)),data=masterdf)
+
+```
+
+```{r}
+library(mgcv)
+library(ggplot2)
+
+# Fit the GAM model
+model <- gam(g ~ s(cbcl_scr_syn_totprob_r, by = poverty) +
+               s(cbcl_scr_syn_totprob_r, by = sex) +
+               sex * poverty +
+               s(interview_age) +
+               s(cbcl_scr_syn_totprob_r, by = interaction(sex, poverty), k = 9),
+             data = masterdf)
+
+# Specify values for the predictor variables
+new_data <- expand.grid(cbcl_scr_syn_totprob_r = seq(min(masterdf$cbcl_scr_syn_totprob_r), 
+                                                     max(masterdf$cbcl_scr_syn_totprob_r), 
+                                                     length.out = 100),
+                        poverty = unique(masterdf$poverty),
+                        sex = unique(masterdf$sex),
+                        interview_age = mean(masterdf$interview_age))
+
+# Predict the response using the fitted GAM model
+predictions <- predict.gam(model, newdata = new_data, type = "response",se.fit = T)
+
+# Add the predicted values to the new_data dataframe
+new_data$predicted <- predictions$fit
+new_data$se <- predictions$se.fit
+
+# Plot the interaction using ggplot2
+ggplot(new_data, aes(x = cbcl_scr_syn_totprob_r, y = predicted, color = interaction(poverty, sex))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = predicted - 2 * se, ymax = predicted + 2 * se), alpha = 0.2) +
+  facet_grid(poverty ~ sex) +
+  labs(x = "cbcl_scr_syn_totprob_r", y = "Predicted Value")+theme_minimal()+xlim(c(0,100))
+
+
+# triple interaction
+model<-gam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=sex)+sex*poverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(sex, poverty)),data=masterdf)
+
+# Fit the GAM model
+model <- gam(g ~ s(cbcl_scr_syn_internal_r, by = poverty) +
+               s(cbcl_scr_syn_internal_r, by = sex) +
+               sex * poverty +
+               s(interview_age) +
+               s(cbcl_scr_syn_internal_r, by = interaction(sex, poverty), k = 9),
+             data = masterdf)
+
+# Specify values for the predictor variables
+new_data <- expand.grid(cbcl_scr_syn_internal_r = seq(min(masterdf$cbcl_scr_syn_internal_r), 
+                                                     max(masterdf$cbcl_scr_syn_internal_r), 
+                                                     length.out = 100),
+                        poverty = unique(masterdf$poverty),
+                        sex = unique(masterdf$sex),
+                        interview_age = mean(masterdf$interview_age))
+
+# Predict the response using the fitted GAM model
+predictions <- predict.gam(model, newdata = new_data, type = "response",se.fit = T)
+
+# Add the predicted values to the new_data dataframe
+new_data$predicted <- predictions$fit
+new_data$se <- predictions$se.fit
+
+# Plot the interaction using ggplot2
+ggplot(new_data, aes(x = cbcl_scr_syn_internal_r, y = predicted, color = interaction(poverty, sex))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = predicted - 2 * se, ymax = predicted + 2 * se), alpha = 0.2) +
+  facet_grid(poverty ~ sex) +
+  labs(x = "cbcl_scr_syn_internal_r", y = "Predicted Value")+theme_minimal()+xlim(c(0,40))
+
+
+# triple interaction
+model<-gam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r,by=sex)+sex*poverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(sex, poverty)),data=masterdf)
+
+# Fit the GAM model
+model <- gam(g ~ s(cbcl_scr_syn_external_r, by = poverty) +
+               s(cbcl_scr_syn_external_r, by = sex) +
+               sex * poverty +
+               s(interview_age) +
+               s(cbcl_scr_syn_external_r, by = interaction(sex, poverty), k = 9),
+             data = masterdf)
+
+# Specify values for the predictor variables
+new_data <- expand.grid(cbcl_scr_syn_external_r = seq(min(masterdf$cbcl_scr_syn_external_r), 
+                                                     max(masterdf$cbcl_scr_syn_external_r), 
+                                                     length.out = 100),
+                        poverty = unique(masterdf$poverty),
+                        sex = unique(masterdf$sex),
+                        interview_age = mean(masterdf$interview_age))
+
+# Predict the response using the fitted GAM model
+predictions <- predict.gam(model, newdata = new_data, type = "response",se.fit = T)
+
+# Add the predicted values to the new_data dataframe
+new_data$predicted <- predictions$fit
+new_data$se <- predictions$se.fit
+
+# Plot the interaction using ggplot2
+ggplot(new_data, aes(x = cbcl_scr_syn_external_r, y = predicted, color = interaction(poverty, sex))) +
+  geom_line() +
+  geom_ribbon(aes(ymin = predicted - 2 * se, ymax = predicted + 2 * se), alpha = 0.2) +
+  facet_grid(poverty ~ sex) +
+  labs(x = "cbcl_scr_syn_external_r", y = "Predicted Value")+theme_minimal()+xlim(c(0,40))
 
 ```

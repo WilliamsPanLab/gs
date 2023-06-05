@@ -28,6 +28,29 @@ gLow999<-quantile(masterdf$g,.001)
 ```
 
 ```{r}
+# calculate _r value for clinical cutoff (60-63 for p int ext): sources https://www.orangecountygov.com/DocumentCenter/View/12981/dpr_aug11_section_vi-PDF?bidId
+# and
+# https://aseba.org/wp-content/uploads/2019/02/cbclprofile.pdf
+# find subjects _r values where _t=60
+# p
+masterdfp60=masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_t==60),]
+clinRiskLow=mean(masterdfp60$cbcl_scr_syn_totprob_r)
+# find subjects _r values where _t=63
+masterdfp63=masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_t==63),]
+clinRiskHigh=mean(masterdfp63$cbcl_scr_syn_totprob_r)
+# int
+masterdfp60=masterdf[as.numeric(masterdf$cbcl_scr_syn_internal_t==60),]
+intclinRiskLow=mean(masterdfp60$cbcl_scr_syn_internal_r)
+# find subjects _r values where _t=63
+masterdfp63=masterdf[as.numeric(masterdf$cbcl_scr_syn_internal_t==63),]
+intclinRiskHigh=mean(masterdfp63$cbcl_scr_syn_internal_r)
+# ext
+masterdfp60=masterdf[as.numeric(masterdf$cbcl_scr_syn_external_t==60),]
+extclinRiskLow=mean(masterdfp60$cbcl_scr_syn_external_r)
+# find subjects _r values where _t=63
+masterdfp63=masterdf[as.numeric(masterdf$cbcl_scr_syn_external_t==63),]
+extclinRiskHigh=mean(masterdfp63$cbcl_scr_syn_external_r)
+
 # approx. clinical cutoff
 clinCutoff<-quantile(masterdf$cbcl_scr_syn_totprob_r,.95)
 clinCutoffInt<-quantile(masterdf$cbcl_scr_syn_internal_r,.95)
