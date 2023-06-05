@@ -28,13 +28,20 @@ gLow999<-quantile(masterdf$g,.001)
 ```
 
 ```{r}
+# approx. clinical cutoff
+clinCutoff<-quantile(masterdf$cbcl_scr_syn_totprob_r,.95)
+clinCutoffInt<-quantile(masterdf$cbcl_scr_syn_internal_r,.95)
+```
+
+```{r}
 # model GP
 # can use pctinle for xlim
 #print(p999)
 ##
-#model<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
-#visreg(model,"cbcl_scr_syn_totprob_r",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+#xlim(c(0,p999))+ylim(c(gLow999,g999))
-#get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_totprob_r")
+model<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
+visreg(model,"cbcl_scr_syn_totprob_r",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+geom_vline(xintercept=clinCutoff)
+  #xlim(c(0,p999))+ylim(c(gLow999,g999))
+get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_totprob_r")
 ## comparison of normalized (log-transformed) p
 #masterdf$cbcl_scr_syn_totprob_rL<-log(masterdf$cbcl_scr_syn_totprob_r+1)
 #modelL<-gam(g~s(cbcl_scr_syn_totprob_rL)+s(interview_age),data=masterdf)
@@ -46,8 +53,9 @@ gLow999<-quantile(masterdf$g,.001)
 ## can use pctinle for xlim
 #print(i999)
 ##
-#model<-gam(g~s(cbcl_scr_syn_internal_r)+s(interview_age),data=masterdf)
-#visreg(model,"cbcl_scr_syn_internal_r",gg=TRUE,ylab="g",xlab="Int",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=2#5)+xlim(c(0,i999))+ylim(c(gLow999,g999))
+model<-gam(g~s(cbcl_scr_syn_internal_r)+s(interview_age),data=masterdf)
+visreg(model,"cbcl_scr_syn_internal_r",gg=TRUE,ylab="g",xlab="Int",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+geom_vline(xintercept=clinCutoffInt)
+#5)+xlim(c(0,i999))+ylim(c(gLow999,g999))
 #get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_internal_r")
 ## comparison of normalized (log-transformed) p
 #masterdf$cbcl_scr_syn_internal_rL<-log(masterdf$cbcl_scr_syn_internal_r+1)
@@ -432,6 +440,7 @@ model <- '
   g.y ~~ cbcl_scr_syn_external_r.y
   
   # Residual variances
+  # note this tracks concurrent increases in outcome variables
   g.x ~~ g.x
   g.y ~~ g.y
   cbcl_scr_syn_external_r.x ~~ cbcl_scr_syn_external_r.x

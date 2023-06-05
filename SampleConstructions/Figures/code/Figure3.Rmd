@@ -10,8 +10,19 @@ library(mgcv)
 library(ggplot2)
 
 # as factor
-masterdf$sex<-as.factor(masterdf$sex)
-model<-gam(g~s(cbcl_scr_syn_totprob_r,sex,bs="fs",k=5),data=masterdf)
+masterdf$sex<-as.ordered(masterdf$sex)
+model<-gam(g~s(cbcl_scr_syn_totprob_r,by=sex)+s(cbcl_scr_syn_totprob_r)+sex+s(interview_age),data=masterdf)
+
+# as numeric
+masterdf$income<-as.numeric(masterdf$income)
+model<-gam(g~ti(cbcl_scr_syn_totprob_r,income)+s(cbcl_scr_syn_totprob_r)+s(income)+s(interview_age),data=masterdf)
+
+# povert quant
+masterdf$poverty=0
+masterdf$poverty[masterdf$income<5]=1
+masterdf$poverty=as.ordered(masterdf$poverty)
+model<-gam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r)+poverty+s(interview_age),data=masterdf)
+
 # plot it
 mycol <- c("blue", "pink")
 mylty <- c(1, 2)
