@@ -153,8 +153,7 @@ extMax=rep(0,10000)
 #################################################
 ##################### loop over manual bootstraps
 #################################################
-# SET to 1K FOR NOW: CHANGE TO 10K AFTER TESTING
-for (b in 1:1000){
+for (b in 1:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -176,11 +175,11 @@ for (b in 1:1000){
 	# get count poverty in this boot
 	Povcount=length(which(bootSamp$poverty==1))
 	# randomly assign Fcount people to pseudoseg
-	bootSamp$psuedoseg=rep(0,numSubjs)
-	bootSamp$psuedoseg[sample(1:numSubjs,Fcount)]=1
+	bootSamp$psuedoseg=0
+	bootSamp$psuedoseg[sample(1:dim(bootSamp)[1],Fcount)]=1
 	# randomly assign Povcount people to pseudopoverty
-	bootSamp$psuedopoverty=rep(0,numSubjs)
-	bootSamp$psuedopoverty[sample(1:numSubjs,Povcount)]=1
+	bootSamp$psuedopoverty=0
+	bootSamp$psuedopoverty[sample(1:dim(bootSamp)[1],Povcount)]=1
 	
 	#
 	######## I FIT MODELS
