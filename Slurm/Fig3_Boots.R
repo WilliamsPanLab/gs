@@ -293,7 +293,7 @@ for (b in 1:10000){
 	attMax[b]=battmax
 	rulMax[b]=brulmax
 	aggMax[b]=baggmax
-	########## II NOW PRINT OUT F STATISTICS AND AIC, INCLUDING FOR NULLS
+	########## II NOW PRINT OUT F STATISTICS AND AIC, INCLUDING FOR NULLS (psuedopoverty and psuedoseg)
 }
 # SAVEOUT
 # save out version with all cbcl factors
