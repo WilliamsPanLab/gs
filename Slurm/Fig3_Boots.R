@@ -139,13 +139,17 @@ Fsegpov_null_ext=rep(0,10000)
 # AIC
 AICseg_null_p=rep(0,10000)
 AICpov_null_p=rep(0,10000)
-AICsexpov_null_p=rep(0,10000)
+AICsegpov_null_p=rep(0,10000)
 AICseg_null_int=rep(0,10000)
 AICpov_null_int=rep(0,10000)
-AICsexpov_null_int=rep(0,10000)
+AICsegpov_null_int=rep(0,10000)
 AICseg_null_ext=rep(0,10000)
 AICpov_null_ext=rep(0,10000)
-AICsexpov_null_ext=rep(0,10000)
+AICsegpov_null_ext=rep(0,10000)
+# and three lil' vectors just to track max p int and ext over iterations
+pMax=rep(0,10000)
+intMax=rep(0,10000)
+extMax=rep(0,10000)
 #################################################
 ##################### loop over manual bootstraps
 #################################################
@@ -200,13 +204,13 @@ for (b in 1:1000){
 	pgAge_pov_noIntrxn=bam(g~s(cbcl_scr_syn_totprob_r)+poverty+s(interview_age),data=bootSamp)
 	intgAge_pov_noIntrxn=bam(g~s(cbcl_scr_syn_internal_r)+poverty+s(interview_age),data=bootSamp)
 	extgAge_pov_noIntrxn=bam(g~s(cbcl_scr_syn_external_r)+poverty+s(interview_age),data=bootSamp)
-	pgAge_seg_pov_noIntrxn<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_totprob_r)+seg*poverty+s(interview_age),data=masterdf)
-	intgAge_seg_pov_noIntrxn<-bam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_internal_r)+seg*poverty+s(interview_age),data=masterdf)
-	extgAge_seg_pov_noIntrxn<-bam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r,by=seg)+s(cbcl_scr_syn_external_r)+seg*poverty+s(interview_age),data=masterdf)
+	pgAge_seg_pov_noIntrxn<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_totprob_r)+seg*poverty+s(interview_age),data=bootSamp)
+	intgAge_seg_pov_noIntrxn<-bam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_internal_r)+seg*poverty+s(interview_age),data=bootSamp)
+	extgAge_seg_pov_noIntrxn<-bam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r,by=seg)+s(cbcl_scr_syn_external_r)+seg*poverty+s(interview_age),data=bootSamp)
 	#### VERY FULL MODELS
-	pgAge_seg_pov<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_totprob_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(seg, poverty)),data=masterdf)
-	intgAge_seg_pov<-bam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_internal_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(seg, poverty)),data=masterdf)
-	extgAge_seg_pov<-bam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r,by=seg)+s(cbcl_scr_syn_external_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(seg, poverty)),data=masterdf)
+	pgAge_seg_pov<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_totprob_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(seg, poverty)),data=bootSamp)
+	intgAge_seg_pov<-bam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_internal_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(seg, poverty)),data=bootSamp)
+	extgAge_seg_pov<-bam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r,by=seg)+s(cbcl_scr_syn_external_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(seg, poverty)),data=bootSamp)
 	# fit null models for use later (no reduced, reduced is the same as real reduced)
 	#### FULL NULL MODELS
 	pgAge_seg_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedoseg)+s(cbcl_scr_syn_totprob_r)+psuedoseg+s(interview_age),data=bootSamp)
@@ -216,9 +220,9 @@ for (b in 1:1000){
 	intgAge_pov_n<-bam(g~s(cbcl_scr_syn_internal_r,by=psuedopoverty)+s(cbcl_scr_syn_internal_r)+psuedopoverty+s(interview_age),data=bootSamp)
 	extgAge_pov_n<-bam(g~s(cbcl_scr_syn_external_r,by=psuedopoverty)+s(cbcl_scr_syn_external_r)+psuedopoverty+s(interview_age),data=bootSamp)
 	#### VERY FULL NULL MODELS
-	pgAge_seg_pov_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedopoverty)+s(cbcl_scr_syn_totprob_r,by=psuedoseg)+s(cbcl_scr_syn_totprob_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
-	intgAge_seg_pov_n<-bam(g~s(cbcl_scr_syn_internal_r,by=psuedopoverty)+s(cbcl_scr_syn_internal_r,by=psuedoseg)+s(cbcl_scr_syn_internal_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
-	extgAge_seg_pov_n<-bam(g~s(cbcl_scr_syn_external_r,by=psuedopoverty)+s(cbcl_scr_syn_external_r,by=psuedoseg)+s(cbcl_scr_syn_external_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
+	pgAge_seg_pov_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedopoverty)+s(cbcl_scr_syn_totprob_r,by=psuedoseg)+s(cbcl_scr_syn_totprob_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(psuedoseg, psuedopoverty)),data=bootSamp)
+	intgAge_seg_pov_n<-bam(g~s(cbcl_scr_syn_internal_r,by=psuedopoverty)+s(cbcl_scr_syn_internal_r,by=psuedoseg)+s(cbcl_scr_syn_internal_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(psuedoseg, psuedopoverty)),data=bootSamp)
+	extgAge_seg_pov_n<-bam(g~s(cbcl_scr_syn_external_r,by=psuedopoverty)+s(cbcl_scr_syn_external_r,by=psuedoseg)+s(cbcl_scr_syn_external_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(psuedoseg, psuedopoverty)),data=bootSamp)
 	
 	#
 	######## II PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
@@ -256,74 +260,74 @@ for (b in 1:1000){
 	forfitp_F=predict(pgAge_seg,predictDF_segp)
 	forfitint_F=predict(intgAge_seg,predictDF_segint)
 	forfitext_F=predict(extgAge_seg,predictDF_segext)
-	forDerivp_F=derivatives(pgAge_seg,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segp)
-	forDerivint_F=derivatives(intgAge_seg,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segint)
-	forDerivext_F=derivatives(extgAge_seg,term="s(cbcl_scr_syn_external_r)",data=predictDF_segext)
+	forDerivp_F=derivatives(pgAge_seg,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segp,n=bpmax)
+	forDerivint_F=derivatives(intgAge_seg,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segint,n=bimax)
+	forDerivext_F=derivatives(extgAge_seg,term="s(cbcl_scr_syn_external_r)",data=predictDF_segext,n=bemax)
 	# predict boy
 	predictDF_segp$seg=rep("M",bpmax)
 	forfitp_M=predict(pgAge_seg,predictDF_segp)
-	forDerivp_M=derivatives(pgAge_seg,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segp)
+	forDerivp_M=derivatives(pgAge_seg,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segp,n=bpmax)
 	predictDF_segint$seg=rep("M",bimax)
 	forfitint_M=predict(intgAge_seg,predictDF_segint)
-	forDerivint_M=derivatives(intgAge_seg,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segint)
+	forDerivint_M=derivatives(intgAge_seg,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segint,n=bimax)
 	predictDF_segext$seg=rep("M",bemax)
 	forfitext_M=predict(extgAge_seg,predictDF_segext)
-	forDerivext_M=derivatives(extgAge_seg,term="s(cbcl_scr_syn_external_r)",data=predictDF_segext)
+	forDerivext_M=derivatives(extgAge_seg,term="s(cbcl_scr_syn_external_r)",data=predictDF_segext,n=bemax)
 	# predict poverty
-	forfitp_P=predict(pgAge_seg_pov,predictDF_povp)
-	forDerivp_P=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_povp)
-	forfitint_P=predict(intgAge_seg_pov,predictDF_povint)
-	forDerivint_P=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_povint)
-	forfitext_P=predict(extgAge_seg_pov,predictDF_povext)
-	forDerivext_P=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_povext)
+	forfitp_P=predict(pgAge_pov,predictDF_povp)
+	forDerivp_P=derivatives(pgAge_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_povp,n=bpmax)
+	forfitint_P=predict(intgAge_pov,predictDF_povint)
+	forDerivint_P=derivatives(intgAge_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_povint,n=bimax)
+	forfitext_P=predict(extgAge_pov,predictDF_povext)
+	forDerivext_P=derivatives(extgAge_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_povext,n=bemax)
 	# predict rich
 	predictDF_povp$poverty=rep("0",bpmax)
-	forfitp_R=predict(pgAge_seg_pov,predictDF_povp)
-	forDerivp_R=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_povp)
+	forfitp_R=predict(pgAge_pov,predictDF_povp)
+	forDerivp_R=derivatives(pgAge_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_povp,n=bpmax)
 	predictDF_povint$poverty=rep("0",bimax)
-	forfitint_R=predict(intgAge_seg_pov,predictDF_povint)
-	forDerivint_R=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_povint)
+	forfitint_R=predict(intgAge_pov,predictDF_povint)
+	forDerivint_R=derivatives(intgAge_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_povint,n=bimax)
 	predictDF_povext$poverty=rep("0",bemax)
-	fotfitext_R=predict(extgAge_seg_pov,predictDF_povext)
-	forDerivext_R=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_povext)
+	forfitext_R=predict(extgAge_pov,predictDF_povext)
+	forDerivext_R=derivatives(extgAge_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_povext,n=bemax)
 	## predict across triple interaction, funtime
 	# poverty female
 	forfitp_PF=predict(pgAge_seg_pov,predictDF_segpovp)
-	forDerivp_PF=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp)
+	forDerivp_PF=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=bpmax)
 	forfitint_PF=predict(intgAge_seg_pov,predictDF_segpovint)
-	forDerivint_PF=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint)
+	forDerivint_PF=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=bimax)
 	forfitext_PF=predict(extgAge_seg_pov,predictDF_segpovext)
-	forDerivext_PF=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext)
+	forDerivext_PF=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=bemax)
 	# poverty male
 	predictDF_segpovp$seg=rep("M",bpmax)
 	forfitp_PM=predict(pgAge_seg_pov,predictDF_segpovp)
-	forDerivp_PM=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp)
+	forDerivp_PM=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=bpmax)
 	predictDF_segpovint$seg=rep("M",bimax)
 	forfitint_PM=predict(intgAge_seg_pov,predictDF_segpovint)
-	forDerivint_PM=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint)
+	forDerivint_PM=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=bimax)
 	predictDF_segpovext$seg=rep("M",bemax)
 	forfitext_PM=predict(extgAge_seg_pov,predictDF_segpovext)
-	forDerivext_PM=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext)
+	forDerivext_PM=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=bemax)
 	# rich male
 	predictDF_segpovp$poverty=rep("0",bpmax)
 	forfitp_RM=predict(pgAge_seg_pov,predictDF_segpovp)
-	forDerivp_RM=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp)
+	forDerivp_RM=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=bpmax)
 	predictDF_segpovint$poverty=rep("0",bimax)
 	forfitint_RM=predict(intgAge_seg_pov,predictDF_segpovint)
-	forDerivint_RM=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint)
+	forDerivint_RM=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=bimax)
 	predictDF_segpovext$poverty=rep("0",bemax)
 	forfitext_RM=predict(extgAge_seg_pov,predictDF_segpovext)
-	forDerivext_RM=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext)
+	forDerivext_RM=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=bemax)
 	# rich female
 	predictDF_segpovp$seg=rep("F",bpmax)
 	forfitp_RF=predict(pgAge_seg_pov,predictDF_segpovp)
-	forDerivp_RF=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp)
+	forDerivp_RF=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=bpmax)
 	predictDF_segpovint$seg=rep("F",bimax)
 	forfitint_RF=predict(intgAge_seg_pov,predictDF_segpovint)
-	forDerivint_RF=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint)
+	forDerivint_RF=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=bimax)
 	predictDF_segpovext$seg=rep("F",bemax)
 	forfitext_RF=predict(extgAge_seg_pov,predictDF_segpovext)
-	forDerivext_RF=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext)
+	forDerivext_RF=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=bemax)
 	# print out fit
 	F_pFit[b,1:bpmax]=forfitp_F
 	F_intFit[b,1:bimax]=forfitint_F
@@ -350,30 +354,30 @@ for (b in 1:1000){
 	RF_intFit[b,1:bimax]=forfitint_RF
 	RF_extFit[b,1:bemax]=forfitext_RF
 	# print out derivatives
-	F_pDeriv[b,1:bpmax]=forDerivp_F
-	F_intDeriv[b,1:bimax]=forDerivint_F
-	F_extDeriv[b,1:bemax]=forDerivext_F
-	M_pDeriv[b,1:bpmax]=forDerivp_M
-	M_intDeriv[b,1:bimax]=forDerivint_M
-	M_extDeriv[b,1:bemax]=forDerivext_M
-	P_pDeriv[b,1:bpmax]=forDerivp_P
-	P_intDeriv[b,1:bimax]=forDerivint_P
-	P_extDeriv[b,1:bemax]=forDerivext_P
-	R_pDeriv[b,1:bpmax]=forDerivp_R
-	R_intDeriv[b,1:bimax]=forDerivint_R
-	R_extDeriv[b,1:bemax]=forDerivext_R
-	PF_pDeriv[b,1:bpmax]=forDerivp_PF
-	PF_intDeriv[b,1:bimax]=forDerivint_PF
-	PF_extDeriv[b,1:bemax]=forDerivext_PF
-	PM_pDeriv[b,1:bpmax]=forDerivp_PM
-	PM_intDeriv[b,1:bimax]=forDerivint_PM
-	PM_extDeriv[b,1:bemax]=forDerivext_PM
-	RM_pDeriv[b,1:bpmax]=forDerivp_RM
-	RM_intDeriv[b,1:bimax]=forDerivint_RM
-	RM_extDeriv[b,1:bemax]=forDerivext_RM
-	RF_pDeriv[b,1:bpmax]=forDerivp_RF
-	RF_intDeriv[b,1:bimax]=forDerivint_RF
-	RF_extDeriv[b,1:bemax]=forDerivext_RF
+	F_pDeriv[b,1:bpmax]=forDerivp_F$derivative
+	F_intDeriv[b,1:bimax]=forDerivint_F$derivative
+	F_extDeriv[b,1:bemax]=forDerivext_F$derivative
+	M_pDeriv[b,1:bpmax]=forDerivp_M$derivative
+	M_intDeriv[b,1:bimax]=forDerivint_M$derivative
+	M_extDeriv[b,1:bemax]=forDerivext_M$derivative
+	P_pDeriv[b,1:bpmax]=forDerivp_P$derivative
+	P_intDeriv[b,1:bimax]=forDerivint_P$derivative
+	P_extDeriv[b,1:bemax]=forDerivext_P$derivative
+	R_pDeriv[b,1:bpmax]=forDerivp_R$derivative
+	R_intDeriv[b,1:bimax]=forDerivint_R$derivative
+	R_extDeriv[b,1:bemax]=forDerivext_R$derivative
+	PF_pDeriv[b,1:bpmax]=forDerivp_PF$derivative
+	PF_intDeriv[b,1:bimax]=forDerivint_PF$derivative
+	PF_extDeriv[b,1:bemax]=forDerivext_PF$derivative
+	PM_pDeriv[b,1:bpmax]=forDerivp_PM$derivative
+	PM_intDeriv[b,1:bimax]=forDerivint_PM$derivative
+	PM_extDeriv[b,1:bemax]=forDerivext_PM$derivative
+	RM_pDeriv[b,1:bpmax]=forDerivp_RM$derivative
+	RM_intDeriv[b,1:bimax]=forDerivint_RM$derivative
+	RM_extDeriv[b,1:bemax]=forDerivext_RM$derivative
+	RF_pDeriv[b,1:bpmax]=forDerivp_RF$derivative
+	RF_intDeriv[b,1:bimax]=forDerivint_RF$derivative
+	RF_extDeriv[b,1:bemax]=forDerivext_RF$derivative
 	# print out max of unconverted versions to anchor em later
 	pMax[b]=bpmax
 	intMax[b]=bimax
