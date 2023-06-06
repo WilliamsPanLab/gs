@@ -116,6 +116,16 @@ AICreduced_ext=rep(0,10000)
 AICseg_ext=rep(0,10000)
 AICpov_ext=rep(0,10000)
 AICsegpov_ext=rep(0,10000)
+# comparison AICs: includes main effect terms but not interaction terms
+AICseg_p_noIntrxn=rep(0,10000)
+AICpov_p_noIntrxn=rep(0,10000)
+AICsegpov_p_noIntrxn=rep(0,10000)
+AICseg_int_noIntrxn=rep(0,10000)
+AICpov_int_noIntrxn=rep(0,10000)
+AICsegpov_int_noIntrxn=rep(0,10000)
+AICseg_ext_noIntrxn=rep(0,10000)
+AICpov_ext_noIntrxn=rep(0,10000)
+AICsegpov_ext_noIntrxn=rep(0,10000)
 # now equivalent vectors for null models
 Fseg_null_p=rep(0,10000)
 Fpov_null_p=rep(0,10000)
@@ -183,10 +193,20 @@ for (b in 1:1000){
 	pgAge_pov<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r)+poverty+s(interview_age),data=bootSamp)
 	intgAge_pov<-bam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r)+poverty+s(interview_age),data=bootSamp)
 	extgAge_pov<-bam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r)+poverty+s(interview_age),data=bootSamp)
+	# comparison models to evaluate AIC gain from interactions specifically. Should include main effects but minus interaction of interest
+	pgAge_seg_noIntrxn=bam(g~s(cbcl_scr_syn_totprob_r)+seg+s(interview_age),data=bootSamp)
+	intgAge_seg_noIntrxn=bam(g~s(cbcl_scr_syn_internal_r)+seg+s(interview_age),data=bootSamp)
+	extgAge_seg_noIntrxn=bam(g~s(cbcl_scr_syn_external_r)+seg+s(interview_age),data=bootSamp)
+	pgAge_pov_noIntrxn=bam(g~s(cbcl_scr_syn_totprob_r)+poverty+s(interview_age),data=bootSamp)
+	intgAge_pov_noIntrxn=bam(g~s(cbcl_scr_syn_internal_r)+poverty+s(interview_age),data=bootSamp)
+	extgAge_pov_noIntrxn=bam(g~s(cbcl_scr_syn_external_r)+poverty+s(interview_age),data=bootSamp)
+	pgAge_seg_pov_noIntrxn<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_totprob_r)+seg*poverty+s(interview_age),data=masterdf)
+	intgAge_seg_pov_noIntrxn<-bam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_internal_r)+seg*poverty+s(interview_age),data=masterdf)
+	extgAge_seg_pov_noIntrxn<-bam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r,by=seg)+s(cbcl_scr_syn_external_r)+seg*poverty+s(interview_age),data=masterdf)
 	#### VERY FULL MODELS
-	pgAge_seg_pov<-gam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_totprob_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(seg, poverty)),data=masterdf)
-	intgAge_seg_pov<-gam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_internal_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(seg, poverty)),data=masterdf)
-	extgAge_seg_pov<-gam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r,by=seg)+s(cbcl_scr_syn_external_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(seg, poverty)),data=masterdf)
+	pgAge_seg_pov<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_totprob_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(seg, poverty)),data=masterdf)
+	intgAge_seg_pov<-bam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_internal_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(seg, poverty)),data=masterdf)
+	extgAge_seg_pov<-bam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r,by=seg)+s(cbcl_scr_syn_external_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(seg, poverty)),data=masterdf)
 	# fit null models for use later (no reduced, reduced is the same as real reduced)
 	#### FULL NULL MODELS
 	pgAge_seg_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedoseg)+s(cbcl_scr_syn_totprob_r)+psuedoseg+s(interview_age),data=bootSamp)
@@ -196,9 +216,9 @@ for (b in 1:1000){
 	intgAge_pov_n<-bam(g~s(cbcl_scr_syn_internal_r,by=psuedopoverty)+s(cbcl_scr_syn_internal_r)+psuedopoverty+s(interview_age),data=bootSamp)
 	extgAge_pov_n<-bam(g~s(cbcl_scr_syn_external_r,by=psuedopoverty)+s(cbcl_scr_syn_external_r)+psuedopoverty+s(interview_age),data=bootSamp)
 	#### VERY FULL NULL MODELS
-	pgAge_seg_pov_n<-gam(g~s(cbcl_scr_syn_totprob_r,by=psuedopoverty)+s(cbcl_scr_syn_totprob_r,by=psuedoseg)+s(cbcl_scr_syn_totprob_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
-	intgAge_seg_pov_n<-gam(g~s(cbcl_scr_syn_internal_r,by=psuedopoverty)+s(cbcl_scr_syn_internal_r,by=psuedoseg)+s(cbcl_scr_syn_internal_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
-	extgAge_seg_pov_n<-gam(g~s(cbcl_scr_syn_external_r,by=psuedopoverty)+s(cbcl_scr_syn_external_r,by=psuedoseg)+s(cbcl_scr_syn_external_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
+	pgAge_seg_pov_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedopoverty)+s(cbcl_scr_syn_totprob_r,by=psuedoseg)+s(cbcl_scr_syn_totprob_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
+	intgAge_seg_pov_n<-bam(g~s(cbcl_scr_syn_internal_r,by=psuedopoverty)+s(cbcl_scr_syn_internal_r,by=psuedoseg)+s(cbcl_scr_syn_internal_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
+	extgAge_seg_pov_n<-bam(g~s(cbcl_scr_syn_external_r,by=psuedopoverty)+s(cbcl_scr_syn_external_r,by=psuedoseg)+s(cbcl_scr_syn_external_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
 	
 	#
 	######## II PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
@@ -437,6 +457,16 @@ for (b in 1:1000){
 	AICsegpov_p[b]=AIC(pgAge_seg_pov)
 	AICsegpov_int[b]=AIC(intgAge_seg_pov)
 	AICsegpov_ext[b]=AIC(extgAge_seg_pov)
+	# AIC of direct comparison models: includes main effect for covariates but without interactions of interest
+	AICseg_p_noIntrxn[b]=AIC(pgAge_seg_noIntrxn)
+	AICseg_int_noIntrxn[b]=AIC(intgAge_seg_noIntrxn)
+	AICseg_ext_noIntrxn[b]=AIC(extgAge_seg_noIntrxn)
+	AICpov_p_noIntrxn[b]=AIC(pgAge_pov_noIntrxn)
+	AICpov_int_noIntrxn[b]=AIC(intgAge_pov_noIntrxn)
+	AICpov_ext_noIntrxn[b]=AIC(extgAge_pov_noIntrxn)
+	AICsegpov_p_noIntrxn[b]=AIC(pgAge_seg_pov_noIntrxn)
+	AICsegpov_int_noIntrxn[b]=AIC(intgAge_seg_pov_noIntrxn)
+	AICsegpov_ext_noIntrxn[b]=AIC(extgAge_seg_pov_noIntrxn)
 	### null F stats
 	# full
 	Fseg_null_p[b]=seg_n_Smooths_p[1,'F']
@@ -463,8 +493,8 @@ for (b in 1:1000){
 	AICsegpov_null_ext[b]=AIC(extgAge_seg_pov_n)
 }
 # SAVEOUT
-# save out version with all F stats and AICs, including max values for each iteration
-outdf=data.frame(Fseg_p,Fseg_int,Fseg_ext,Fpov_p,Fpov_int,Fpov_ext,Fsegpov_p,Fsegpov_int,Fsegpov_ext,AICreduced_p,AICreduced_int,AICreduced_ext,AICseg_p,AICseg_int,AICseg_ext,AICpov_p,AICpov_int,AICpov_ext,AICsegpov_p,AICsegpov_int,AICsegpov_ext,Fseg_null_p,Fseg_null_int,Fseg_null_ext,Fpov_null_p,Fpov_null_int,Fpov_null_ext,Fsegpov_null_p,Fsegpov_null_int,Fsegpov_null_ext,AICseg_null_p,AICseg_null_int,AICseg_null_ext,AICpov_null_p,AICpov_null_int,AICpov_null_ext,AICsegpov_null_p,AICsegpov_null_int,AICsegpov_null_ext)
+# save out version with all F stats and AICs, include max values for all iterations as well
+outdf=data.frame(Fseg_p,Fseg_int,Fseg_ext,Fpov_p,Fpov_int,Fpov_ext,Fsegpov_p,Fsegpov_int,Fsegpov_ext,AICreduced_p,AICreduced_int,AICreduced_ext,AICseg_p,AICseg_int,AICseg_ext,AICpov_p,AICpov_int,AICpov_ext,AICsegpov_p,AICsegpov_int,AICsegpov_ext,Fseg_null_p,Fseg_null_int,Fseg_null_ext,Fpov_null_p,Fpov_null_int,Fpov_null_ext,Fsegpov_null_p,Fsegpov_null_int,Fsegpov_null_ext,AICseg_null_p,AICseg_null_int,AICseg_null_ext,AICpov_null_p,AICpov_null_int,AICpov_null_ext,AICsegpov_null_p,AICsegpov_null_int,AICsegpov_null_ext,AICseg_p_noIntrxn,AICseg_int_noIntrxn,AICseg_ext_noIntrxn,AICpov_p_noIntrxn,AICpov_int_noIntrxn,AICpov_ext_noIntrxn,AICsegpov_p_noIntrxn,AICsegpov_int_noIntrxn,AICsegpov_ext_noIntrxn,pMax,intMax,extMax)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFandAIC.rds')
 # save out fits
 outdf=data.frame(F_pFit,F_intFit,F_extFit,M_pFit,M_intFit,M_extFit,P_pFit,P_intFit,P_extFit,R_pFit,R_intFit,R_extFit,PF_pFit,PF_intFit,PF_extFit,PM_pFit,PM_intFit,PM_extFit,RM_pFit,RM_intFit,RM_extFit,RF_pFit,RF_intFit,RF_extFit)
