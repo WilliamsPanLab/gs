@@ -22,7 +22,7 @@ dim(masterdf)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up # add cbcl subscales
-masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','g','subjectkey','interview_age')]
+masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','g','subjectkey','interview_age','sex','income')]
 # get length of df for later
 lenDF=dim(masterdf)[1]
 # will need to get full and reduced models for each boot, as well as a null distribution
@@ -94,24 +94,53 @@ PM_extFit=matrix(0,nrow=10000,ncol=emaxVal)
 RF_extFit=matrix(0,nrow=10000,ncol=emaxVal)
 RM_extFit=matrix(0,nrow=10000,ncol=emaxVal)
 # F statistic vector for each interaction
-Fseg=rep(0,10000)
-Fpoverty=rep(0,10000)
-Fsegpoverty=rep(0,10000)
+Fseg_p=rep(0,10000)
+Fpov_p=rep(0,10000)
+Fsegpov_p=rep(0,10000)
+Fseg_int=rep(0,10000)
+Fpov_int=rep(0,10000)
+Fsegpov_int=rep(0,10000)
+Fseg_ext=rep(0,10000)
+Fpov_ext=rep(0,10000)
+Fsegpov_ext=rep(0,10000)
 # AIC for each model
-AICreduced=rep(0,10000)
-AICseg=rep(0,10000)
-AICpoverty=rep(0,10000)
-AICsegpoverty=rep(0,10000)
+AICreduced_p=rep(0,10000)
+AICseg_p=rep(0,10000)
+AICpov_p=rep(0,10000)
+AICsegpov_p=rep(0,10000)
+AICreduced_int=rep(0,10000)
+AICseg_int=rep(0,10000)
+AICpov_int=rep(0,10000)
+AICsegpov_int=rep(0,10000)
+AICreduced_ext=rep(0,10000)
+AICseg_ext=rep(0,10000)
+AICpov_ext=rep(0,10000)
+AICsegpov_ext=rep(0,10000)
 # now equivalent vectors for null models
-Fseg_null=rep(0,10000)
-Fpoverty_null=rep(0,10000)
-Fsegpoverty_null=rep(0,10000)
+Fseg_null_p=rep(0,10000)
+Fpov_null_p=rep(0,10000)
+Fsegpov_null_p=rep(0,10000)
+Fseg_null_int=rep(0,10000)
+Fpov_null_int=rep(0,10000)
+Fsegpov_null_int=rep(0,10000)
+Fseg_null_ext=rep(0,10000)
+Fpov_null_ext=rep(0,10000)
+Fsegpov_null_ext=rep(0,10000)
 # AIC
-AICseg_null=rep(0,10000)
-AICpoverty_null=rep(0,10000)
-AICsexpoverty_null=rep(0,10000)
-# loop over manual bootstrap
-for (b in 1:10000){
+AICseg_null_p=rep(0,10000)
+AICpov_null_p=rep(0,10000)
+AICsexpov_null_p=rep(0,10000)
+AICseg_null_int=rep(0,10000)
+AICpov_null_int=rep(0,10000)
+AICsexpov_null_int=rep(0,10000)
+AICseg_null_ext=rep(0,10000)
+AICpov_null_ext=rep(0,10000)
+AICsexpov_null_ext=rep(0,10000)
+#################################################
+##################### loop over manual bootstraps
+#################################################
+# SET to 1K FOR NOW: CHANGE TO 10K AFTER TESTING
+for (b in 1:1000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -138,7 +167,11 @@ for (b in 1:10000){
 	# randomly assign Povcount people to pseudopoverty
 	bootSamp$psuedopoverty=rep(0,numSubjs)
 	bootSamp$psuedopoverty[sample(1:numSubjs,Povcount)]=1
-	######## I PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
+	
+	#
+	######## I FIT MODELS
+	#
+	
 	#### g as response variable: REDUCED MODELS
 	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=bootSamp)
 	intgAge<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age),data=bootSamp)
@@ -151,9 +184,26 @@ for (b in 1:10000){
 	intgAge_pov<-bam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r)+poverty+s(interview_age),data=bootSamp)
 	extgAge_pov<-bam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r)+poverty+s(interview_age),data=bootSamp)
 	#### VERY FULL MODELS
-	pgAge_seg_pov<-gam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=seg)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(seg, poverty)),data=masterdf)
-	intgAge_seg_pov<-gam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=seg)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(seg, poverty)),data=masterdf)
-	extgAge_seg_pov<-gam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r,by=seg)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(seg, poverty)),data=masterdf)
+	pgAge_seg_pov<-gam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_totprob_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(seg, poverty)),data=masterdf)
+	intgAge_seg_pov<-gam(g~s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_internal_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(seg, poverty)),data=masterdf)
+	extgAge_seg_pov<-gam(g~s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_external_r,by=seg)+s(cbcl_scr_syn_external_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(seg, poverty)),data=masterdf)
+	# fit null models for use later (no reduced, reduced is the same as real reduced)
+	#### FULL NULL MODELS
+	pgAge_seg_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedoseg)+s(cbcl_scr_syn_totprob_r)+psuedoseg+s(interview_age),data=bootSamp)
+	intgAge_seg_n<-bam(g~s(cbcl_scr_syn_internal_r,by=psuedoseg)+s(cbcl_scr_syn_internal_r)+psuedoseg+s(interview_age),data=bootSamp)
+	extgAge_seg_n<-bam(g~s(cbcl_scr_syn_external_r,by=psuedoseg)+s(cbcl_scr_syn_external_r)+psuedoseg+s(interview_age),data=bootSamp)
+	pgAge_pov_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedopoverty)+s(cbcl_scr_syn_totprob_r)+psuedopoverty+s(interview_age),data=bootSamp)
+	intgAge_pov_n<-bam(g~s(cbcl_scr_syn_internal_r,by=psuedopoverty)+s(cbcl_scr_syn_internal_r)+psuedopoverty+s(interview_age),data=bootSamp)
+	extgAge_pov_n<-bam(g~s(cbcl_scr_syn_external_r,by=psuedopoverty)+s(cbcl_scr_syn_external_r)+psuedopoverty+s(interview_age),data=bootSamp)
+	#### VERY FULL NULL MODELS
+	pgAge_seg_pov_n<-gam(g~s(cbcl_scr_syn_totprob_r,by=psuedopoverty)+s(cbcl_scr_syn_totprob_r,by=psuedoseg)+s(cbcl_scr_syn_totprob_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
+	intgAge_seg_pov_n<-gam(g~s(cbcl_scr_syn_internal_r,by=psuedopoverty)+s(cbcl_scr_syn_internal_r,by=psuedoseg)+s(cbcl_scr_syn_internal_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_internal_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
+	extgAge_seg_pov_n<-gam(g~s(cbcl_scr_syn_external_r,by=psuedopoverty)+s(cbcl_scr_syn_external_r,by=psuedoseg)+s(cbcl_scr_syn_external_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_external_r, by = interaction(psuedoseg, psuedopoverty)),data=masterdf)
+	
+	#
+	######## II PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
+	#
+	
 	# use PREDICTED VALUES of model fit for each symptom count for saving
 	eachPcount=seq(1:bpmax)
 	eachIntcount=seq(1:bimax)
@@ -186,50 +236,74 @@ for (b in 1:10000){
 	forfitp_F=predict(pgAge_seg,predictDF_segp)
 	forfitint_F=predict(intgAge_seg,predictDF_segint)
 	forfitext_F=predict(extgAge_seg,predictDF_segext)
+	forDerivp_F=derivatives(pgAge_seg,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segp)
+	forDerivint_F=derivatives(intgAge_seg,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segint)
+	forDerivext_F=derivatives(extgAge_seg,term="s(cbcl_scr_syn_external_r)",data=predictDF_segext)
 	# predict boy
 	predictDF_segp$seg=rep("M",bpmax)
 	forfitp_M=predict(pgAge_seg,predictDF_segp)
+	forDerivp_M=derivatives(pgAge_seg,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segp)
 	predictDF_segint$seg=rep("M",bimax)
 	forfitint_M=predict(intgAge_seg,predictDF_segint)
+	forDerivint_M=derivatives(intgAge_seg,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segint)
 	predictDF_segext$seg=rep("M",bemax)
 	forfitext_M=predict(extgAge_seg,predictDF_segext)
+	forDerivext_M=derivatives(extgAge_seg,term="s(cbcl_scr_syn_external_r)",data=predictDF_segext)
 	# predict poverty
 	forfitp_P=predict(pgAge_seg_pov,predictDF_povp)
+	forDerivp_P=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_povp)
 	forfitint_P=predict(intgAge_seg_pov,predictDF_povint)
+	forDerivint_P=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_povint)
 	forfitext_P=predict(extgAge_seg_pov,predictDF_povext)
+	forDerivext_P=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_povext)
 	# predict rich
 	predictDF_povp$poverty=rep("0",bpmax)
 	forfitp_R=predict(pgAge_seg_pov,predictDF_povp)
+	forDerivp_R=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_povp)
 	predictDF_povint$poverty=rep("0",bimax)
 	forfitint_R=predict(intgAge_seg_pov,predictDF_povint)
+	forDerivint_R=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_povint)
 	predictDF_povext$poverty=rep("0",bemax)
 	fotfitext_R=predict(extgAge_seg_pov,predictDF_povext)
+	forDerivext_R=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_povext)
 	## predict across triple interaction, funtime
 	# poverty female
 	forfitp_PF=predict(pgAge_seg_pov,predictDF_segpovp)
+	forDerivp_PF=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp)
 	forfitint_PF=predict(intgAge_seg_pov,predictDF_segpovint)
+	forDerivint_PF=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint)
 	forfitext_PF=predict(extgAge_seg_pov,predictDF_segpovext)
+	forDerivext_PF=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext)
 	# poverty male
 	predictDF_segpovp$seg=rep("M",bpmax)
 	forfitp_PM=predict(pgAge_seg_pov,predictDF_segpovp)
+	forDerivp_PM=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp)
 	predictDF_segpovint$seg=rep("M",bimax)
 	forfitint_PM=predict(intgAge_seg_pov,predictDF_segpovint)
+	forDerivint_PM=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint)
 	predictDF_segpovext$seg=rep("M",bemax)
 	forfitext_PM=predict(extgAge_seg_pov,predictDF_segpovext)
+	forDerivext_PM=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext)
 	# rich male
 	predictDF_segpovp$poverty=rep("0",bpmax)
 	forfitp_RM=predict(pgAge_seg_pov,predictDF_segpovp)
+	forDerivp_RM=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp)
 	predictDF_segpovint$poverty=rep("0",bimax)
 	forfitint_RM=predict(intgAge_seg_pov,predictDF_segpovint)
+	forDerivint_RM=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint)
 	predictDF_segpovext$poverty=rep("0",bemax)
 	forfitext_RM=predict(extgAge_seg_pov,predictDF_segpovext)
+	forDerivext_RM=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext)
 	# rich female
 	predictDF_segpovp$seg=rep("F",bpmax)
 	forfitp_RF=predict(pgAge_seg_pov,predictDF_segpovp)
+	forDerivp_RF=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp)
 	predictDF_segpovint$seg=rep("F",bimax)
 	forfitint_RF=predict(intgAge_seg_pov,predictDF_segpovint)
+	forDerivint_RF=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint)
 	predictDF_segpovext$seg=rep("F",bemax)
 	forfitext_RF=predict(extgAge_seg_pov,predictDF_segpovext)
+	forDerivext_RF=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext)
 	# print out fit
 	F_pFit[b,1:bpmax]=forfitp_F
 	F_intFit[b,1:bimax]=forfitint_F
@@ -255,53 +329,146 @@ for (b in 1:10000){
 	RF_pFit[b,1:bpmax]=forfitp_RF
 	RF_intFit[b,1:bimax]=forfitint_RF
 	RF_extFit[b,1:bemax]=forfitext_RF
-	# use same procedure to print out deriatives of fit ADAPT DERIVATIVES TO FIT ON BOTH LEVELS OF FACTORS
-	F_pDeriv[b,1:bpmax]=derivatives(pgAge_seg
-	# use DERIVATIVES of model fit for saving
-	forSplinep=derivatives(pgAge,term='s(cbcl_scr_syn_totprob_r)',partial_match = TRUE,n=bpmax)
-	forSplineint=derivatives(intgAge,term='s(cbcl_scr_syn_internal_r)',partial_match = TRUE,n=bimax)
-	forSplineext=derivatives(extgAge,term='s(cbcl_scr_syn_external_r)',partial_match = TRUE,n=bemax)
-	forSplinesom=derivatives(somgAge,term='s(cbcl_scr_syn_somatic_r)',partial_match = TRUE,n=bsommax)
-	forSplineanx=derivatives(anxgAge,term='s(cbcl_scr_syn_anxdep_r)',partial_match = TRUE,n=banxmax)
-	forSplinetho=derivatives(thogAge,term='s(cbcl_scr_syn_thought_r)',partial_match = TRUE,n=bthomax)
-	forSplinewit=derivatives(witgAge,term='s(cbcl_scr_syn_withdep_r)',partial_match = TRUE,n=bwitmax)
-	forSplinesoc=derivatives(socgAge,term='s(cbcl_scr_syn_social_r)',partial_match = TRUE,n=bsocmax)
-	forSplineatt=derivatives(attgAge,term='s(cbcl_scr_syn_attention_r)',partial_match = TRUE,n=battmax)
-	forSplinerul=derivatives(rulgAge,term='s(cbcl_scr_syn_rulebreak_r)',partial_match = TRUE,n=brulmax)
-	forSplineagg=derivatives(agggAge,term='s(cbcl_scr_syn_aggressive_r)',partial_match = TRUE,n=baggmax)
-	# print out fit derivatives
-	pDeriv[b,1:bpmax]=forSplinep$derivative
-	intDeriv[b,1:bimax]=forSplineint$derivative
-	extDeriv[b,1:bemax]=forSplineext$derivative
-	somDeriv[b,1:bsommax]=forSplinesom$derivative
-	anxDeriv[b,1:banxmax]=forSplineanx$derivative
-	thoDeriv[b,1:bthomax]=forSplinetho$derivative
-	witDeriv[b,1:bwitmax]=forSplinewit$derivative
-	socDeriv[b,1:bsocmax]=forSplinesoc$derivative
-	attDeriv[b,1:battmax]=forSplineatt$derivative
-	rulDeriv[b,1:brulmax]=forSplinerul$derivative
-	aggDeriv[b,1:baggmax]=forSplineagg$derivative
+	# print out derivatives
+	F_pDeriv[b,1:bpmax]=forDerivp_F
+	F_intDeriv[b,1:bimax]=forDerivint_F
+	F_extDeriv[b,1:bemax]=forDerivext_F
+	M_pDeriv[b,1:bpmax]=forDerivp_M
+	M_intDeriv[b,1:bimax]=forDerivint_M
+	M_extDeriv[b,1:bemax]=forDerivext_M
+	P_pDeriv[b,1:bpmax]=forDerivp_P
+	P_intDeriv[b,1:bimax]=forDerivint_P
+	P_extDeriv[b,1:bemax]=forDerivext_P
+	R_pDeriv[b,1:bpmax]=forDerivp_R
+	R_intDeriv[b,1:bimax]=forDerivint_R
+	R_extDeriv[b,1:bemax]=forDerivext_R
+	PF_pDeriv[b,1:bpmax]=forDerivp_PF
+	PF_intDeriv[b,1:bimax]=forDerivint_PF
+	PF_extDeriv[b,1:bemax]=forDerivext_PF
+	PM_pDeriv[b,1:bpmax]=forDerivp_PM
+	PM_intDeriv[b,1:bimax]=forDerivint_PM
+	PM_extDeriv[b,1:bemax]=forDerivext_PM
+	RM_pDeriv[b,1:bpmax]=forDerivp_RM
+	RM_intDeriv[b,1:bimax]=forDerivint_RM
+	RM_extDeriv[b,1:bemax]=forDerivext_RM
+	RF_pDeriv[b,1:bpmax]=forDerivp_RF
+	RF_intDeriv[b,1:bimax]=forDerivint_RF
+	RF_extDeriv[b,1:bemax]=forDerivext_RF
 	# print out max of unconverted versions to anchor em later
 	pMax[b]=bpmax
 	intMax[b]=bimax
 	extMax[b]=bemax
-	somMax[b]=bsommax
-	anxMax[b]=banxmax
-	thoMax[b]=bthomax
-	witMax[b]=bwitmax
-	socMax[b]=bsocmax
-	attMax[b]=battmax
-	rulMax[b]=brulmax
-	aggMax[b]=baggmax
-	########## II NOW PRINT OUT F STATISTICS AND AIC, INCLUDING FOR NULLS (psuedopoverty and psuedoseg)
+	
+	#
+	########## III NOW PRINT OUT F STATISTICS AND AIC, INCLUDING FOR NULLS (psuedopoverty and psuedoseg)
+	#
+	
+	# model summaries
+	reducedSum_p=summary(pgAge)
+	segSum_p=summary(pgAge_seg)
+	povSum_p=summary(pgAge_pov)
+	segpovSum_p=summary(pgAge_seg_pov)
+	reducedSum_int=summary(intgAge)
+	segSum_int=summary(intgAge_seg)
+	povSum_int=summary(intgAge_pov)
+	segpovSum_int=summary(intgAge_seg_pov)
+	reducedSum_ext=summary(extgAge)
+	segSum_ext=summary(extgAge_seg)
+	povSum_ext=summary(extgAge_pov)
+	segpovSum_ext=summary(extgAge_seg_pov)
+	# null model summaries
+	seg_n_Sum_p=summary(pgAge_seg_n)
+	pov_n_Sum_p=summary(pgAge_pov_n)
+	segpov_n_Sum_p=summary(pgAge_seg_pov_n)
+	seg_n_Sum_int=summary(intgAge_seg_n)
+	pov_n_Sum_int=summary(intgAge_pov_n)
+	segpov_n_Sum_int=summary(intgAge_seg_pov_n)
+	seg_n_Sum_ext=summary(extgAge_seg_n)
+	pov_n_Sum_ext=summary(extgAge_pov_n)
+	segpov_n_Sum_ext=summary(extgAge_seg_pov_n)
+	# extract smooths table
+	reducedSmooths_p=reducedSum_p$s.table
+	segSmooths_p=segSum_p$s.table
+	povSmooths_p=povSum_p$s.table
+	segpovSmooths_p=segpovSum_p$s.table
+	reducedSmooths_int=reducedSum_int$s.table
+	segSmooths_int=segSum_int$s.table
+	povSmooths_int=povSum_int$s.table
+	segpovSmooths_int=segpovSum_int$s.table
+	reducedSmooths_ext=reducedSum_ext$s.table
+	segSmooths_ext=segSum_ext$s.table
+	povSmooths_ext=povSum_ext$s.table
+	segpovSmooths_ext=segpovSum_ext$s.table
+	# null smooths table
+	seg_n_Smooths_p=seg_n_Sum_p$s.table
+	pov_n_Smooths_p=pov_n_Sum_p$s.table
+	segpov_n_Smooths_p=segpov_n_Sum_p$s.table
+	seg_n_Smooths_int=seg_n_Sum_int$s.table
+	pov_n_Smooths_int=pov_n_Sum_int$s.table
+	segpov_n_Smooths_int=segpov_n_Sum_int$s.table
+	seg_n_Smooths_ext=seg_n_Sum_ext$s.table
+	pov_n_Smooths_ext=pov_n_Sum_ext$s.table
+	segpov_n_Smooths_ext=segpov_n_Sum_ext$s.table
+	### F stats
+	# full
+	Fseg_p[b]=segSmooths_p[1,'F']
+	Fseg_int[b]=segSmooths_int[1,'F']
+	Fseg_ext[b]=segSmooths_ext[1,'F']
+	Fpov_p[b]=povSmooths_p[1,'F']
+	Fpov_int[b]=povSmooths_int[1,'F']
+	Fpov_ext[b]=povSmooths_ext[1,'F']
+	# very full - note summing will likely render AIC comparison more useful
+	Fsegpov_p[b]=sum(segpovSmooths_p[5:8,'F'])
+	Fsegpov_int[b]=sum(segpovSmooths_int[5:8,'F'])
+	Fsegpov_ext[b]=sum(segpovSmooths_ext[5:8,'F'])
+	### AIC
+	# reduced
+	AICreduced_p[b]=AIC(pgAge)
+	AICreduced_int[b]=AIC(intgAge)
+	AICreduced_ext[b]=AIC(extgAge)
+	# full
+	AICseg_p[b]=AIC(pgAge_seg)
+	AICseg_int[b]=AIC(intgAge_seg)
+	AICseg_ext[b]=AIC(extgAge_seg)
+	AICpov_p[b]=AIC(pgAge_pov)
+	AICpov_int[b]=AIC(intgAge_pov)
+	AICpov_ext[b]=AIC(extgAge_pov)
+	# very full
+	AICsegpov_p[b]=AIC(pgAge_seg_pov)
+	AICsegpov_int[b]=AIC(intgAge_seg_pov)
+	AICsegpov_ext[b]=AIC(extgAge_seg_pov)
+	### null F stats
+	# full
+	Fseg_null_p[b]=seg_n_Smooths_p[1,'F']
+	Fseg_null_int[b]=seg_n_Smooths_int[1,'F']
+	Fseg_null_ext[b]=seg_n_Smooths_ext[1,'F']
+	Fpov_null_p[b]=pov_n_Smooths_p[1,'F']
+	Fpov_null_int[b]=pov_n_Smooths_int[1,'F']
+	Fpov_null_ext[b]=pov_n_Smooths_ext[1,'F']
+	# very full
+	Fsegpov_null_p[b]=sum(segpov_n_Smooths_p[5:8,'F'])
+	Fsegpov_null_int[b]=sum(segpov_n_Smooths_int[5:8,'F'])
+	Fsegpov_null_ext[b]=sum(segpov_n_Smooths_ext[5:8,'F'])
+	### null AIC
+	# full
+	AICseg_null_p[b]=AIC(pgAge_seg_n)
+	AICseg_null_int[b]=AIC(intgAge_seg_n)
+	AICseg_null_ext[b]=AIC(extgAge_seg_n)
+	AICpov_null_p[b]=AIC(pgAge_pov_n)
+	AICpov_null_int[b]=AIC(intgAge_pov_n)
+	AICpov_null_ext[b]=AIC(extgAge_pov_n)
+	# very full
+	AICsegpov_null_p[b]=AIC(pgAge_seg_pov_n)
+	AICsegpov_null_int[b]=AIC(intgAge_seg_pov_n)
+	AICsegpov_null_ext[b]=AIC(extgAge_seg_pov_n)
 }
 # SAVEOUT
-# save out version with all cbcl factors
-outdf=data.frame(plinBoots,intlinBoots,extlinBoots,somlinBoots,anxlinBoots,tholinBoots,witlinBoots,soclinBoots,attlinBoots,rullinBoots,agglinBoots,pMax,intMax,extMax,somMax,anxMax,thoMax,witMax,socMax,attMax,rulMax,aggMax)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots.rds')
-outdf=data.frame(pDeriv,intDeriv,extDeriv,somDeriv,anxDeriv,thoDeriv,witDeriv,socDeriv,attDeriv,rulDeriv,aggDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots.rds')
-outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,socFit,attFit,rulFit,aggFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots.rds')
-
+# save out version with all F stats and AICs, including max values for each iteration
+outdf=data.frame(Fseg_p,Fseg_int,Fseg_ext,Fpov_p,Fpov_int,Fpov_ext,Fsegpov_p,Fsegpov_int,Fsegpov_ext,AICreduced_p,AICreduced_int,AICreduced_ext,AICseg_p,AICseg_int,AICseg_ext,AICpov_p,AICpov_int,AICpov_ext,AICsegpov_p,AICsegpov_int,AICsegpov_ext,Fseg_null_p,Fseg_null_int,Fseg_null_ext,Fpov_null_p,Fpov_null_int,Fpov_null_ext,Fsegpov_null_p,Fsegpov_null_int,Fsegpov_null_ext,AICseg_null_p,AICseg_null_int,AICseg_null_ext,AICpov_null_p,AICpov_null_int,AICpov_null_ext,AICsegpov_null_p,AICsegpov_null_int,AICsegpov_null_ext)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFandAIC.rds')
+# save out fits
+outdf=data.frame(F_pFit,F_intFit,F_extFit,M_pFit,M_intFit,M_extFit,P_pFit,P_intFit,P_extFit,R_pFit,R_intFit,R_extFit,PF_pFit,PF_intFit,PF_extFit,PM_pFit,PM_intFit,PM_extFit,RM_pFit,RM_intFit,RM_extFit,RF_pFit,RF_intFit,RF_extFit)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFits.rds')
+# save out derivatives
+outdf=data.frame(F_pDeriv,F_intDeriv,F_extDeriv,M_pDeriv,M_intDeriv,M_extDeriv,P_pDeriv,P_intDeriv,P_extDeriv,R_pDeriv,R_intDeriv,R_extDeriv,PF_pDeriv,PF_intDeriv,PF_extDeriv,PM_pDeriv,PM_intDeriv,PM_extDeriv,RM_pDeriv,RM_intDeriv,RM_extDeriv,RF_pDeriv,RF_intDeriv,RF_extDeriv)
 print('done with g~p fit bootstrapping!')
