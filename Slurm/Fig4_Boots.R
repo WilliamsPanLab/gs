@@ -50,6 +50,11 @@ pFit=matrix(0,nrow=10000,ncol=pMaxVal)
 intFit=matrix(0,nrow=10000,ncol=pMaxVal)
 extFit=matrix(0,nrow=10000,ncol=pMaxVal)
 parentPFit=matrix(0,nrow=10000,ncol=pMaxVal)
+# deviance explained in g from parent P vs child measures
+pDevExpl_g=rep(0,10000)
+intDevExpl_g=rep(0,10000)
+extDevExpl_g=rep(0,10000)
+parentPDevExpl_g=rep(0,10000)
 # note only 1 max because it is parent P as predictor
 pMax=rep(0,10000)
 # loop over manual bootstrap
@@ -109,6 +114,14 @@ for (b in 1:10000){
 	intDeriv[b,1:bpmax]=forSplineint$derivative
 	extDeriv[b,1:bpmax]=forSplineext$derivative
 	parentPderiv[b,1:bpmax]=forSplineParentP$derivative
+	####### III COMPARE DEVIANCE EXPLAINED IN G FROM PARENT P VS CHILD P, INT EXT
+	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=bootSamp)
+	intgAge<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age),data=bootSamp)
+	extgAge<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age),data=bootSamp)
+	pDevExpl_g[b]=summary(pgAge)$dev.expl
+	intDevExpl_g[b]=summary(intgAge)$dev.expl
+	extDevExpl_g[b]=summary(extgAge)$dev.expl
+	parentPDevExpl_g[b]=summary(gParentp)$dev.expl
 	# print out max of unconverted versions to anchor em later
 	pMax[b]=bpmax
 }
@@ -120,5 +133,6 @@ outdf=data.frame(pDeriv,intDeriv,extDeriv,parentPderiv)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpDerivBoots.rds')
 outdf=data.frame(pFit,intFit,extFit,parentPfit)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpFitBoots.rds')
-
+outdf=data.frame(pDevExpl_g,intDevExpl_g,extDevExpl_g,parentPDevExpl_g)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpDevExplBoots.rds'
 print('done with g~p fit bootstrapping!')
