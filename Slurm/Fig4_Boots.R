@@ -38,17 +38,18 @@ extlinBoots=rep(0,10000)
 ### NOTE THAT PARENT P IS ACTUALLY G AS OUTCOME VARIABLE
 parentPlinBoots=rep(0,10000)
 # predicted derivatives: set to maximum value for ncol
-pMaxVal=max(masterdf$cbcl_scr_syn_totprob_r)
+pMaxVal=max(masterdf$parentPcount)
+# and initialize derivative vectors
 pDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
-intDeriv=matrix(0,nrow=10000,ncol=iMaxVal)
-extDeriv=matrix(0,nrow=10000,ncol=emaxVal)
+intDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
+extDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
 # again, parent p nomenclature represents g as outcome variable
-parentPderiv=matrix(0,nrow=10000,ncol=parentPmaxVal)
+parentPderiv=matrix(0,nrow=10000,ncol=pMaxVal)
 # predicted values: set to maximum value for ncol
 pFit=matrix(0,nrow=10000,ncol=pMaxVal)
-intFit=matrix(0,nrow=10000,ncol=iMaxVal)
-extFit=matrix(0,nrow=10000,ncol=emaxVal)
-parentPFit=matrix(0,nrow=10000,ncol=parentPmaxVal)
+intFit=matrix(0,nrow=10000,ncol=pMaxVal)
+extFit=matrix(0,nrow=10000,ncol=pMaxVal)
+parentPFit=matrix(0,nrow=10000,ncol=pMaxVal)
 # note only 1 max because it is parent P as predictor
 pMax=rep(0,10000)
 # loop over manual bootstrap
@@ -70,9 +71,9 @@ for (b in 1:10000){
 	#### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
 	pgAge<-bam(cbcl_scr_syn_totprob_r~parentPcount+s(parentPcount,m=c(2,0))+s(interview_age),data=bootSamp,family=nb())
 	plinBoots[b]=summary(pgAge)$s.pv[1]
-	intgAge<-bam(cbcl_scr_syn_internal_r~parentPcount+s(parentPcount,m=c(2,0))+s(interview_age),data=bootSamp,family=nb()
+	intgAge<-bam(cbcl_scr_syn_internal_r~parentPcount+s(parentPcount,m=c(2,0))+s(interview_age),data=bootSamp,family=nb())
 	intlinBoots[b]=summary(intgAge)$s.pv[1]
-	extgAge<-bam(cbcl_scr_syn_external~parentPcount+s(parentPcount,m=c(2,0))+s(interview_age),data=bootSamp,family=nb()
+	extgAge<-bam(cbcl_scr_syn_external_r~parentPcount+s(parentPcount,m=c(2,0))+s(interview_age),data=bootSamp,family=nb())
 	extlinBoots[b]=summary(extgAge)$s.pv[1]
 	parentPgAge<-bam(g~parentPcount+s(parentPcount,m=c(2,0))+s(interview_age),data=bootSamp)
 	parentPlinBoots[b]=summary(parentPgAge)$s.pv[1]
@@ -87,7 +88,7 @@ for (b in 1:10000){
 	# set age to to median for predict df
 	predictDFp=data.frame(eachPcount,rep(median(bootSamp$interview_age),bpmax))
 	# set colnames so predict can work
-	colnames(predictDFp)=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','parentPcount','g','interview_age')
+	colnames(predictDFp)=c('parentPcount','interview_age')
 	# predict
 	forFitP=predict(pgAge,predictDFp)
 	forFitint=predict(intgAge,predictDFp)
@@ -95,13 +96,14 @@ for (b in 1:10000){
 	forFitParentP=predict(gParentp,predictDFp)
 	# print out fit
 	pFit[b,1:bpmax]=forFitP
-	intFit[b,1:bpmax]=forFitInt
-	extFit[b,1:bpmax]=forFitExt
+	intFit[b,1:bpmax]=forFitint
+	extFit[b,1:bpmax]=forFitext
 	parentPFit[b,1:bpmax]=forFitParentP
 	# use DERIVATIVES of model fit for saving
 	forSplinep=derivatives(pgAge,term='s(parentPcount)',partial_match = TRUE,n=bpmax)
-	forSplineint=derivatives(intgAge,term='s(cbcl_scr_syn_internal_r)',partial_match = TRUE,n=bpmax)
-	forSplineext=derivatives(extgAge,term='s(cbcl_scr_syn_external_r)',partial_match = TRUE,n=bpmax)
+	forSplineint=derivatives(intgAge,term='s(parentPcount)',partial_match = TRUE,n=bpmax)
+	forSplineext=derivatives(extgAge,term='s(parentPcount)',partial_match = TRUE,n=bpmax)
+	forSplineParentP=derivatives(gParentp,term='s(parentPcount)',partial_match = TRUE,n=bpmax)
 	# print out fit derivatives
 	pDeriv[b,1:bpmax]=forSplinep$derivative
 	intDeriv[b,1:bpmax]=forSplineint$derivative
