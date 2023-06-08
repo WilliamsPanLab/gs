@@ -79,99 +79,6 @@ print(paste0(cbclSubjs-cbclSubjsBoth,' lost due to single-timepoint CBCL complet
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-### This  chunk  processes  scholastic  data ###
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-
-### LOAD in grades, ∆∆∆ will need to correct for incongruency between tp1 measure (decent granularity) and tp2 measure (high granularity) ∆∆∆
-gradesInfoBV=read.delim('~/Downloads/Package_1210940/dibf01.txt')
-# extract baseline
-gradesInfoBV=subset(gradesInfoBV,eventname=='baseline_year_1_arm_1')
-gradesInfoBV$Grades<-as.numeric(gradesInfoBV$kbi_p_grades_in_school)
-# convert ndar value to R
-gradesInfoBV$Grades[gradesInfoBV$Grades==-1]=NA
-# ungraded NA for these analyses
-gradesInfoBV$Grades[gradesInfoBV$Grades==6]=NA
-# convert ndar colnames to other ndar colnames
-# for tp2, the key is 1 = A's, 2 = B's, 3 = C's, 4 = D's, 5 = F's, 6 = ungraded, -1 = NA
-gradesInfoY2=read.delim('~/Downloads/Package_1210940/abcd_saag01.txt')
-gradesInfoY2=subset(gradesInfoY2,eventname=='2_year_follow_up_y_arm_1')
-gradesInfoY2$sag_grade_type<-as.numeric(gradesInfoY2$sag_grade_type)
-# key: 1=100-97,2=96-93,3=92-90,4=89-87,5=86-83,6=82-80,7=79-77,8=76-73,9=72-70,10=69-67,11=66-65,12=0-65,-1=NA,777= no answer
-gradesInfoY2$sag_grade_type[gradesInfoY2$sag_grade_type==-1]=NA
-gradesInfoY2$sag_grade_type[gradesInfoY2$sag_grade_type==777]=NA
-# now convert to be equivalent with timepoint 1 grades measure
-ind12=gradesInfoY2$sag_grade_type==12
-ind11=gradesInfoY2$sag_grade_type==11
-ind10=gradesInfoY2$sag_grade_type==10
-ind9=gradesInfoY2$sag_grade_type==9
-ind8=gradesInfoY2$sag_grade_type==8
-ind7=gradesInfoY2$sag_grade_type==7
-ind6=gradesInfoY2$sag_grade_type==6
-ind5=gradesInfoY2$sag_grade_type==5
-ind4=gradesInfoY2$sag_grade_type==4
-ind3=gradesInfoY2$sag_grade_type==3
-ind2=gradesInfoY2$sag_grade_type==2
-ind1=gradesInfoY2$sag_grade_type==1
-#### Set indices to low-res versions
-# < 65 becomes failing
-gradesInfoY2$sag_grade_type[ind12]=5
-# 66-69 = Ds
-gradesInfoY2$sag_grade_type[ind11]=4
-gradesInfoY2$sag_grade_type[ind10]=4
-# 70-79 = Cs
-gradesInfoY2$sag_grade_type[ind7]=3
-gradesInfoY2$sag_grade_type[ind8]=3
-gradesInfoY2$sag_grade_type[ind9]=3
-# 80-89 = Bs
-gradesInfoY2$sag_grade_type[ind4]=2
-gradesInfoY2$sag_grade_type[ind5]=2
-gradesInfoY2$sag_grade_type[ind6]=2
-# 90+ = As
-gradesInfoY2$sag_grade_type[ind1]=1
-gradesInfoY2$sag_grade_type[ind2]=1
-gradesInfoY2$sag_grade_type[ind3]=1
-gradesInfoY2$Grades<-gradesInfoY2$sag_grade_type
-
-###### ∆∆∆∆∆∆∆ create grades info from both of em
-NeededColNames=c('subjectkey','eventname','Grades')
-gradesInfo<-rbind(gradesInfoBV[,NeededColNames],gradesInfoY2[,NeededColNames])
-gradesInfo$Grades<-as.ordered(gradesInfo$Grades)
-
-# merge and count losses
-masterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
-
-# subjects with this measure at both timepoints
-# only use subjects with both timepoints as complete cases
-subjs=unique(masterdf$subjectkey)
-for (s in subjs){
-  # if there are less than two complete cases of the variables of interest
-  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,'Grades']))<2){
-    subjs=subjs[subjs!=s]
-  }
-}
-
-# exclude participants without data at both timepoints
-masterdf=masterdf[masterdf$subjectkey %in% subjs,]
-
-# omit nans and empties for variables of interest (totprobs,int,ext)
-masterdf=masterdf[!is.empty(masterdf$Grades),]
-masterdf=masterdf[!is.na(masterdf$Grades),]
-gradesSubjs=length(unique(masterdf$subjectkey))
-# add to included subjs DF
-includedSubjects$Grades=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
-# print data volume
-print(gradesSubjs)
-dif=cbclSubjsBoth-gradesSubjs
-print(paste0(dif,' participants lost from grades merge'))
-
-# included subjs df
-includedSubjects$Grades=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
-```
-
-```{r}
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 ### This chunk processes adult mental health ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
@@ -195,7 +102,7 @@ masterdf=masterdf[masterdf$subjectkey %in% subjs,]
 
 # full losses counted after asr count chunk, but note one participant is probably lost here just from merge
 asrSubjs=length(unique(masterdf$subjectkey))
-dif=gradesSubjs-asrSubjs
+dif=cbclSubjsBoth-asrSubjs
 print(paste0(dif,' participants lost from needing ASR at both timepoints'))
 
 # included subjs df
@@ -588,11 +495,105 @@ ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
         legend.text = element_text(size=40),legend.title = element_text(size=40))
 ```
 
+
+```{r}
+# now making an alternate version with KSADS for child-reported-p-proxy. Note that I wanted to get child-identified gender from ksads, but values are missing for every single observation
+ksads_y=read.delim('~/Downloads/Package_1216656/abcd_ksad501.txt')
+# convert src_subject_id to subjectkey
+ksads_y$subjectkey=ksads_y$src_subject_id
+# and age to numeric for merging later
+ksads_y$interview_age<-as.numeric(ksads_y$interview_age)/12
+# remove timepoints .5 and 1.5
+ksads_y=ksads_y[ksads_y$eventname!='1_year_follow_up_y_arm_1',]
+ksads_y=ksads_y[ksads_y$eventname!='3_year_follow_up_y_arm_1',]
+# Extract the first row of the ksads_y data frame (true column names)
+first_row <- ksads_y[1, ]
+# Get the column indices that contain ', Present'
+present_cols <- grep(', Present', first_row)
+# now select for those that specify symptoms
+symptom_cols <- grep('Symptom', first_row)
+# get intersection
+present_symptom_cols=intersect(present_cols,symptom_cols)
+# count empties
+ksads_y$empties<-0
+for (i in present_symptom_cols){
+  # add an empty count for each subject where this one symptom is missing
+  ksads_y$empties=ksads_y$empties+as.numeric(is.empty(ksads_y[,i]))
+}
+# omit empties
+ksads_y_rem=ksads_y[ksads_y$empties<1,] 
+# omit subjects without data at both timepoints
+ksadsy_subjects=length(unique(ksads_y_rem$subjectkey))
+OutDFBV=subset(ksads_y_rem,eventname=='baseline_year_1_arm_1')
+OutDF2Y=subset(ksads_y_rem,eventname=='2_year_follow_up_y_arm_1')
+# intersection of subjs in both
+BothTPsubjs=intersect(OutDFBV$subjectkey,OutDF2Y$subjectkey)
+MissingTPsubjs=setdiff(unique(masterdf$subjectkey),BothTPsubjs)
+# only include subjects with data at both timepoints
+ksads_y_rem=ksads_y_rem[ksads_y_rem$subjectkey %in% BothTPsubjs,]
+# deal with numeric codes
+ksads_y_rem[ksads_y_rem=="555"]=NA
+ksads_y_rem[ksads_y_rem=="888"]=NA
+ksads_y_rem[ksads_y_rem=="999"]=NA 
+
+# Loop through the present_cols and convert each column to numeric
+for (col_index in present_symptom_cols) {
+  ksads_y_rem[[col_index]] <- as.numeric(ksads_y_rem[[col_index]])
+}
+
+# get a count of endorsed, present symptoms. use grep to select for colnames that have ", Present" in them
+ksads_y_rem$totcount_y=rowSums(ksads_y_rem[present_symptom_cols],na.rm = T)
+
+### merge in for child-reported p equivalent
+masterdf2=merge(masterdf,ksads_y_rem,by=c('subjectkey','sex','interview_age','eventname'))
+
+# new merge and count
+ksadsSubjs=length(unique(masterdf2$subjectkey))
+# add to included subjs DF
+includedSubjects$ksads=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf2$subjectkey),]$ksads=1
+
+# melt the plot df to get in proper format
+plotdf=melt(includedSubjects)
+plotdf$value<-as.factor(plotdf$value)
+plotdf$subj<-as.factor(plotdf$subj)
+# merge in raceEth of each subj
+raceEth=participantsTSV$race_ethnicity
+subjectsInPtsv=participantsTSV$subjectkey
+infoDf=data.frame(raceEth,subjectsInPtsv)
+colnames(infoDf)<-c('RaceEthn','subj')
+test=merge(plotdf,infoDf,by='subj')
+# overwrite race with "empty" if missing after each checkpoint
+test$RaceEthn<-factor(test$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
+test$RaceEthn[test$value==0]="Missing"
+
+my_colors <- c("red", "orange", "yellow", "green", "blue", "gray")
+
+ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
+  geom_stratum(aes(fill = RaceEthn)) +
+  geom_flow(aes(fill = RaceEthn)) +
+  scale_fill_manual(values = my_colors) +
+  theme_bw(base_size = 35)
+
+
+#########################
+#########################
+#########################
+#########################
+# this dataframe is now your working data frame for fig4 sensititvity analyses
+saveRDS(masterdf2,'~/gp_masterdf2.rds')
+####################
+#########################
+#########################
+#########################
+
+```
+
 ```{r}
 #### ∆∆∆
 # temporal precedence df
 #### ∆∆∆
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','Grades','parentPcount','income','sex','race_ethnicity','matched_group','eventname')
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','income','sex','race_ethnicity','matched_group','eventname')
 # eliminate rows with NAs and ensure none without two-timepoint data
 # variables of interest redux
 masterdf=masterdf[,c(variablesOfInterest)]
