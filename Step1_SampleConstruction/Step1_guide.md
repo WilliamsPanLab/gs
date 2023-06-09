@@ -26,3 +26,18 @@ You can download the .Rmd to follow the code on your local machine, and follow t
 
 9. Chunk 9 runs PCA to derive *g* (first factor). As noted, a supplementary analysis demonstrates this produces an equivalent outcome to more complex approaches.
 
+10. Chunk 10 just checks for complete data at both timepoints.
+
+11. Chunk 11 calculates the adult p factor. For multiple reasons, discussed in-text, we are using the sum of endorsed symptoms. Several items are reverse scored, which presents a potentially challenging interpretative framework. Specifically, it's not clear that saying you are happy is equivalent to negative psychiatric symptoms. To make the fewest assumptions, these items are omitted rather than reversed in adult totals (subtracted from the total sum).
+
+12. Chunk 12 handles a participants tsv, which is [a useful file with centralized info](https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups). We use this one to derive sex and parent income, as child-endorsed gender identification is missing for every single observation for every single child (as of now, from KSADS). Same drill as prior: kids with missing data are excluded. We also save out the primary dataframe here (gp_masterdf.rds)
+
+13. Chunk 13 plots missing data. It's time to see where we lost participants. This makes an alluvial plot.
+
+14. Chunk 14 plots missing data as pie charts (before and after)
+
+15. Loads in [ksads data](https://nda.nih.gov/data_structure.html?short_name=abcd_ksad501) so we have a child-report version of their p factor score. Note the ksads is messy: branching logic, variably-expressed missing data, and big (~1,000 variables). These data are also saved out after merging with masterdf, and further missingness is plotted.
+
+16. This chunk prepares data for temporal precedence analysis: largely a replication of Romer & Pizzagalli [2021](https://pubmed.ncbi.nlm.nih.gov/34332330/). This uses a sep. dataframe because we are explicitly interested in temporal precedence from timepoint 1 to timepoint 2. This does not establish causality, but does add credence to the ways our models are constructed through the rest of the paper.
+
+## Upon completion, we should have masterdf, masterdf2, and OutDFTmpPrec to bootstrap on our institution's computer cluster
