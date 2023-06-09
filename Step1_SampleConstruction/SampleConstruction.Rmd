@@ -8,15 +8,16 @@ date: "2023-01-25"
 This .rmd links ndar downloads into a master dataset. Cross-sectional and temporal precedence datasets are be exported from this file (no matched imaging groups needed, pooled factor decomposition).
 
 ```{r}
-#### load libraries
+#### chunk 1: load libraries
 library(rapportools)
 library(reshape2)
 library(ggplot2)
+library(ggalluvial)
 ```
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-### This chunk processes mental health data ###
+####  chunk 2 processes mental health data  ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in cbcl data
@@ -79,7 +80,7 @@ print(paste0(cbclSubjs-cbclSubjsBoth,' lost due to single-timepoint CBCL complet
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-### This chunk processes adult mental health ###
+#### Chunlk 2 processes adult mental health ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in ASR data
@@ -112,7 +113,7 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$ASR=1
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-### This   chunk   processes family ID   data ###
+####  Chunk 4   processes family ID   data  ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # load in acs file for rel_family_ID
@@ -156,7 +157,7 @@ masterdf$cbcl_scr_syn_external_r<-as.numeric(masterdf$cbcl_scr_syn_external_r)
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-###   This chunk processes cognitive data    ###
+####   Chunk 6 processes cognitive data    ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 #### LOAD in cognitive data
@@ -182,7 +183,7 @@ masterdf$interview_age<-as.numeric(masterdf$interview_age)/12
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-##This chunk preps for cognition factorization##
+## Chunk 7 preps for cognition factorization ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # use thompson 2019 recreation of non nih-tb measures
@@ -235,7 +236,9 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CogBot
 ```
 
 ```{r}
-### ∆∆∆
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+###  Chunk 8 preps by selecting 1 per family ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 # finish cleaning data for sherlock runs: one family member per family to facilitate random sample
 masterdf$id_fam = NULL
 # default value of family size (# of children in abcd study)
@@ -289,7 +292,7 @@ pcaDf<-masterdf[,pcVars]
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-###  This chunk runs cognition factorization ###
+### Chunk 9: it runs cognition factorization ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # derive pcs
@@ -308,7 +311,7 @@ masterdf$g<-Yextended$g
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## merges subjects with data at both timepoints##
+## Chunk 10 subjects with data at both timepoints##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # exclude subjs without data for both timepoints
@@ -434,7 +437,6 @@ paste0(participantsTSVSubjs,' remain')
 ```
 
 ```{r}
-library(ggalluvial)
 # melt the plot df to get in proper format
 plotdf=melt(includedSubjects)
 plotdf$value<-as.factor(plotdf$value)
