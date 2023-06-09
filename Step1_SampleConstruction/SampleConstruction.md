@@ -8,7 +8,7 @@ and temporal precedence datasets are be exported from this file (no
 matched imaging groups needed, pooled factor decomposition).
 
 ``` r
-#### load libraries
+#### chunk 1: load libraries
 library(rapportools)
 ```
 
@@ -26,11 +26,12 @@ library(rapportools)
 ``` r
 library(reshape2)
 library(ggplot2)
+library(ggalluvial)
 ```
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-### This chunk processes mental health data ###
+####  chunk 2 processes mental health data  ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in cbcl data
@@ -95,7 +96,7 @@ print(paste0(cbclSubjs-cbclSubjsBoth,' lost due to single-timepoint CBCL complet
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-### This chunk processes adult mental health ###
+#### Chunlk 2 processes adult mental health ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in ASR data
@@ -132,7 +133,7 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$ASR=1
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-### This   chunk   processes family ID   data ###
+####  Chunk 4   processes family ID   data  ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # load in acs file for rel_family_ID
@@ -182,7 +183,7 @@ masterdf$cbcl_scr_syn_external_r<-as.numeric(masterdf$cbcl_scr_syn_external_r)
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-###   This chunk processes cognitive data    ###
+####   Chunk 6 processes cognitive data    ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 #### LOAD in cognitive data
@@ -250,7 +251,7 @@ masterdf$interview_age<-as.numeric(masterdf$interview_age)/12
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-##This chunk preps for cognition factorization##
+## Chunk 7 preps for cognition factorization ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # use thompson 2019 recreation of non nih-tb measures
@@ -317,7 +318,9 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CogBot
 ```
 
 ``` r
-### ∆∆∆
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+###  Chunk 8 preps by selecting 1 per family ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 # finish cleaning data for sherlock runs: one family member per family to facilitate random sample
 masterdf$id_fam = NULL
 # default value of family size (# of children in abcd study)
@@ -375,7 +378,7 @@ pcaDf<-masterdf[,pcVars]
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-###  This chunk runs cognition factorization ###
+### Chunk 9: it runs cognition factorization ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # derive pcs
@@ -413,7 +416,7 @@ masterdf$g<-Yextended$g
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## merges subjects with data at both timepoints##
+## Chunk 10 subjects with data at both timepoints##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # exclude subjs without data for both timepoints
@@ -433,7 +436,7 @@ print(paste0(dif,' rows lost from only using subjs with both timepoints'))
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## handles adult p factor                     ##
+## Chunk 11 handles adult p factor            ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # make count version of adult P
@@ -493,7 +496,7 @@ paste0(length(unique(masterdf$subjectkey)))
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Handles participants TSV from              ##
+## Chunk 12 Handles participants TSV          ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in ParticipantsTSV for parent income and edu background
@@ -584,7 +587,10 @@ paste0(participantsTSVSubjs,' remain')
     ## [1] "5240 remain"
 
 ``` r
-library(ggalluvial)
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+#### Chunk 13 plots data missingness       #####
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 # melt the plot df to get in proper format
 plotdf=melt(includedSubjects)
 ```
@@ -616,7 +622,10 @@ ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
-### and finish with pie charts
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+#### Chunk 14 plots  missingness as pie charts #
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 # can overlay two pie charts: starting raceEth Comp and Ending. Tuck into area that is pink now
 startingdf=test[test$variable=='cbclInclude',]
 startingdf=startingdf[startingdf$value==1,]
@@ -657,13 +666,24 @@ ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
 
 ``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##################
+#### Chunk 15 loads in ksads data for a supplement #
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##################
+
 # now making an alternate version with KSADS for child-reported-p-proxy. Note that I wanted to get child-identified gender from ksads, but values are missing for every single observation
 ksads_y=read.delim('~/Downloads/Package_1216656/abcd_ksad501.txt')
 # convert src_subject_id to subjectkey
 ksads_y$subjectkey=ksads_y$src_subject_id
+# and age to numeric for merging later
+ksads_y$interview_age<-as.numeric(ksads_y$interview_age)/12
+```
+
+    ## Warning: NAs introduced by coercion
+
+``` r
 # remove timepoints .5 and 1.5
-ksads_y=masterdf[ksads_y$eventname!='1_year_follow_up_y_arm_1',]
-ksads_y=masterdf[ksads_y$eventname!='3_year_follow_up_y_arm_1',]
+ksads_y=ksads_y[ksads_y$eventname!='1_year_follow_up_y_arm_1',]
+ksads_y=ksads_y[ksads_y$eventname!='3_year_follow_up_y_arm_1',]
 # Extract the first row of the ksads_y data frame (true column names)
 first_row <- ksads_y[1, ]
 # Get the column indices that contain ', Present'
@@ -703,23 +723,16 @@ for (col_index in present_symptom_cols) {
 ksads_y_rem$totcount_y=rowSums(ksads_y_rem[present_symptom_cols],na.rm = T)
 
 ### merge in for child-reported p equivalent
-masterdf2=merge(masterdf,ksads_y_rem,by=c('subjectkey','sex'))
+masterdf2=merge(masterdf,ksads_y_rem,by=c('subjectkey','sex','interview_age','eventname'))
 ```
 
     ## Warning in merge.data.frame(masterdf, ksads_y_rem, by = c("subjectkey", :
-    ## column names 'collection_id.x.x', 'dataset_id.x.x', 'interview_date.x.x',
-    ## 'collection_title.x.x', 'collection_id.y.x', 'dataset_id.y.x',
-    ## 'src_subject_id.x.x', 'interview_date.y.x', 'collection_title.y.x',
-    ## 'collection_id.x.x', 'dataset_id.x.x', 'src_subject_id.y.x',
-    ## 'interview_date.x.x', 'collection_title.x.x', 'collection_id.y.x',
-    ## 'dataset_id.y.x', 'interview_date.y.x', 'collection_title.y.x',
-    ## 'collection_id.x.y', 'dataset_id.x.y', 'interview_date.x.y',
-    ## 'collection_title.x.y', 'collection_id.y.y', 'dataset_id.y.y',
-    ## 'src_subject_id.x.y', 'interview_date.y.y', 'collection_title.y.y',
-    ## 'collection_id.x.y', 'dataset_id.x.y', 'src_subject_id.y.y',
-    ## 'interview_date.x.y', 'collection_title.x.y', 'collection_id.y.y',
-    ## 'dataset_id.y.y', 'interview_date.y.y', 'collection_title.y.y' are duplicated
-    ## in the result
+    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
+    ## 'interview_date.y', 'collection_title.y', 'collection_id.x', 'dataset_id.x',
+    ## 'src_subject_id.y', 'interview_date.x', 'collection_title.x',
+    ## 'collection_id.y', 'dataset_id.y', 'src_subject_id.x', 'interview_date.y',
+    ## 'collection_title.y', 'src_subject_id.y' are duplicated in the result
 
 ``` r
 # new merge and count
@@ -772,9 +785,10 @@ saveRDS(masterdf2,'~/gp_masterdf2.rds')
 ```
 
 ``` r
-#### ∆∆∆
-# temporal precedence df
-#### ∆∆∆
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
+#### Chunk 16 prepares data for analysis of temporal precedence ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
+
 variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','income','sex','race_ethnicity','matched_group','eventname')
 # eliminate rows with NAs and ensure none without two-timepoint data
 # variables of interest redux

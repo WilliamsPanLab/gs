@@ -330,7 +330,7 @@ print(paste0(dif,' rows lost from only using subjs with both timepoints'))
 ```{r}
 
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## handles adult p factor                     ##
+## Chunk 11 handles adult p factor            ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # make count version of adult P
@@ -368,7 +368,7 @@ paste0(length(unique(masterdf$subjectkey)))
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Handles participants TSV from              ##
+## Chunk 12 Handles participants TSV          ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in ParticipantsTSV for parent income and edu background
@@ -437,6 +437,10 @@ paste0(participantsTSVSubjs,' remain')
 ```
 
 ```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+#### Chunk 13 plots data missingness       #####
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
 # melt the plot df to get in proper format
 plotdf=melt(includedSubjects)
 plotdf$value<-as.factor(plotdf$value)
@@ -463,8 +467,10 @@ ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
 ```
 
 ```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+#### Chunk 14 plots  missingness as pie charts #
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
-### and finish with pie charts
 # can overlay two pie charts: starting raceEth Comp and Ending. Tuck into area that is pink now
 startingdf=test[test$variable=='cbclInclude',]
 startingdf=startingdf[startingdf$value==1,]
@@ -499,6 +505,10 @@ ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
 
 
 ```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##################
+#### Chunk 15 loads in ksads data for a supplement #
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##################
+
 # now making an alternate version with KSADS for child-reported-p-proxy. Note that I wanted to get child-identified gender from ksads, but values are missing for every single observation
 ksads_y=read.delim('~/Downloads/Package_1216656/abcd_ksad501.txt')
 # convert src_subject_id to subjectkey
@@ -592,9 +602,10 @@ saveRDS(masterdf2,'~/gp_masterdf2.rds')
 ```
 
 ```{r}
-#### ∆∆∆
-# temporal precedence df
-#### ∆∆∆
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
+#### Chunk 16 prepares data for analysis of temporal precedence ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
+
 variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','income','sex','race_ethnicity','matched_group','eventname')
 # eliminate rows with NAs and ensure none without two-timepoint data
 # variables of interest redux
