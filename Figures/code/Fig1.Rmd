@@ -13,7 +13,6 @@ library(shapes)
 library(reshape2)
 library(viridis)
 library(dplyr)
-
 ```
 
 ```{r}
@@ -46,11 +45,13 @@ plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Cli
   ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2, color = Var2)) +
     geom_line(aes(alpha = CI), show.legend = FALSE) +
     scale_color_viridis_c(option = "inferno", direction = -1) +
-    scale_alpha_manual(values = c(0.01, 1), guide = FALSE) +
-    theme_classic() +
-    xlim(c(0, maxValuePlot))+ylab('g')+xlab(Name)+
+    scale_alpha_manual(values = c(0.01, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(Name)+
     geom_vline(xintercept = BorderlineClinical, linetype = "dashed")+
-    geom_vline(xintercept = Clinical, linetype = "dashed")
+    geom_vline(xintercept = Clinical, linetype = "dashed")+
+    theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,maxValuePlot),expand = expansion(mult = c(0, 0)))
 }
 
 
@@ -88,7 +89,8 @@ Ic=mean(masterdfP_c$cbcl_scr_syn_internal_r)
 Ebc=mean(masterdfE_bc$cbcl_scr_syn_external_r)
 Ec=mean(masterdfE_c$cbcl_scr_syn_external_r)
 
-plot_bootstraps(PFits,127,'p-factor',MaxP,Pbc,Pc)
+# actually plot em
+plot_bootstraps(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
 plot_bootstraps(IFits,51,'internalizing',MaxI,Ibc,Ic)
 plot_bootstraps(EFits,47,'externalizing',MaxE,Ebc,Ec)
 
