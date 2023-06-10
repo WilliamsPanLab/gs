@@ -1,0 +1,158 @@
+---
+title: "Figure1"
+output: html_document
+date: "2023-06-09"
+---
+
+```{r}
+# load libraries
+library(ggplot2)
+library(hexbin)
+library(rgl)
+library(shapes)
+library(reshape2)
+library(viridis)
+library(dplyr)
+
+```
+
+```{r}
+
+plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Clinical) {
+  # Melt the data frame
+  data_melt <- melt(t(data))
+  data_melt$Var1 <- rep(seq(1, maxval), nrow(data))
+
+  # Calculate percentiles
+  percentiles <- data %>%
+    summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
+  
+  percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_to = "Percentile", values_to = "YValue")
+
+  # Add CI column
+  data_melt$CI <- 0
+  
+  # Prepare CIs for insertion
+  CIs <- data.frame(rep(seq(1, maxval), 2), c(rep(10001, maxval), rep(10002, maxval)), percentiles_long$YValue, rep(1, (maxval*2)))
+  colnames(CIs) <- colnames(data_melt)
+  
+  # Add CIs
+  data_melt2 <- rbind(data_melt, CIs)
+  
+  # Convert CI column to factor
+  data_melt2$CI <- as.factor(data_melt2$CI)
+  
+  # Plotting the lines
+  ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2, color = Var2)) +
+    geom_line(aes(alpha = CI), show.legend = FALSE) +
+    scale_color_viridis_c(option = "inferno", direction = -1) +
+    scale_alpha_manual(values = c(0.01, 1), guide = FALSE) +
+    theme_classic() +
+    xlim(c(0, maxValuePlot))+ylab('g')+xlab(Name)+
+    geom_vline(xintercept = BorderlineClinical, linetype = "dashed")+
+    geom_vline(xintercept = Clinical, linetype = "dashed")
+}
+
+
+find_furthest_nonzero <- function(data) {
+  numZeros=colSums(data==0)
+  isZeroZeros=numZeros==0
+  furthest_nonzero=sum(isZeroZeros)
+}
+```
+
+```{r}
+# load in data
+Fits=readRDS('~/gpFitBoots.rds')
+# find mean shape and plot it: p
+PFits=Fits[,1:127]
+IFits=Fits[,128:178]
+EFits=Fits[,179:225]
+
+MaxP=find_furthest_nonzero(PFits)
+MaxI=find_furthest_nonzero(IFits)
+MaxE=find_furthest_nonzero(EFits)
+
+# pull clinical cutoff from master df: t scores > 68 = borderline clinical, 70 = clinical
+masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==68,]
+masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==70,]
+masterdfI_bc<-masterdf[masterdf$cbcl_scr_syn_internal_t==68,]
+masterdfI_c<-masterdf[masterdf$cbcl_scr_syn_internal_t==70,]
+masterdfE_bc<-masterdf[masterdf$cbcl_scr_syn_external_t==68,]
+masterdfE_c<-masterdf[masterdf$cbcl_scr_syn_external_t==70,]
+# borderline clinical and clinical cutoffs
+Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
+Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
+Ibc=mean(masterdfP_bc$cbcl_scr_syn_internal_r)
+Ic=mean(masterdfP_c$cbcl_scr_syn_internal_r)
+Ebc=mean(masterdfE_bc$cbcl_scr_syn_external_r)
+Ec=mean(masterdfE_c$cbcl_scr_syn_external_r)
+
+plot_bootstraps(PFits,127,'p-factor',MaxP,Pbc,Pc)
+plot_bootstraps(IFits,51,'internalizing',MaxI,Ibc,Ic)
+plot_bootstraps(EFits,47,'externalizing',MaxE,Ebc,Ec)
+
+```
+
+
+```{r}
+#Input k x m x n real array, where k is the number of points, m is the number of
+#dimensions, and n is the sample size.
+# initialize shape matrix
+shapeMat=array(0, dim = c(127, 1, 10000))
+shapeMat[1:127,,]=seq(0,126)
+
+for (i in 1:10000){
+    shapeMat[,1,i]=unlist(PFits[i,1:127])
+}
+
+# and cut it where we dont have good coverage
+non_zero_cols <- which(apply(PFits, 2, function(col) all(col != 0)))
+
+# Subset the PFits dataframe with the non-zero columns
+PFits_subset <- PFits[, non_zero_cols]
+shapeMat_subset=array(0, dim = c(max(non_zero_cols), 1, 10000))
+shapeMat_subset[1:max(non_zero_cols),1,1:10000]=shapeMat[1:max(non_zero_cols),1,1:10000]
+test=procGPA(shapeMat_subset)
+test2=shapepca(test,type="r",mag=3)
+```
+
+
+```{r}
+# Load required packages
+library(sRDA)
+
+   
+
+
+library(dplyr)
+
+# Assuming your dataframe is named 'df'
+asr_vars <- mutate_all(asr_vars[,2:123], as.numeric)
+cbcl_vars <- mutate_all(cbcl_vars,as.numeric)
+
+
+X=asr_vars
+Y=cbcl_vars
+  
+RDA.res <- sRDA(predictor = X, predicted = Y, nonzero = c(5,10,15),
+ridge_penalty = c(0.1,1), penalization = "enet", cross_validate = TRUE,
+parallel_CV = TRUE)
+
+# check first 10 weights of X
+RDA.res$ALPHA[1:10]
+
+# check the Ridge parameter and the number of nonzeros included in the model
+RDA.res$ridge_penalty
+RDA.res$nr_nonzeros
+# Perform sparse-CCA
+sparse_cca <- sCCA(asr_vars, cbcl_vars, nonzero = 10)
+
+# Extract canonical coefficients and correlations
+coefficients <- sparse_cca$variates$x
+correlations <- sparse_cca$cor
+
+# Print the canonical coefficients and correlations
+print(coefficients)
+print(correlations)
+```
