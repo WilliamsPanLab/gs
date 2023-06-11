@@ -13,7 +13,105 @@ library(shapes)
 library(reshape2)
 library(viridis)
 library(dplyr)
+library(mgcv)
 ```
+```{r}
+# reference linear model
+plotdf<-data.frame(masterdf$g,masterdf$cbcl_scr_syn_totprob_r,masterdf$interview_age)
+colnames(plotdf)<-c('g','cbcl_scr_syn_totprob_r','interview_age')
+modelforresids<-gam(g~s(interview_age),data=plotdf)
+plotdf$resids<-modelforresids$residuals
+
+jet.colors <- colorRampPalette(rev(c("#00007F", "blue", "cyan", "#7FFF7F", "yellow", "#FCEC9F")))
+
+basic=ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=40)+
+    geom_point(alpha=0)+
+    geom_smooth(method = "lm",formula = (y~x),color='gray') +
+    scale_fill_viridis_c(option = "turbo") +
+    ylim(c(-4,5)) +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    geom_vline(xintercept = 60.225, linetype = "dashed")+
+    geom_vline(xintercept = 65.65574, linetype = "dashed")+
+    theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,113),expand = expansion(mult = c(0, 0)))
+
+# make marginal plot
+ggMarginal(basic, type="density")
+
+# extract line of best fit for comparison
+fit_data<-ggplot_build(basic)$data[[3]]
+
+basicLog=ggplot(data = plotdf,aes(x = log(cbcl_scr_syn_totprob_r+1), y = g)) + geom_point(size=6,alpha=.01)+
+    geom_smooth(method = "lm",formula = (y~x),color='gray') +
+    scale_fill_viridis_c(option = "inferno") +
+    ylim(c(-4,4.5)) +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    geom_vline(xintercept = log(60.225), linetype = "dashed")+
+    geom_vline(xintercept = log(65.65574), linetype = "dashed")+
+    theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,log(113)),expand = expansion(mult = c(0, 0)))
+ggMarginal(testLog, type="density")
+```
+
+```{r}
+### P boots plot with overlaid linear fit
+# load in data
+Fits=readRDS('~/gpFitBoots.rds')
+# find mean shape and plot it: p
+PFits=Fits[,1:127]
+
+MaxP=find_furthest_nonzero(PFits)
+
+# pull clinical cutoff from master df: t scores > 68 = borderline clinical, 70 = clinical
+masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==68,]
+masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==70,]
+
+# borderline clinical and clinical cutoffs
+Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
+Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
+
+data_melt <- melt(t(PFits))
+data_melt$Var1 <- rep(seq(1, 127), nrow(data))
+# Calculate percentiles
+percentiles <- data %>%
+summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
+  
+percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_to = "Percentile", values_to = "YValue")
+
+# Add CI column
+data_melt$CI <- 0
+  
+# Prepare CIs for insertion
+CIs <- data.frame(rep(seq(1, 127), 2), c(rep(10001, 127), rep(10002, 127)), percentiles_long$YValue, rep(1, (127*2)))
+colnames(CIs) <- colnames(data_melt)
+  
+# Add CIs
+data_melt2 <- rbind(data_melt, CIs)
+  
+# Convert CI column to factor
+data_melt2$CI <- as.factor(data_melt2$CI)
+  
+
+# add in var2, only length of 80
+fit_data$Var2=rep(10003,80)
+
+# Plotting the lines
+ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
+  geom_line(aes(alpha = CI, color = Var2), show.legend = FALSE) +
+  scale_color_viridis_c(option = "inferno", direction = -1) +
+  scale_alpha_manual(values = c(0.01, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
+  theme_minimal(base_size=35) + 
+  ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+  geom_vline(xintercept = Pbc, linetype = "dashed")+
+  geom_vline(xintercept = Pc, linetype = "dashed")+
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 1)) +
+  scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0))) + 
+  geom_line(data = fit_data, aes(x = x, y = y), color = "gray",size=1.5)
+
+```
+
 
 ```{r}
 
@@ -54,12 +152,59 @@ plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Cli
     scale_x_continuous(limits = c(0,maxValuePlot),expand = expansion(mult = c(0, 0)))
 }
 
+# and and a derivatives version. only change is ylim
+plot_bootstrapDerivs <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Clinical) {
+  # Melt the data frame
+  data_melt <- melt(t(data))
+  data_melt$Var1 <- rep(seq(1, maxval), nrow(data))
+
+  # Calculate percentiles
+  percentiles <- data %>%
+    summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
+  
+  percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_to = "Percentile", values_to = "YValue")
+
+  # Add CI column
+  data_melt$CI <- 0
+  
+  # Prepare CIs for insertion
+  CIs <- data.frame(rep(seq(1, maxval), 2), c(rep(10001, maxval), rep(10002, maxval)), percentiles_long$YValue, rep(1, (maxval*2)))
+  colnames(CIs) <- colnames(data_melt)
+  
+  # Add CIs
+  data_melt2 <- rbind(data_melt, CIs)
+  
+  # Convert CI column to factor
+  data_melt2$CI <- as.factor(data_melt2$CI)
+  
+  # Plotting the lines
+  ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2, color = Var2)) +
+    geom_line(aes(alpha = CI), show.legend = FALSE) +
+    scale_color_viridis_c(option = "inferno", direction = -1) +
+    scale_alpha_manual(values = c(0.01, 1), guide = FALSE) + ylim(c(-.15,.15)) +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(Name)+
+    geom_vline(xintercept = BorderlineClinical, linetype = "dashed")+
+    geom_vline(xintercept = Clinical, linetype = "dashed")+
+    theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,maxValuePlot),expand = expansion(mult = c(0, 0)))
+}
+
 
 find_furthest_nonzero <- function(data) {
   numZeros=colSums(data==0)
   isZeroZeros=numZeros==0
   furthest_nonzero=sum(isZeroZeros)
 }
+
+
+find_furthest_nonzero <- function(data) {
+  numZeros=colSums(data==0)
+  isZeroZeros=numZeros==0
+  furthest_nonzero=sum(isZeroZeros)
+}
+
+
 ```
 
 ```{r}
@@ -93,6 +238,83 @@ Ec=mean(masterdfE_c$cbcl_scr_syn_external_r)
 plot_bootstraps(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
 plot_bootstraps(IFits,51,'internalizing',MaxI,Ibc,Ic)
 plot_bootstraps(EFits,47,'externalizing',MaxE,Ebc,Ec)
+
+```
+
+```{r}
+# load in data
+Fits=readRDS('~/Desktop/g_p/gpDerivBoots.rds')
+# find mean shape and plot it: p
+PFits=Fits[,1:127]
+IFits=Fits[,128:178]
+EFits=Fits[,179:225]
+
+plot_bootstrapDerivs(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
+plot_bootstrapDerivs(IFits,51,'internalizing',MaxI,Ibc,Ic)
+plot_bootstrapDerivs(EFits,47,'externalizing',MaxE,Ebc,Ec)
+
+# for p
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(PFits > 0, na.rm = TRUE)
+negative_counts <- colSums(PFits < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(PFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+      theme(panel.spacing = unit(-.01,"cm")) +
+      scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+                           high = "#e41a1c",limits = c(min(-.032),max(0.032)))+theme_minimal()+xlim(c(0,MaxP))
+# for int
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(IFits > 0, na.rm = TRUE)
+negative_counts <- colSums(IFits < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(IFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+      theme(panel.spacing = unit(-.01,"cm")) +
+      scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+                           high = "#e41a1c",limits = c(min(-.032),max(0.032)))+theme_minimal()+xlim(c(0,MaxI))
+
+# for ext
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(EFits > 0, na.rm = TRUE)
+negative_counts <- colSums(EFits < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(EFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+      theme(panel.spacing = unit(-.01,"cm")) +
+      scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+                           high = "#e41a1c",limits = c(min(-.032),max(0.032)))+theme_minimal()+xlim(c(0,MaxE))
+
 
 ```
 
