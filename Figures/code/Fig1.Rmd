@@ -215,7 +215,6 @@ SomFits=Fits[,226:238]
 AnxFits=Fits[,239:263]
 ThoFits=Fits[,264:281]
 WitFits=Fits[,282:297]
-SocFits=Fits[,298:314]
 AttFits=Fits[,315:333]
 RulFits=Fits[,334:351]
 AggFits=Fits[,352:383]
@@ -223,7 +222,6 @@ AggFits=Fits[,352:383]
 MaxP=find_furthest_nonzero(PFits)
 MaxI=find_furthest_nonzero(IFits)
 MaxE=find_furthest_nonzero(EFits)
-MaxSom=find_furthest_nonzero(SomFits)
 MaxAnx=find_furthest_nonzero(AnxFits)
 MaxTho=find_furthest_nonzero(ThoFits)
 MaxWit=find_furthest_nonzero(WitFits)
@@ -239,6 +237,21 @@ masterdfI_bc<-masterdf[masterdf$cbcl_scr_syn_internal_t==68,]
 masterdfI_c<-masterdf[masterdf$cbcl_scr_syn_internal_t==70,]
 masterdfE_bc<-masterdf[masterdf$cbcl_scr_syn_external_t==68,]
 masterdfE_c<-masterdf[masterdf$cbcl_scr_syn_external_t==70,]
+masterdfAnx_bc<-masterdf[masterdf$cbcl_scr_syn_anxdisord_t==68,]
+masterdfAnx_c<-masterdf[masterdf$cbcl_scr_syn_anxdisord_t==70,]
+masterdfTho_bc<-masterdf[masterdf$cbcl_scr_syn_thought_t==68,]
+masterdfTho_c<-masterdf[masterdf$cbcl_scr_syn_thought_t==70,]
+masterdfWit_bc<-masterdf[masterdf$cbcl_scr_syn_withdrawn_t==68,]
+masterdfWit_c<-masterdf[masterdf$cbcl_scr_syn_withdrawn_t==70,]
+masterdfSoc_bc<-masterdf[masterdf$cbcl_scr_syn_sociemot_t==68,]
+masterdfSoc_c<-masterdf[masterdf$cbcl_scr_syn_sociemot_t==70,]
+masterdfAtt_bc<-masterdf[masterdf$cbcl_scr_syn_attention_t==68,]
+masterdfAtt_c<-masterdf[masterdf$cbcl_scr_syn_attention_t==70,]
+masterdfRul_bc<-masterdf[masterdf$cbcl_scr_syn_rulebreak_t==68,]
+masterdfRul_c<-masterdf[masterdf$cbcl_scr_syn_rulebreak_t==70,]
+masterdfAgg_bc<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==68,]
+masterdfAgg_c<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==70,]
+
 # borderline clinical and clinical cutoffs
 Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
 Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
@@ -246,11 +259,32 @@ Ibc=mean(masterdfP_bc$cbcl_scr_syn_internal_r)
 Ic=mean(masterdfP_c$cbcl_scr_syn_internal_r)
 Ebc=mean(masterdfE_bc$cbcl_scr_syn_external_r)
 Ec=mean(masterdfE_c$cbcl_scr_syn_external_r)
+AnxBc=mean(as.numeric(masterdfAnx_bc$cbcl_scr_syn_anxdisord_r))
+AnxC=mean(as.numeric(masterdfAnx_c$cbcl_scr_syn_anxdisord_r))
+ThoBc=mean(as.numeric(masterdfTho_bc$cbcl_scr_syn_thought_r))
+ThoC=mean(as.numeric(masterdfTho_c$cbcl_scr_syn_thought_r))
+WitBc=mean(as.numeric(masterdfWit_bc$cbcl_scr_syn_withdrawn_r))
+WitC=mean(as.numeric(masterdfWit_c$cbcl_scr_syn_withdrawn_r))
+SocBc=mean(as.numeric(masterdfSoc_bc$cbcl_scr_syn_sociemot_r))
+SocC=mean(as.numeric(masterdfSoc_c$cbcl_scr_syn_sociemot_r))
+AttBc=mean(as.numeric(masterdfAtt_bc$cbcl_scr_syn_attention_r))
+AttC=mean(as.numeric(masterdfAtt_c$cbcl_scr_syn_attention_r))
+RulBc=mean(as.numeric(masterdfRul_bc$cbcl_scr_syn_rulebreak_r))
+RulC=mean(as.numeric(masterdfRul_c$cbcl_scr_syn_rulebreak_r))
+AggBc=mean(as.numeric(masterdfAgg_bc$cbcl_scr_syn_aggressive_r))
+AggC=mean(as.numeric(masterdfAgg_c$cbcl_scr_syn_aggressive_r))
 
 # actually plot em
 plot_bootstraps(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
 plot_bootstraps(IFits,51,'internalizing',MaxI,Ibc,Ic)
 plot_bootstraps(EFits,47,'externalizing',MaxE,Ebc,Ec)
+plot_bootstraps(AnxFits,25,'anx.depr.',MaxAnx,AnxBc,AnxC)
+plot_bootstraps(ThoFits,18,'thought',MaxTho,ThoBc,ThoC)
+plot_bootstraps(WitFits,16,'withdrawn',MaxWit,WitBc,WitC)
+plot_bootstraps(SocFits,17,'social',MaxSoc,SocBc,SocC)
+plot_bootstraps(AttFits,19,'attention',MaxAtt,AttBc,AttC)
+plot_bootstraps(RulFits,18,'rulebreak',MaxRul,RulBc,RulC)
+plot_bootstraps(AggFits,32,'aggressive',MaxAgg,AggBc,AggC)
 
 ```
 
