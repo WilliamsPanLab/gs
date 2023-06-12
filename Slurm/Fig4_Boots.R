@@ -131,7 +131,7 @@ outdf=data.frame(plinBoots,intlinBoots,extlinBoots,parentPlinBoots)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpBoots.rds')
 outdf=data.frame(pDeriv,intDeriv,extDeriv,parentPderiv)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpDerivBoots.rds')
-outdf=data.frame(pFit,intFit,extFit,parentPfit)
+outdf=data.frame(pFit,intFit,extFit,parentPFit)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpFitBoots.rds')
 outdf=data.frame(pDevExpl_g,intDevExpl_g,extDevExpl_g,parentPDevExpl_g)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpDevExplBoots.rds'

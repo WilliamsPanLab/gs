@@ -72,5 +72,5 @@ for (b in 1:10000){
 # SAVEOUT
 # save out version with all cbcl factors
 outdf=data.frame(pDevExpl_g,intDevExpl_g,extDevExpl_g,parentPDevExpl_g,p_sr_DevExpl_g)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpDevExplBoots_df2.rds'
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpDevExplBoots_df2.rds')
 print('done with g~p fit bootstrapping!')
