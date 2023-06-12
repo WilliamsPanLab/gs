@@ -24,16 +24,16 @@ plotdf$resids<-modelforresids$residuals
 
 jet.colors <- colorRampPalette(rev(c("#00007F", "blue", "cyan", "#7FFF7F", "yellow", "#FCEC9F")))
 
-basic=ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=40)+
+basic=ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=60)+
     geom_point(alpha=0)+
     geom_smooth(method = "lm",formula = (y~x),color='gray') +
-    scale_fill_viridis_c(option = "turbo") +
+    scale_fill_viridis_c(option = "inferno") +
     ylim(c(-4,5)) +
     theme_minimal(base_size=35) + 
     ylab(expression(italic(g)))+xlab(expression(italic(p)))+
     geom_vline(xintercept = 60.225, linetype = "dashed")+
     geom_vline(xintercept = 65.65574, linetype = "dashed")+
-    theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(3,"cm"))+
     scale_x_continuous(limits = c(0,113),expand = expansion(mult = c(0, 0)))
 
 # make marginal plot
@@ -61,23 +61,19 @@ ggMarginal(testLog, type="density")
 Fits=readRDS('~/gpFitBoots.rds')
 # find mean shape and plot it: p
 PFits=Fits[,1:127]
-
 MaxP=find_furthest_nonzero(PFits)
-
 # pull clinical cutoff from master df: t scores > 68 = borderline clinical, 70 = clinical
 masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==68,]
 masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==70,]
-
 # borderline clinical and clinical cutoffs
 Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
 Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
-
+# melt data for plotting each line
 data_melt <- melt(t(PFits))
-data_melt$Var1 <- rep(seq(1, 127), nrow(data))
+data_melt$Var1 <- rep(seq(1, 127), nrow(PFits))
 # Calculate percentiles
-percentiles <- data %>%
+percentiles <- PFits %>%
 summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
-  
 percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_to = "Percentile", values_to = "YValue")
 
 # Add CI column
@@ -209,15 +205,31 @@ find_furthest_nonzero <- function(data) {
 
 ```{r}
 # load in data
-Fits=readRDS('~/gpFitBoots.rds')
+Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
 # find mean shape and plot it: p
 PFits=Fits[,1:127]
 IFits=Fits[,128:178]
 EFits=Fits[,179:225]
+SomFits=Fits[,226:238]
+AnxFits=Fits[,239:263]
+ThoFits=Fits[,264:281]
+WitFits=Fits[,282:297]
+SocFits=Fits[,298:314]
+AttFits=Fits[,315:333]
+RulFits=Fits[,334:351]
+AggFits=Fits[,352:383]
 
 MaxP=find_furthest_nonzero(PFits)
 MaxI=find_furthest_nonzero(IFits)
 MaxE=find_furthest_nonzero(EFits)
+MaxSom=find_furthest_nonzero(SomFits)
+MaxAnx=find_furthest_nonzero(AnxFits)
+MaxTho=find_furthest_nonzero(ThoFits)
+MaxWit=find_furthest_nonzero(WitFits)
+MaxSoc=find_furthest_nonzero(SocFits)
+MaxAtt=find_furthest_nonzero(AttFits)
+MaxRul=find_furthest_nonzero(RulFits)
+MaxAgg=find_furthest_nonzero(AggFits)
 
 # pull clinical cutoff from master df: t scores > 68 = borderline clinical, 70 = clinical
 masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==68,]
@@ -248,12 +260,21 @@ Fits=readRDS('~/Desktop/g_p/gpDerivBoots.rds')
 PFits=Fits[,1:127]
 IFits=Fits[,128:178]
 EFits=Fits[,179:225]
+SomFits=Fits[,226:238]
+AnxFits=Fits[,239:263]
+ThoFits=Fits[,264:281]
+WitFits=Fits[,282:297]
+SocFits=Fits[,298:314]
+AttFits=Fits[,315:333]
+RulFits=Fits[,334:351]
+AggFits=Fits[,352:383]
 
-plot_bootstrapDerivs(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
-plot_bootstrapDerivs(IFits,51,'internalizing',MaxI,Ibc,Ic)
-plot_bootstrapDerivs(EFits,47,'externalizing',MaxE,Ebc,Ec)
 
-# for p
+#plot_bootstrapDerivs(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
+#plot_bootstrapDerivs(IFits,51,'internalizing',MaxI,Ibc,Ic)
+#plot_bootstrapDerivs(EFits,47,'externalizing',MaxE,Ebc,Ec)
+
+# for p - saved out at 600x200, 300x200 for minor scales
 # get straightfoward of segment where 99% is over 0 or under
 positive_counts <- colSums(PFits > 0, na.rm = TRUE)
 negative_counts <- colSums(PFits < 0, na.rm = TRUE)
@@ -270,9 +291,13 @@ dervPlotDf$sig_deriv=0
 dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
-      theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-                           high = "#e41a1c",limits = c(min(-.032),max(0.032)))+theme_minimal()+xlim(c(0,MaxP))
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab(expression(italic(p)))+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
 # for int
 # get straightfoward of segment where 99% is over 0 or under
 positive_counts <- colSums(IFits > 0, na.rm = TRUE)
@@ -290,9 +315,13 @@ dervPlotDf$sig_deriv=0
 dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
-      theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-                           high = "#e41a1c",limits = c(min(-.032),max(0.032)))+theme_minimal()+xlim(c(0,MaxI))
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    xlab('Internalizing')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxI),expand = expansion(mult = c(0, 0)))
 
 # for ext
 # get straightfoward of segment where 99% is over 0 or under
@@ -311,9 +340,173 @@ dervPlotDf$sig_deriv=0
 dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxE))+xlab('Externalizing')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxE),expand = expansion(mult = c(0, 0)))
+
+# for som
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(SomFits > 0, na.rm = TRUE)
+negative_counts <- colSums(SomFits < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(SomFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxSom))+xlab('Somatic')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxSom),expand = expansion(mult = c(0, 0)))
+
+# for anx
+positive_counts <- colSums(AnxFits > 0, na.rm = TRUE)
+negative_counts <- colSums(AnxFits < 0, na.rm = TRUE)
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+data <- apply(AnxFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxAnx))+xlab('Anx.Depr.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxAnx),expand = expansion(mult = c(0, 0)))
+# for Tho
+positive_counts <- colSums(ThoFits > 0, na.rm = TRUE)
+negative_counts <- colSums(ThoFits < 0, na.rm = TRUE)
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+data <- apply(ThoFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxTho))+xlab('Thought')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxTho),expand = expansion(mult = c(0, 0)))
+
+# for Wit
+positive_counts <- colSums(WitFits > 0, na.rm = TRUE)
+negative_counts <- colSums(WitFits < 0, na.rm = TRUE)
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+data <- apply(WitFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(panel.spacing = unit(-.01,"cm")) +
       scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-                           high = "#e41a1c",limits = c(min(-.032),max(0.032)))+theme_minimal()+xlim(c(0,MaxE))
+			high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+xlim(c(0,MaxWit))+xlab('Withd.Depr.')+
+      guides(fill=FALSE)+
+      theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+      scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
+
+# for Soc
+positive_counts <- colSums(SocFits > 0, na.rm = TRUE)
+negative_counts <- colSums(SocFits < 0, na.rm = TRUE)
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+data <- apply(SocFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+      theme(panel.spacing = unit(-.01,"cm")) +
+      scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+			high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+xlim(c(0,MaxSoc))+xlab('Social')+
+      guides(fill=FALSE)+
+      theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+      scale_x_continuous(breaks=c(0,3,6,9,12),limits = c(0,MaxSoc),expand = expansion(mult = c(0, 0)))
+
+# for Att
+positive_counts <- colSums(AttFits > 0, na.rm = TRUE)
+negative_counts <- colSums(AttFits < 0, na.rm = TRUE)
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+data <- apply(AttFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+      theme(panel.spacing = unit(-.01,"cm")) +
+      scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+			high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+xlim(c(0,MaxAtt))+xlab('Attn.')+
+      guides(fill=FALSE)+
+      theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+      scale_x_continuous(limits = c(0,MaxAtt),expand = expansion(mult = c(0, 0)))
+
+# for Rul
+positive_counts <- colSums(RulFits > 0, na.rm = TRUE)
+negative_counts <- colSums(RulFits < 0, na.rm = TRUE)
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+data <- apply(RulFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+      theme(panel.spacing = unit(-.01,"cm")) +
+      scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+			high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+xlim(c(0,MaxRul))+xlab('Rules')+
+      guides(fill=FALSE)+
+      theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+      scale_x_continuous(breaks=c(0,3,6,9,12),limits = c(0,MaxRul),expand = expansion(mult = c(0, 0)))
+
+# for Agg
+positive_counts <- colSums(AggFits > 0, na.rm = TRUE)
+negative_counts <- colSums(AggFits < 0, na.rm = TRUE)
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+data <- apply(AggFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+      theme(panel.spacing = unit(-.01,"cm")) +
+      scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+			high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+xlim(c(0,MaxAgg))+xlab('Aggr.')+
+      guides(fill=FALSE)+
+      theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+      scale_x_continuous(limits = c(0,MaxAgg),expand = expansion(mult = c(0, 0)))
+
 
 
 ```
