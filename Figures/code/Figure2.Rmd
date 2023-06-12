@@ -13,359 +13,115 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(data.table)
-```
-
-
-```{r}
-# load in from sample construction
-masterdf=masterdf
-# calculate 99.9th percentile of P int and Ext
-p999<-quantile(masterdf$cbcl_scr_syn_totprob_r,.999)
-i999<-quantile(masterdf$cbcl_scr_syn_internal_r,.999)
-e999<-quantile(masterdf$cbcl_scr_syn_external_r,.999)
-g999<-quantile(masterdf$g,.999)
-gLow999<-quantile(masterdf$g,.001)
+library(ggridges)
+library(ggbeeswarm)
 ```
 
 ```{r}
-# calculate _r value for clinical cutoff (60-63 for p int ext): sources https://www.orangecountygov.com/DocumentCenter/View/12981/dpr_aug11_section_vi-PDF?bidId
-# and
-# https://aseba.org/wp-content/uploads/2019/02/cbclprofile.pdf
-# find subjects _r values where _t=60
-# p
-masterdfp60=masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_t==60),]
-clinRiskLow=mean(masterdfp60$cbcl_scr_syn_totprob_r)
-# find subjects _r values where _t=63
-masterdfp63=masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_t==63),]
-clinRiskHigh=mean(masterdfp63$cbcl_scr_syn_totprob_r)
-# int
-masterdfp60=masterdf[as.numeric(masterdf$cbcl_scr_syn_internal_t==60),]
-intclinRiskLow=mean(masterdfp60$cbcl_scr_syn_internal_r)
-# find subjects _r values where _t=63
-masterdfp63=masterdf[as.numeric(masterdf$cbcl_scr_syn_internal_t==63),]
-intclinRiskHigh=mean(masterdfp63$cbcl_scr_syn_internal_r)
-# ext
-masterdfp60=masterdf[as.numeric(masterdf$cbcl_scr_syn_external_t==60),]
-extclinRiskLow=mean(masterdfp60$cbcl_scr_syn_external_r)
-# find subjects _r values where _t=63
-masterdfp63=masterdf[as.numeric(masterdf$cbcl_scr_syn_external_t==63),]
-extclinRiskHigh=mean(masterdfp63$cbcl_scr_syn_external_r)
-
-# approx. clinical cutoff
-clinCutoff<-quantile(masterdf$cbcl_scr_syn_totprob_r,.95)
-clinCutoffInt<-quantile(masterdf$cbcl_scr_syn_internal_r,.95)
-```
-
-```{r}
-# model GP
-# can use pctinle for xlim
-#print(p999)
-##
-model<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
-visreg(model,"cbcl_scr_syn_totprob_r",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+geom_vline(xintercept=clinCutoff)
-  #xlim(c(0,p999))+ylim(c(gLow999,g999))
-get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_totprob_r")
-## comparison of normalized (log-transformed) p
-#masterdf$cbcl_scr_syn_totprob_rL<-log(masterdf$cbcl_scr_syn_totprob_r+1)
-#modelL<-gam(g~s(cbcl_scr_syn_totprob_rL)+s(interview_age),data=masterdf)
-#visreg(modelL,"cbcl_scr_syn_totprob_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25#)
-#get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_totprob_rL")
-#```
-#
-#```{r}
-## can use pctinle for xlim
-#print(i999)
-##
-model<-gam(g~s(cbcl_scr_syn_internal_r)+s(interview_age),data=masterdf)
-visreg(model,"cbcl_scr_syn_internal_r",gg=TRUE,ylab="g",xlab="Int",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+geom_vline(xintercept=clinCutoffInt)
-#5)+xlim(c(0,i999))+ylim(c(gLow999,g999))
-#get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_internal_r")
-## comparison of normalized (log-transformed) p
-#masterdf$cbcl_scr_syn_internal_rL<-log(masterdf$cbcl_scr_syn_internal_r+1)
-#modelL<-gam(g~s(cbcl_scr_syn_internal_rL)+s(interview_age),data=masterdf)
-#visreg(modelL,"cbcl_scr_syn_internal_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=2#5)
-#get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_internal_rL")
-#```
-#
-#```{r}
-## model G~ext
-#model<-gam(g~s(cbcl_scr_syn_external_r)+s(interview_age),data=masterdf)
-#visreg(model,"cbcl_scr_syn_external_r",gg=TRUE,ylab="g",xlab="Ext",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=2#5)+xlim(c(0,e999))+ylim(c(gLow999,g999))
-#get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_external_r")
-## comparison of normalized (log-transformed) p
-#masterdf$cbcl_scr_syn_external_rL<-log(masterdf$cbcl_scr_syn_external_r+1)
-#modelL<-gam(g~s(cbcl_scr_syn_external_rL)+s(interview_age),data=masterdf)
-#visreg(modelL,"cbcl_scr_syn_external_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=2#5)
-#get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_external_rL")
-#```
-#
-#```{r}
-## model G~grades
-#model<-gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=masterdf)
-#visreg(model,"cbcl_scr_syn_totprob_r",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)+#xlim(c(0,p999))+ylim(c(gLow999,g999))
-#get_derivs_and_plot(model,smooth_var = "cbcl_scr_syn_totprob_r")
-## comparison of normalized (log-transformed) p
-#masterdf$cbcl_scr_syn_totprob_rL<-log(masterdf$cbcl_scr_syn_totprob_r+1)
-#modelL<-gam(g~s(cbcl_scr_syn_totprob_rL)+s(interview_age),data=masterdf)
-#visreg(modelL,"cbcl_scr_syn_totprob_rL",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25#)
-#get_derivs_and_plot(modelL,smooth_var = "cbcl_scr_syn_totprob_rL")
-```
-
-```{r}
-# model Grades~p
-# percentile 99.9th
-# plot G
+# set functions
 
 ```
 
 ```{r}
-# model Grades~int
-# percentile 99.9th
-# plot G
+# t-test plots
+# Subset the data for males and females
+girls <- masterdf$cbcl_scr_syn_totprob_r[masterdf$sex == "F"]
+boys <- masterdf$cbcl_scr_syn_totprob_r[masterdf$sex == "M"]
 
+# Create a combined data vector
+data <- list(Girls = girls, Boys = boys)
+
+# Create the boxplot
+boxplot(data, col = c("#9589BF", "#EFC570"), ylab = expression(italic(p)))
+
+# internalizing
+girls <- masterdf$cbcl_scr_syn_internal_r[masterdf$sex == "F"]
+boys <- masterdf$cbcl_scr_syn_internal_r[masterdf$sex == "M"]
+
+# Create a combined data vector
+data <- list(Girls = girls, Boys = boys)
+
+# Create the boxplot
+boxplot(data, col = c("#9589BF", "#EFC570"), ylab = "Internalizing")
+
+# externalizing
+girls <- masterdf$cbcl_scr_syn_external_r[masterdf$sex == "F"]
+boys <- masterdf$cbcl_scr_syn_external_r[masterdf$sex == "M"]
+
+# Create a combined data vector
+data <- list(Girls = girls, Boys = boys)
+
+# Create the boxplot
+boxplot(data, col = c("#9589BF", "#EFC570"), ylab = "Externalizing")
 ```
 
 ```{r}
-# model Grades~ext
-# percentile 99.9th
-# plot G
+# equivalent plots for poverty
+masterdf$income<-as.numeric(masterdf$income)
+# note that poverty is defined as income < 5: https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups
+masterdf$poverty=0
+masterdf$poverty[masterdf$income<5]=1
+masterdf$poverty=as.ordered(masterdf$poverty)
+# Subset the data for males and females
+poor <- masterdf$cbcl_scr_syn_totprob_r[masterdf$poverty == 1]
+rich <- masterdf$cbcl_scr_syn_totprob_r[masterdf$poverty == 0]
 
-```
+# Create a combined data vector
+data <- list(Below = poor, Above = rich)
 
-```{r}
-gpBoots=readRDS('~/Desktop/g_p/gpBoots.rds')
-# grades dev. expl p vs g dev. expl p: will need bootstraps
-gpBoots_melted <- melt(gpBoots)
+# Create the boxplot
+boxplot(data, col = c("#E38B73", "#80A4CC"), ylab = expression(italic(p)))
 
-# Create a boxplot for pDevExpl_g and pDevExpl_grades
-ggplot(gpBoots_melted[gpBoots_melted$variable %in% c("pDevExpl_g", "nbpDevExpl_g","logpDevExpl_g","pDevExpl_grades","nbpDevExpl_grades","logpDevExpl_grades"),], aes(x = variable, y = value)) +
-  geom_boxplot() +
- scale_x_discrete(labels = c("g", "g (nb link)","g (logp)","grades", "grades (nb link)","grades (logp)")) +
-  labs(x = "Covariate", y = "Deviance") +
-  theme_bw(base_size=20)+ylim(c(0,.13))
+# internalizing
+poor <- masterdf$cbcl_scr_syn_internal_r[masterdf$poverty == 1]
+rich <- masterdf$cbcl_scr_syn_internal_r[masterdf$poverty == 0]
 
-ggplot(gpBoots_melted[gpBoots_melted$variable %in% c("intDevExpl_g", "nbintDevExpl_g","logintDevExpl_g","intDevExpl_grades","nbintDevExpl_grades","logintDevExpl_grades"),], aes(x = variable, y = value)) +
-  geom_boxplot() +
- scale_x_discrete(labels = c("g", "g (nb link)","g (logInt)","grades", "grades (nb link)","grades (logInt)")) +
-  labs(x = "Covariate", y = "Deviance") +
-  theme_bw(base_size=20)+ylim(c(0,.13))
+# Create a combined data vector
+data <- list(Below = poor, Above = rich)
 
-ggplot(gpBoots_melted[gpBoots_melted$variable %in% c("extDevExpl_g", "nbextDevExpl_g","logextDevExpl_g","extDevExpl_grades","nbextDevExpl_grades","logextDevExpl_grades"),], aes(x = variable, y = value)) +
-  geom_boxplot() +
- scale_x_discrete(labels = c("g", "g (nb link)","g (logExt)","grades", "grades (nb link)","grades (logExt)")) +
-  labs(x = "Covariate", y = "Deviance") +
-  theme_bw(base_size=20)+ylim(c(0,.13))
-```
+# Create the boxplot
+boxplot(data, col = c("#E38B73", "#80A4CC"), ylab = "Internalizing")
 
-```{r}
-# grades dev. expl int vs g dev. expl int: will need bootstraps
+# externalizing
+poor <- masterdf$cbcl_scr_syn_external_r[masterdf$poverty == 1]
+rich <- masterdf$cbcl_scr_syn_external_r[masterdf$poverty == 0]
 
-```
+# Create a combined data vector
+data <- list(Below = poor, Above = rich)
 
-```{r}
-# grades dev. expl ext vs g dev. expl ext: will need bootstraps
-
-```
-
-
-```{r}
-
-#### Load in bootstrap output
-gpBoots=readRDS('~/Desktop/g_p/gpBoots.rds')
-gpDerivBoots=readRDS('~/Desktop/g_p/gpRawDerivBoots.rds')
-
-# GP with bootstraps filled in
-pDerivs=gpDerivBoots[,1:200]
-iDerivs=gpDerivBoots[,201:400]
-eDerivs=gpDerivBoots[,401:600]
-
-
-library(ggplot2)
-library(visreg)
-
-model <- gam(g ~ s(cbcl_scr_syn_totprob_r) + s(interview_age), data = masterdf)
-
-# Create a data frame of predictor values for plotting
-p_values <- seq(0, 113, length.out = 200)
-plot_data <- data.frame(cbcl_scr_syn_totprob_r = p_values)
-new_data <- data.frame(cbcl_scr_syn_totprob_r = plot_data$cbcl_scr_syn_totprob_r,
-                       interview_age = mean(masterdf$interview_age))
-# Predict response values using the model
-plot_data$g <- predict(model, newdata = new_data)
-
-# Create the plot
-ggplot(plot_data, aes(x = cbcl_scr_syn_totprob_r, y = g)) +
-  geom_line(size = 2, color = "black") +
-  ylim(c(gLow999, g999)) +
-  xlim(c(0, p999)) +
-  labs(x = "p", y = "g") +
-  theme_minimal(base_size = 25)
-
-#### now plot version with color-coded slope
-
-
-# temp 
-pDerivs=pDerivs[1:199]
-
-# Count the number of positive, negative, and zero derivatives at each bin
-n_positive <- colSums(pDerivs > 0)
-n_negative <- colSums(pDerivs < 0)
-n_zero <- colSums(pDerivs == 0)
-
-# Determine the color for each bin based on the direction of the majority of derivatives
-bin_color <- ifelse(n_positive > 0.999 * n_bootstrap, "Increasing",
-                    ifelse(n_negative > 0.999 * n_bootstrap, "Decreasing:", "<99.9"))
-# temp
-bin_color[200]<-"<99.9"
-
-# Predict response values using the model
-new_data <- data.frame(cbcl_scr_syn_totprob_r = plot_data$cbcl_scr_syn_totprob_r,
-                       interview_age = mean(masterdf$interview_age))
-plot_data$g <- predict(model, newdata = new_data)
-
-# Create the plot
-ggplot(plot_data, aes(x = cbcl_scr_syn_totprob_r, y = g, color = bin_color)) +
-  geom_line(size = 2) +
-  ylim(c(gLow999, g999)) +
-  xlim(c(0, p999)) +
-  labs(x = "p", y = "g") +
-  scale_color_manual(values = c("black", "red", "blue")) +
-  theme_minimal(base_size = 25)
-
-# ITS BROKE 
-```
-
-```{r}
-model <- gam(g ~ s(cbcl_scr_syn_internal_r) + s(interview_age), data = masterdf)
-
-# temp 
-pDerivs=iDerivs[1:199]
-
-# Count the number of positive, negative, and zero derivatives at each bin
-n_positive <- colSums(iDerivs > 0)
-n_negative <- colSums(iDerivs < 0)
-n_zero <- colSums(iDerivs == 0)
-
-# Determine the color for each bin based on the direction of the majority of derivatives
-bin_color <- ifelse(n_positive > 0.999 * n_bootstrap, "Increasing",
-                    ifelse(n_negative > 0.999 * n_bootstrap, "Decreasing:", "<99.9"))
-# temp
-bin_color[200]<-"<99.9"
-
-# Predict response values using the model
-# Create a data frame of predictor values for plotting
-i_values <- seq(0, i999, length.out = 200)
-plot_data <- data.frame(cbcl_scr_syn_internal_r = p_values)
-new_data <- data.frame(cbcl_scr_syn_internal_r = plot_data$cbcl_scr_syn_internal_r,
-                       interview_age = mean(masterdf$interview_age))
-plot_data$g <- predict(model, newdata = new_data)
-
-# Create the plot
-ggplot(plot_data, aes(x = cbcl_scr_syn_internal_r, y = g, color = bin_color)) +
-  geom_line(size = 2) +
-  ylim(c(gLow999, g999)) +
-  xlim(c(0, p999)) +
-  labs(x = "p", y = "g") +
-  scale_color_manual(values = c("black", "red", "blue")) +
-  theme_minimal(base_size = 25)
-
-
-```
-
-```{r}
-# temp 
-eDerivs=eDerivs[1:199]
-
-# Count the number of positive, negative, and zero derivatives at each bin
-n_positive <- colSums(eDerivs > 0)
-n_negative <- colSums(eDerivs < 0)
-n_zero <- colSums(Derivs == 0)
-
-# Determine the color for each bin based on the direction of the majority of derivatives
-bin_color <- ifelse(n_positive > 0.999 * n_bootstrap, "Increasing",
-                    ifelse(n_negative > 0.999 * n_bootstrap, "Decreasing:", "<99.9"))
-# temp
-bin_color[200]<-"<99.9"
-
-# Predict response values using the model
-
-new_data <- data.frame(cbcl_scr_syn_totprob_r = plot_data$cbcl_scr_syn_totprob_r,
-                       interview_age = mean(masterdf$interview_age))
-plot_data$g <- predict(model, newdata = new_data)
-
-# Create the plot
-ggplot(plot_data, aes(x = cbcl_scr_syn_totprob_r, y = g, color = bin_color)) +
-  geom_line(size = 2) +
-  ylim(c(gLow999, g999)) +
-  xlim(c(0, p999)) +
-  labs(x = "p", y = "g") +
-  scale_color_manual(values = c("black", "red", "blue")) +
-  theme_minimal(base_size = 25)
-
-```
-
-```{r}
-library(mgcv)
-library(ggplot2)
-
-# Create a vector of the span values for the predictor variable
-span_values <- seq(0, 1, length.out = 200)
-
-# Determine which portions of the smooth have a significantly positive or negative slope
-significant_mask <- apply(pDerivs, 2, function(col) {
-  pos_prop <- sum(col > 0) / length(col)
-  neg_prop <- sum(col < 0) / length(col)
-  pos_prop > 0.999 | neg_prop > 0.999
-})
-
-# get the average of each 200 segment
-avg200=colMeans(pDerivs)
-# correct it with mask
-sig200=avg200*significant_mask
-
-# Create a data frame with the x and y values for the smooth
-smooth_data <- data.frame(x = span_values, y = significant_mask * eDerivs)
-
-# Add a column to the data frame indicating which portions of the smooth are significant
-smooth_data$significant <- as.logical(significant_mask)
-
-# Plot the smooth with only the significant portions colored
-ggplot(smooth_data, aes(x = x, y = y)) +
-  geom_line(aes(color = significant), size = 1) +
-  scale_color_manual(values = c("black", "red")) +
-  theme_classic() +
-  labs(y = "Slope of smooth")
-
-
+# Create the boxplot
+boxplot(data, col = c("#E38B73", "#80A4CC"), ylab = "Externalizing")
 
 ```
 
 
+
+
+
+
+
+
+
+
+
 ```{r}
-library(ggplot2)
+# some manual calculation to compensate for geom_boxplot shortcomings
 
-# Create a vector of the span values for the predictor variable
-span_values <- seq(0, 1, length.out = 200)
+MinMeanSEMMax <- function(x) {
+  v <- c(min(x), mean(x) - sd(x), mean(x), mean(x) + sd(x), max(x))
+  names(v) <- c("ymin", "lower", "middle", "upper", "ymax")
+  v
+}
 
-# Determine which portions of the smooth have a significantly positive or negative slope
-significant_mask <- apply(pDerivs, 2, function(col) {
-  pos_prop <- sum(col > 0) / length(col)
-  neg_prop <- sum(col < 0) / length(col)
-  pos_prop > 0.999 | neg_prop > 0.999
-})
+ggplot(data, aes(factor(group), value)) +
+  stat_summary(fun.data=MinMeanSEMMax, geom="boxplot", colour="red") + 
+  ggtitle("Boxplot: Min, Mean-1SEM, Mean, Mean+1SEM, Max")
 
-# Calculate the slope at each point in the smooth
-slope_values <- apply(pDerivs, 2, function(col) {
-  approx(span_values, col, n = length(span_values))$y
-})
-
-# Create a data frame with the x and y values for the significant portions of the smooth
-smooth_data <- data.frame(x = span_values[significant_mask], y = slope_values[significant_mask])
-
-# Plot the significant portions of the smooth with their exact slope
-ggplot(smooth_data, aes(x = x, y = y)) +
-  geom_line(size = 1) +
-  theme_classic()
+```
+```{r}
+# load in fits
+# load in derivatives
+# plot F: p, int ext
 
 ```
 
