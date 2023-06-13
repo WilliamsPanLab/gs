@@ -504,4 +504,5 @@ outdf=data.frame(F_pFit,F_intFit,F_extFit,M_pFit,M_intFit,M_extFit,P_pFit,P_intF
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFits.rds')
 # save out derivatives
 outdf=data.frame(F_pDeriv,F_intDeriv,F_extDeriv,M_pDeriv,M_intDeriv,M_extDeriv,P_pDeriv,P_intDeriv,P_extDeriv,R_pDeriv,R_intDeriv,R_extDeriv,PF_pDeriv,PF_intDeriv,PF_extDeriv,PM_pDeriv,PM_intDeriv,PM_extDeriv,RM_pDeriv,RM_intDeriv,RM_extDeriv,RF_pDeriv,RF_intDeriv,RF_extDeriv)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpDerivs.rds')
 print('done with g~p fit bootstrapping!')
