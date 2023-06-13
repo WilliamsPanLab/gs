@@ -616,7 +616,7 @@ ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
   geom_stratum(aes(fill = RaceEthn)) +
   geom_flow(aes(fill = RaceEthn)) +
   scale_fill_manual(values = my_colors) +
-  theme_bw(base_size = 35)
+  theme_bw(base_size = 30)+xlab('')
 ```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
@@ -643,8 +643,8 @@ ggplot(startingdf, aes(x="", y=value, fill=RaceEthnicity)) +
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         panel.grid  = element_blank(),panel.background = element_blank(),
-        plot.title = element_text(size = 40),
-        legend.text = element_text(size=40),legend.title = element_text(size=40))
+        plot.title = element_text(size = 30),
+        legend.text = element_text(size=30),legend.title = element_text(size=30))+scale_fill_manual(values = my_colors)
 ```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
@@ -659,8 +659,8 @@ ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         panel.grid  = element_blank(),panel.background = element_blank(),
-        plot.title = element_text(size = 40),
-        legend.text = element_text(size=40),legend.title = element_text(size=40))
+        plot.title = element_text(size = 30),
+        legend.text = element_text(size=30),legend.title = element_text(size=30))+scale_fill_manual(values = my_colors)
 ```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->

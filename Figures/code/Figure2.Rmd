@@ -19,7 +19,48 @@ library(ggbeeswarm)
 
 ```{r}
 # set functions
+plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Clinical) {
+  # Melt the data frame
+  data_melt <- melt(t(data))
+  data_melt$Var1 <- rep(seq(1, maxval), nrow(data))
 
+  # Calculate percentiles
+  percentiles <- data %>%
+    summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
+  
+  percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_to = "Percentile", values_to = "YValue")
+
+  # Add CI column
+  data_melt$CI <- 0
+  
+  # Prepare CIs for insertion
+  CIs <- data.frame(rep(seq(1, maxval), 2), c(rep(10001, maxval), rep(10002, maxval)), percentiles_long$YValue, rep(1, (maxval*2)))
+  colnames(CIs) <- colnames(data_melt)
+  
+  # Add CIs
+  data_melt2 <- rbind(data_melt, CIs)
+  
+  # Convert CI column to factor
+  data_melt2$CI <- as.factor(data_melt2$CI)
+  
+  # Plotting the lines
+  ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2, color = Var2)) +
+    geom_line(aes(alpha = CI), show.legend = FALSE) +
+    scale_color_viridis_c(option = "inferno", direction = -1) +
+    scale_alpha_manual(values = c(0.01, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(Name)+
+    geom_vline(xintercept = BorderlineClinical, linetype = "dashed")+
+    geom_vline(xintercept = Clinical, linetype = "dashed")+
+    theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,maxValuePlot),expand = expansion(mult = c(0, 0)))
+}
+
+find_furthest_nonzero <- function(data) {
+  numZeros=colSums(data==0)
+  isZeroZeros=numZeros==0
+  furthest_nonzero=sum(isZeroZeros)
+}
 ```
 
 ```{r}
@@ -105,29 +146,98 @@ boxplot(data, col = c("#E38B73", "#80A4CC"), ylab = "Externalizing")
 
 
 ```{r}
-# some manual calculation to compensate for geom_boxplot shortcomings
+# load in fits: ordered as follows:
+# F_pFit,F_intFit,F_extFit,M_pFit,M_intFit,M_extFit,P_pFit,P_intFit,P_extFit,R_pFit,R_intFit,R_extFit,PF_pFit,PF_intFit,PF_extFit,PM_pFit,PM_intFit,PM_extFit,RM_pFit,RM_intFit,RM_extFit,RF_pFit,RF_intFit,RF_extFit
+Fits=readRDS('~/Desktop/g_p/F3_gpFits.rds')
 
-MinMeanSEMMax <- function(x) {
-  v <- c(min(x), mean(x) - sd(x), mean(x), mean(x) + sd(x), max(x))
-  names(v) <- c("ymin", "lower", "middle", "upper", "ymax")
-  v
-}
+# pull clinical cutoff from master df: t scores > 68 = borderline clinical, 70 = clinical
+masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==68,]
+masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==70,]
+masterdfI_bc<-masterdf[masterdf$cbcl_scr_syn_internal_t==68,]
+masterdfI_c<-masterdf[masterdf$cbcl_scr_syn_internal_t==70,]
+masterdfE_bc<-masterdf[masterdf$cbcl_scr_syn_external_t==68,]
+masterdfE_c<-masterdf[masterdf$cbcl_scr_syn_external_t==70,]
 
-ggplot(data, aes(factor(group), value)) +
-  stat_summary(fun.data=MinMeanSEMMax, geom="boxplot", colour="red") + 
-  ggtitle("Boxplot: Min, Mean-1SEM, Mean, Mean+1SEM, Max")
-
+# borderline clinical and clinical cutoffs
+Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
+Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
+Ibc=mean(masterdfP_bc$cbcl_scr_syn_internal_r)
+Ic=mean(masterdfP_c$cbcl_scr_syn_internal_r)
+Ebc=mean(masterdfE_bc$cbcl_scr_syn_external_r)
+Ec=mean(masterdfE_c$cbcl_scr_syn_external_r)
 ```
+
 ```{r}
-# load in fits
-# load in derivatives
-# plot F: p, int ext
+# isolate Female, Male, Poor, Rich
+F_PFits=Fits[,1:161]
+F_IFits=Fits[,162:212]
+F_EFits=Fits[,213:259]
+
+# calculate some background info for plots
+MaxP=find_furthest_nonzero(F_PFits)
+MaxI=find_furthest_nonzero(IFits)
+MaxE=find_furthest_nonzero(F_IFits)
+
+plot_bootstraps(F_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
+plot_bootstraps(F_IFits,51,'internalizing',MaxI,Ibc,Ic)
+plot_bootstraps(F_EFits,47,'externalizing',MaxE,Ebc,Ec)
 
 ```
 
+```{r}
+# isolate male fits
+M_PFits=Fits[,260:420]
+M_IFits=Fits[,421:471]
+M_EFits=Fits[,472:518]
 
+# calculate some background info for plots
+MaxP=find_furthest_nonzero(M_PFits)
+MaxI=find_furthest_nonzero(M_IFits)
+MaxE=find_furthest_nonzero(M_EFits)
 
+plot_bootstraps(M_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
+plot_bootstraps(M_IFits,51,'internalizing',MaxI,Ibc,Ic)
+plot_bootstraps(M_EFits,47,'externalizing',MaxE,Ebc,Ec)
 
+```
+
+```{r}
+# isolate fits to children below poverty line
+P_PFits=Fits[,519:679]
+P_IFits=Fits[,680:730]
+P_EFits=Fits[,731:777]
+
+# calculate some background info for plots
+MaxP=find_furthest_nonzero(P_PFits)
+MaxI=find_furthest_nonzero(P_IFits)
+MaxE=find_furthest_nonzero(P_EFits)
+
+plot_bootstraps(P_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
+plot_bootstraps(P_IFits,51,'internalizing',MaxI,Ibc,Ic)
+plot_bootstraps(P_EFits,47,'externalizing',MaxE,Ebc,Ec)
+
+```
+
+```{r}
+# children above poverty line
+R_PFits=Fits[,778:938]
+R_IFits=Fits[,939:989]
+R_EFits=Fits[,990:1036]
+
+# calculate some background info for plots
+MaxP=find_furthest_nonzero(R_PFits)
+MaxI=find_furthest_nonzero(R_IFits)
+MaxE=find_furthest_nonzero(R_EFits)
+
+plot_bootstraps(R_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
+plot_bootstraps(R_IFits,51,'internalizing',MaxI,Ibc,Ic)
+plot_bootstraps(R_EFits,47,'externalizing',MaxE,Ebc,Ec)
+
+```
+
+```{r}
+
+```
 
 
 
