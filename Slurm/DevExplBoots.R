@@ -42,6 +42,7 @@ masterdf$parentPcount=as.numeric(masterdf$parentPcount)
 # sex (g in for x to get co-pilot around its NSFW filter) and poverty to factors
 masterdf$seg<-as.ordered(masterdf$sex)
 masterdf$income<-as.numeric(masterdf$income)
+masterdf$poverty=0
 masterdf$poverty[masterdf$income<5]=1
 masterdf$poverty=as.ordered(masterdf$poverty)
 # initialize a vector for each of 10k bootstraps that will hold deviance unexplained by omission of terms from full model
@@ -74,9 +75,9 @@ for (b in 1:1000){
 	# deviance explained by all of that and poverty status/poverty status interaction
 	devExplBoots_pov[b]<-summary(bam(g~s(cbcl_scr_syn_totprob_r)+s(cbcl_scr_syn_internal_r)+s(cbcl_scr_syn_external_r)+seg+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_external_r,by=seg)+poverty+s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_external_r,by=poverty),data=bootSamp))$dev.expl
 	# deviance explained by all of that and triple interactions with seg and poverty for p int ext
-	devExplBoots_segpov[b]<-summary(bam(g~s(cbcl_scr_syn_totprob_r)+s(cbcl_scr_syn_internal_r)+s(cbcl_scr_syn_external_r)+seg+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_external_r,by=seg)+poverty+s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_totprob_r,interaction(seg, poverty))+s(cbcl_scr_syn_internal_r,interaction(seg, poverty))+s(cbcl_scr_syn_external_r,by=interaction(seg, poverty)),data=bootSamp))$dev.expl
+	devExplBoots_segpov[b]<-summary(bam(g~s(cbcl_scr_syn_totprob_r)+s(cbcl_scr_syn_internal_r)+s(cbcl_scr_syn_external_r)+seg+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_external_r,by=seg)+poverty+s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=interaction(seg, poverty))+s(cbcl_scr_syn_internal_r,by=interaction(seg, poverty))+s(cbcl_scr_syn_external_r,by=interaction(seg, poverty)),data=bootSamp))$dev.expl
 	# deviance explained by all of that and parentPcount
-	devExplBoots_parentP[b]<-summary(bam(g~s(cbcl_scr_syn_totprob_r)+s(cbcl_scr_syn_internal_r)+s(cbcl_scr_syn_external_r)+seg+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_external_r,by=seg)+poverty+s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_totprob_r,interaction(seg, poverty))+s(cbcl_scr_syn_internal_r,interaction(seg, poverty))+s(cbcl_scr_syn_external_r,interaction(seg, poverty))+s(parentPcount),data=bootSamp))$dev.expl
+	devExplBoots_parentP[b]<-summary(bam(g~s(cbcl_scr_syn_totprob_r)+s(cbcl_scr_syn_internal_r)+s(cbcl_scr_syn_external_r)+seg+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_internal_r,by=seg)+s(cbcl_scr_syn_external_r,by=seg)+poverty+s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_internal_r,by=poverty)+s(cbcl_scr_syn_external_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=interaction(seg, poverty))+s(cbcl_scr_syn_internal_r,by=interaction(seg, poverty))+s(cbcl_scr_syn_external_r,by=interaction(seg, poverty))+s(parentPcount),data=bootSamp))$dev.expl
 }
 # SAVEOUT
 # saveout all deviance explained vectors in one dataframe
