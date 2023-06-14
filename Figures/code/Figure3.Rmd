@@ -6,6 +6,41 @@ date: "2023-05-16"
 
 ```{r}
 #Figure 3
+# load in dev explained plots
+devExpl=readRDS('~/Desktop/g_p/F3-5DevExpl.rds')
+# Define the desired order of variables
+variable_order <- c(
+  "devExplBoots_p",
+  "devExplBoots_intext",
+  "devExplBoots_seg",
+  "devExplBoots_pov",
+  "devExplBoots_segpov",
+  "devExplBoots_parentP"
+)
+
+# Create a data frame with the data
+data <- data.frame(
+  devExplBoots_p = devExpl$devExplBoots_p,
+  devExplBoots_intext = devExpl$devExplBoots_intext,
+  devExplBoots_seg = devExpl$devExplBoots_seg,
+  devExplBoots_pov = devExpl$devExplBoots_pov,
+  devExplBoots_segpov = devExpl$devExplBoots_segpov,
+  devExplBoots_parentP = devExpl$devExplBoots_parentP
+)
+
+
+# Convert the data frame into long format
+data_long <- tidyr::gather(data, variable)
+data_long$variable<-factor(data_long$variable,levels=variable_order)
+# Create a boxplot using ggplot2
+ggplot(data_long, aes(x = variable, y = value)) +
+  geom_boxplot() +
+  labs(x = "Variable", y = "Value") +
+  ggtitle("Box and Whiskers Plot")
+
+```
+
+```{r}
 library(mgcv)
 library(ggplot2)
 
