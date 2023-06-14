@@ -64,74 +64,6 @@ find_furthest_nonzero <- function(data) {
 ```
 
 ```{r}
-# t-test plots
-# Subset the data for males and females
-girls <- masterdf$cbcl_scr_syn_totprob_r[masterdf$sex == "F"]
-boys <- masterdf$cbcl_scr_syn_totprob_r[masterdf$sex == "M"]
-
-# Create a combined data vector
-data <- list(Girls = girls, Boys = boys)
-
-# Create the boxplot
-boxplot(data, col = c("#9589BF", "#EFC570"), ylab = expression(italic(p)))
-
-# internalizing
-girls <- masterdf$cbcl_scr_syn_internal_r[masterdf$sex == "F"]
-boys <- masterdf$cbcl_scr_syn_internal_r[masterdf$sex == "M"]
-
-# Create a combined data vector
-data <- list(Girls = girls, Boys = boys)
-
-# Create the boxplot
-boxplot(data, col = c("#9589BF", "#EFC570"), ylab = "Internalizing")
-
-# externalizing
-girls <- masterdf$cbcl_scr_syn_external_r[masterdf$sex == "F"]
-boys <- masterdf$cbcl_scr_syn_external_r[masterdf$sex == "M"]
-
-# Create a combined data vector
-data <- list(Girls = girls, Boys = boys)
-
-# Create the boxplot
-boxplot(data, col = c("#9589BF", "#EFC570"), ylab = "Externalizing")
-```
-
-```{r}
-# equivalent plots for poverty
-masterdf$income<-as.numeric(masterdf$income)
-# note that poverty is defined as income < 5: https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups
-masterdf$poverty=0
-masterdf$poverty[masterdf$income<5]=1
-masterdf$poverty=as.ordered(masterdf$poverty)
-# Subset the data for males and females
-poor <- masterdf$cbcl_scr_syn_totprob_r[masterdf$poverty == 1]
-rich <- masterdf$cbcl_scr_syn_totprob_r[masterdf$poverty == 0]
-
-# Create a combined data vector
-data <- list(Below = poor, Above = rich)
-
-# Create the boxplot
-boxplot(data, col = c("#E38B73", "#80A4CC"), ylab = expression(italic(p)))
-
-# internalizing
-poor <- masterdf$cbcl_scr_syn_internal_r[masterdf$poverty == 1]
-rich <- masterdf$cbcl_scr_syn_internal_r[masterdf$poverty == 0]
-
-# Create a combined data vector
-data <- list(Below = poor, Above = rich)
-
-# Create the boxplot
-boxplot(data, col = c("#E38B73", "#80A4CC"), ylab = "Internalizing")
-
-# externalizing
-poor <- masterdf$cbcl_scr_syn_external_r[masterdf$poverty == 1]
-rich <- masterdf$cbcl_scr_syn_external_r[masterdf$poverty == 0]
-
-# Create a combined data vector
-data <- list(Below = poor, Above = rich)
-
-# Create the boxplot
-boxplot(data, col = c("#E38B73", "#80A4CC"), ylab = "Externalizing")
 
 ```
 
@@ -149,7 +81,7 @@ boxplot(data, col = c("#E38B73", "#80A4CC"), ylab = "Externalizing")
 # load in fits: ordered as follows:
 # F_pFit,F_intFit,F_extFit,M_pFit,M_intFit,M_extFit,P_pFit,P_intFit,P_extFit,R_pFit,R_intFit,R_extFit,PF_pFit,PF_intFit,PF_extFit,PM_pFit,PM_intFit,PM_extFit,RM_pFit,RM_intFit,RM_extFit,RF_pFit,RF_intFit,RF_extFit
 Fits=readRDS('~/Desktop/g_p/F3_gpFits.rds')
-
+Derivs=
 # pull clinical cutoff from master df: t scores > 68 = borderline clinical, 70 = clinical
 masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==68,]
 masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==70,]
@@ -182,6 +114,26 @@ plot_bootstraps(F_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
 plot_bootstraps(F_IFits,51,'internalizing',MaxI,Ibc,Ic)
 plot_bootstraps(F_EFits,47,'externalizing',MaxE,Ebc,Ec)
 
+# plot equiv derivs
+#positive_counts <- colSums(AnxFits > 0, na.rm = TRUE)
+#negative_counts <- colSums(AnxFits < 0, na.rm = TRUE)
+#positive_countsSig=positive_counts>9900
+#negative_countsSig=negative_counts>9900
+#data <- apply(AnxFits, 2, function(x) quantile(x, probs = 0.5))
+#dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+#dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+#dervPlotDf$sig_deriv=0
+#dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+#dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+#ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+#    theme(panel.spacing = unit(-.01,"cm")) +
+#    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+#    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+#    xlim(c(0,MaxAnx))+xlab('Anx.Depr.')+
+#    guides(fill=FALSE)+
+#    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+#    scale_x_continuous(limits = c(0,MaxAnx),expand = expansion(mult = c(0, 0)))
+#
 ```
 
 ```{r}
@@ -236,10 +188,73 @@ plot_bootstraps(R_EFits,47,'externalizing',MaxE,Ebc,Ec)
 ```
 
 ```{r}
+# now from the interactions: girls below poverty line first
+PF_PFits=Fits[,1037:1197]
+PF_IFits=Fits[,1198:1248]
+PF_EFits=Fits[,1249:1295]
+
+# calculate some background info for plots
+MaxP=find_furthest_nonzero(PF_PFits)
+MaxI=find_furthest_nonzero(PF_IFits)
+MaxE=find_furthest_nonzero(PF_EFits)
+
+plot_bootstraps(PF_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
+plot_bootstraps(PF_IFits,51,'internalizing',MaxI,Ibc,Ic)
+plot_bootstraps(PF_EFits,47,'externalizing',MaxE,Ebc,Ec)
 
 ```
 
+```{r}
+# now boys below the poverty line
+PM_PFits=Fits[,1296:1456]
+PM_IFits=Fits[,1457:1507]
+PM_EFits=Fits[,1508:1554]
 
+# calculate some background info for plots
+MaxP=find_furthest_nonzero(PM_PFits)
+MaxI=find_furthest_nonzero(PM_IFits)
+MaxE=find_furthest_nonzero(PM_EFits)
+
+plot_bootstraps(PM_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
+plot_bootstraps(PM_IFits,51,'internalizing',MaxI,Ibc,Ic)
+plot_bootstraps(PM_EFits,47,'externalizing',MaxE,Ebc,Ec)
+
+```
+
+```{r}
+# girls above poverty line
+RF_PFits=Fits[,1555:1715]
+RF_IFits=Fits[,1716:1766]
+RF_EFits=Fits[,1767:1813]
+
+# calculate some background info for plots
+MaxP=find_furthest_nonzero(RF_PFits)
+MaxI=find_furthest_nonzero(RF_IFits)
+MaxE=find_furthest_nonzero(RF_EFits)
+
+plot_bootstraps(RF_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
+plot_bootstraps(RF_IFits,51,'internalizing',MaxI,Ibc,Ic)
+plot_bootstraps(RF_EFits,47,'externalizing',MaxE,Ebc,Ec)
+```
+
+
+```{r}
+
+# boys above poverty line
+RM_PFits=Fits[,1814:1974]
+RM_IFits=Fits[,1975:2025]
+RM_EFits=Fits[,2026:2072]
+
+# calculate some background info for plots
+MaxP=find_furthest_nonzero(RM_PFits)
+qMaxI=find_furthest_nonzero(RM_IFits)
+MaxE=find_furthest_nonzero(RM_EFits)
+
+plot_bootstraps(RM_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
+plot_bootstraps(RM_IFits,51,'internalizing',MaxI,Ibc,Ic)
+plot_bootstraps(RM_EFits,47,'externalizing',MaxE,Ebc,Ec)
+
+```
 
 
 

@@ -545,6 +545,7 @@ participantsTSV=participantsTSV[participantsTSV$parental_education!=888,]
 participantsTSV=participantsTSV[participantsTSV$parental_education!=777,]
 participantsTSV$parental_education<-as.ordered(participantsTSV$parental_education)
 
+
 #########################
 #########################
 #########################
@@ -562,6 +563,8 @@ masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
     ## duplicated in the result
 
 ``` r
+# last removal: one participant is more than 3 S.D. from every other participant. No way it's valid data.
+masterdf=masterdf[masterdf$g>-7.5,]
 # this dataframe is now your working data frame for all figure RMDs
 saveRDS(masterdf,'~/gp_masterdf.rds')
 ####################
@@ -798,7 +801,7 @@ masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ]
 print(dim(masterdf))
 ```
 
-    ## [1] 10480    12
+    ## [1] 10479    12
 
 ``` r
 # and two-timepoint check
@@ -816,7 +819,7 @@ OutDFTmpPrec<-merge(df1,df2,by='subjectkey')
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 5240   23
+    ## [1] 5239   23
 
 ``` r
 # save it out

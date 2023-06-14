@@ -412,12 +412,15 @@ participantsTSV=participantsTSV[participantsTSV$parental_education!=888,]
 participantsTSV=participantsTSV[participantsTSV$parental_education!=777,]
 participantsTSV$parental_education<-as.ordered(participantsTSV$parental_education)
 
+
 #########################
 #########################
 #########################
 #########################
 ### merge in for fam income and parent edu
 masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
+# last removal: one participant is more than 3 S.D. from every other participant. No way it's valid data.
+masterdf=masterdf[masterdf$g>-7.5,]
 # this dataframe is now your working data frame for all figure RMDs
 saveRDS(masterdf,'~/gp_masterdf.rds')
 ####################
