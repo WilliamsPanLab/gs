@@ -63,19 +63,6 @@ find_furthest_nonzero <- function(data) {
 }
 ```
 
-```{r}
-
-```
-
-
-
-
-
-
-
-
-
-
 
 ```{r}
 # load in fits: ordered as follows:

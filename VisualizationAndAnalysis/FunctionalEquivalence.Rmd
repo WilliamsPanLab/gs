@@ -68,6 +68,18 @@ ComparePlot
 #### P: P FACTOR  ~= SYMPTOM COUNT
 ################# ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ ∆∆∆ 
 ## write a version parallel to michelini et al 2019
+### LOAD in cbcl data
+cbcl=read.delim('~/Downloads/Package_1205735/abcd_cbcl01.txt')
+cbcls=read.delim('/Users/panlab/Downloads/Package_1205735/abcd_cbcls01.txt')
+# subset timepoints
+cbclsBV=subset(cbcls,eventname=='baseline_year_1_arm_1')
+cbcls2=subset(cbcls,eventname=='2_year_follow_up_y_arm_1')
+# subset timepoints
+cbclBV=subset(cbcl,eventname=='baseline_year_1_arm_1')
+cbcl2=subset(cbcl,eventname=='2_year_follow_up_y_arm_1')
+# merge with other cbcl
+cbclsBV=merge(cbclsBV,cbclBV,by=c('subjectkey','eventname'))
+cbcls2=merge(cbcls2,cbcl2,by=c('subjectkey','eventname'))
 #### low freq removal
 ##The following CBCL items were removed because of low frequency: “Drinks alcohol without parents' approval”, “Sexual problems”, “Smokes, chews, or sniffs tobacco”, “Truancy, skips school”, “Uses drugs for non-medical #purposes (don't include alcohol or tobacco)”. 
 ## find items
