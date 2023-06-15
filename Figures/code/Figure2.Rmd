@@ -68,7 +68,7 @@ find_furthest_nonzero <- function(data) {
 # load in fits: ordered as follows:
 # F_pFit,F_intFit,F_extFit,M_pFit,M_intFit,M_extFit,P_pFit,P_intFit,P_extFit,R_pFit,R_intFit,R_extFit,PF_pFit,PF_intFit,PF_extFit,PM_pFit,PM_intFit,PM_extFit,RM_pFit,RM_intFit,RM_extFit,RF_pFit,RF_intFit,RF_extFit
 Fits=readRDS('~/Desktop/g_p/F3_gpFits.rds')
-Derivs=
+#Derivs=
 # pull clinical cutoff from master df: t scores > 68 = borderline clinical, 70 = clinical
 masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==68,]
 masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==70,]
@@ -94,12 +94,23 @@ F_EFits=Fits[,213:259]
 
 # calculate some background info for plots
 MaxP=find_furthest_nonzero(F_PFits)
-MaxI=find_furthest_nonzero(IFits)
-MaxE=find_furthest_nonzero(F_IFits)
+MaxI=find_furthest_nonzero(F_IFits)
+MaxE=find_furthest_nonzero(F_EFits)
 
-plot_bootstraps(F_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
-plot_bootstraps(F_IFits,51,'internalizing',MaxI,Ibc,Ic)
-plot_bootstraps(F_EFits,47,'externalizing',MaxE,Ebc,Ec)
+# get median value
+F_PFits_Coverage=F_PFits[,seq(1:MaxP)]
+col_means=colMeans(F_PFits_Coverage)
+FP_medians <- apply(F_PFits_Coverage, 2, median)
+
+# get median internalizing
+F_IFits_Coverage=F_IFits[,seq(1:MaxI)]
+col_means=colMeans(F_IFits_Coverage)
+FI_medians <- apply(F_IFits_Coverage, 2, median)
+
+# get median externalizing
+F_EFits_Coverage=F_EFits[,seq(1:MaxE)]
+col_means=colMeans(F_EFits_Coverage)
+FE_medians <- apply(F_EFits_Coverage, 2, median)
 
 # plot equiv derivs
 #positive_counts <- colSums(AnxFits > 0, na.rm = TRUE)
@@ -134,13 +145,88 @@ MaxP=find_furthest_nonzero(M_PFits)
 MaxI=find_furthest_nonzero(M_IFits)
 MaxE=find_furthest_nonzero(M_EFits)
 
-plot_bootstraps(M_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
-plot_bootstraps(M_IFits,51,'internalizing',MaxI,Ibc,Ic)
-plot_bootstraps(M_EFits,47,'externalizing',MaxE,Ebc,Ec)
+# get mean median value
+M_PFits_Coverage=M_PFits[,seq(1:MaxP)]
+col_means=colMeans(M_PFits_Coverage)
+MP_medians <- apply(M_PFits_Coverage, 2, median)
+
+
+# get mean median value
+M_IFits_Coverage=M_IFits[,seq(1:MaxI)]
+col_means=colMeans(M_IFits_Coverage)
+MI_medians <- apply(M_IFits_Coverage, 2, median)
+
+# get mean median value
+M_EFits_Coverage=M_EFits[,seq(1:MaxE)]
+col_means=colMeans(M_EFits_Coverage)
+ME_medians <- apply(M_EFits_Coverage, 2, median)
+
+data <- data.frame(
+  x = 1:length(F_medians),
+  y_girls = FP_medians,
+  y_boys = MP_medians
+)
+
+# Create the line plot for p
+ggplot(data, aes(x = x, y = y_girls)) +
+  geom_line(color = "#9589BF", size = 1.5) +
+  geom_line(aes(y = y_boys), color = "#EFC570", size = 1.5) +
+  labs(x = expression(italic(p)), y = expression(italic(g))) +
+  theme_minimal(base_size = 35) +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
+  geom_vline(xintercept = Pbc, linetype = "dashed")+
+  geom_vline(xintercept = Pc, linetype = "dashed")+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
+
+data <- data.frame(
+  x = 1:length(FI_medians),
+  y_girls = FI_medians,
+  y_boys = MI_medians
+)
+
+# Create the line plot for int
+ggplot(data, aes(x = x, y = y_girls)) +
+  geom_line(color = "#9589BF", size = 1.5) +
+  geom_line(aes(y = y_boys), color = "#EFC570", size = 1.5) +
+  labs(x = "Internalizing", y = expression(italic(g))) +
+  theme_minimal(base_size = 35) +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
+  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = Ic, linetype = "dashed")+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
+
+
+data <- data.frame(
+  x = 1:length(FE_medians),
+  y_girls = FE_medians,
+  y_boys = ME_medians
+)
+
+# Create the line plot for ext
+ggplot(data, aes(x = x, y = y_girls)) +
+  geom_line(color = "#9589BF", size = 1.5) +
+  geom_line(aes(y = y_boys), color = "#EFC570", size = 1.5) +
+  labs(x = "Externalizing", y = expression(italic(g))) +
+  theme_minimal(base_size = 35) +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
+  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = Ic, linetype = "dashed")+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
 
 ```
 
 ```{r}
+# max girl boy plots for above poverty line and below poverty line plots for p, int, and ext
+
 # isolate fits to children below poverty line
 P_PFits=Fits[,519:679]
 P_IFits=Fits[,680:730]
@@ -151,9 +237,6 @@ MaxP=find_furthest_nonzero(P_PFits)
 MaxI=find_furthest_nonzero(P_IFits)
 MaxE=find_furthest_nonzero(P_EFits)
 
-plot_bootstraps(P_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
-plot_bootstraps(P_IFits,51,'internalizing',MaxI,Ibc,Ic)
-plot_bootstraps(P_EFits,47,'externalizing',MaxE,Ebc,Ec)
 
 ```
 
@@ -168,10 +251,6 @@ MaxP=find_furthest_nonzero(R_PFits)
 MaxI=find_furthest_nonzero(R_IFits)
 MaxE=find_furthest_nonzero(R_EFits)
 
-plot_bootstraps(R_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
-plot_bootstraps(R_IFits,51,'internalizing',MaxI,Ibc,Ic)
-plot_bootstraps(R_EFits,47,'externalizing',MaxE,Ebc,Ec)
-
 ```
 
 ```{r}
@@ -185,9 +264,13 @@ MaxP=find_furthest_nonzero(PF_PFits)
 MaxI=find_furthest_nonzero(PF_IFits)
 MaxE=find_furthest_nonzero(PF_EFits)
 
-plot_bootstraps(PF_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
-plot_bootstraps(PF_IFits,51,'internalizing',MaxI,Ibc,Ic)
-plot_bootstraps(PF_EFits,47,'externalizing',MaxE,Ebc,Ec)
+# get median values
+PF_PFits_Coverage=PF_PFits[,1:MaxP]
+PF_IFits_Coverage=PF_IFits[,1:MaxI]
+PF_EFits_Coverage=PF_EFits[,1:MaxE]
+PF_p_median=apply(PF_PFits_Coverage,2,median)
+PF_Int_median=apply(PF_IFits_Coverage,2,median)
+PF_Ext_median=apply(PF_EFits_Coverage,2,median)
 
 ```
 
@@ -202,44 +285,186 @@ MaxP=find_furthest_nonzero(PM_PFits)
 MaxI=find_furthest_nonzero(PM_IFits)
 MaxE=find_furthest_nonzero(PM_EFits)
 
-plot_bootstraps(PM_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
-plot_bootstraps(PM_IFits,51,'internalizing',MaxI,Ibc,Ic)
-plot_bootstraps(PM_EFits,47,'externalizing',MaxE,Ebc,Ec)
+# get median values
+PM_PFits_Coverage=PM_PFits[,1:MaxP]
+PM_IFits_Coverage=PM_IFits[,1:MaxI]
+PM_EFits_Coverage=PM_EFits[,1:MaxE]
+PM_p_median=apply(PM_PFits_Coverage,2,median)
+PM_Int_median=apply(PM_IFits_Coverage,2,median)
+PM_Ext_median=apply(PM_EFits_Coverage,2,median)
 
 ```
 
 ```{r}
 # girls above poverty line
-RF_PFits=Fits[,1555:1715]
-RF_IFits=Fits[,1716:1766]
-RF_EFits=Fits[,1767:1813]
+RF_PFits=Fits[,1814:1974]
+RF_IFits=Fits[,1975:2025]
+RF_EFits=Fits[,2026:2072]
 
 # calculate some background info for plots
 MaxP=find_furthest_nonzero(RF_PFits)
 MaxI=find_furthest_nonzero(RF_IFits)
 MaxE=find_furthest_nonzero(RF_EFits)
 
-plot_bootstraps(RF_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
-plot_bootstraps(RF_IFits,51,'internalizing',MaxI,Ibc,Ic)
-plot_bootstraps(RF_EFits,47,'externalizing',MaxE,Ebc,Ec)
+# get median values
+RF_PFits_Coverage=RF_PFits[,1:MaxP]
+RF_IFits_Coverage=RF_IFits[,1:MaxI]
+RF_EFits_Coverage=RF_EFits[,1:MaxE]
+RF_p_median=apply(RF_PFits_Coverage,2,median)
+RF_Int_median=apply(RF_IFits_Coverage,2,median)
+RF_Ext_median=apply(RF_EFits_Coverage,2,median)
+
 ```
 
 
 ```{r}
-
 # boys above poverty line
-RM_PFits=Fits[,1814:1974]
-RM_IFits=Fits[,1975:2025]
-RM_EFits=Fits[,2026:2072]
+RM_PFits=Fits[,1555:1715]
+RM_IFits=Fits[,1716:1766]
+RM_EFits=Fits[,1767:1813]
 
 # calculate some background info for plots
 MaxP=find_furthest_nonzero(RM_PFits)
 qMaxI=find_furthest_nonzero(RM_IFits)
 MaxE=find_furthest_nonzero(RM_EFits)
 
-plot_bootstraps(RM_PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
-plot_bootstraps(RM_IFits,51,'internalizing',MaxI,Ibc,Ic)
-plot_bootstraps(RM_EFits,47,'externalizing',MaxE,Ebc,Ec)
+# get median values
+RM_PFits_Coverage=RM_PFits[,1:MaxP]
+RM_IFits_Coverage=RM_IFits[,1:MaxI]
+RM_EFits_Coverage=RM_EFits[,1:MaxE]
+RM_p_median=apply(RM_PFits_Coverage,2,median)
+RM_Int_median=apply(RM_IFits_Coverage,2,median)
+RM_Ext_median=apply(RM_EFits_Coverage,2,median)
+
+```
+
+```{r}
+# now plot two panels for p, one for girl boy below poverty line and one above. physically place above poverty line above the below poverty line plot
+data_pov <- data.frame(
+  x = 1:length(PF_p_median),
+  pov_girls = PF_p_median,
+  pov_boys = PM_p_median
+)
+
+data_nopov <- data.frame(
+  x = 1:length(PF_p_median),
+  r_girls = RF_p_median,
+  r_boys = RM_p_median
+)
+
+# Create the line plot for p for poverty
+plot1<-ggplot(data_pov, aes(x = x, y = pov_girls)) +
+  geom_line(color = "#9589BF", size = 1.5) +
+  geom_line(aes(y = pov_boys), color = "#EFC570", size = 1.5) +
+  labs(x = expression(italic(p)), y = expression(italic(g))) +
+  theme_minimal(base_size = 35) +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
+  geom_vline(xintercept = Pbc, linetype = "dashed")+
+  geom_vline(xintercept = Pc, linetype = "dashed")+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
+
+# Create the line plot for p for above poverty line
+plot2<-ggplot(data_nopov, aes(x = x, y = r_girls)) +
+  geom_line(color = "#9589BF", size = 1.5) +
+  geom_line(aes(y = r_boys), color = "#EFC570", size = 1.5) +
+  labs(x = expression(italic(p)), y = expression(italic(g))) +
+  theme_minimal(base_size = 35) +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
+  geom_vline(xintercept = Pbc, linetype = "dashed")+
+  geom_vline(xintercept = Pc, linetype = "dashed")+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
+
+# create the line plot for int for poverty
+data_pov <- data.frame(
+  x = 1:length(PF_Int_median),
+  pov_girls = PF_Int_median,
+  pov_boys = PM_Int_median
+)
+
+data_nopov <- data.frame(
+  x = 1:length(RF_Int_median),
+  r_girls = RF_Int_median,
+  r_boys = RM_Int_median
+)
+
+
+plot1<-ggplot(data_pov, aes(x = x, y = pov_girls)) +
+  geom_line(color = "#9589BF", size = 1.5) +
+  geom_line(aes(y = pov_boys), color = "#EFC570", size = 1.5) +
+  labs(x = "Internalizing", y = expression(italic(g))) +
+  theme_minimal(base_size = 35) +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
+  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = Ic, linetype = "dashed")+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
+
+# creaete the line plot for int for above poverty line
+plot2<-ggplot(data_nopov, aes(x = x, y = r_girls)) +
+  geom_line(color = "#9589BF", size = 1.5) +
+  geom_line(aes(y = r_boys), color = "#EFC570", size = 1.5) +
+  labs(x = "Internalizing", y = expression(italic(g))) +
+  theme_minimal(base_size = 35) +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
+  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = Ic, linetype = "dashed")+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
+
+# create the line plot for ext for poverty
+data_pov <- data.frame(
+  x = 1:length(PF_Ext_median),
+  pov_girls = PF_Ext_median,
+  pov_boys = PM_Ext_median
+)
+
+data_nopov <- data.frame(
+  x = 1:length(RF_Ext_median),
+  r_girls = RF_Ext_median,
+  r_boys = RM_Ext_median
+)
+
+
+plot1<-ggplot(data_pov, aes(x = x, y = pov_girls)) +
+  geom_line(color = "#9589BF", size = 1.5) +
+  geom_line(aes(y = pov_boys), color = "#EFC570", size = 1.5) +
+  labs(x = "Externalizing", y = expression(italic(g))) +
+  theme_minimal(base_size = 35) +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
+  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = Ic, linetype = "dashed")+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
+
+# creaete the line plot for int for above poverty line
+plot2<-ggplot(data_nopov, aes(x = x, y = r_girls)) +
+  geom_line(color = "#9589BF", size = 1.5) +
+  geom_line(aes(y = r_boys), color = "#EFC570", size = 1.5) +
+  labs(x = "Externalizing", y = expression(italic(g))) +
+  theme_minimal(base_size = 35) +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
+  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = Ic, linetype = "dashed")+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
+
+
+```
+
 
 ```
 
