@@ -143,7 +143,7 @@ attMax=rep(0,10000)
 rulMax=rep(0,10000)
 aggMax=rep(0,10000)
 # loop over manual bootstrap
-for (b in 1:1){
+for (b in 1:100){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -349,29 +349,27 @@ for (b in 1:1){
 	asrrulFit[b,1:basrrulmax]=forFitasrRul
 	asraggFit[b,1:basraggmax]=forFitasrAgg
 	# use DERIVATIVES of model fit for saving
-
-	#### NEED TO UPDATE WHAT DERIVATIVES ARE BEING CALCULCATED ON: ASR VARIABLES UP HERE, AND '' THOSE BELOW`
-	forSplinep=derivatives(pgAge,term='s(cbcl_scr_syn_totprob_r)',partial_match = TRUE,n=bpmax)
-	forSplineint=derivatives(intgAge,term='s(cbcl_scr_syn_internal_r)',partial_match = TRUE,n=bimax)
-	forSplineext=derivatives(extgAge,term='s(cbcl_scr_syn_external_r)',partial_match = TRUE,n=bemax)
-	forSplinesom=derivatives(somgAge,term='s(cbcl_scr_syn_somatic_r)',partial_match = TRUE,n=bsommax)
-	forSplineanx=derivatives(anxgAge,term='s(cbcl_scr_syn_anxdep_r)',partial_match = TRUE,n=banxmax)
-	forSplinetho=derivatives(thogAge,term='s(cbcl_scr_syn_thought_r)',partial_match = TRUE,n=bthomax)
-	forSplinewit=derivatives(witgAge,term='s(cbcl_scr_syn_withdep_r)',partial_match = TRUE,n=bwitmax)
-	forSplineatt=derivatives(attgAge,term='s(cbcl_scr_syn_attention_r)',partial_match = TRUE,n=battmax)
-	forSplinerul=derivatives(rulgAge,term='s(cbcl_scr_syn_rulebreak_r)',partial_match = TRUE,n=brulmax)
-	forSplineagg=derivatives(agggAge,term='s(cbcl_scr_syn_aggressive_r)',partial_match = TRUE,n=baggmax)
+	forSplinep=derivatives(pgAge,term='s(parentPcount)',partial_match = TRUE,n=basrpmax)
+	forSplineint=derivatives(intgAge,term='s(ASRInt)',partial_match = TRUE,n=basrintmax)
+	forSplineext=derivatives(extgAge,term='s(ASRExt)',partial_match = TRUE,n=basrextmax)
+	forSplinesom=derivatives(somgAge,term='s(ASR_somatic)',partial_match = TRUE,n=basrsommax)
+	forSplineanx=derivatives(anxgAge,term='s(ASR_anxdep)',partial_match = TRUE,n=basranxmax)
+	forSplinetho=derivatives(thogAge,term='s(ASR_thought)',partial_match = TRUE,n=basrthomax)
+	forSplinewit=derivatives(witgAge,term='s(ASR_withdep)',partial_match = TRUE,n=basrwitmax)
+	forSplineatt=derivatives(attgAge,term='s(ASR_attention)',partial_match = TRUE,n=basrattmax)
+	forSplinerul=derivatives(rulgAge,term='s(ASR_rulebreak)',partial_match = TRUE,n=basrrulmax)
+	forSplineagg=derivatives(agggAge,term='s(ASR_aggressive)',partial_match = TRUE,n=basraggmax)
 	# asr
 	forSplineasrp=derivatives(asrpgAge,term='s(parentPcount)',partial_match = TRUE,n=basrpmax)
-	forSplineasrint=derivatives(asrintgAge,term=s(ASRInt),partial_match = TRUE,n=basrintmax)
-	forSplineasrext=derivatives(asrexgAge,term=s(ASRExt),partial_match = TRUE,n=basrexmax)
-	forSplineasrsom=derivatives(asrsgAge,term=s(ASR_somatic),partial_match = TRUE,n=basrsommax)
-	forSplineasranx=derivatives(asrangAge,term=s(ASR_anxdep),partial_match = TRUE,n=basranxmax)
-	forSplineasrtho=derivatives(asrthogAge,term=s(ASR_thought),partial_match = TRUE,n=basrthomax)
-	forSplineasrwit=derivatives(asrwitgAge,term=s(ASR_withdep),partial_match = TRUE,n=basrwitmax)
-	forSplineasratt=derivatives(asrattgAge,term=s(ASR_attention),partial_match = TRUE,n=basrattmax)
-	forSplineasrrul=derivatives(asrrulgAge,term=s(ASR_rulebreak),partial_match = TRUE,n=basrrulmax)
-	forSplineasragg=derivatives(asragggAge,term=s(ASR_aggressive),partial_match = TRUE,n=basraggmax)
+	forSplineasrint=derivatives(asrintgAge,term='s(ASRInt)',partial_match = TRUE,n=basrintmax)
+	forSplineasrext=derivatives(asrextgAge,term='s(ASRExt)',partial_match = TRUE,n=basrextmax)
+	forSplineasrsom=derivatives(asrsomgAge,term='s(ASR_somatic)',partial_match = TRUE,n=basrsommax)
+	forSplineasranx=derivatives(asranxgAge,term='s(ASR_anxdep)',partial_match = TRUE,n=basranxmax)
+	forSplineasrtho=derivatives(asrthogAge,term='s(ASR_thought)',partial_match = TRUE,n=basrthomax)
+	forSplineasrwit=derivatives(asrwitgAge,term='s(ASR_withdep)',partial_match = TRUE,n=basrwitmax)
+	forSplineasratt=derivatives(asrattgAge,term='s(ASR_attention)',partial_match = TRUE,n=basrattmax)
+	forSplineasrrul=derivatives(asrrulgAge,term='s(ASR_rulebreak)',partial_match = TRUE,n=basrrulmax)
+	forSplineasragg=derivatives(asragggAge,term='s(ASR_aggressive)',partial_match = TRUE,n=basraggmax)
 	# print out fit derivatives
 	pDeriv[b,1:basrpmax]=forSplinep$derivative
 	intDeriv[b,1:basrintmax]=forSplineint$derivative
@@ -394,32 +392,10 @@ for (b in 1:1){
 	asrattDeriv[b,1:basrattmax]=forSplineasratt$derivative
 	asrrulDeriv[b,1:basrrulmax]=forSplineasrrul$derivative
 	asraggDeriv[b,1:basraggmax]=forSplineasragg$derivative
-	# print out max of unconverted versions to anchor em later
-	pMax[b]=bpmax
-	intMax[b]=bimax
-	extMax[b]=bemax
-	somMax[b]=bsommax
-	anxMax[b]=banxmax
-	thoMax[b]=bthomax
-	witMax[b]=bwitmax
-	attMax[b]=battmax
-	rulMax[b]=brulmax
-	aggMax[b]=baggmax
-	# asr
-	asrpMax[b]=basrpmax
-	asrintMax[b]=basrintmax
-	asrextMax[b]=basrexmax
-	asrsomMax[b]=basrsommax
-	asranxMax[b]=basranxmax
-	asrthoMax[b]=basrthomax
-	asrwitMax[b]=basrwitmax
-	asrattMax[b]=basrattmax
-	asrrulMax[b]=basrrulmax
-	asraggMax[b]=basraggmax
 }
 # SAVEOUT
 # save out version with all cbcl and asr linboots
-outdf=data.frame(plinBoots,intlinBoots,extlinBoots,somLinBoots,anxLinBoots,thoLinBoots,witLinBoots,attLinBoots,rulLinBoots,aggLinBoots,asrpLinBoots,asrintLinBoots,asrexLinBoots,asrsomLinBoots,asranxLinBoots,asrthoLinBoots,asrwitLinBoots,asrattLinBoots,asrrulLinBoots,asraggLinBoots)
+outdf=data.frame(plinBoots,intlinBoots,extlinBoots,somLinBoots,anxLinBoots,thoLinBoots,witLinBoots,attLinBoots,rulLinBoots,aggLinBoots,asrpLinBoots,asrintLinBoots,asrextLinBoots,asrsomLinBoots,asranxLinBoots,asrthoLinBoots,asrwitLinBoots,asrattLinBoots,asrrulLinBoots,asraggLinBoots)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_asr.rds')
 # save out version with all cbcl and asr derivs
 outdf=data.frame(pDeriv,intDeriv,extDeriv,somDeriv,anxDeriv,thoDeriv,witDeriv,attDeriv,rulDeriv,aggDeriv,asrpDeriv,asrintDeriv,asrextDeriv,asrsomDeriv,asranxDeriv,asrthoDeriv,asrwitDeriv,asrattDeriv,asrrulDeriv,asraggDeriv)
