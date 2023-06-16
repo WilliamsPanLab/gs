@@ -21,7 +21,7 @@ dim(masterdf)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up # add cbcl subscales
-masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRIntrusive','ASRRulB','ASRInt','ASRExt','g','subjectkey','interview_age')]
+masterdf=masterdf[,c('parentPcount','cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRIntrusive','ASRRulB','ASRInt','ASRExt','g','subjectkey','interview_age')]
 # get length of df for later
 lenDF=dim(masterdf)[1]
 # convert all cbcl scores to numeric
@@ -69,16 +69,16 @@ asrattLinBoots=rep(0,10000)
 asrrulLinBoots=rep(0,10000)
 asraggLinBoots=rep(0,10000)
 # predicted derivatives: set to maximum value for ncol
-pMaxVal=max(masterdf$cbcl_scr_syn_totprob_r)
-iMaxVal=max(masterdf$cbcl_scr_syn_internal_r)
-emaxVal=max(masterdf$cbcl_scr_syn_external_r)
-somMaxVal=max(masterdf$cbcl_scr_syn_somatic_r)
-anxMaxVal=max(masterdf$cbcl_scr_syn_anxdep_r)
-thoMaxVal=max(masterdf$cbcl_scr_syn_thought_r)
-witMaxVal=max(masterdf$cbcl_scr_syn_withdep_r)
-attMaxVal=max(masterdf$cbcl_scr_syn_attention_r)
-rulMaxVal=max(masterdf$cbcl_scr_syn_rulebreak_r)
-aggMaxVal=max(masterdf$cbcl_scr_syn_aggressive_r)
+pMaxVal=max(masterdf$parentPcount)
+iMaxVal=max(masterdf$ASRInt)
+emaxVal=max(masterdf$ASRExt)
+somMaxVal=max(masterdf$ASR_somatic)
+anxMaxVal=max(masterdf$ASR_anxdep)
+thoMaxVal=max(masterdf$ASR_thought)
+witMaxVal=max(masterdf$ASR_withdep)
+attMaxVal=max(masterdf$ASR_attention)
+rulMaxVal=max(masterdf$ASR_rulebreak)
+aggMaxVal=max(masterdf$ASR_aggressive)
 asrpMaxVal=max(masterdf$parentPcount)
 asriMaxVal=max(masterdf$ASRInt)
 asreMaxVal=max(masterdf$ASRExt)
@@ -121,7 +121,7 @@ witFit=matrix(0,nrow=10000,ncol=witMaxVal)
 attFit=matrix(0,nrow=10000,ncol=attMaxVal)
 rulFit=matrix(0,nrow=10000,ncol=rulMaxVal)
 aggFit=matrix(0,nrow=10000,ncol=aggMaxVal)
-asrpFit=matrix(0,nrow=10000,ncol=asrpMaxVal)
+asrPFit=matrix(0,nrow=10000,ncol=asrpMaxVal)
 asrintFit=matrix(0,nrow=10000,ncol=asriMaxVal)
 asrextFit=matrix(0,nrow=10000,ncol=asreMaxVal)
 asrsomFit=matrix(0,nrow=10000,ncol=asrsomMaxVal)
@@ -143,7 +143,7 @@ attMax=rep(0,10000)
 rulMax=rep(0,10000)
 aggMax=rep(0,10000)
 # loop over manual bootstrap
-for (b in 1:10000){
+for (b in 1:1){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -223,7 +223,7 @@ for (b in 1:10000){
 	#### g as response variable, add asr and predict on asr
 	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+s(parentPcount),data=bootSamp)
 	intgAge<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age)+s(ASRInt),data=bootSamp)
-	extgAge<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age)+s(ASRExt,data=bootSamp)
+	extgAge<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age)+s(ASRExt),data=bootSamp)
 	somgAge<-bam(g~s(cbcl_scr_syn_somatic_r)+s(interview_age)+s(ASR_somatic),data=bootSamp)
 	anxgAge<-bam(g~s(cbcl_scr_syn_anxdep_r)+s(interview_age)+s(ASR_anxdep),data=bootSamp)
 	thogAge<-bam(g~s(cbcl_scr_syn_thought_r)+s(interview_age)+s(ASR_thought),data=bootSamp)
@@ -263,22 +263,18 @@ for (b in 1:10000){
 	eachasrAttcount=seq(1:basrattmax)
 	eachasrRulcount=seq(1:basrrulmax)
 	eachasrAggcount=seq(1:basraggmax)
-	# set age to to median for predict df
-	
-	#######
-	# NEED TO MATCH THIS TO COLUMN NAMES BELOW AND ENSURE ITS PREDICTING AT EACH RANGE OF PARENT ASR
-	####### 
+	# set age to to median for predict df, also set child symptom score to median for predict df
 	#####################################
-	predictDFp=data.frame(eachasrPcount,rep(median(bootSamp$interview_age),basrpmax))
-	predictDFint=data.frame(eachasrIntcount,rep(median(bootSamp$interview_age),basrintmax)))
-	predictDFext=data.frame(eachasrExtcount,rep(median(bootSamp$interview_age),basrextmax))
-	predictDFsom=data.frame(eachasrSomcount,rep(median(bootSamp$interview_age),basrsommax))
-	predictDFanx=data.frame(eachasrAnxcount,rep(median(bootSamp$interview_age),basranxmax))
-	predictDFtho=data.frame(eachasrThocount,rep(median(bootSamp$interview_age),basrthomax))
-	predictDFwit=data.frame(eachasrWitcount,rep(median(bootSamp$interview_age),basrwitmax))
-	predictDFatt=data.frame(eachasrAttcount,rep(median(bootSamp$interview_age),basrattmax))
-	predictDFrul=data.frame(eachasrRulcount,rep(median(bootSamp$interview_age),basrrulmax))
-	predictDFagg=data.frame(eachasrAggcount,rep(median(bootSamp$interview_age),basraggmax))
+	predictDFp=data.frame(eachasrPcount,rep(median(bootSamp$cbcl_scr_syn_totprob_r),basrpmax),rep(median(bootSamp$interview_age),basrpmax))
+	predictDFint=data.frame(eachasrIntcount,rep(median(bootSamp$cbcl_scr_syn_internal_r),basrintmax),rep(median(bootSamp$interview_age),basrintmax))
+	predictDFext=data.frame(eachasrExtcount,rep(median(bootSamp$cbcl_scr_syn_external_r),basrextmax),rep(median(bootSamp$interview_age),basrextmax))
+	predictDFsom=data.frame(eachasrSomcount,rep(median(bootSamp$cbcl_scr_syn_somatic_r),basrsommax),rep(median(bootSamp$interview_age),basrsommax))
+	predictDFanx=data.frame(eachasrAnxcount,rep(median(bootSamp$cbcl_scr_syn_anxdep_r),basranxmax),rep(median(bootSamp$interview_age),basranxmax))
+	predictDFtho=data.frame(eachasrThocount,rep(median(bootSamp$cbcl_scr_syn_thought_r),basrthomax),rep(median(bootSamp$interview_age),basrthomax))
+	predictDFwit=data.frame(eachasrWitcount,rep(median(bootSamp$cbcl_scr_syn_withdep_r),basrwitmax),rep(median(bootSamp$interview_age),basrwitmax))
+	predictDFatt=data.frame(eachasrAttcount,rep(median(bootSamp$cbcl_scr_syn_attention_r),basrattmax),rep(median(bootSamp$interview_age),basrattmax))
+	predictDFrul=data.frame(eachasrRulcount,rep(median(bootSamp$cbcl_scr_syn_rulebreak_r),basrrulmax),rep(median(bootSamp$interview_age),basrrulmax))
+	predictDFagg=data.frame(eachasrAggcount,rep(median(bootSamp$cbcl_scr_syn_aggressive_r),basraggmax),rep(median(bootSamp$interview_age),basraggmax))
 	predictDFasrp=data.frame(eachasrPcount,rep(median(bootSamp$interview_age),basrpmax))
 	predictDFasrint=data.frame(eachasrIntcount,rep(median(bootSamp$interview_age),basrintmax))
 	predictDFasrext=data.frame(eachasrExtcount,rep(median(bootSamp$interview_age),basrextmax))
@@ -290,16 +286,16 @@ for (b in 1:10000){
 	predictDFasrrul=data.frame(eachasrRulcount,rep(median(bootSamp$interview_age),basrrulmax))
 	predictDFasragg=data.frame(eachasrAggcount,rep(median(bootSamp$interview_age),basraggmax))
 	# set colnames so predict can work
-	colnames(predictDFp)=c('cbcl_scr_syn_totprob_r','parentPcount','interview_age')
-	colnames(predictDFint)=c('cbcl_scr_syn_internal_r','ASRInt','interview_age')
-	colnames(predictDFext)=c('cbcl_scr_syn_external_r','ASRExt','interview_age')
-	colnames(predictDFsom)=c('cbcl_scr_syn_somatic_r','ASR_somatic','interview_age')
-	colnames(predictDFanx)=c('cbcl_scr_syn_anxdep_r','ASR_anxdep','interview_age')
-	colnames(predictDFtho)=c('cbcl_scr_syn_thought_r','ASR_thought','interview_age')
-	colnames(predictDFwit)=c('cbcl_scr_syn_withdep_r','ASR_withdep','interview_age')
-	colnames(predictDFatt)=c('cbcl_scr_syn_attention_r','ASR_attention','interview_age')
-	colnames(predictDFrul)=c('cbcl_scr_syn_rulebreak_r','ASR_rulebreak','interview_age')
-	colnames(predictDFagg)=c('cbcl_scr_syn_aggressive_r','ASR_aggressive','interview_age')
+	colnames(predictDFp)=c('parentPcount','cbcl_scr_syn_totprob_r','interview_age')
+	colnames(predictDFint)=c('ASRInt','cbcl_scr_syn_internal_r','interview_age')
+	colnames(predictDFext)=c('ASRExt','cbcl_scr_syn_external_r','interview_age')
+	colnames(predictDFsom)=c('ASR_somatic','cbcl_scr_syn_somatic_r','interview_age')
+	colnames(predictDFanx)=c('ASR_anxdep','cbcl_scr_syn_anxdep_r','interview_age')
+	colnames(predictDFtho)=c('ASR_thought','cbcl_scr_syn_thought_r','interview_age')
+	colnames(predictDFwit)=c('ASR_withdep','cbcl_scr_syn_withdep_r','interview_age')
+	colnames(predictDFatt)=c('ASR_attention','cbcl_scr_syn_attention_r','interview_age')
+	colnames(predictDFrul)=c('ASR_rulebreak','cbcl_scr_syn_rulebreak_r','interview_age')
+	colnames(predictDFagg)=c('ASR_aggressive','cbcl_scr_syn_aggressive_r','interview_age')
 	colnames(predictDFasrp)=c('parentPcount','interview_age')
 	colnames(predictDFasrint)=c('ASRInt','interview_age')
 	colnames(predictDFasrext)=c('ASRExt','interview_age')
@@ -323,36 +319,38 @@ for (b in 1:10000){
 	forFitAgg=predict(agggAge,predictDFagg)
 	forFitasrP=predict(asrpgAge,predictDFasrp)
 	forFitasrInt=predict(asrintgAge,predictDFasrint)
-	forFitasrExt=predict(asrexgAge,predictDFasrext)
-	forFitasrSom=predict(asrsgAge,predictDFasrsom)
-	forFitasrAnx=predict(asrangAge,predictDFasranx)
+	forFitasrExt=predict(asrextgAge,predictDFasrext)
+	forFitasrSom=predict(asrsomgAge,predictDFasrsom)
+	forFitasrAnx=predict(asranxgAge,predictDFasranx)
 	forFitasrTho=predict(asrthogAge,predictDFasrtho)
 	forFitasrWit=predict(asrwitgAge,predictDFasrwit)
 	forFitasrAtt=predict(asrattgAge,predictDFasratt)
 	forFitasrRul=predict(asrrulgAge,predictDFasrrul)
 	forFitasrAgg=predict(asragggAge,predictDFasragg)
 	# print out fit
-	pFit[b,1:bpmax]=forFitP
-	intFit[b,1:bimax]=forFitInt
-	extFit[b,1:bemax]=forFitExt
-	somFit[b,1:bsommax]=forFitSom
-	anxFit[b,1:banxmax]=forFitAnx
-	thoFit[b,1:bthomax]=forFitTho
-	witFit[b,1:bwitmax]=forFitWit
-	attFit[b,1:battmax]=forFitAtt
-	rulFit[b,1:brulmax]=forFitRul
-	aggFit[b,1:baggmax]=forFitAgg
+	pFit[b,1:basrpmax]=forFitP
+	intFit[b,1:basrintmax]=forFitInt
+	extFit[b,1:basrextmax]=forFitExt
+	somFit[b,1:basrsommax]=forFitSom
+	anxFit[b,1:basranxmax]=forFitAnx
+	thoFit[b,1:basrthomax]=forFitTho
+	witFit[b,1:basrwitmax]=forFitWit
+	attFit[b,1:basrattmax]=forFitAtt
+	rulFit[b,1:basrrulmax]=forFitRul
+	aggFit[b,1:basraggmax]=forFitAgg
 	asrPFit[b,1:basrpmax]=forFitasrP
-	asrIntFit[b,1:basrintmax]=forFitasrInt
-	asrExtFit[b,1:basrexmax]=forFitasrExt
-	asrSomFit[b,1:basrsommax]=forFitasrSom
-	asrAnxFit[b,1:basranxmax]=forFitasrAnx
-	asrThoFit[b,1:basrthomax]=forFitasrTho
-	asrWitFit[b,1:basrwitmax]=forFitasrWit
-	asrAttFit[b,1:basrattmax]=forFitasrAtt
-	asrRulFit[b,1:basrrulmax]=forFitasrRul
-	asrAggFit[b,1:basraggmax]=forFitasrAgg
+	asrintFit[b,1:basrintmax]=forFitasrInt
+	asrextFit[b,1:basrextmax]=forFitasrExt
+	asrsomFit[b,1:basrsommax]=forFitasrSom
+	asranxFit[b,1:basranxmax]=forFitasrAnx
+	asrthoFit[b,1:basrthomax]=forFitasrTho
+	asrwitFit[b,1:basrwitmax]=forFitasrWit
+	asrattFit[b,1:basrattmax]=forFitasrAtt
+	asrrulFit[b,1:basrrulmax]=forFitasrRul
+	asraggFit[b,1:basraggmax]=forFitasrAgg
 	# use DERIVATIVES of model fit for saving
+
+	#### NEED TO UPDATE WHAT DERIVATIVES ARE BEING CALCULCATED ON: ASR VARIABLES UP HERE, AND '' THOSE BELOW`
 	forSplinep=derivatives(pgAge,term='s(cbcl_scr_syn_totprob_r)',partial_match = TRUE,n=bpmax)
 	forSplineint=derivatives(intgAge,term='s(cbcl_scr_syn_internal_r)',partial_match = TRUE,n=bimax)
 	forSplineext=derivatives(extgAge,term='s(cbcl_scr_syn_external_r)',partial_match = TRUE,n=bemax)
@@ -362,7 +360,7 @@ for (b in 1:10000){
 	forSplinewit=derivatives(witgAge,term='s(cbcl_scr_syn_withdep_r)',partial_match = TRUE,n=bwitmax)
 	forSplineatt=derivatives(attgAge,term='s(cbcl_scr_syn_attention_r)',partial_match = TRUE,n=battmax)
 	forSplinerul=derivatives(rulgAge,term='s(cbcl_scr_syn_rulebreak_r)',partial_match = TRUE,n=brulmax)
-	forSplineagg=derivatives(agggAge,term='s(cbcl_scr_syn_aggressive_r)',partial_match = TRUE,n=baggmax)i
+	forSplineagg=derivatives(agggAge,term='s(cbcl_scr_syn_aggressive_r)',partial_match = TRUE,n=baggmax)
 	# asr
 	forSplineasrp=derivatives(asrpgAge,term='s(parentPcount)',partial_match = TRUE,n=basrpmax)
 	forSplineasrint=derivatives(asrintgAge,term=s(ASRInt),partial_match = TRUE,n=basrintmax)
@@ -375,20 +373,20 @@ for (b in 1:10000){
 	forSplineasrrul=derivatives(asrrulgAge,term=s(ASR_rulebreak),partial_match = TRUE,n=basrrulmax)
 	forSplineasragg=derivatives(asragggAge,term=s(ASR_aggressive),partial_match = TRUE,n=basraggmax)
 	# print out fit derivatives
-	pDeriv[b,1:bpmax]=forSplinep$derivative
-	intDeriv[b,1:bimax]=forSplineint$derivative
-	extDeriv[b,1:bemax]=forSplineext$derivative
-	somDeriv[b,1:bsommax]=forSplinesom$derivative
-	anxDeriv[b,1:banxmax]=forSplineanx$derivative
-	thoDeriv[b,1:bthomax]=forSplinetho$derivative
-	witDeriv[b,1:bwitmax]=forSplinewit$derivative
-	attDeriv[b,1:battmax]=forSplineatt$derivative
-	rulDeriv[b,1:brulmax]=forSplinerul$derivative
-	aggDeriv[b,1:baggmax]=forSplineagg$derivative
+	pDeriv[b,1:basrpmax]=forSplinep$derivative
+	intDeriv[b,1:basrintmax]=forSplineint$derivative
+	extDeriv[b,1:basrextmax]=forSplineext$derivative
+	somDeriv[b,1:basrsommax]=forSplinesom$derivative
+	anxDeriv[b,1:basranxmax]=forSplineanx$derivative
+	thoDeriv[b,1:basrthomax]=forSplinetho$derivative
+	witDeriv[b,1:basrwitmax]=forSplinewit$derivative
+	attDeriv[b,1:basrattmax]=forSplineatt$derivative
+	rulDeriv[b,1:basrrulmax]=forSplinerul$derivative
+	aggDeriv[b,1:basraggmax]=forSplineagg$derivative
 	# asr
 	asrpDeriv[b,1:basrpmax]=forSplineasrp$derivative
 	asrintDeriv[b,1:basrintmax]=forSplineasrint$derivative
-	asrextDeriv[b,1:basrexmax]=forSplineasrext$derivative
+	asrextDeriv[b,1:basrextmax]=forSplineasrext$derivative
 	asrsomDeriv[b,1:basrsommax]=forSplineasrsom$derivative
 	asranxDeriv[b,1:basranxmax]=forSplineasranx$derivative
 	asrthoDeriv[b,1:basrthomax]=forSplineasrtho$derivative
@@ -427,6 +425,6 @@ saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_asr.rds
 outdf=data.frame(pDeriv,intDeriv,extDeriv,somDeriv,anxDeriv,thoDeriv,witDeriv,attDeriv,rulDeriv,aggDeriv,asrpDeriv,asrintDeriv,asrextDeriv,asrsomDeriv,asranxDeriv,asrthoDeriv,asrwitDeriv,asrattDeriv,asrrulDeriv,asraggDeriv)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_asr.rds')
 # save out version with all cbcl and asr fits
-outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,attFit,rulFit,aggFit,asrpFit,asrintFit,asrextFit,asrsomFit,asranxFit,asrthoFit,asrwitFit,asrattFit,asrrulFit,asraggFit)
+outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,attFit,rulFit,aggFit,asrPFit,asrintFit,asrextFit,asrsomFit,asranxFit,asrthoFit,asrwitFit,asrattFit,asrrulFit,asraggFit)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_asr.rds')
 print('done with g~p fit bootstrapping!')

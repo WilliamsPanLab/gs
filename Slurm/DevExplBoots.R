@@ -46,15 +46,15 @@ masterdf$poverty=0
 masterdf$poverty[masterdf$income<5]=1
 masterdf$poverty=as.ordered(masterdf$poverty)
 # initialize a vector for each of 10k bootstraps that will hold deviance unexplained by omission of terms from full model
-devExplBoots_p=rep(0,1000)
-devExplBoots_intext=rep(0,1000)
-devExplBoots_seg=rep(0,1000)
-devExplBoots_pov=rep(0,1000)
-devExplBoots_segpov=rep(0,1000)
-devExplBoots_parentP=rep(0,1000)
+devExplBoots_p=rep(0,10000)
+devExplBoots_intext=rep(0,10000)
+devExplBoots_seg=rep(0,10000)
+devExplBoots_pov=rep(0,10000)
+devExplBoots_segpov=rep(0,10000)
+devExplBoots_parentP=rep(0,10000)
 
 set.seed(1)
-for (b in 1:1000){
+for (b in 1:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
