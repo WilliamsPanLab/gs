@@ -143,7 +143,7 @@ attMax=rep(0,10000)
 rulMax=rep(0,10000)
 aggMax=rep(0,10000)
 # loop over manual bootstrap
-for (b in 1:100){
+for (b in 1:1000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)

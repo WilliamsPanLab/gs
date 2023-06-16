@@ -134,5 +134,5 @@ saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpDerivBo
 outdf=data.frame(pFit,intFit,extFit,parentPFit)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpFitBoots.rds')
 outdf=data.frame(pDevExpl_g,intDevExpl_g,extDevExpl_g,parentPDevExpl_g)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpDevExplBoots.rds'
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gParentpDevExplBoots.rds')
 print('done with g~p fit bootstrapping!')
