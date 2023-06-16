@@ -7,3 +7,6 @@ This is the main page hosting the code repository and replication guide for "The
 Step 3 corresponds to figure 2, and executes bootstraps to reveal interactions with sex and poverty in *g*~*p*
 
 Step 4 corresponds to figure 3, and executes bootstraps to reveal the relationship and relative relationship of parental mental health to child *g*
+
+
+AP documentation to-do's: add grades to sampl constr explanation, change figure #'s

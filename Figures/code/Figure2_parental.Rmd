@@ -1,0 +1,429 @@
+---
+title: "Figure2_Parents.Rmd"
+output: html_document
+date: "2023-06-16"
+---
+
+
+```{r}
+# set functions
+plot_bootstraps <- function(data,maxval,Name,maxValuePlot) {
+  # Melt the data frame
+  data_melt <- melt(t(data))
+  data_melt$Var1 <- rep(seq(1, maxval), nrow(data))
+
+  # Calculate percentiles
+  percentiles <- data %>%
+    summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
+  
+  percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_to = "Percentile", values_to = "YValue")
+
+  # Add CI column
+  data_melt$CI <- 0
+  
+  # Prepare CIs for insertion
+  CIs <- data.frame(rep(seq(1, maxval), 2), c(rep(101, maxval), rep(102, maxval)), percentiles_long$YValue, rep(1, (maxval*2)))
+  colnames(CIs) <- colnames(data_melt)
+  
+  # Add CIs
+  data_melt2 <- rbind(data_melt, CIs)
+  
+  # Convert CI column to factor
+  data_melt2$CI <- as.factor(data_melt2$CI)
+  
+  # Plotting the lines
+  ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2, color = Var2)) +
+    geom_line(aes(alpha = CI), show.legend = FALSE) +
+    scale_color_viridis_c(option = "inferno", direction = -1) +
+    scale_alpha_manual(values = c(0.1, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(Name)+
+    theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,maxValuePlot),expand = expansion(mult = c(0, 0)))
+}
+
+# and and a derivatives version. only change is ylim
+plot_bootstrapDerivs <- function(data,maxval,Name,maxValuePlot) {
+  # Melt the data frame
+  data_melt <- melt(t(data))
+  data_melt$Var1 <- rep(seq(1, maxval), nrow(data))
+
+  # Calculate percentiles
+  percentiles <- data %>%
+    summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
+  
+  percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_to = "Percentile", values_to = "YValue")
+
+  # Add CI column
+  data_melt$CI <- 0
+  
+  # Prepare CIs for insertion
+  CIs <- data.frame(rep(seq(1, maxval), 2), c(rep(101, maxval), rep(102, maxval)), percentiles_long$YValue, rep(1, (maxval*2)))
+  colnames(CIs) <- colnames(data_melt)
+  
+  # Add CIs
+  data_melt2 <- rbind(data_melt, CIs)
+  
+  # Convert CI column to factor
+  data_melt2$CI <- as.factor(data_melt2$CI)
+  
+  # Plotting the lines
+  ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2, color = Var2)) +
+    geom_line(aes(alpha = CI), show.legend = FALSE) +
+    scale_color_viridis_c(option = "inferno", direction = -1) +
+    scale_alpha_manual(values = c(0.1, 1), guide = FALSE) + ylim(c(-.15,.15)) +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(Name)+
+    theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,maxValuePlot),expand = expansion(mult = c(0, 0)))
+}
+
+find_furthest_nonzero <- function(data) {
+  numZeros=colSums(data==0)
+  isZeroZeros=numZeros==0
+  furthest_nonzero=sum(isZeroZeros)
+}
+
+```
+
+```{r}
+parentFits=readRDS('~/Desktop/g_p/gpFitBoots_asr.rds')
+parentDerivs=readRDS('~/Desktop/g_p/gpDerivBoots_asr.rds')
+
+## note these first few are controlling for child psychopathology
+
+cPFits=parentFits[1:100,1:160]
+cIFits=parentFits[1:100,161:218]
+cEFits=parentFits[1:100,219:281]
+cSomFit=parentFits[1:100,282:301]
+cAnxFit=parentFits[1:100,302:332]
+cThoFit=parentFits[1:100,333:350]
+cWitFit=parentFits[1:100,351,368]
+cAttFit=parentFits[1:100,369:399]
+cRuleFit=parentFits[1:100,400,420]
+cAggFit=parentFits[1:100,421,465]
+
+# and these are without controlling for it
+
+PFits=parentFits[1:100,466:625]
+IFits=parentFits[1:100,626:683]
+EFits=parentFits[1:100,684:746]
+SomFit=parentFits[1:100,747:766]
+AnxFit=parentFits[1:100,767:797]
+ThoFit=parentFits[1:100,798:815]
+WitFit=parentFits[1:100,816:833]
+AttFit=parentFits[1:100,834:864]
+RuleFit=parentFits[1:100,865:885]
+AggFit=parentFits[1:100,886:930]
+
+
+# calculate some background info for plots
+MaxP=find_furthest_nonzero(PFits)
+MaxI=find_furthest_nonzero(IFits)
+MaxE=find_furthest_nonzero(EFits)
+MaxSom=find_furthest_nonzero(SomFit)
+MaxAnx=find_furthest_nonzero(AnxFit)
+MaxTho=find_furthest_nonzero(ThoFit)
+MaxWit=find_furthest_nonzero(WitFit)
+MaxAtt=find_furthest_nonzero(AttFit)
+MaxRule=find_furthest_nonzero(RuleFit)
+MaxAgg=find_furthest_nonzero(AggFit)
+
+plot_bootstraps(PFits,160,"Parental p",MaxP)
+plot_bootstraps(IFits,58,"Parental int",MaxI)
+plot_bootstraps(EFits,63,"Parental ext",MaxE)
+plot_bootstraps(SomFit,20,"Parental som",MaxSom)
+plot_bootstraps(AnxFit,31,"Parental anx",MaxAnx)
+plot_bootstraps(ThoFit,18,"Parental tho",MaxTho)
+plot_bootstraps(WitFit,18,"Parental wit",MaxWit)
+plot_bootstraps(AttFit,31,"Parental att",MaxAtt)
+plot_bootstraps(RuleFit,21,"Parental rule",MaxRule)
+plot_bootstraps(AggFit,45,"Parental agg",MaxAgg)
+
+```
+
+```{r}
+cPFits=parentDerivs[1:100,1:160]
+cIFits=parentDerivs[1:100,161:218]
+cEFits=parentDerivs[1:100,219:281]
+cSomFit=parentDerivs[1:100,282:301]
+cAnxFit=parentDerivs[1:100,302:332]
+cThoFit=parentDerivs[1:100,333:350]
+cWitFit=parentDerivs[1:100,351,368]
+cAttFit=parentDerivs[1:100,369:399]
+cRuleFit=parentDerivs[1:100,400,420]
+cAggFit=parentDerivs[1:100,421,465]
+
+# and these are without controlling for it
+
+PFits=parentDerivs[1:100,466:625]
+IFits=parentDerivs[1:100,626:683]
+EFits=parentDerivs[1:100,684:746]
+SomFit=parentDerivs[1:100,747:766]
+AnxFit=parentDerivs[1:100,767:797]
+ThoFit=parentDerivs[1:100,798:815]
+WitFit=parentDerivs[1:100,816:833]
+AttFit=parentDerivs[1:100,834:864]
+RuleFit=parentDerivs[1:100,865:885]
+AggFit=parentDerivs[1:100,886:930]
+
+# quantify derivs
+# for p - saved out at 600x200, 300x200 for minor scales
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(PFits > 0, na.rm = TRUE)
+negative_counts <- colSums(PFits < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>98
+negative_countsSig=negative_counts>98
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(PFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab(expression(italic(p)))+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
+# for int
+# quantify derivs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(IFits > 0, na.rm = TRUE)
+negative_counts <- colSums(IFits < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>98
+negative_countsSig=negative_counts>98
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(IFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxI))+xlab('Int')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxI),expand = expansion(mult = c(0, 0)))
+# for ext
+# quantify derivs
+# for p - saved out at 600x200, 300x200 for minor scales
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(EFits > 0, na.rm = TRUE)
+negative_counts <- colSums(EFits < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>98
+negative_countsSig=negative_counts>98
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(EFits, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab('Ext')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxE),expand = expansion(mult = c(0, 0)))
+
+# for som
+# quantify derivs
+# for p - saved out at 600x200, 300x200 for minor scales
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(SomFit > 0, na.rm = TRUE)
+negative_counts <- colSums(SomFit < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>98
+negative_countsSig=negative_counts>98
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(SomFit, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab('Som')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxSom),expand = expansion(mult = c(0, 0)))
+
+# for anx
+# quantify derivs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(AnxFit > 0, na.rm = TRUE)
+negative_counts <- colSums(AnxFit < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>98
+negative_countsSig=negative_counts>98
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(AnxFit, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab('Anx')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxAnx),expand = expansion(mult = c(0, 0)))
+
+# for Tho
+# quantify derivs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(ThoFit > 0, na.rm = TRUE)
+negative_counts <- colSums(ThoFit < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>98
+negative_countsSig=negative_counts>98
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(ThoFit, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.15),max(0.25)))+theme_minimal(base_size = 25)+
+    xlim(c(0,MaxP))+xlab('Tho')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxSom),expand = expansion(mult = c(0, 0)))
+
+# for Wit
+# quantify derivs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(WitFit > 0, na.rm = TRUE)
+negative_counts <- colSums(WitFit < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>98
+negative_countsSig=negative_counts>98
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(WitFit, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab('Wit')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
+
+# for Att
+# quantify derivs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(AttFit > 0, na.rm = TRUE)
+negative_counts <- colSums(AttFit < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>98
+negative_countsSig=negative_counts>98
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(AttFit, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab('Att')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxAtt),expand = expansion(mult = c(0, 0)))
+
+# for Rule
+# quantify derivs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(RuleFit > 0, na.rm = TRUE)
+negative_counts <- colSums(RuleFit < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>98
+negative_countsSig=negative_counts>98
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(RuleFit, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab('Rule')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxRule),expand = expansion(mult = c(0, 0)))
+
+# for agg
+# quantify derivs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(AggFit > 0, na.rm = TRUE)
+negative_counts <- colSums(AggFit < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>98
+negative_countsSig=negative_counts>98
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(AggFit, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
+    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab('Agg')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxAgg),expand = expansion(mult = c(0, 0)))
+```

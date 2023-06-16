@@ -8,7 +8,7 @@ date: "2023-01-25"
 This .rmd links ndar downloads into a master dataset. Cross-sectional and temporal precedence datasets are be exported from this file (no matched imaging groups needed, pooled factor decomposition).
 
 ```{r}
-#### chunk 1: load libraries
+#### load libraries
 library(rapportools)
 library(reshape2)
 library(ggplot2)
@@ -17,7 +17,7 @@ library(ggalluvial)
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-####  chunk 2 processes mental health data  ####
+####  chunk 1 processes mental health data  ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in cbcl data
@@ -77,10 +77,103 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CBCLBo
 cbclSubjsBoth=length(unique(masterdf$subjectkey))
 print(paste0(cbclSubjs-cbclSubjsBoth,' lost due to single-timepoint CBCL completeness'))
 ```
+```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+###   Chunk 2  processes  scholastic  data.  ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
+### LOAD in grades, ∆∆∆ will need to correct for incongruency between tp1 measure (decent granularity) and tp2 measure (high granularity) ∆∆∆
+gradesInfoBV=read.delim('~/Downloads/Package_1210940/dibf01.txt')
+# extract baseline
+gradesInfoBV=subset(gradesInfoBV,eventname=='baseline_year_1_arm_1')
+gradesInfoBV$Grades<-as.numeric(gradesInfoBV$kbi_p_grades_in_school)
+# convert ndar value to R
+gradesInfoBV$Grades[gradesInfoBV$Grades==-1]=NA
+# ungraded NA for these analyses
+gradesInfoBV$Grades[gradesInfoBV$Grades==6]=NA
+# convert ndar colnames to other ndar colnames
+# for tp2, the key is 1 = A's, 2 = B's, 3 = C's, 4 = D's, 5 = F's, 6 = ungraded, -1 = NA
+gradesInfoY2=read.delim('~/Downloads/Package_1210940/abcd_saag01.txt')
+gradesInfoY2=subset(gradesInfoY2,eventname=='2_year_follow_up_y_arm_1')
+gradesInfoY2$sag_grade_type<-as.numeric(gradesInfoY2$sag_grade_type)
+# key: 1=100-97,2=96-93,3=92-90,4=89-87,5=86-83,6=82-80,7=79-77,8=76-73,9=72-70,10=69-67,11=66-65,12=0-65,-1=NA,777= no answer
+gradesInfoY2$sag_grade_type[gradesInfoY2$sag_grade_type==-1]=NA
+gradesInfoY2$sag_grade_type[gradesInfoY2$sag_grade_type==777]=NA
+# now convert to be equivalent with timepoint 1 grades measure
+ind12=gradesInfoY2$sag_grade_type==12
+ind11=gradesInfoY2$sag_grade_type==11
+ind10=gradesInfoY2$sag_grade_type==10
+ind9=gradesInfoY2$sag_grade_type==9
+ind8=gradesInfoY2$sag_grade_type==8
+ind7=gradesInfoY2$sag_grade_type==7
+ind6=gradesInfoY2$sag_grade_type==6
+ind5=gradesInfoY2$sag_grade_type==5
+ind4=gradesInfoY2$sag_grade_type==4
+ind3=gradesInfoY2$sag_grade_type==3
+ind2=gradesInfoY2$sag_grade_type==2
+ind1=gradesInfoY2$sag_grade_type==1
+#### Set indices to low-res versions
+# < 65 becomes failing
+gradesInfoY2$sag_grade_type[ind12]=5
+# 66-69 = Ds
+gradesInfoY2$sag_grade_type[ind11]=4
+gradesInfoY2$sag_grade_type[ind10]=4
+# 70-79 = Cs
+gradesInfoY2$sag_grade_type[ind7]=3
+gradesInfoY2$sag_grade_type[ind8]=3
+gradesInfoY2$sag_grade_type[ind9]=3
+# 80-89 = Bs
+gradesInfoY2$sag_grade_type[ind4]=2
+gradesInfoY2$sag_grade_type[ind5]=2
+gradesInfoY2$sag_grade_type[ind6]=2
+# 90+ = As
+gradesInfoY2$sag_grade_type[ind1]=1
+gradesInfoY2$sag_grade_type[ind2]=1
+gradesInfoY2$sag_grade_type[ind3]=1
+gradesInfoY2$Grades<-gradesInfoY2$sag_grade_type
+
+###### ∆∆∆∆∆∆∆ create grades info from both of em
+NeededColNames=c('subjectkey','eventname','Grades')
+gradesInfo<-rbind(gradesInfoBV[,NeededColNames],gradesInfoY2[,NeededColNames])
+gradesInfo$Grades<-as.ordered(gradesInfo$Grades)
+
+# merge and count losses
+masterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
+
+# subjects with this measure at both timepoints
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,'Grades']))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+
+# exclude participants without data at both timepoints
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# omit nans and empties for variables of interest (totprobs,int,ext)
+masterdf=masterdf[!is.empty(masterdf$Grades),]
+masterdf=masterdf[!is.na(masterdf$Grades),]
+gradesSubjs=length(unique(masterdf$subjectkey))
+# add to included subjs DF
+includedSubjects$Grades=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
+# print data volume
+print(gradesSubjs)
+dif=cbclSubjsBoth-gradesSubjs
+print(paste0(dif,' participants lost from grades merge'))
+
+# included subjs df
+includedSubjects$Grades=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
+
+```
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-#### Chunlk 2 processes adult mental health ####
+#### Chunk 3 processes adult mental health ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in ASR data
@@ -305,8 +398,12 @@ y.pca = psych::principal(Y, rotate="varimax", nfactors=ncomp, scores=TRUE)
 y.pca$loadings
 # assign scores to subjs
 Yextended$g<-y.pca$scores[,1]
+Yextended$pc2<-y.pca$scores[,2]
+Yextended$pc3<-y.pca$scores[,3]
 # merge in cog data
 masterdf$g<-Yextended$g
+masterdf$pc2<-Yextended$pc2
+masterdf$pc3<-Yextended$pc3
 # removal of one participant more than 3 S.D. from every other participant
 masterdf=masterdf[masterdf$g>-7.5,]
 ```
@@ -356,7 +453,7 @@ ASRAggr=ASRdfNum$asr_q03_p+ASRdfNum$asr_q05_p+ASRdfNum$asr_q16_p+ASRdfNum$asr_q2
 ASRIntrusive=ASRdfNum$asr_q07_p+ASRdfNum$asr_q19_p+ASRdfNum$asr_q74_p+ASRdfNum$asr_q93_p+ASRdfNum$asr_q94_p+ASRdfNum$asr_q104_p
 
 # now internalizing and externalizing, to be equivalent with children
-ASRInt=ASRWithdrawn+ASRAnxDepr+ASRSomatic
+ASRInt=ASRWithdrawn+ASRSomatic
 
 ASRExt=ASRAggr+ASRRulB
 # and subtract reverse score items because they were included in sum above, and modeling "happiness" as symmetric to "symptoms" seems like a strong assumption
@@ -627,7 +724,7 @@ ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
 #########################
 #########################
 #########################
-# this dataframe is now your working data frame for fig4 sensititvity analyses
+# this dataframe is now your working data frame for fig4 sensitvity analyses
 saveRDS(masterdf2,'~/gp_masterdf2.rds')
 ####################
 #########################
@@ -640,7 +737,7 @@ saveRDS(masterdf2,'~/gp_masterdf2.rds')
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
 #### Chunk 16 prepares data for analysis of temporal precedence ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','income','sex','race_ethnicity','matched_group','eventname')
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','Grades','pc2','pc3','income','sex','race_ethnicity','matched_group','eventname')
 # eliminate rows with NAs and ensure none without two-timepoint data
 # variables of interest redux
 masterdf=masterdf[,c(variablesOfInterest)]

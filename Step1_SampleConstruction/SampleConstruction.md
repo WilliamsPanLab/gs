@@ -8,7 +8,7 @@ and temporal precedence datasets are be exported from this file (no
 matched imaging groups needed, pooled factor decomposition).
 
 ``` r
-#### chunk 1: load libraries
+#### load libraries
 library(rapportools)
 ```
 
@@ -31,7 +31,7 @@ library(ggalluvial)
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-####  chunk 2 processes mental health data  ####
+####  chunk 1 processes mental health data  ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in cbcl data
@@ -96,7 +96,109 @@ print(paste0(cbclSubjs-cbclSubjsBoth,' lost due to single-timepoint CBCL complet
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-#### Chunlk 2 processes adult mental health ####
+###   Chunk 2  processes  scholastic  data.  ###
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
+### LOAD in grades, ∆∆∆ will need to correct for incongruency between tp1 measure (decent granularity) and tp2 measure (high granularity) ∆∆∆
+gradesInfoBV=read.delim('~/Downloads/Package_1210940/dibf01.txt')
+# extract baseline
+gradesInfoBV=subset(gradesInfoBV,eventname=='baseline_year_1_arm_1')
+gradesInfoBV$Grades<-as.numeric(gradesInfoBV$kbi_p_grades_in_school)
+# convert ndar value to R
+gradesInfoBV$Grades[gradesInfoBV$Grades==-1]=NA
+# ungraded NA for these analyses
+gradesInfoBV$Grades[gradesInfoBV$Grades==6]=NA
+# convert ndar colnames to other ndar colnames
+# for tp2, the key is 1 = A's, 2 = B's, 3 = C's, 4 = D's, 5 = F's, 6 = ungraded, -1 = NA
+gradesInfoY2=read.delim('~/Downloads/Package_1210940/abcd_saag01.txt')
+gradesInfoY2=subset(gradesInfoY2,eventname=='2_year_follow_up_y_arm_1')
+gradesInfoY2$sag_grade_type<-as.numeric(gradesInfoY2$sag_grade_type)
+# key: 1=100-97,2=96-93,3=92-90,4=89-87,5=86-83,6=82-80,7=79-77,8=76-73,9=72-70,10=69-67,11=66-65,12=0-65,-1=NA,777= no answer
+gradesInfoY2$sag_grade_type[gradesInfoY2$sag_grade_type==-1]=NA
+gradesInfoY2$sag_grade_type[gradesInfoY2$sag_grade_type==777]=NA
+# now convert to be equivalent with timepoint 1 grades measure
+ind12=gradesInfoY2$sag_grade_type==12
+ind11=gradesInfoY2$sag_grade_type==11
+ind10=gradesInfoY2$sag_grade_type==10
+ind9=gradesInfoY2$sag_grade_type==9
+ind8=gradesInfoY2$sag_grade_type==8
+ind7=gradesInfoY2$sag_grade_type==7
+ind6=gradesInfoY2$sag_grade_type==6
+ind5=gradesInfoY2$sag_grade_type==5
+ind4=gradesInfoY2$sag_grade_type==4
+ind3=gradesInfoY2$sag_grade_type==3
+ind2=gradesInfoY2$sag_grade_type==2
+ind1=gradesInfoY2$sag_grade_type==1
+#### Set indices to low-res versions
+# < 65 becomes failing
+gradesInfoY2$sag_grade_type[ind12]=5
+# 66-69 = Ds
+gradesInfoY2$sag_grade_type[ind11]=4
+gradesInfoY2$sag_grade_type[ind10]=4
+# 70-79 = Cs
+gradesInfoY2$sag_grade_type[ind7]=3
+gradesInfoY2$sag_grade_type[ind8]=3
+gradesInfoY2$sag_grade_type[ind9]=3
+# 80-89 = Bs
+gradesInfoY2$sag_grade_type[ind4]=2
+gradesInfoY2$sag_grade_type[ind5]=2
+gradesInfoY2$sag_grade_type[ind6]=2
+# 90+ = As
+gradesInfoY2$sag_grade_type[ind1]=1
+gradesInfoY2$sag_grade_type[ind2]=1
+gradesInfoY2$sag_grade_type[ind3]=1
+gradesInfoY2$Grades<-gradesInfoY2$sag_grade_type
+
+###### ∆∆∆∆∆∆∆ create grades info from both of em
+NeededColNames=c('subjectkey','eventname','Grades')
+gradesInfo<-rbind(gradesInfoBV[,NeededColNames],gradesInfoY2[,NeededColNames])
+gradesInfo$Grades<-as.ordered(gradesInfo$Grades)
+
+# merge and count losses
+masterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
+
+# subjects with this measure at both timepoints
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,'Grades']))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+
+# exclude participants without data at both timepoints
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# omit nans and empties for variables of interest (totprobs,int,ext)
+masterdf=masterdf[!is.empty(masterdf$Grades),]
+masterdf=masterdf[!is.na(masterdf$Grades),]
+gradesSubjs=length(unique(masterdf$subjectkey))
+# add to included subjs DF
+includedSubjects$Grades=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
+# print data volume
+print(gradesSubjs)
+```
+
+    ## [1] 7348
+
+``` r
+dif=cbclSubjsBoth-gradesSubjs
+print(paste0(dif,' participants lost from grades merge'))
+```
+
+    ## [1] "715 participants lost from grades merge"
+
+``` r
+# included subjs df
+includedSubjects$Grades=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
+```
+
+``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+#### Chunk 3 processes adult mental health ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in ASR data
@@ -123,7 +225,7 @@ dif=cbclSubjsBoth-asrSubjs
 print(paste0(dif,' participants lost from needing ASR at both timepoints'))
 ```
 
-    ## [1] "4 participants lost from needing ASR at both timepoints"
+    ## [1] "716 participants lost from needing ASR at both timepoints"
 
 ``` r
 # included subjs df
@@ -158,7 +260,7 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$acs=1
 print(acsSubjs)
 ```
 
-    ## [1] 8058
+    ## [1] 7346
 
 ``` r
 dif=asrSubjs-acsSubjs
@@ -205,7 +307,7 @@ newList=length(unique(masterdf$subjectkey))
 print(paste0(newList,' after merging nih toolbox, ',(acsSubjs- newList),' lost after merge'))
 ```
 
-    ## [1] "8058 after merging nih toolbox, 0 lost after merge"
+    ## [1] "7346 after merging nih toolbox, 0 lost after merge"
 
 ``` r
 masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age','sex'))
@@ -222,7 +324,7 @@ newList2=length(unique(masterdf$subjectkey))
 print(paste0(newList2,' after merging other cognitive measures, ',(newList- newList2),' lost after merge'))
 ```
 
-    ## [1] "8058 after merging other cognitive measures, 0 lost after merge"
+    ## [1] "7346 after merging other cognitive measures, 0 lost after merge"
 
 ``` r
 masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age','sex'))
@@ -241,7 +343,7 @@ newList3=length(unique(masterdf$subjectkey))
 print(paste0(newList3,' after merging little man, ',(newList2 - newList3),' lost after merge'))
 ```
 
-    ## [1] "8058 after merging little man, 0 lost after merge"
+    ## [1] "7346 after merging little man, 0 lost after merge"
 
 ``` r
 # clean age
@@ -303,13 +405,13 @@ newList4=length(unique(masterdf$subjectkey))
 print(paste0(newList4,' after retaining only subjs with Cognitive vars of int at BOTH timepoints, ',(newList3- newList4),' lost after removing'))
 ```
 
-    ## [1] "6580 after retaining only subjs with Cognitive vars of int at BOTH timepoints, 1478 lost after removing"
+    ## [1] "5994 after retaining only subjs with Cognitive vars of int at BOTH timepoints, 1352 lost after removing"
 
 ``` r
 print(dim(masterdf))
 ```
 
-    ## [1] 13160   591
+    ## [1] 11988   592
 
 ``` r
 # populated included subjs df
@@ -365,7 +467,7 @@ newList5=length(unique(masterdf$subjectkey))
 print(paste0(newList5,' after retaining only one subjs per family, ',(newList4- newList5),' lost after removing'))
 ```
 
-    ## [1] "5709 after retaining only one subjs per family, 871 lost after removing"
+    ## [1] "5214 after retaining only one subjs per family, 780 lost after removing"
 
 ``` r
 # included subjects DF to track subj loss
@@ -393,25 +495,29 @@ y.pca$loadings
 
     ## 
     ## Loadings:
-    ##                             RC1    RC2    RC3   
-    ## nihtbx_picvocab_uncorrected  0.752  0.186  0.106
-    ## nihtbx_flanker_uncorrected   0.205  0.823       
-    ## nihtbx_pattern_uncorrected   0.168  0.844       
-    ## nihtbx_picture_uncorrected   0.608  0.248       
-    ## nihtbx_reading_uncorrected   0.710  0.205  0.189
-    ## pea_ravlt_ld                 0.765              
-    ## lmt_scr_perc_correct                       0.980
+    ##                             RC1   RC2   RC3  
+    ## nihtbx_picvocab_uncorrected 0.816 0.146 0.224
+    ## nihtbx_flanker_uncorrected  0.184 0.790      
+    ## nihtbx_pattern_uncorrected  0.104 0.833 0.139
+    ## nihtbx_picture_uncorrected        0.278 0.812
+    ## nihtbx_reading_uncorrected  0.857 0.177 0.126
+    ## pea_ravlt_ld                0.294       0.797
+    ## lmt_scr_perc_correct        0.456 0.477 0.164
     ## 
-    ##                RC1   RC2   RC3
-    ## SS loadings    2.1 1.535 1.016
-    ## Proportion Var 0.3 0.219 0.145
-    ## Cumulative Var 0.3 0.519 0.664
+    ##                  RC1   RC2   RC3
+    ## SS loadings    1.746 1.675 1.415
+    ## Proportion Var 0.249 0.239 0.202
+    ## Cumulative Var 0.249 0.489 0.691
 
 ``` r
 # assign scores to subjs
 Yextended$g<-y.pca$scores[,1]
+Yextended$pc2<-y.pca$scores[,2]
+Yextended$pc3<-y.pca$scores[,3]
 # merge in cog data
 masterdf$g<-Yextended$g
+masterdf$pc2<-Yextended$pc2
+masterdf$pc3<-Yextended$pc3
 # removal of one participant more than 3 S.D. from every other participant
 masterdf=masterdf[masterdf$g>-7.5,]
 ```
@@ -434,7 +540,7 @@ dif=newList5-newList6
 print(paste0(dif,' rows lost from only using subjs with both timepoints'))
 ```
 
-    ## [1] "1 rows lost from only using subjs with both timepoints"
+    ## [1] "0 rows lost from only using subjs with both timepoints"
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
@@ -461,7 +567,7 @@ ASRAggr=ASRdfNum$asr_q03_p+ASRdfNum$asr_q05_p+ASRdfNum$asr_q16_p+ASRdfNum$asr_q2
 ASRIntrusive=ASRdfNum$asr_q07_p+ASRdfNum$asr_q19_p+ASRdfNum$asr_q74_p+ASRdfNum$asr_q93_p+ASRdfNum$asr_q94_p+ASRdfNum$asr_q104_p
 
 # now internalizing and externalizing, to be equivalent with children
-ASRInt=ASRWithdrawn+ASRAnxDepr+ASRSomatic
+ASRInt=ASRWithdrawn+ASRSomatic
 
 ASRExt=ASRAggr+ASRRulB
 # and subtract reverse score items because they were included in sum above, and modeling "happiness" as symmetric to "symptoms" seems like a strong assumption
@@ -504,7 +610,7 @@ asr$subjectkey<-as.factor(asr$subjectkey)
 paste0(length(unique(masterdf$subjectkey)))
 ```
 
-    ## [1] "5709"
+    ## [1] "5214"
 
 ``` r
 # collapse to just variables of interest to prevent duplicate variables
@@ -526,7 +632,7 @@ masterdf=merge(masterdf,asr,by=c('subjectkey','eventname','interview_age'))
 paste0(length(unique(masterdf$subjectkey)))
 ```
 
-    ## [1] "5709"
+    ## [1] "5214"
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
@@ -613,13 +719,13 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$pTSV=1
 print(paste0(newList6-participantsTSVSubjs,' participants lost after needing complete data in participantstsv'))
 ```
 
-    ## [1] "468 participants lost after needing complete data in participantstsv"
+    ## [1] "432 participants lost after needing complete data in participantstsv"
 
 ``` r
 paste0(participantsTSVSubjs,' remain')
 ```
 
-    ## [1] "5240 remain"
+    ## [1] "4782 remain"
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
@@ -654,7 +760,7 @@ ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
   theme_bw(base_size = 30)+xlab('')
 ```
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
@@ -682,7 +788,7 @@ ggplot(startingdf, aes(x="", y=value, fill=RaceEthnicity)) +
         legend.text = element_text(size=30),legend.title = element_text(size=30))+scale_fill_manual(values = my_colors)
 ```
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 # plot df is both with race labels
@@ -698,7 +804,7 @@ ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
         legend.text = element_text(size=30),legend.title = element_text(size=30))+scale_fill_manual(values = my_colors)
 ```
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##################
@@ -804,14 +910,14 @@ ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
   theme_bw(base_size = 35)
 ```
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 #########################
 #########################
 #########################
 #########################
-# this dataframe is now your working data frame for fig4 sensititvity analyses
+# this dataframe is now your working data frame for fig4 sensitvity analyses
 saveRDS(masterdf2,'~/gp_masterdf2.rds')
 ####################
 #########################
@@ -823,7 +929,7 @@ saveRDS(masterdf2,'~/gp_masterdf2.rds')
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
 #### Chunk 16 prepares data for analysis of temporal precedence ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','income','sex','race_ethnicity','matched_group','eventname')
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','Grades','pc2','pc3','income','sex','race_ethnicity','matched_group','eventname')
 # eliminate rows with NAs and ensure none without two-timepoint data
 # variables of interest redux
 masterdf=masterdf[,c(variablesOfInterest)]
@@ -832,7 +938,7 @@ masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ]
 print(dim(masterdf))
 ```
 
-    ## [1] 10479    12
+    ## [1] 9564   15
 
 ``` r
 # and two-timepoint check
@@ -850,7 +956,7 @@ OutDFTmpPrec<-merge(df1,df2,by='subjectkey')
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 5239   23
+    ## [1] 4782   29
 
 ``` r
 # save it out
