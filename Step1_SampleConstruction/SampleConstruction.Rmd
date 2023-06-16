@@ -307,6 +307,8 @@ y.pca$loadings
 Yextended$g<-y.pca$scores[,1]
 # merge in cog data
 masterdf$g<-Yextended$g
+# removal of one participant more than 3 S.D. from every other participant
+masterdf=masterdf[masterdf$g>-7.5,]
 ```
 
 ```{r}
@@ -325,17 +327,38 @@ Different=setdiff(unique(masterdf$subjectkey),BothTPsubjs)
 newList6=length(unique(BothTPsubjs))
 dif=newList5-newList6
 print(paste0(dif,' rows lost from only using subjs with both timepoints'))
+
 ```
 
 ```{r}
 
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Chunk 11 handles adult p factor            ##
+## Chunk 11 calculates adult mental health    ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-
 # make count version of adult P
 ASRdfNum<-as.data.frame(lapply(asr[-1,11:141],as.numeric))
 ASRtotal=rowSums(ASRdfNum)
+
+ASRAnxDepr=ASRdfNum$asr_q12_p+ASRdfNum$asr_q13_p+ASRdfNum$asr_q14_p+ASRdfNum$asr_q22_p+ASRdfNum$asr_q31_p+ASRdfNum$asr_q33_p+ASRdfNum$asr_q34_p+ASRdfNum$asr_q35_p+ASRdfNum$asr_q45_p+ASRdfNum$asr_q47_p+ASRdfNum$asr_q50_p+ASRdfNum$asr_q71_p+ASRdfNum$asr_q91_p+ASRdfNum$asr_q103_p+ASRdfNum$asr_q107_p+ASRdfNum$asr_q112_p+ASRdfNum$asr_q113_p
+
+ASRWithdrawn=ASRdfNum$asr_q25_p+ASRdfNum$asr_q30_p+ASRdfNum$asr_q42_p+ASRdfNum$asr_q48_p+ASRdfNum$asr_q60_p+ASRdfNum$asr_q65_p+ASRdfNum$asr_q67_p+ASRdfNum$asr_q69_p+ASRdfNum$asr_q111_p
+
+ASRSomatic=ASRdfNum$asr_q51_p+ASRdfNum$asr_q56a_p+ASRdfNum$asr_q56b_p+ASRdfNum$asr_q56c_p+ASRdfNum$asr_q56e_p+ASRdfNum$asr_q56f_p+ASRdfNum$asr_q56g_p+ASRdfNum$asr_q56h_p+ASRdfNum$asr_q56i_p+ASRdfNum$asr_q100_p
+
+ASRThought=ASRdfNum$asr_q09_p+ASRdfNum$asr_q18_p+ASRdfNum$asr_q36_p+ASRdfNum$asr_q40_p+ASRdfNum$asr_q46_p+ASRdfNum$asr_q63_p+ASRdfNum$asr_q66_p+ASRdfNum$asr_q70_p+ASRdfNum$asr_q80_p+ASRdfNum$asr_q84_p+ASRdfNum$asr_q85_p+ASRdfNum$asr_q91_p
+
+ASRAttn=ASRdfNum$asr_q01_p+ASRdfNum$asr_q08_p+ASRdfNum$asr_q11_p+ASRdfNum$asr_q13_p+ASRdfNum$asr_q17_p+ASRdfNum$asr_q53_p+ASRdfNum$asr_q59_p+ASRdfNum$asr_q61_p+ASRdfNum$asr_q64_p+ASRdfNum$asr_q78_p+ASRdfNum$asr_q96_p+ASRdfNum$asr_q101_p+ASRdfNum$asr_q102_p+ASRdfNum$asr_q105_p+ASRdfNum$asr_q108_p+ASRdfNum$asr_q119_p+ASRdfNum$asr_q121_p
+
+ASRRulB=ASRdfNum$asr_q06_p+ASRdfNum$asr_q20_p+ASRdfNum$asr_q23_p+ASRdfNum$asr_q26_p+ASRdfNum$asr_q39_p+ASRdfNum$asr_q41_p+ASRdfNum$asr_q43_p+ASRdfNum$asr_q76_p+ASRdfNum$asr_q82_p+ASRdfNum$asr_q90_p+ASRdfNum$asr_q92_p+ASRdfNum$asr_q114_p+ASRdfNum$asr_q117_p+ASRdfNum$asr_q122_p
+
+ASRAggr=ASRdfNum$asr_q03_p+ASRdfNum$asr_q05_p+ASRdfNum$asr_q16_p+ASRdfNum$asr_q28_p+ASRdfNum$asr_q37_p+ASRdfNum$asr_q55_p+ASRdfNum$asr_q57_p+ASRdfNum$asr_q68_p+ASRdfNum$asr_q81_p+ASRdfNum$asr_q86_p+ASRdfNum$asr_q87_p+ASRdfNum$asr_q95_p+ASRdfNum$asr_q97_p+ASRdfNum$asr_q113_p+ASRdfNum$asr_q116_p+ASRdfNum$asr_q118_p+ASRdfNum$asr_q06_p+ASRdfNum$asr_q20_p+ASRdfNum$asr_q23_p+ASRdfNum$asr_q26_p+ASRdfNum$asr_q39_p+ASRdfNum$asr_q41_p+ASRdfNum$asr_q43_p+ASRdfNum$asr_q76_p+ASRdfNum$asr_q82_p+ASRdfNum$asr_q90_p+ASRdfNum$asr_q92_p+ASRdfNum$asr_q114_p+ASRdfNum$asr_q117_p+ASRdfNum$asr_q122_p
+
+ASRIntrusive=ASRdfNum$asr_q07_p+ASRdfNum$asr_q19_p+ASRdfNum$asr_q74_p+ASRdfNum$asr_q93_p+ASRdfNum$asr_q94_p+ASRdfNum$asr_q104_p
+
+# now internalizing and externalizing, to be equivalent with children
+ASRInt=ASRWithdrawn+ASRAnxDepr+ASRSomatic
+
+ASRExt=ASRAggr+ASRRulB
 # and subtract reverse score items because they were included in sum above, and modeling "happiness" as symmetric to "symptoms" seems like a strong assumption
 # reverse scored = face validity AND loading in expected direction
 ASRtotal=ASRtotal-ASRdfNum$asr_q02_p
@@ -350,6 +373,18 @@ ASRtotal=ASRtotal-ASRdfNum$asr_q123_p
 
 # merge in (first row is colnames)
 asr$parentPcount=c(NA,ASRtotal)
+asr$ASRAnxDepr=c(NA,ASRAnxDepr)
+asr$ASRWithdrawn=c(NA,ASRWithdrawn)
+asr$ASRSomatic=c(NA,ASRSomatic)
+asr$ASRThought=c(NA,ASRThought)
+asr$ASRAttn=c(NA,ASRAttn)
+asr$ASRAggr=c(NA,ASRAggr)
+asr$ASRIntrusive=c(NA,ASRIntrusive)
+asr$ASRRulB=c(NA,ASRRulB)
+asr$ASRInt=c(NA,ASRInt)
+asr$ASRExt=c(NA,ASRExt)
+#
+
 # fix asr age for merge
 asr$interview_age=as.numeric(asr$interview_age)/12
 # set subjectkey to factor for merge
@@ -358,7 +393,7 @@ asr$subjectkey<-as.factor(asr$subjectkey)
 # ensure none are missing
 paste0(length(unique(masterdf$subjectkey)))
 # collapse to just variables of interest to prevent duplicate variables
-asr=asr[,c('parentPcount','subjectkey','eventname','interview_age')]
+asr=asr[,c('parentPcount','subjectkey','eventname','interview_age','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRIntrusive','ASRInt','ASRExt')]
 # merge
 masterdf=merge(masterdf,asr,by=c('subjectkey','eventname','interview_age'))
 # ensure none are missing
@@ -419,8 +454,6 @@ participantsTSV$parental_education<-as.ordered(participantsTSV$parental_educatio
 #########################
 ### merge in for fam income and parent edu
 masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
-# last removal: one participant is more than 3 S.D. from every other participant. No way it's valid data.
-masterdf=masterdf[masterdf$g>-7.5,]
 # this dataframe is now your working data frame for all figure RMDs
 saveRDS(masterdf,'~/gp_masterdf.rds')
 ####################
@@ -590,7 +623,6 @@ ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
   scale_fill_manual(values = my_colors) +
   theme_bw(base_size = 35)
 
-
 #########################
 #########################
 #########################
@@ -608,7 +640,6 @@ saveRDS(masterdf2,'~/gp_masterdf2.rds')
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
 #### Chunk 16 prepares data for analysis of temporal precedence ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-
 variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','income','sex','race_ethnicity','matched_group','eventname')
 # eliminate rows with NAs and ensure none without two-timepoint data
 # variables of interest redux
