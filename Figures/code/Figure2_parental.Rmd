@@ -84,6 +84,8 @@ find_furthest_nonzero <- function(data) {
   furthest_nonzero=sum(isZeroZeros)
 }
 
+# set colors
+my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1c", "#a80009"))
 ```
 
 ```{r}
@@ -186,12 +188,12 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab(expression(italic(p)))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
+
 # for int
 # quantify derivs
 # get straightfoward of segment where 99% is over 0 or under
@@ -211,12 +213,12 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxI))+xlab('Int')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxI),expand = expansion(mult = c(0, 0)))
+
 # for ext
 # quantify derivs
 # for p - saved out at 600x200, 300x200 for minor scales
@@ -237,8 +239,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-    high = "#e41a1c",limits = c(min(-.075),max(0.075)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab('Ext')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -264,8 +265,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab('Som')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -290,8 +290,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab('Anx')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -316,10 +315,9 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-    high = "#e41a1c",limits = c(min(-.15),max(0.25)))+theme_minimal(base_size = 25)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 25)+
     xlim(c(0,MaxP))+xlab('Tho')+
-    guides(fill=FALSE)+
+    #guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxSom),expand = expansion(mult = c(0, 0)))
 
@@ -342,8 +340,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab('Wit')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -368,8 +365,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab('Att')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -394,8 +390,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab('Rule')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -420,8 +415,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradient2(low = "#377eb8", midpoint = 0, mid = "white",
-    high = "#e41a1c",limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab('Agg')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+

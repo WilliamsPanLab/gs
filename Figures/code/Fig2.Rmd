@@ -17,45 +17,39 @@ library(mgcv)
 ```
 
 ```{r}
-# reference linear model
+# reference dataframe
 plotdf<-data.frame(masterdf$parentPcount,masterdf$g,masterdf$cbcl_scr_syn_totprob_r,masterdf$interview_age)
 colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
-modelforresids<-gam(g~s(interview_age),data=plotdf)
-plotdf$resids<-modelforresids$residuals
 
-basic=ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=60)+
+# set plot title outside of plot call
+x_title <- expression(paste("Parental ", italic("p")))
+y_title <- expression(paste("Child ", italic("g")))
+y1_title <- expression(paste("Child ", italic("p")))
+
+basic=ggplot(data = plotdf,aes(y = cbcl_scr_syn_totprob_r, x = parentPcount)) + geom_hex(bins=60)+
     geom_point(alpha=0)+
-    geom_smooth(method = "lm",formula = y~x,color='gray') +
+    #geom_smooth(method = "lm",formula = y~x,color='gray') +
     scale_fill_viridis_c(option = "inferno") +
-    ylim(c(-3.9,4.7)) +
+    scale_y_continuous(limits=c(0,113),expand = expansion(mult = c(0, 0)))+
     theme_minimal(base_size=35) + 
-    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
-    geom_vline(xintercept = 60.225, linetype = "dashed")+
-    geom_vline(xintercept = 65.65574, linetype = "dashed")+
+    xlab(x_title)+ylab(y1_title)+
+    geom_hline(yintercept = 60.225, linetype = "dashed")+
+    geom_hline(yintercept = 65.65574, linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
-    scale_x_continuous(limits = c(0,113),expand = expansion(mult = c(0, 0)))+guides(fill=FALSE)
-
-basic
-# extract line of best fit for comparison
-fit_data<-ggplot_build(basic)$data[[3]]
+    scale_x_continuous(limits = c(0,135),expand = expansion(mult = c(0, 0)))+guides(fill=FALSE)
+ggMarginal(basic,type="histogram",size=3,binwidth=4,fill="gray")
 ```
 
 ```{r}
 ### P boots plot with overlaid linear fit
 # load in data
-Fits=readRDS('~/gpFitBoots.rds')
+Fits=readRDS('~/Desktop/g_p/gParentpFitBoots.rds')
 # find mean shape and plot it: p
-PFits=Fits[,1:127]
+PFits=Fits[,481:640]
 MaxP=find_furthest_nonzero(PFits)
-# pull clinical cutoff from master df: t scores > 68 = borderline clinical, 70 = clinical
-masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==68,]
-masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==70,]
-# borderline clinical and clinical cutoffs
-Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
-Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
 # melt data for plotting each line
 data_melt <- melt(t(PFits))
-data_melt$Var1 <- rep(seq(1, 127), nrow(PFits))
+data_melt$Var1 <- rep(seq(1, 160), nrow(PFits))
 # Calculate percentiles
 percentiles <- PFits %>%
 summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
@@ -65,7 +59,7 @@ percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_
 data_melt$CI <- 0
   
 # Prepare CIs for insertion
-CIs <- data.frame(rep(seq(1, 127), 2), c(rep(10001, 127), rep(10002, 127)), percentiles_long$YValue, rep(1, (127*2)))
+CIs <- data.frame(rep(seq(1, 160), 2), c(rep(10001, 160), rep(10002, 160)), percentiles_long$YValue, rep(1, (160*2)))
 colnames(CIs) <- colnames(data_melt)
   
 # Add CIs
@@ -73,10 +67,7 @@ data_melt2 <- rbind(data_melt, CIs)
   
 # Convert CI column to factor
 data_melt2$CI <- as.factor(data_melt2$CI)
-  
 
-# add in var2, only length of 80
-fit_data$Var2=rep(10003,80)
 
 # Plotting the lines
 ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
@@ -84,19 +75,16 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
   scale_color_viridis_c(option = "inferno", direction = -1) +
   scale_alpha_manual(values = c(0.01, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
   theme_minimal(base_size=35) + 
-  ylab(expression(italic(g)))+xlab(expression(italic(p)))+
-  geom_vline(xintercept = Pbc, linetype = "dashed")+
-  geom_vline(xintercept = Pc, linetype = "dashed")+
+  ylab(y_title)+xlab(x_title)+
   theme(panel.border = element_rect(color = "black", fill = NA, size = 1)) +
-  scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0))) + 
-  geom_line(data = fit_data, aes(x = x, y = y), color = "gray",size=1.5)
+  scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
 
 ```
 
 
 ```{r}
 
-plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Clinical) {
+plot_bootstraps_par <- function(data,maxval,Name,maxValuePlot) {
   # Melt the data frame
   data_melt <- melt(t(data))
   data_melt$Var1 <- rep(seq(1, maxval), nrow(data))
@@ -111,7 +99,7 @@ plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Cli
   data_melt$CI <- 0
   
   # Prepare CIs for insertion
-  CIs <- data.frame(rep(seq(1, maxval), 2), c(rep(10001, maxval), rep(10002, maxval)), percentiles_long$YValue, rep(1, (maxval*2)))
+  CIs <- data.frame(rep(seq(1, maxval), 2), c(rep(1001, maxval), rep(1002, maxval)), percentiles_long$YValue, rep(1, (maxval*2)))
   colnames(CIs) <- colnames(data_melt)
   
   # Add CIs
@@ -124,11 +112,9 @@ plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Cli
   ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2, color = Var2)) +
     geom_line(aes(alpha = CI), show.legend = FALSE) +
     scale_color_viridis_c(option = "inferno", direction = -1) +
-    scale_alpha_manual(values = c(0.01, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
+    scale_alpha_manual(values = c(0.1, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
     theme_minimal(base_size=35) + 
-    ylab(expression(italic(g)))+xlab(Name)+
-    geom_vline(xintercept = BorderlineClinical, linetype = "dashed")+
-    geom_vline(xintercept = Clinical, linetype = "dashed")+
+    ylab(y_title)+xlab(Name)+
     theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,maxValuePlot),expand = expansion(mult = c(0, 0)))
 }
@@ -185,21 +171,39 @@ my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1
 
 ```{r}
 # load in data
-Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
+Fits=readRDS('~/Desktop/g_p/gParentpDerivBoots.rds')
 # find mean shape and plot it: p
-PFits=Fits[,1:127]
-IFits=Fits[,128:178]
-EFits=Fits[,179:225]
-SomFits=Fits[,226:238]
-AnxFits=Fits[,239:263]
-ThoFits=Fits[,264:281]
-WitFits=Fits[,282:297]
-SocFits=Fits[,298:314]
-AttFits=Fits[,315:333]
-RulFits=Fits[,334:351]
-AggFits=Fits[,352:383]
-
+PFits=Fits[,481:640]
 MaxP=find_furthest_nonzero(PFits)
+
+# load in 1k data
+Fits=readRDS('~/Desktop/g_p/gpFitBoots_asr.rds')
+IFits = Fits[1:1000,(161:190)+437]
+EFits = Fits[1:1000,(191:253)+437]
+SomFits = Fits[1:1000,(254:273)+437]
+AnxFits = Fits[1:1000,(274:304)+437]
+ThoFits = Fits[1:1000,(305:322)+437]
+WitFits = Fits[1:1000,(323:340)+437]
+AttFits = Fits[1:1000,(341:371)+437]
+RulFits = Fits[1:1000,(373:392)+437]
+AggFits = Fits[1:1000,(393:437)+437]
+
+MaxI=find_furthest_nonzero(IFits)
+MaxE=find_furthest_nonzero(EFits)
+
+# actually plot em
+plot_bootstraps_par(PFits,160,x_title,MaxP,Pbc,Pc)
+plot_bootstraps_par(IFits,30,'Parental Internalizing',MaxI)
+plot_bootstraps_par(EFits,63,'Parental Externalizing',MaxE)
+plot_bootstraps_par(AnxFits,31,'anx.depr.',MaxAnx)
+#plot_bootstraps(ThoFits,18,'thought',MaxTho,ThoBc,ThoC)
+#plot_bootstraps(WitFits,16,'withdrawn',MaxWit,WitBc,WitC)
+#plot_bootstraps(SocFits,17,'social',MaxSoc,SocBc,SocC)
+#plot_bootstraps(AttFits,19,'attention',MaxAtt,AttBc,AttC)
+#plot_bootstraps(RulFits,18,'rulebreak',MaxRul,RulBc,RulC)
+#plot_bootstraps(AggFits,32,'aggressive',MaxAgg,AggBc,AggC)
+
+
 MaxI=find_furthest_nonzero(IFits)
 MaxE=find_furthest_nonzero(EFits)
 MaxAnx=find_furthest_nonzero(AnxFits)
@@ -210,85 +214,21 @@ MaxSom=find_furthest_nonzero(SomFits)
 MaxAtt=find_furthest_nonzero(AttFits)
 MaxRul=find_furthest_nonzero(RulFits)
 MaxAgg=find_furthest_nonzero(AggFits)
-
-# pull clinical cutoff from master df: t scores > 68 = borderline clinical, 70 = clinical
-masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==68,]
-masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==70,]
-masterdfI_bc<-masterdf[masterdf$cbcl_scr_syn_internal_t==68,]
-masterdfI_c<-masterdf[masterdf$cbcl_scr_syn_internal_t==70,]
-masterdfE_bc<-masterdf[masterdf$cbcl_scr_syn_external_t==68,]
-masterdfE_c<-masterdf[masterdf$cbcl_scr_syn_external_t==70,]
-masterdfAnx_bc<-masterdf[masterdf$cbcl_scr_syn_anxdisord_t==68,]
-masterdfAnx_c<-masterdf[masterdf$cbcl_scr_syn_anxdisord_t==70,]
-masterdfTho_bc<-masterdf[masterdf$cbcl_scr_syn_thought_t==68,]
-masterdfTho_c<-masterdf[masterdf$cbcl_scr_syn_thought_t==70,]
-masterdfWit_bc<-masterdf[masterdf$cbcl_scr_syn_withdrawn_t==68,]
-masterdfWit_c<-masterdf[masterdf$cbcl_scr_syn_withdrawn_t==70,]
-masterdfSoc_bc<-masterdf[masterdf$cbcl_scr_syn_sociemot_t==68,]
-masterdfSoc_c<-masterdf[masterdf$cbcl_scr_syn_sociemot_t==70,]
-masterdfAtt_bc<-masterdf[masterdf$cbcl_scr_syn_attention_t==68,]
-masterdfAtt_c<-masterdf[masterdf$cbcl_scr_syn_attention_t==70,]
-masterdfRul_bc<-masterdf[masterdf$cbcl_scr_syn_rulebreak_t==68,]
-masterdfRul_c<-masterdf[masterdf$cbcl_scr_syn_rulebreak_t==70,]
-masterdfAgg_bc<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==68,]
-masterdfAgg_c<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==70,]
-
-# borderline clinical and clinical cutoffs
-Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
-Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
-Ibc=mean(masterdfP_bc$cbcl_scr_syn_internal_r)
-Ic=mean(masterdfP_c$cbcl_scr_syn_internal_r)
-Ebc=mean(masterdfE_bc$cbcl_scr_syn_external_r)
-Ec=mean(masterdfE_c$cbcl_scr_syn_external_r)
-AnxBc=mean(as.numeric(masterdfAnx_bc$cbcl_scr_syn_anxdisord_r))
-AnxC=mean(as.numeric(masterdfAnx_c$cbcl_scr_syn_anxdisord_r))
-ThoBc=mean(as.numeric(masterdfTho_bc$cbcl_scr_syn_thought_r))
-ThoC=mean(as.numeric(masterdfTho_c$cbcl_scr_syn_thought_r))
-WitBc=mean(as.numeric(masterdfWit_bc$cbcl_scr_syn_withdrawn_r))
-WitC=mean(as.numeric(masterdfWit_c$cbcl_scr_syn_withdrawn_r))
-SocBc=mean(as.numeric(masterdfSoc_bc$cbcl_scr_syn_sociemot_r))
-SocC=mean(as.numeric(masterdfSoc_c$cbcl_scr_syn_sociemot_r))
-AttBc=mean(as.numeric(masterdfAtt_bc$cbcl_scr_syn_attention_r))
-AttC=mean(as.numeric(masterdfAtt_c$cbcl_scr_syn_attention_r))
-RulBc=mean(as.numeric(masterdfRul_bc$cbcl_scr_syn_rulebreak_r))
-RulC=mean(as.numeric(masterdfRul_c$cbcl_scr_syn_rulebreak_r))
-AggBc=mean(as.numeric(masterdfAgg_bc$cbcl_scr_syn_aggressive_r))
-AggC=mean(as.numeric(masterdfAgg_c$cbcl_scr_syn_aggressive_r))
-
-# actually plot em
-plot_bootstraps(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
-plot_bootstraps(IFits,51,'Internalizing',MaxI,Ibc,Ic)
-plot_bootstraps(EFits,47,'Externalizing',MaxE,Ebc,Ec)
-#plot_bootstraps(AnxFits,25,'anx.depr.',MaxAnx,AnxBc,AnxC)
-#plot_bootstraps(ThoFits,18,'thought',MaxTho,ThoBc,ThoC)
-#plot_bootstraps(WitFits,16,'withdrawn',MaxWit,WitBc,WitC)
-#plot_bootstraps(SocFits,17,'social',MaxSoc,SocBc,SocC)
-#plot_bootstraps(AttFits,19,'attention',MaxAtt,AttBc,AttC)
-#plot_bootstraps(RulFits,18,'rulebreak',MaxRul,RulBc,RulC)
-#plot_bootstraps(AggFits,32,'aggressive',MaxAgg,AggBc,AggC)
-
 ```
 
 ```{r}
 # load in data
-Fits=readRDS('~/Desktop/g_p/gpDerivBoots.rds')
+Fits=readRDS('~/Desktop/g_p/gpDerivBoots_asr.rds')
 # find mean shape and plot it: p
-PFits=Fits[,1:127]
-IFits=Fits[,128:178]
-EFits=Fits[,179:225]
-SomFits=Fits[,226:238]
-AnxFits=Fits[,239:263]
-ThoFits=Fits[,264:281]
-WitFits=Fits[,282:297]
-SocFits=Fits[,298:314]
-AttFits=Fits[,315:333]
-RulFits=Fits[,334:351]
-AggFits=Fits[,352:383]
-
-
-#plot_bootstrapDerivs(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
-#plot_bootstrapDerivs(IFits,51,'internalizing',MaxI,Ibc,Ic)
-#plot_bootstrapDerivs(EFits,47,'externalizing',MaxE,Ebc,Ec)
+IFits = Fits[1:1000,(161:190)+437]
+EFits = Fits[1:1000,(191:253)+437]
+SomFits = Fits[1:1000,(254:273)+437]
+AnxFits = Fits[1:1000,(274:304)+437]
+ThoFits = Fits[1:1000,(305:322)+437]
+WitFits = Fits[1:1000,(323:340)+437]
+AttFits = Fits[1:1000,(341:371)+437]
+RulFits = Fits[1:1000,(373:392)+437]
+AggFits = Fits[1:1000,(393:437)+437]
 
 # for p - saved out at 600x200, 300x200 for minor scales
 # get straightfoward of segment where 99% is over 0 or under
@@ -309,10 +249,11 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab(expression(italic(p)))+
+    xlim(c(0,MaxP))+xlab(x_title)+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
+
 # and a version with colorbar - for p only (same color mapping using throughout)
 dervPlotDf$Slope=dervPlotDf$sig_deriv
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
@@ -328,8 +269,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
 positive_counts <- colSums(IFits > 0, na.rm = TRUE)
 negative_counts <- colSums(IFits < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>990
+negative_countsSig=negative_counts>990
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(IFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -342,7 +283,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
-    xlab('Internalizing')+
+    xlab('Parental Internalizing')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxI),expand = expansion(mult = c(0, 0)))
@@ -352,8 +293,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 positive_counts <- colSums(EFits > 0, na.rm = TRUE)
 negative_counts <- colSums(EFits < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>990
+negative_countsSig=negative_counts>990
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(EFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -366,7 +307,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxE))+xlab('Externalizing')+
+    xlim(c(0,MaxE))+xlab('Parental Externalizing')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxE),expand = expansion(mult = c(0, 0)))
@@ -376,8 +317,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 positive_counts <- colSums(SomFits > 0, na.rm = TRUE)
 negative_counts <- colSums(SomFits < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>990
+negative_countsSig=negative_counts>990
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(SomFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -398,8 +339,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 # for anx
 positive_counts <- colSums(AnxFits > 0, na.rm = TRUE)
 negative_counts <- colSums(AnxFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>990
+negative_countsSig=negative_counts>990
 data <- apply(AnxFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -416,8 +357,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 # for Tho
 positive_counts <- colSums(ThoFits > 0, na.rm = TRUE)
 negative_counts <- colSums(ThoFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>990
+negative_countsSig=negative_counts>990
 data <- apply(ThoFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -426,7 +367,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.26),max(0.26)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxTho))+xlab('Thought')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -435,8 +376,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 # for Wit
 positive_counts <- colSums(WitFits > 0, na.rm = TRUE)
 negative_counts <- colSums(WitFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>990
+negative_countsSig=negative_counts>990
 data <- apply(WitFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -450,29 +391,11 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
 
-# for Soc
-positive_counts <- colSums(SocFits > 0, na.rm = TRUE)
-negative_counts <- colSums(SocFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
-data <- apply(SocFits, 2, function(x) quantile(x, probs = 0.5))
-dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
-dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
-dervPlotDf$sig_deriv=0
-dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
-dervPlotDf$seq=1:(dim(dervPlotDf)[1])
-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
-      theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+xlim(c(0,MaxSoc))+xlab('Social')+
-      guides(fill=FALSE)+
-      theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-      scale_x_continuous(breaks=c(0,3,6,9,12),limits = c(0,MaxSoc),expand = expansion(mult = c(0, 0)))
-
 # for Att
 positive_counts <- colSums(AttFits > 0, na.rm = TRUE)
 negative_counts <- colSums(AttFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>990
+negative_countsSig=negative_counts>990
 data <- apply(AttFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -489,8 +412,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 # for Rul
 positive_counts <- colSums(RulFits > 0, na.rm = TRUE)
 negative_counts <- colSums(RulFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>990
+negative_countsSig=negative_counts>990
 data <- apply(RulFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -507,8 +430,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 # for Agg
 positive_counts <- colSums(AggFits > 0, na.rm = TRUE)
 negative_counts <- colSums(AggFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>990
+negative_countsSig=negative_counts>990
 data <- apply(AggFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -526,46 +449,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
 ```
 
+
 ```{r}
-# for each bootstrap, recover symptom % with maxmimal slope
-PFitsMax <- apply(PFits[,1:MaxP], 1, function(row) which.max(abs(row)/MaxP))
-IFitsMax <- apply(IFits[,1:MaxI], 1, function(row) which.max(abs(row)/MaxI))
-EFitsMax <- apply(EFits[,1:MaxE], 1, function(row) which.max(abs(row)/MaxE))
-SomFitsMax <- apply(SomFits[,1:MaxSom], 1, function(row) which.max(abs(row)/MaxAnx))
-AnxFitsMax <- apply(AnxFits[,1:MaxAnx], 1, function(row) which.max(abs(row)/MaxTho))
-ThoFitsMax <- apply(ThoFits[,1:MaxTho], 1, function(row) which.max(abs(row)/MaxWit))
-WitFitsMax <- apply(WitFits[,1:MaxWit], 1, function(row) which.max(abs(row)/MaxSoc))
-SocFitsMax <- apply(SocFits[,1:MaxSoc], 1, function(row) which.max(abs(row)/MaxSom))
-AttFitsMax <- apply(AttFits[,1:MaxAtt], 1, function(row) which.max(abs(row)/MaxAtt))
-RulFitsMax <- apply(RulFits[,1:MaxRul], 1, function(row) which.max(abs(row)/MaxRul))
-AggFitsMax <- apply(AggFits[,1:MaxAgg], 1, function(row) which.max(abs(row)/MaxAgg))
-
-df <- data.frame(
-  PFitsMax,
-  IFitsMax,
-  EFitsMax,
-  SomFitsMax,
-  AnxFitsMax,
-  ThoFitsMax,
-  WitFitsMax,
-  SocFitsMax,
-  AttFitsMax,
-  RulFitsMax,
-  AggFitsMax
-)
-
-# Convert the data frame to a tidy format
-df_tidy <- df %>%
-  gather(key = "Subscale", value = "MaxValue")
-
-# plot distribution of bootstrap symptom percentiles with maximal slope for each subscale
-ggplot(df_tidy, aes(x = Subscale, y = MaxValue)) +
-  geom_boxplot() +
-  labs(title = "Maximum Values of Subscales",
-       x = "Subscale",
-       y = "Maximum Value") +
-  theme_minimal()
-
 # for each bootstrap, recover median slope
 df <- data.frame(
   p = apply(PFits[, 1:MaxP], 1, median),
@@ -575,7 +460,8 @@ df <- data.frame(
   AnxDepr = apply(AnxFits[, 1:MaxAnx], 1, median),
   Thought = apply(ThoFits[, 1:MaxTho], 1, median),
   WithDepr = apply(WitFits[, 1:MaxWit], 1, median),
-  Social = apply(SocFits[, 1:MaxSoc], 1, median),
+  # can replace with intrusive
+  #Social = apply(SocFits[, 1:MaxSoc], 1, median),
   Attn = apply(AttFits[, 1:MaxAtt], 1, median),
   Rules = apply(RulFits[, 1:MaxRul], 1, median),
   Aggr = apply(AggFits[, 1:MaxAgg], 1, median)
