@@ -150,6 +150,9 @@ AICsegpov_null_ext=rep(0,10000)
 pMax=rep(0,10000)
 intMax=rep(0,10000)
 extMax=rep(0,10000)
+# and modular fit for pov vs. psuedopov 2 (matched #) fits
+povFit=matrix(0,nrow=10000,ncol=pMaxVal)
+psuedopovFit=matrix(0,nrow=10000,ncol=pMaxVal)
 #################################################
 ##################### loop over manual bootstraps
 #################################################
@@ -180,6 +183,9 @@ for (b in 1:10000){
 	# randomly assign Povcount people to pseudopoverty
 	bootSamp$psuedopoverty=0
 	bootSamp$psuedopoverty[sample(1:dim(bootSamp)[1],Povcount)]=1
+	# make a df that is just the same number of kids in poverty, but actually from the non-poverty group. The point is to see if we can recover g~p slope in a an equivalent number of non-poverty kids
+	bootSamp$psuedopoverty2=0
+	bootSamp$psuedopoverty2[sample(which(bootSamp$poverty==0),Povcount)]=1
 	
 	#
 	######## I FIT MODELS
@@ -494,6 +500,21 @@ for (b in 1:10000){
 	AICsegpov_null_p[b]=AIC(pgAge_seg_pov_n)
 	AICsegpov_null_int[b]=AIC(intgAge_seg_pov_n)
 	AICsegpov_null_ext[b]=AIC(extgAge_seg_pov_n)
+
+	# modular portion for poverty and equivalently-sized group from non-poverty:
+	# extract poverty and pseudopov2 group
+	povertyGroup=subset(bootSamp,poverty==1)
+	pseudoPov2Group=subset(bootSamp,pseudopoverty2==1)
+	# fit g~p to poverty group
+	pov_gp=gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=povertyGroup)
+	# fit g~p to same-size nonpoverty group
+	nonpov_gp=gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=pseudoPov2Group)
+	# make prediction df to use for both models
+	predictDFp=data.frame(eachPcount,rep(median(bootSamp$interview_age),bpmax))
+	colnames(predictDFp)=c('cbcl_scr_syn_totprob_r','interview_age')
+	# extract fit (to become derivatives in postproc)
+	povFit[b]=predict(pov_gp,newdata=predictDFp)
+	pseudopovFit[b]=predict(nonpov_gp,newdata=predictDFp)
 }
 # SAVEOUT
 # save out version with all F stats and AICs, include max values for all iterations as well
@@ -506,3 +527,6 @@ saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFits.rds')
 outdf=data.frame(F_pDeriv,F_intDeriv,F_extDeriv,M_pDeriv,M_intDeriv,M_extDeriv,P_pDeriv,P_intDeriv,P_extDeriv,R_pDeriv,R_intDeriv,R_extDeriv,PF_pDeriv,PF_intDeriv,PF_extDeriv,PM_pDeriv,PM_intDeriv,PM_extDeriv,RM_pDeriv,RM_intDeriv,RM_extDeriv,RF_pDeriv,RF_intDeriv,RF_extDeriv)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpDerivs.rds')
 print('done with g~p fit bootstrapping!')
+# save out modular poverty and equivlanetly-sized poverty fits
+outdf=data.frame(povFit,pseudopovFit)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpPovNonPov.rds')
