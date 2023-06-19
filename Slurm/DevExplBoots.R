@@ -36,7 +36,7 @@ devExplBoots_gparentP=rep(0,10000)
 devExplBoots_pcsparentP=rep(0,10000)
 devExplBoots_GradesparentP=rep(0,10000)
 set.seed(1)
-for (b in 1:10000){
+for (b in 1:1000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
