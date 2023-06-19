@@ -152,7 +152,7 @@ intMax=rep(0,10000)
 extMax=rep(0,10000)
 # and modular fit for pov vs. psuedopov 2 (matched #) fits
 povFit=matrix(0,nrow=10000,ncol=pMaxVal)
-psuedopovFit=matrix(0,nrow=10000,ncol=pMaxVal)
+pseudopovFit=matrix(0,nrow=10000,ncol=pMaxVal)
 #################################################
 ##################### loop over manual bootstraps
 #################################################
@@ -184,8 +184,8 @@ for (b in 1:10000){
 	bootSamp$psuedopoverty=0
 	bootSamp$psuedopoverty[sample(1:dim(bootSamp)[1],Povcount)]=1
 	# make a df that is just the same number of kids in poverty, but actually from the non-poverty group. The point is to see if we can recover g~p slope in a an equivalent number of non-poverty kids
-	bootSamp$psuedopoverty2=0
-	bootSamp$psuedopoverty2[sample(which(bootSamp$poverty==0),Povcount)]=1
+	bootSamp$pseudopoverty2=0
+	bootSamp$pseudopoverty2[sample(which(bootSamp$poverty==0),Povcount)]=1
 	
 	#
 	######## I FIT MODELS
