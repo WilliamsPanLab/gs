@@ -8,15 +8,15 @@ You can download the .Rmd to follow the code on your local machine, and follow t
 
 ## The steps
 
-1. First, we'll load the libraries we need (chunk 1).
+1. After loading the libraries we'll need, load in our primary measures of interest: child mental health. Specifically, the [Child Behavioral Checklist](https://nda.nih.gov/data_structure.html?short_name=abcd_cbcls01). Some objects are initialized here, and children are checked for having missing data at either timepoint. For maximal interpretability of analyses, children without data at one timepoint are excluded.
 
-2. Next, we'll load in our primary measures of interest: child mental health (chunk 2). Specifically, the [Child Behavioral Checklist](https://nda.nih.gov/data_structure.html?short_name=abcd_cbcls01). Some objects are initialized here, and children are checked for having missing data at either timepoint. For maximal interpretability of analyses, children without data at one timepoint are excluded.
-
+2. Chunk 2 loads in and procesesses scholastic data. Unfortunately they appear to be differently collected at baseline and follow up visits. Fortunately, they are convertible if we are willing to revert to the lowest common denominator. In this instance, that means the more coarse measurement of grades acquired at baseline (A,B,C,D,F, ungraded or NA). So we'll take the more granular grade data from timepoint 2 and convert it to the 5-level factor structure. This also means that we are removing kids with ungraded, NA, or missing data as their value for this field. Finally, we'll want participants with data at both timepoints.
+   
 3. Chunk 3 processes adult mental health data, that is, the parents. Specifically, the [Parent Adult Self Report Raw Scores Aseba](https://nda.nih.gov/data_structure.html?short_name=pasr01) instrument is used. Similarly, participants without data at both timepoints are exlcuded. Very few kids are lost here.
 
-4. Chunk 4 takes in the family ID of each participant. We also need this for maximal interpretability, to avoid overrepresentation of certain families in our results. The [acspw03](https://nda.nih.gov/data_structure.html?short_name=acspsw03) instrument is used here.
+4. Chunk 4 takes in the family ID of each participant. We also need this for maximal interpretability, to avoid overrepresentation of certain families in our results. The [acspw03](https://nda.nih.gov/data_structure.html?short_name=acspsw03) instrument is used here. 
 
-5. Chunk 5 just converts data to numeric format
+5. Chunk 5 just converts data to numeric format.
 
 6. Chunk 6 loads in cognitive data. Note this and subsequent chunks are modeled after a [nice paper](https://pubmed.ncbi.nlm.nih.gov/30595399/), for which we explicitly demonstrate functional equivalence as a supplementary result. The basis of the derived cognitive score for each child (at each timepoint) is largely the NIH toolbox, but two additional tasks are included. In chunk 6 the cognitive data is merged in ([source 1](https://nda.nih.gov/data_structure.html?short_name=abcd_tbss01), [2](https://nda.nih.gov/data_structure.html?short_name=abcd_ps01), and [3](https://nda.nih.gov/data_structure.html?short_name=lmtp201))
 
@@ -28,7 +28,7 @@ You can download the .Rmd to follow the code on your local machine, and follow t
 
 10. Chunk 10 just checks for complete data at both timepoints.
 
-11. Chunk 11 calculates the adult p factor. For multiple reasons, discussed in-text, we are using the sum of endorsed symptoms. Several items are reverse scored, which presents a potentially challenging interpretative framework. Specifically, it's not clear that saying you are happy is equivalent to negative psychiatric symptoms. To make the fewest assumptions, these items are omitted rather than reversed in adult totals (subtracted from the total sum).
+11. Chunk 11 calculates the adult mental health factor. For multiple reasons, discussed in-text, we are using the sum of endorsed symptoms. Several items are reverse scored, which presents a potentially challenging interpretative framework. Specifically, it's not clear that saying you are happy is equivalent to negative psychiatric symptoms. To make the fewest assumptions, these items are omitted rather than reversed in adult totals (subtracted from the total sum).
 
 12. Chunk 12 handles a participants tsv, which is [a useful file with centralized info](https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups). We use this one to derive sex and parent income, as child-endorsed gender identification is missing for every single observation for every single child (as of now, from KSADS). Same drill as prior: kids with missing data are excluded. We also save out the primary dataframe here (gp_masterdf.rds)
 
@@ -38,6 +38,6 @@ You can download the .Rmd to follow the code on your local machine, and follow t
 
 15. Loads in [ksads data](https://nda.nih.gov/data_structure.html?short_name=abcd_ksad501) so we have a child-report version of their p factor score. Note the ksads is messy: branching logic, variably-expressed missing data, and big (~1,000 variables). These data are also saved out after merging with masterdf, and further missingness is plotted.
 
-16. This chunk prepares data for temporal precedence analysis: largely a replication of Romer & Pizzagalli [2021](https://pubmed.ncbi.nlm.nih.gov/34332330/). This uses a sep. dataframe because we are explicitly interested in temporal precedence from timepoint 1 to timepoint 2. This does not establish causality, but does add credence to the ways our models are constructed through the rest of the paper.
+17. This chunk prepares data for temporal precedence analysis: largely a replication of Romer & Pizzagalli [2021](https://pubmed.ncbi.nlm.nih.gov/34332330/). This uses a sep. dataframe because we are explicitly interested in temporal precedence from timepoint 1 to timepoint 2. This does not establish causality, but does add credence to the ways our models are constructed through the rest of the paper.
 
 ## Upon completion, we should have masterdf, masterdf2, and OutDFTmpPrec to bootstrap on our institution's computer cluster
