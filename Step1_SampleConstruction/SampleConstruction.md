@@ -727,38 +727,7 @@ paste0(participantsTSVSubjs,' remain')
 
     ## [1] "4782 remain"
 
-``` r
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-#### Chunk 13 plots data missingness       #####
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-
-# melt the plot df to get in proper format
-plotdf=melt(includedSubjects)
-```
-
     ## Using subj as id variables
-
-``` r
-plotdf$value<-as.factor(plotdf$value)
-plotdf$subj<-as.factor(plotdf$subj)
-# merge in raceEth of each subj
-raceEth=participantsTSV$race_ethnicity
-subjectsInPtsv=participantsTSV$subjectkey
-infoDf=data.frame(raceEth,subjectsInPtsv)
-colnames(infoDf)<-c('RaceEthn','subj')
-test=merge(plotdf,infoDf,by='subj')
-# overwrite race with "empty" if missing after each checkpoint
-test$RaceEthn<-factor(test$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
-test$RaceEthn[test$value==0]="Missing"
-
-my_colors <- c("red", "orange", "yellow", "green", "blue", "gray")
-
-ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
-  geom_stratum(aes(fill = RaceEthn)) +
-  geom_flow(aes(fill = RaceEthn)) +
-  scale_fill_manual(values = my_colors) +
-  theme_bw(base_size = 30)+xlab('')
-```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
@@ -806,66 +775,7 @@ ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
 
-``` r
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##################
-#### Chunk 15 loads in ksads data for a supplement #
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##################
-
-# now making an alternate version with KSADS for child-reported-p-proxy. Note that I wanted to get child-identified gender from ksads, but values are missing for every single observation
-ksads_y=read.delim('~/Downloads/Package_1216656/abcd_ksad501.txt')
-# convert src_subject_id to subjectkey
-ksads_y$subjectkey=ksads_y$src_subject_id
-# and age to numeric for merging later
-ksads_y$interview_age<-as.numeric(ksads_y$interview_age)/12
-```
-
     ## Warning: NAs introduced by coercion
-
-``` r
-# remove timepoints .5 and 1.5
-ksads_y=ksads_y[ksads_y$eventname!='1_year_follow_up_y_arm_1',]
-ksads_y=ksads_y[ksads_y$eventname!='3_year_follow_up_y_arm_1',]
-# Extract the first row of the ksads_y data frame (true column names)
-first_row <- ksads_y[1, ]
-# Get the column indices that contain ', Present'
-present_cols <- grep(', Present', first_row)
-# now select for those that specify symptoms
-symptom_cols <- grep('Symptom', first_row)
-# get intersection
-present_symptom_cols=intersect(present_cols,symptom_cols)
-# count empties
-ksads_y$empties<-0
-for (i in present_symptom_cols){
-  # add an empty count for each subject where this one symptom is missing
-  ksads_y$empties=ksads_y$empties+as.numeric(is.empty(ksads_y[,i]))
-}
-# omit empties
-ksads_y_rem=ksads_y[ksads_y$empties<1,] 
-# omit subjects without data at both timepoints
-ksadsy_subjects=length(unique(ksads_y_rem$subjectkey))
-OutDFBV=subset(ksads_y_rem,eventname=='baseline_year_1_arm_1')
-OutDF2Y=subset(ksads_y_rem,eventname=='2_year_follow_up_y_arm_1')
-# intersection of subjs in both
-BothTPsubjs=intersect(OutDFBV$subjectkey,OutDF2Y$subjectkey)
-MissingTPsubjs=setdiff(unique(masterdf$subjectkey),BothTPsubjs)
-# only include subjects with data at both timepoints
-ksads_y_rem=ksads_y_rem[ksads_y_rem$subjectkey %in% BothTPsubjs,]
-# deal with numeric codes
-ksads_y_rem[ksads_y_rem=="555"]=NA
-ksads_y_rem[ksads_y_rem=="888"]=NA
-ksads_y_rem[ksads_y_rem=="999"]=NA 
-
-# Loop through the present_cols and convert each column to numeric
-for (col_index in present_symptom_cols) {
-  ksads_y_rem[[col_index]] <- as.numeric(ksads_y_rem[[col_index]])
-}
-
-# get a count of endorsed, present symptoms. use grep to select for colnames that have ", Present" in them
-ksads_y_rem$totcount_y=rowSums(ksads_y_rem[present_symptom_cols],na.rm = T)
-
-### merge in for child-reported p equivalent
-masterdf2=merge(masterdf,ksads_y_rem,by=c('subjectkey','sex','interview_age','eventname'))
-```
 
     ## Warning in merge.data.frame(masterdf, ksads_y_rem, by = c("subjectkey", :
     ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
@@ -875,55 +785,9 @@ masterdf2=merge(masterdf,ksads_y_rem,by=c('subjectkey','sex','interview_age','ev
     ## 'collection_id.y', 'dataset_id.y', 'src_subject_id.x', 'interview_date.y',
     ## 'collection_title.y', 'src_subject_id.y' are duplicated in the result
 
-``` r
-# new merge and count
-ksadsSubjs=length(unique(masterdf2$subjectkey))
-# add to included subjs DF
-includedSubjects$ksads=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf2$subjectkey),]$ksads=1
-
-# melt the plot df to get in proper format
-plotdf=melt(includedSubjects)
-```
-
     ## Using subj as id variables
 
-``` r
-plotdf$value<-as.factor(plotdf$value)
-plotdf$subj<-as.factor(plotdf$subj)
-# merge in raceEth of each subj
-raceEth=participantsTSV$race_ethnicity
-subjectsInPtsv=participantsTSV$subjectkey
-infoDf=data.frame(raceEth,subjectsInPtsv)
-colnames(infoDf)<-c('RaceEthn','subj')
-test=merge(plotdf,infoDf,by='subj')
-# overwrite race with "empty" if missing after each checkpoint
-test$RaceEthn<-factor(test$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
-test$RaceEthn[test$value==0]="Missing"
-
-my_colors <- c("red", "orange", "yellow", "green", "blue", "gray")
-
-ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
-  geom_stratum(aes(fill = RaceEthn)) +
-  geom_flow(aes(fill = RaceEthn)) +
-  scale_fill_manual(values = my_colors) +
-  theme_bw(base_size = 35)
-```
-
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
-
-``` r
-#########################
-#########################
-#########################
-#########################
-# this dataframe is now your working data frame for fig4 sensitvity analyses
-saveRDS(masterdf2,'~/gp_masterdf2.rds')
-####################
-#########################
-#########################
-#########################
-```
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################

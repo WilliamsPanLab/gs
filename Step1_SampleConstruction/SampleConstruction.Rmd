@@ -569,7 +569,7 @@ paste0(participantsTSVSubjs,' remain')
 
 ```
 
-```{r}
+```{r, echo=FALSE, fig.dim = c(20, 6)}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 #### Chunk 13 plots data missingness       #####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
@@ -637,7 +637,7 @@ ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
 ```
 
 
-```{r}
+```{r, echo=FALSE, fig.dim = c(20, 6)}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##################
 #### Chunk 15 loads in ksads data for a supplement #
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##################
