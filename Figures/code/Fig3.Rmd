@@ -15,6 +15,7 @@ library(stringr)
 library(data.table)
 library(ggridges)
 library(ggbeeswarm)
+library(ggExtra)
 ```
 
 ```{r}
@@ -928,12 +929,80 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
 ```
 
+```{r}
+# grades plots from master df
+grade_levels <- c(5, 4, 3, 2, 1)
+grade_labels <- c("F", "Failing", "C", "B", "A")
+masterdf$plotGrades<-factor(masterdf$Grades, levels = grade_levels, labels = grade_labels)
+masterdf$plotGrades[masterdf$plotGrades=="F"]="Failing"
+# only 28 f's: merge into Ds
+boys_data <- subset(masterdf, sex == "M")
+girls_data <- subset(masterdf, sex == "F")
+
+# plot girls
+girlsWealth=subset(girls_data, income >5)
+girlsPoor=subset(masterdf, income <5)
+ggplot(girlsWealth, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
+  geom_boxplot(fill="#9589BF") +
+  labs(title = "Girls above poverty line",
+       x = expression(italic(p)),
+       y = "Grades")+theme_minimal(base_size=25)+xlim(0,113)+
+      geom_vline(xintercept = Pbc, linetype = "dashed")+
+      geom_vline(xintercept = Pc, linetype = "dashed")
+
+ggplot(girlsPoor, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
+  geom_boxplot(fill="#9589BF") +
+  labs(title = "Girls below poverty line",
+       x = expression(italic(p)),
+       y = "Grades")+theme_minimal(base_size=25)+xlim(0,113)+
+      geom_vline(xintercept = Pbc, linetype = "dashed")+
+      geom_vline(xintercept = Pc, linetype = "dashed")
+  
+# plot boys
+boysWealth=subset(boys_data, income >5)
+boysPoor=subset(boys_data, income <5)
+# Create the box plot for boys
+ggplot(boysWealth, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
+  geom_boxplot(fill="#EFC570") +
+  labs(title = "Boys above poverty line",
+       x = expression(italic(p)),
+       y = "Grades")+theme_minimal(base_size=25)+xlim(0,113)+
+      geom_vline(xintercept = Pbc, linetype = "dashed")+
+      geom_vline(xintercept = Pc, linetype = "dashed")
+
+ggplot(boysPoor, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
+  geom_boxplot(fill="#EFC570")+
+  labs(title = "Boys below poverty line",
+       x = expression(italic(p)),
+       y = "Grades")+theme_minimal(base_size=25)+xlim(0,113)+
+      geom_vline(xintercept = Pbc, linetype = "dashed")+
+      geom_vline(xintercept = Pc, linetype = "dashed")
+```
+
 
 ```{r}
 # deviance explained plots
 DevExpl=readRDS('~/Desktop/g_p/F3-5DevExpl.rds')
+DevExpl_L=readRDS('~/Desktop/g_p/F3-5DevExpl_longit.rds')
+DevExpl_L_Relative=DevExpl_L-DevExpl_L[,1]
+DevExpl_L_Relative=DevExpl_L_Relative[,c(2,4,5,7)]
 
+df_long <- reshape2::melt(DevExpl)
+# Create the boxplot
+ggplot(df_long, aes(x = variable, y = value)) +
+  geom_boxplot() +
+  xlab("Variables") +
+  ylab("Deviance Explained") + theme_minimal()
 
+# now for longitudinal variables
+custom_labels <- c(expression(italic(g)), "Grades", expression(paste(italic(g), " + Parental ", italic("p"))),expression(paste("Grades + Parental ", italic("p"))))
+df_long <- reshape2::melt(DevExpl_L_Relative)
+# Create the boxplot
+ggplot(df_long, aes(x = variable, y = value)) +
+  geom_boxplot() +
+  xlab("Variables") +
+  scale_x_discrete(labels = custom_labels) +
+  ylab("Longitudinal Deviance Explained") + theme_minimal(base_size=24)
 ```
 
 
