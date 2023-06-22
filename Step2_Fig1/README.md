@@ -4,7 +4,7 @@ Here, the goal is to submit 10k iterations of non-linear fits of g to cbcl subsc
 
 These analyses take place over three scripts: sample construction (done already), [Fig2_Boots_xSectional.R](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/Fig2_Boots_xSectional.R), and then plotting the values derived from the bootstrapping ([Fig1.Rmd](https://github.com/WilliamsPanLab/gp/blob/master/Figures/code/Fig1.Rmd))
 
-## The steps (assuming sample construction is done)
+## Bootstrapping/computational steps (assuming sample construction is done)
 
 1. Port masterdf over to Sherlock with scp. Subsequent steps in Fig2_Boots_xSectional.R.
 2. module load R/4.1 on sherlock and open R (terminal)
@@ -32,3 +32,13 @@ These analyses take place over three scripts: sample construction (done already)
 19. saveout all the data as .rds files
 
 ## Upon completion, we should have gpBoots.rds, gpDerivBoots.rds, and gpFitBoots.rds for use in the subsequent plotting script
+
+## Plotting steps (assuming above .rds files are derived and locally available)
+
+1. Chunk 1: load needed libraries.
+2. Chunk 2 establishes some functions that we'll use throughout the markdown. One is to plot bootstraps with a fair amount of ggplot specifications, and the other is to find the furthest extent of symptoms reported in each bootstrap. For context: the significance testing we've employed uses the total number of bootstraps to derive p-values. If certain levels of symptoms are not included in some bootstraps, this changes how we can consider statistical significance. To maximize statistical certainty, only symptom ranges that were included in all bootstraps are considered. Therefore, we need this function `find_furthest_nonzero` to determine what the highest symptom count that was included across all all 10k iterations was. Finally, we set a color palette that will be used throughout.
+3. Plot our reference linear model. This is equivalent to the reported correlation. The linear fit is also extracted to plot as a reference on future plots. `basic` is the name of the first plot, which is a hexplot.
+4. The next chunk loads in the bootstrapped fits (`gpFitBoots.rds`) and plots the p-factor. We'll extract subfactors from the big all-subfactor-bootstrap dataframe. The maximum extent of each subfactor is the maximum value for that subfactor in masterdf. They are extracted accordingly: see the previous bootstrapping script (above) for reference. Next, we derive some plot elements, such as the threshold for borderline clinical and clinical thresholds from t-scores ([see this paper for reference](https://www.nature.com/articles/s41380-022-01522-w)).
+5. The next chunk does the same, but extends this processing to internalizing and externalizing subscales (while extracting the information for subscales for future plotting).
+6. Now we load in bootstrapped derivatives (`gpDerivBoots.rds`). The structure of which values belong to which subscale is the same as that used for the fits in steps 4-5. Now we'll do our manual significance testing at 99% confidence. Specifically, we'll find where derivatives (slopes) are positive or negative across all 10,000 iterations. This is a way of testing if the 99% confidence interval for the true slope excludes 0. We'll then plot significant locations (spans of symptoms where slope is significant) using geom_raster. This is equivalent to the approach used in [this paper](https://www.sciencedirect.com/science/article/pii/S1878929320300360), but manual bootstrapping was needed in this situation (hence sherlock/slurm). All credit for this idea to the esteemed Dr. Bart Larsen. We'll plot out the significant slopes for all subscales.
+7. The last step is to summarize these derivatives. Obviously the models are non-linear so they don't have a single slope, but folks will probably prefer something immediately interpretable to something nuanced. This allows us to order the different fits relative to each other as well. 
