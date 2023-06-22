@@ -526,19 +526,19 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 ```
 
 ```{r}
-# for each bootstrap, recover median slope in bottom 50th percentile
+# for each bootstrap, recover median slope in bottom and top tertiles
 df <- data.frame(
-  p = apply(PFits[, 1:Pbc], 1, median),
-  Internal = apply(IFits[, 1:Ibc], 1, median),
-  External = apply(EFits[, 1:Ebc], 1, median),
-  Somatic = apply(SomFits[, 1:SomBc], 1, median),
-  AnxDepr = apply(AnxFits[, 1:AnxBc], 1, median),
-  Thought = apply(ThoFits[, 1:ThoBc], 1, median),
-  WithDepr = apply(WitFits[, 1:WitBc], 1, median),
-  Social = apply(SocFits[, 1:SocBc], 1, median),
-  Attn = apply(AttFits[, 1:AttBc], 1, median),
-  Rules = apply(RulFits[, 1:RulBc], 1, median),
-  Aggr = apply(AggFits[, 1:AggBc], 1, median)
+  p = apply(PFits[, 1:(MaxP/3)], 1, median),
+  Internal = apply(IFits[, 1:(MaxI/3)], 1, median),
+  External = apply(EFits[, 1:(MaxE/3)], 1, median),
+  Somatic = apply(SomFits[, 1:(MaxSom/3)], 1, median),
+  AnxDepr = apply(AnxFits[, 1:(MaxAnx/3)], 1, median),
+  Thought = apply(ThoFits[, 1:(MaxTho/3)], 1, median),
+  WithDepr = apply(WitFits[, 1:(MaxWit/3)], 1, median),
+  Social = apply(SocFits[, 1:(MaxSoc/3)], 1, median),
+  Attn = apply(AttFits[, 1:(MaxAtt/3)], 1, median),
+  Rules = apply(RulFits[, 1:(MaxRul/3)], 1, median),
+  Aggr = apply(AggFits[, 1:(MaxAgg/3)], 1, median)
 )
 
 # Convert the data frame to a tidy format
@@ -558,7 +558,7 @@ df_tidy$Subscale <- reorder(df_tidy$Subscale, -df_tidy$MedianValue, median)
 # Create the boxplot
 ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
   geom_boxplot() +
-  labs(title = "Median Association with Cognitive Score: Subclinical Range",
+  labs(title = "Median Association with Cognitive Score: Healthy Tertile",
        x = "Subscale",
        y = "Median Slope") +
   theme_minimal(base_size=20)+scale_fill_gradientn(
@@ -569,41 +569,40 @@ ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
 
 ```{r}
 # and now a clinical risk group
-
-
 # only in clinical range
 df <- data.frame(
-  p = apply(PFits[, -(1:Pbc)], 1, median),
-  Internal = apply(IFits[, -(1:Ibc)], 1, median),
-  External = apply(EFits[, -(1:Ebc)], 1, median),
-  Somatic = apply(SomFits[, -(1:SomBc)], 1, median),
-  AnxDepr = apply(AnxFits[, -(1:AnxBc)], 1, median),
-  Thought = apply(ThoFits[, -(1:ThoBc)], 1, median),
-  WithDepr = apply(WitFits[, -(1:WitBc)], 1, median),
-  Social = apply(SocFits[, -(1:SocBc)], 1, median),
-  Attn = apply(AttFits[, -(1:AttBc)], 1, median),
-  Rules = apply(RulFits[, -(1:AttBc)], 1, median),
-  Aggr = apply(AggFits[, -(1:AggBc)], 1, median)
+  p = apply(PFits[, (MaxP/1.5):MaxP], 1, median),
+  Internal = apply(IFits[, (MaxI/1.5):MaxI], 1, median),
+  External = apply(EFits[, (MaxE/1.5):MaxE], 1, median),
+  Somatic = apply(SomFits[, (MaxSom/1.5):MaxSom], 1, median),
+  AnxDepr = apply(AnxFits[, (MaxAnx/1.5):MaxAnx], 1, median),
+  Thought = apply(ThoFits[, (MaxTho/1.5):MaxTho], 1, median),
+  WithDepr = apply(WitFits[, (MaxWit/1.5):MaxWit], 1, median),
+  Social = apply(SocFits[, (MaxSoc/1.5):MaxSoc], 1, median),
+  Attn = apply(AttFits[, (MaxAtt/1.5):MaxAtt], 1, median),
+  Rules = apply(RulFits[, (MaxRul/1.5):MaxRul], 1, median),
+  Aggr = apply(AggFits[, (MaxAgg/1.5):MaxAgg], 1, median)
 )
 
 # Convert the data frame to a tidy format
-df_tidy <- df %>%
+df_tidy2 <- df %>%
   gather(key = "Subscale", value = "MedianValue")
 
 # Calculate the median for each subscale iteration
-df_median <- df_tidy %>%
+df_median <- df_tidy2 %>%
   group_by(Subscale) %>%
   summarize(MedianIteration = median(MedianValue))
 
 # Join the MedianIteration column to df_tidy based on Subscale
-df_tidy <- left_join(df_tidy, df_median, by = "Subscale")
+df_tidy2 <- left_join(df_tidy2, df_median, by = "Subscale")
 
-df_tidy$Subscale <- reorder(df_tidy$Subscale, -df_tidy$MedianValue, median)
+# note we are sorting by plot one's order
+df_tidy2$Subscale <- reorder(df_tidy2$Subscale, -df_tidy$MedianValue, median)
 
 # Create the boxplot
-ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
+ggplot(df_tidy2, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
   geom_boxplot() +
-  labs(title = "Median Association with Cognitive Score: Clinical Range",
+  labs(title = "Median Association with Cognitive Score: Clinical Tertile",
        x = "Subscale",
        y = "Median Slope") +
   theme_minimal(base_size=20)+scale_fill_gradientn(
