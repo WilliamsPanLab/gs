@@ -1,4 +1,4 @@
-# Figure 1: Non-linear fits to asr (adult self report, parental) subscales
+# Figure 2: Non-linear fits to asr (adult self report, parental) subscales
 
 Here, the goal is to submit 10k iterations of non-linear fits of g to parental mental health subscales subscales on sherlock (our computing cluser, slurm-based). So we'll take masterdf from the sample construction step and run 10,000 [bootstraps](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)) to gauge model consistency over different permutations of participants. Because we have repeated measures (2x), we need to take care to remove entire participants for each bootstrap, not just observations.
 
