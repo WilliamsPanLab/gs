@@ -2,7 +2,7 @@
 
 Here, the goal is to submit 10k iterations of non-linear fits of g to cbcl subscales on sherlock (our computing cluser, slurm-based). So we'll take masterdf from the sample construction step and run 10,000 [bootstraps](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)) to gauge model consistency over different permutations of participants. Because we have repeated measures (2x), we need to take care to remove entire participants for each bootstrap, not just observations.
 
-These analyses take place over three scripts: sample construction (done already), [Fig2_Boots_xSectional.R](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/Fig2_Boots_xSectional.R), and then plotting the values derived from the bootstrapping ([Fig1.Rmd](https://github.com/WilliamsPanLab/gp/blob/master/Figures/code/Fig1.Rmd))
+These analyses take place over three scripts: sample construction (done already), [Fig1_Boots.R](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/Fig1_Boots.R), and then plotting the values derived from the bootstrapping ([Fig1.Rmd](https://github.com/WilliamsPanLab/gp/blob/master/Figures/code/Fig1.Rmd))
 
 ## Bootstrapping/computational steps (assuming sample construction is done)
 
