@@ -985,14 +985,17 @@ ggplot(boysPoor, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
 DevExpl=readRDS('~/Desktop/g_p/F3-5DevExpl.rds')
 DevExpl_L=readRDS('~/Desktop/g_p/F3-5DevExpl_longit.rds')
 DevExpl_L_Relative=DevExpl_L-DevExpl_L[,1]
+DevExpl=DevExpl[,c(1,3,4,6)]
 DevExpl_L_Relative=DevExpl_L_Relative[,c(2,4,5,7)]
 
 df_long <- reshape2::melt(DevExpl)
+custom_labels <- c(expression(italic(g)), "Grades", expression(paste(italic(g), " + Parental ", italic("p"))),expression(paste("Grades + Parental ", italic("p"))))
 # Create the boxplot
 ggplot(df_long, aes(x = variable, y = value)) +
   geom_boxplot() +
   xlab("Variables") +
-  ylab("Deviance Explained") + theme_minimal()
+  scale_x_discrete(labels = custom_labels) +
+  ylab("Cross-sectional Deviance Explained") + theme_minimal(base_size=24)
 
 # now for longitudinal variables
 custom_labels <- c(expression(italic(g)), "Grades", expression(paste(italic(g), " + Parental ", italic("p"))),expression(paste("Grades + Parental ", italic("p"))))
