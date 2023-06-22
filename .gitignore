@@ -1,3 +1,4 @@
+FunctionalImages/*
 *.mat
 slurm*.err
 slurm*.out
