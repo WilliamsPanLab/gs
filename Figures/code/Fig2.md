@@ -1,24 +1,69 @@
----
-title: "Figure1"
-output: github_document
-date: "2023-06-09"
----
+Figure1
+================
+2023-06-09
 
-```{r}
+``` r
 # load libraries
 library(ggplot2)
 library(hexbin)
 library(rgl)
+```
+
+    ## Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display
+
+    ## Warning: 'rgl.init' failed, running with 'rgl.useNULL = TRUE'.
+
+``` r
 library(shapes)
 library(reshape2)
 library(viridis)
+```
+
+    ## Loading required package: viridisLite
+
+``` r
 library(dplyr)
+```
+
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+``` r
 library(mgcv)
+```
+
+    ## Loading required package: nlme
+
+    ## 
+    ## Attaching package: 'nlme'
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     collapse
+
+    ## This is mgcv 1.8-42. For overview type 'help("mgcv-package")'.
+
+``` r
 library(ggExtra)
 library(tidyr)
 ```
 
-```{r}
+    ## 
+    ## Attaching package: 'tidyr'
+
+    ## The following object is masked from 'package:reshape2':
+    ## 
+    ##     smiths
+
+``` r
 plot_bootstraps_par <- function(data,maxval,Name,maxValuePlot) {
   # Melt the data frame
   data_melt <- melt(t(data))
@@ -99,7 +144,7 @@ find_furthest_nonzero <- function(data) {
 my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1c", "#a80009"))
 ```
 
-```{r}
+``` r
 # master df from sample construction
 masterdf=readRDS('~/gp_masterdf.rds')
 # reference dataframe
@@ -122,11 +167,51 @@ basic=ggplot(data = plotdf,aes(y = cbcl_scr_syn_totprob_r, x = parentPcount)) + 
     geom_hline(yintercept = 65.65574, linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
     scale_x_continuous(limits = c(0,135),expand = expansion(mult = c(0, 0)))+guides(fill=FALSE)
+```
+
+    ## Warning: The `size` argument of `element_rect()` is deprecated as of ggplot2 3.4.0.
+    ## ℹ Please use the `linewidth` argument instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: The `<scale>` argument of `guides()` cannot be `FALSE`. Use "none" instead as
+    ## of ggplot2 3.3.4.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 ggMarginal(basic,type="histogram",size=3,binwidth=4,fill="gray")
+```
+
+    ## Warning: Removed 15 rows containing non-finite values (`stat_binhex()`).
+
+    ## Warning: Removed 15 rows containing non-finite values (`stat_binhex()`).
+
+    ## Warning: Removed 35 rows containing missing values (`geom_hex()`).
+
+    ## Warning: Removed 15 rows containing missing values (`geom_point()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+``` r
 print(cor.test(masterdf$parentPcount,masterdf$cbcl_scr_syn_totprob_r))
 ```
 
-```{r}
+    ## 
+    ##  Pearson's product-moment correlation
+    ## 
+    ## data:  masterdf$parentPcount and masterdf$cbcl_scr_syn_totprob_r
+    ## t = 67.24, df = 9562, p-value < 2.2e-16
+    ## alternative hypothesis: true correlation is not equal to 0
+    ## 95 percent confidence interval:
+    ##  0.5528383 0.5800571
+    ## sample estimates:
+    ##       cor 
+    ## 0.5666022
+
+``` r
 ### P boots plot with overlaid linear fit
 # load in data
 Fits=readRDS('~/Desktop/g_p/gParentpFitBoots.rds')
@@ -139,6 +224,30 @@ data_melt$Var1 <- rep(seq(1, 160), nrow(PFits))
 # Calculate percentiles
 percentiles <- PFits %>%
 summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
+```
+
+    ## Warning: There was 1 warning in `summarise()`.
+    ## ℹ In argument: `across(everything(), quantile, probs = c(0.01, 0.99), na.rm =
+    ##   TRUE)`.
+    ## Caused by warning:
+    ## ! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
+    ## Supply arguments directly to `.fns` through an anonymous function instead.
+    ## 
+    ##   # Previously
+    ##   across(a:b, mean, na.rm = TRUE)
+    ## 
+    ##   # Now
+    ##   across(a:b, \(x) mean(x, na.rm = TRUE))
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_to = "Percentile", values_to = "YValue")
 
 # Add CI column
@@ -163,11 +272,20 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
   ylab(y_title)+xlab(x_title)+
   theme(panel.border = element_rect(color = "black", fill = NA, size = 1)) +
   scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
-
 ```
 
+    ## Warning: Removed 250050 rows containing missing values (`geom_line()`).
 
-```{r}
+    ## Warning: The `guide` argument in `scale_*()` cannot be `FALSE`. This was deprecated in
+    ## ggplot2 3.3.4.
+    ## ℹ Please use "none" instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+![](Fig2_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+``` r
 # load in data: 10,000 only done for p
 Fits=readRDS('~/Desktop/g_p/gParentpDerivBoots.rds')
 PFits=Fits[,481:640]
@@ -190,9 +308,53 @@ MaxE=find_furthest_nonzero(EFits)
 
 # actually plot em
 plot_bootstraps_par(PFits,160,x_title,MaxP)
+```
 
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 250050 rows containing missing values (`geom_line()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+``` r
 plot_bootstraps_par(IFits,30,'Parental Internalizing',MaxI)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 5010 rows containing missing values (`geom_line()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+
+``` r
 plot_bootstraps_par(EFits,63,'Parental Externalizing',MaxE)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 17034 rows containing missing values (`geom_line()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
+
+``` r
 #plot_bootstraps_par(AnxFits,31,'anx.depr.',MaxAnx)
 #plot_bootstraps(ThoFits,18,'thought',MaxTho,ThoBc,ThoC)
 #plot_bootstraps(WitFits,16,'withdrawn',MaxWit,WitBc,WitC)
@@ -214,7 +376,7 @@ MaxRul=find_furthest_nonzero(RulFits)
 MaxAgg=find_furthest_nonzero(AggFits)
 ```
 
-```{r}
+``` r
 # load in data
 Fits=readRDS('~/Desktop/g_p/gpDerivBoots_asr.rds')
 # find mean shape and plot it: p
@@ -251,7 +413,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
+```
 
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
+
+    ## Warning: Removed 26 rows containing missing values (`geom_raster()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+``` r
 # and a version with colorbar - for p only (same color mapping using throughout)
 dervPlotDf$Slope=dervPlotDf$sig_deriv
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
@@ -262,6 +433,18 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
     scale_x_continuous(limits = c(0,113),expand = expansion(mult = c(0, 0)))
+```
+
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
+
+    ## Warning: Removed 48 rows containing missing values (`geom_raster()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+
+``` r
 # for int
 # get straightfoward of segment where 99% is over 0 or under
 positive_counts <- colSums(IFits > 0, na.rm = TRUE)
@@ -285,7 +468,13 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxI),expand = expansion(mult = c(0, 0)))
+```
 
+    ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+
+``` r
 # for ext
 # get straightfoward of segment where 99% is over 0 or under
 positive_counts <- colSums(EFits > 0, na.rm = TRUE)
@@ -309,7 +498,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxE),expand = expansion(mult = c(0, 0)))
+```
 
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
+
+    ## Warning: Removed 18 rows containing missing values (`geom_raster()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
+
+``` r
 # for som
 # get straightfoward of segment where 99% is over 0 or under
 positive_counts <- colSums(SomFits > 0, na.rm = TRUE)
@@ -333,7 +531,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxSom),expand = expansion(mult = c(0, 0)))
+```
 
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
+
+    ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->
+
+``` r
 # for anx
 positive_counts <- colSums(AnxFits > 0, na.rm = TRUE)
 negative_counts <- colSums(AnxFits < 0, na.rm = TRUE)
@@ -352,6 +559,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxAnx),expand = expansion(mult = c(0, 0)))
+```
+
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
+
+    ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-6.png)<!-- -->
+
+``` r
 # for Tho
 positive_counts <- colSums(ThoFits > 0, na.rm = TRUE)
 negative_counts <- colSums(ThoFits < 0, na.rm = TRUE)
@@ -370,7 +587,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxTho),expand = expansion(mult = c(0, 0)))
+```
 
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
+
+    ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-7.png)<!-- -->
+
+``` r
 # for Wit
 positive_counts <- colSums(WitFits > 0, na.rm = TRUE)
 negative_counts <- colSums(WitFits < 0, na.rm = TRUE)
@@ -388,7 +614,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
+```
 
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
+
+    ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-8.png)<!-- -->
+
+``` r
 # for Att
 positive_counts <- colSums(AttFits > 0, na.rm = TRUE)
 negative_counts <- colSums(AttFits < 0, na.rm = TRUE)
@@ -406,7 +641,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxAtt),expand = expansion(mult = c(0, 0)))
+```
 
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
+
+    ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-9.png)<!-- -->
+
+``` r
 # for Rul
 positive_counts <- colSums(RulFits > 0, na.rm = TRUE)
 negative_counts <- colSums(RulFits < 0, na.rm = TRUE)
@@ -424,7 +668,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(breaks=c(0,3,6,9,12),limits = c(0,MaxRul),expand = expansion(mult = c(0, 0)))
+```
 
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
+
+    ## Warning: Removed 8 rows containing missing values (`geom_raster()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-10.png)<!-- -->
+
+``` r
 # for Agg
 positive_counts <- colSums(AggFits > 0, na.rm = TRUE)
 negative_counts <- colSums(AggFits < 0, na.rm = TRUE)
@@ -442,13 +695,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxAgg),expand = expansion(mult = c(0, 0)))
-
-
-
 ```
 
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
 
-```{r}
+    ## Warning: Removed 12 rows containing missing values (`geom_raster()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-11.png)<!-- -->
+
+``` r
 # for each bootstrap, recover median slope
 df <- data.frame(
   p = apply(PFits[, 1:MaxP], 1, median),
@@ -464,7 +720,13 @@ df <- data.frame(
   Rules = apply(RulFits[, 1:MaxRul], 1, median),
   Aggr = apply(AggFits[, 1:MaxAgg], 1, median)
 )
+```
 
+    ## Warning in data.frame(p = apply(PFits[, 1:MaxP], 1, median), Internal =
+    ## apply(IFits[, : row names were found from a short variable and have been
+    ## discarded
+
+``` r
 # Convert the data frame to a tidy format
 df_tidy <- df %>%
   gather(key = "Subscale", value = "MedianValue")
@@ -488,5 +750,6 @@ ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
   theme_minimal(base_size=20)+scale_fill_gradientn(
     colors = my_palette(100),
     limits = c(-.27,.27))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
-
 ```
+
+![](Fig2_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
