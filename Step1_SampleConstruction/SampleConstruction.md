@@ -56,18 +56,23 @@ masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_internal_r),]
 masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_internal_r),]
 masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_external_r),]
 masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_external_r),]
-# calculate remaining subjs
-cbclSubjs=length(unique(masterdf$subjectkey))
+
 # initialize included subjects df
 includedSubjects=data.frame(unique(masterdf$subjectkey))
 colnames(includedSubjects)<-'subj'
 includedSubjects$cbclInclude=1
 
-
 # check for completeness at both timepoints- subset those timepoints
 masterdf=masterdf[masterdf$eventname!='1_year_follow_up_y_arm_1',]
 masterdf=masterdf[masterdf$eventname!='3_year_follow_up_y_arm_1',]
+# calculate remaining subjs
+cbclSubjs=length(unique(masterdf$subjectkey))
+length(unique(masterdf$subjectkey))
+```
 
+    ## [1] 11827
+
+``` r
 # get other vars of interest to check for complete cases
 KidVarsOfInt=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r')
 
@@ -221,11 +226,11 @@ masterdf=masterdf[masterdf$subjectkey %in% subjs,]
 
 # full losses counted after asr count chunk, but note one participant is probably lost here just from merge
 asrSubjs=length(unique(masterdf$subjectkey))
-dif=cbclSubjsBoth-asrSubjs
+dif=gradesSubjs-asrSubjs
 print(paste0(dif,' participants lost from needing ASR at both timepoints'))
 ```
 
-    ## [1] "716 participants lost from needing ASR at both timepoints"
+    ## [1] "1 participants lost from needing ASR at both timepoints"
 
 ``` r
 # included subjs df
@@ -402,16 +407,10 @@ for (s in subjs){
 # convert masterdf to df with complete observations for cognition
 masterdf=masterdf[masterdf$subjectkey %in% subjs,]
 newList4=length(unique(masterdf$subjectkey))
-print(paste0(newList4,' after retaining only subjs with Cognitive vars of int at BOTH timepoints, ',(newList3- newList4),' lost after removing'))
+print(paste0(newList4,' after retaining only subjs with Cognitive vars of interest at BOTH timepoints, ',(newList3- newList4),' lost after removing'))
 ```
 
-    ## [1] "5994 after retaining only subjs with Cognitive vars of int at BOTH timepoints, 1352 lost after removing"
-
-``` r
-print(dim(masterdf))
-```
-
-    ## [1] 11988   592
+    ## [1] "5994 after retaining only subjs with Cognitive vars of interest at BOTH timepoints, 1352 lost after removing"
 
 ``` r
 # populated included subjs df
