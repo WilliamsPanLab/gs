@@ -582,18 +582,27 @@ raceEth=participantsTSV$race_ethnicity
 subjectsInPtsv=participantsTSV$subjectkey
 infoDf=data.frame(raceEth,subjectsInPtsv)
 colnames(infoDf)<-c('RaceEthn','subj')
-test=merge(plotdf,infoDf,by='subj')
+plotdf2=merge(plotdf,infoDf,by='subj')
 # overwrite race with "empty" if missing after each checkpoint
-test$RaceEthn<-factor(test$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
-test$RaceEthn[test$value==0]="Missing"
+plotdf2$RaceEthn<-factor(plotdf2$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
+plotdf2$RaceEthn[plotdf2$value==0]="Missing"
+alph_order <- c("Asian", "Black", "Hispanic", "Missing", "Other", "White")
 
-my_colors <- c("red", "orange", "yellow", "green", "blue", "gray")
+# preset some color
+my_colors <- c("red", "orange", "blue", "gray", "green","yellow")
 
-ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
-  geom_stratum(aes(fill = RaceEthn)) +
-  geom_flow(aes(fill = RaceEthn)) +
-  scale_fill_manual(values = my_colors) +
-  theme_bw(base_size = 30)+xlab('')
+# preset x-axis names
+x_labs=c("CBCL (both timepoints)", "Grades","Grades (both)","ASR (both)","ACS","Cognitive data (both)","One sibling per family","ABCC")
+
+#
+ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
+  geom_stratum(aes(fill = factor(RaceEthn, levels = alph_order))) +
+  geom_flow(aes(fill = factor(RaceEthn, levels = alph_order))) +
+  scale_fill_manual(values = my_colors, breaks = alph_order) +
+  theme_bw(base_size = 28) + 
+  labs(y = "Children", fill = "Race/Ethnicity", title = "Alluvial Consort Chart") +
+  scale_x_discrete(labels = x_labs) +
+  theme(axis.title.x = element_blank())
 
 
 ```
@@ -604,9 +613,9 @@ ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # can overlay two pie charts: starting raceEth Comp and Ending. Tuck into area that is pink now
-startingdf=test[test$variable=='cbclInclude',]
+startingdf=plotdf2[plotdf2$variable=='cbclInclude',]
 startingdf=startingdf[startingdf$value==1,]
-endingdf=test[test$variable=='pTSV',]
+endingdf=plotdf2[plotdf2$variable=='pTSV',]
 endingdf=endingdf[endingdf$value==1,]
 # now tabulate them to get in proper plotting format
 startingdfTab=tabulate(startingdf$RaceEthn)
@@ -614,25 +623,29 @@ endingdfTab=tabulate(endingdf$RaceEthn)
 # starting df: adding 0 for placeholder for missing category (consistent coloration)
 startingdf=data.frame(c(startingdfTab,0),factor(c("White","Black","Hispanic","Asian","Other","Missing"),levels=c("White","Black","Hispanic","Asian","Other","Missing")))
 colnames(startingdf)<-c('value','RaceEthnicity')
-ggplot(startingdf, aes(x="", y=value, fill=RaceEthnicity)) +
+
+# now make color assignment equivalent
+
+ggplot(startingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_order))) +
   geom_bar(stat="identity", width=1) +
   coord_polar("y", start=0)+ggtitle('Before Exclusions')+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         panel.grid  = element_blank(),panel.background = element_blank(),
         plot.title = element_text(size = 30),
-        legend.text = element_text(size=30),legend.title = element_text(size=30))+scale_fill_manual(values = my_colors)
+        legend.text = element_text(size=30),legend.title = element_blank())+scale_fill_manual(values = my_colors)
+
 # plot df is both with race labels
 endingdf=data.frame(c(endingdfTab,0),factor(c("White","Black","Hispanic","Asian","Other","Missing"),levels=c("White","Black","Hispanic","Asian","Other","Missing")))
 colnames(endingdf)<-c('value','RaceEthnicity')
-ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
+ggplot(endingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_order))) +
   geom_bar(stat="identity", width=1) +
   coord_polar("y", start=0)+ggtitle('After Exclusions')+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         panel.grid  = element_blank(),panel.background = element_blank(),
         plot.title = element_text(size = 30),
-        legend.text = element_text(size=30),legend.title = element_text(size=30))+scale_fill_manual(values = my_colors)
+        legend.text = element_text(size=30),legend.title = element_blank())+scale_fill_manual(values = my_colors)
 ```
 
 
@@ -706,18 +719,28 @@ raceEth=participantsTSV$race_ethnicity
 subjectsInPtsv=participantsTSV$subjectkey
 infoDf=data.frame(raceEth,subjectsInPtsv)
 colnames(infoDf)<-c('RaceEthn','subj')
-test=merge(plotdf,infoDf,by='subj')
+plotdf2=merge(plotdf,infoDf,by='subj')
 # overwrite race with "empty" if missing after each checkpoint
-test$RaceEthn<-factor(test$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
-test$RaceEthn[test$value==0]="Missing"
+plotdf2$RaceEthn<-factor(plotdf2$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
+plotdf2$RaceEthn[plotdf2$value==0]="Missing"
+alph_order <- c("Asian", "Black", "Hispanic", "Missing", "Other", "White")
 
-my_colors <- c("red", "orange", "yellow", "green", "blue", "gray")
+# preset some color
+my_colors <- c("red", "orange", "blue", "gray", "green","yellow")
 
-ggplot(test, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
-  geom_stratum(aes(fill = RaceEthn)) +
-  geom_flow(aes(fill = RaceEthn)) +
-  scale_fill_manual(values = my_colors) +
-  theme_bw(base_size = 35)
+# preset x-axis names
+x_labs=c("CBCL (both timepoints)", "Grades","Grades (both)","ASR (both)","ACS","Cognitive data (both)","One sibling per family","ABCC","Child SR")
+
+#
+ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
+  geom_stratum(aes(fill = factor(RaceEthn, levels = alph_order))) +
+  geom_flow(aes(fill = factor(RaceEthn, levels = alph_order))) +
+  scale_fill_manual(values = my_colors, breaks = alph_order) +
+  theme_bw(base_size = 27) + 
+  labs(y = "Children", fill = "Race/Ethnicity", title = "Alluvial Consort Chart") +
+  scale_x_discrete(labels = x_labs) +
+  theme(axis.title.x = element_blank())
+
 
 #########################
 #########################

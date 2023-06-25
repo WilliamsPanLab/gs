@@ -736,9 +736,9 @@ paste0(participantsTSVSubjs,' remain')
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # can overlay two pie charts: starting raceEth Comp and Ending. Tuck into area that is pink now
-startingdf=test[test$variable=='cbclInclude',]
+startingdf=plotdf2[plotdf2$variable=='cbclInclude',]
 startingdf=startingdf[startingdf$value==1,]
-endingdf=test[test$variable=='pTSV',]
+endingdf=plotdf2[plotdf2$variable=='pTSV',]
 endingdf=endingdf[endingdf$value==1,]
 # now tabulate them to get in proper plotting format
 startingdfTab=tabulate(startingdf$RaceEthn)
@@ -746,14 +746,17 @@ endingdfTab=tabulate(endingdf$RaceEthn)
 # starting df: adding 0 for placeholder for missing category (consistent coloration)
 startingdf=data.frame(c(startingdfTab,0),factor(c("White","Black","Hispanic","Asian","Other","Missing"),levels=c("White","Black","Hispanic","Asian","Other","Missing")))
 colnames(startingdf)<-c('value','RaceEthnicity')
-ggplot(startingdf, aes(x="", y=value, fill=RaceEthnicity)) +
+
+# now make color assignment equivalent
+
+ggplot(startingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_order))) +
   geom_bar(stat="identity", width=1) +
   coord_polar("y", start=0)+ggtitle('Before Exclusions')+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         panel.grid  = element_blank(),panel.background = element_blank(),
         plot.title = element_text(size = 30),
-        legend.text = element_text(size=30),legend.title = element_text(size=30))+scale_fill_manual(values = my_colors)
+        legend.text = element_text(size=30),legend.title = element_blank())+scale_fill_manual(values = my_colors)
 ```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
@@ -762,14 +765,14 @@ ggplot(startingdf, aes(x="", y=value, fill=RaceEthnicity)) +
 # plot df is both with race labels
 endingdf=data.frame(c(endingdfTab,0),factor(c("White","Black","Hispanic","Asian","Other","Missing"),levels=c("White","Black","Hispanic","Asian","Other","Missing")))
 colnames(endingdf)<-c('value','RaceEthnicity')
-ggplot(endingdf, aes(x="", y=value, fill=RaceEthnicity)) +
+ggplot(endingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_order))) +
   geom_bar(stat="identity", width=1) +
   coord_polar("y", start=0)+ggtitle('After Exclusions')+
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(),
         panel.grid  = element_blank(),panel.background = element_blank(),
         plot.title = element_text(size = 30),
-        legend.text = element_text(size=30),legend.title = element_text(size=30))+scale_fill_manual(values = my_colors)
+        legend.text = element_text(size=30),legend.title = element_blank())+scale_fill_manual(values = my_colors)
 ```
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
