@@ -610,3 +610,27 @@ ggplot(df_tidy2, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
     limits = c(-.27,.27))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.25,.25))
 
 ```
+
+```{r}
+# proof-of-concept g~p linear in healthy and clincal range
+masterdf=readRDS('~/gp_masterdf.rds')
+healthy=masterdf[masterdf$cbcl_scr_syn_totprob_r<15,]
+clin=masterdf[masterdf$cbcl_scr_syn_totprob_r>60,]
+# reference linear model
+plotdf<-data.frame(clin$parentPcount,clin$g,clin$cbcl_scr_syn_totprob_r,clin$interview_age)
+colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
+modelforresids<-gam(g~s(interview_age),data=plotdf)
+plotdf$resids<-modelforresids$residuals
+
+ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=20)+
+    geom_point(alpha=0)+
+    geom_smooth(method = "lm",formula = y~x,color='gray') +
+    scale_fill_viridis_c(option = "inferno") +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    geom_vline(xintercept = 60.225, linetype = "dashed")+
+    geom_vline(xintercept = 65.65574, linetype = "dashed")+
+    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
+    scale_x_continuous(limits = c(60,113),expand = expansion(mult = c(0, 0)))
+
+```
