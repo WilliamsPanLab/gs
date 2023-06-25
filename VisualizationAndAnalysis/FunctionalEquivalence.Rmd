@@ -11,6 +11,7 @@ date: "2023-02-10"
 ```
 
 ```{r}
+library(nortest)
 # load in masterdf
 masterdf=readRDS('~/gp_masterdf.rds')
 ```
@@ -57,9 +58,11 @@ compareG_df$neurocog_pc1.bl<-as.numeric(compareG_df$neurocog_pc1.bl)
 print(cor.test(compareG_df$g,compareG_df$neurocog_pc1.bl))
 library(ggplot2)
 plotdf<-compareG_df[,c('g','neurocog_pc1.bl')]
-ComparePlot<-ggplot(data=plotdf,aes(x=g,y=neurocog_pc1.bl))+geom_smooth(method='lm',color='black')+geom_point(alpha=.05)+theme_classic()
-ComparePlot
 
+y_title <- expression(paste(italic("g")," (pca-derived)"))
+x_title <- expression(paste(italic("g")," (bayesian pca-derived)"))
+
+ggplot(data=plotdf,aes(x=g,y=neurocog_pc1.bl))+geom_smooth(method='lm',color='black')+geom_point(alpha=.05)+theme_classic(base_size=30)+ylab(y_title)+xlab(x_title)
 ### Can add cormat among loadings for all 3 components it looks like they are functionally equivalent all the way down
 ```
 
@@ -192,12 +195,17 @@ y.pca$loadings
 subjPvalues=data.frame(pcaDf_p_CompleteSubjs,pcaDf_p_CompleteEventNames,y.pca$scores[,1])
 colnames(subjPvalues)<-c('subjectkey','eventname','p')
 
-# compare 'em!
+# compare 'em
 testEquivDf=merge(masterdf,subjPvalues,by=c('subjectkey','eventname'))
 print(cor.test(testEquivDf$p,testEquivDf$cbcl_scr_syn_totprob_r))
 
 plotdf<-testEquivDf[,c('p','cbcl_scr_syn_totprob_r')]
-ComparePlot<-ggplot(data=plotdf,aes(x=p,y=cbcl_scr_syn_totprob_r))+geom_smooth(method='lm',col='black')+geom_point(alpha=.05)+theme_classic()
+
+# make axix labels
+y_title <- expression(paste(italic("p")," (symptom count)"))
+x_title <- expression(paste(italic("p")," (pca-derived)"))
+
+ComparePlot<-ggplot(data=plotdf,aes(x=p,y=cbcl_scr_syn_totprob_r))+geom_smooth(method='lm',col='black')+geom_point(alpha=.05)+theme_classic(base_size=30)+ylab(y_title)+xlab(x_title)
 ComparePlot
 ```
 
@@ -366,4 +374,12 @@ print(cor.test(OutDF$parentP,OutDF$parentPcount))
 plotdf<-OutDF[,c('parentP','parentPcount')]
 ComparePlot<-ggplot(data=plotdf,aes(x=parentPcount,y=parentP))+geom_smooth(method='lm',col='black')+geom_point(alpha=.05)+theme_classic()
 ComparePlot
+```
+
+```{r}
+### quick lilliefors test to demonstrate non-normality of psychopathology variables
+# BV
+lillie.test(OutDFBV$cbcl_scr_syn_totprob_r)
+# 2y
+lillie.test(OutDF2Y$cbcl_scr_syn_totprob_r)
 ```
