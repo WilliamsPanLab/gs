@@ -612,7 +612,7 @@ ggplot(df_tidy2, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
 ```
 
 ```{r}
-# proof-of-concept g~p linear in healthy and clincal range
+# proof-of-concept g~p linear in healthy and clinical range
 masterdf=readRDS('~/gp_masterdf.rds')
 healthy=masterdf[masterdf$cbcl_scr_syn_totprob_r<15,]
 clin=masterdf[masterdf$cbcl_scr_syn_totprob_r>60,]
@@ -633,4 +633,28 @@ ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bin
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
     scale_x_continuous(limits = c(60,113),expand = expansion(mult = c(0, 0)))
 
+```
+
+```{r}
+# each subscale for supplementary figures
+# load in data
+Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
+# find mean shape and plot it: p
+SomFits=Fits[,226:238]
+AnxFits=Fits[,239:263]
+ThoFits=Fits[,264:281]
+WitFits=Fits[,282:297]
+SocFits=Fits[,298:314]
+AttFits=Fits[,315:333]
+RulFits=Fits[,334:351]
+AggFits=Fits[,352:383]
+# actually plot em
+plot_bootstraps(SomFits,13,"Somatic",MaxSom,SomBc,SomC)
+plot_bootstraps(AnxFits,25,'Anxious Depression',MaxAnx,AnxBc,AnxC)
+plot_bootstraps(ThoFits,18,'Thought',MaxTho,ThoBc,ThoC)
+plot_bootstraps(WitFits,16,"Withdrawn Depression",MaxWit,WitBc,WitC)
+plot_bootstraps(SocFits,17,'Social',MaxSoc,SocBc,SocC)
+plot_bootstraps(AttFits,19,'Attention',MaxAtt,AttBc,AttC)
+plot_bootstraps(RulFits,18,'Rule Breaking',MaxRul,RulBc,RulC)
+plot_bootstraps(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
 ```
