@@ -1,5 +1,5 @@
 ---
-title: "FIgure2"
+title: "Figure3"
 output: github_document
 date: "2023-05-06"
 ---
@@ -990,12 +990,12 @@ DevExpl_L_Relative=DevExpl_L_Relative[,c(2,4,5,7)]
 
 df_long <- reshape2::melt(DevExpl)
 custom_labels <- c(expression(italic(g)), "Grades", expression(paste(italic(g), " + Parental ", italic("p"))),expression(paste("Grades + Parental ", italic("p"))))
-# Create the boxplot
+# Create the boxplot - 1350 x 800 dimensions
 ggplot(df_long, aes(x = variable, y = value)) +
   geom_boxplot() +
   xlab("Variables") +
   scale_x_discrete(labels = custom_labels) +
-  ylab("Cross-sectional Deviance Explained") + theme_minimal(base_size=24)
+  ylab("Cross-sectional Deviance Explained") + theme_minimal(base_size=30)
 
 # now for longitudinal variables
 custom_labels <- c(expression(italic(g)), "Grades", expression(paste(italic(g), " + Parental ", italic("p"))),expression(paste("Grades + Parental ", italic("p"))))
@@ -1005,10 +1005,45 @@ ggplot(df_long, aes(x = variable, y = value)) +
   geom_boxplot() +
   xlab("Variables") +
   scale_x_discrete(labels = custom_labels) +
-  ylab("Longitudinal Deviance Explained") + theme_minimal(base_size=24)
+  ylab("Longitudinal Deviance Explained") + theme_minimal(base_size=30)
 ```
 
+```{r}
+# SUPPLEMENT
 
+# grades plots from master df
+grade_levels <- c(5, 4, 3, 2, 1)
+grade_labels <- c("F", "Failing", "C", "B", "A")
+masterdf$plotGrades<-factor(masterdf$Grades, levels = grade_levels, labels = grade_labels)
+masterdf$plotGrades[masterdf$plotGrades=="F"]="Failing"
+plotdf=masterdf[,c('plotGrades','g')]
+### supplementary grades fig
+ggplot(plotdf, aes(x = g, y = plotGrades)) +
+  geom_boxplot() +
+  labs(title = "All Children",
+       x = expression(italic(g)),
+       y = "Grades")+theme_minimal(base_size=25)+xlim(-4,4.6)
+
+# poverty plots from master df
+masterdf$income<-as.numeric(masterdf$income)
+# note that poverty is defined as income < 5: https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups
+masterdf$poverty=0
+masterdf$poverty[masterdf$income<5]=1
+masterdf$poverty=as.ordered(masterdf$poverty)
+pov_labels <- c("Above Poverty Line", "Below")
+masterdf$poverty<-factor(masterdf$poverty, labels = pov_labels)
+# for cats probably not needed
+library(forcats)
+masterdf$poverty <- fct_relevel(masterdf$poverty, "Below")
+plotdf=masterdf[,c('poverty','cbcl_scr_syn_totprob_r')]
+### supplementary grades fig
+ggplot(plotdf, aes(x = cbcl_scr_syn_totprob_r, y = poverty)) +
+  geom_boxplot() +
+  labs(title = "All Children",
+       x = expression(italic(p)),
+       y = "Parental Income")+theme_minimal(base_size=25)
+
+```
 
 
 
@@ -1021,7 +1056,7 @@ ggplot(df_long, aes(x = variable, y = value)) +
 #### TEMPORAL PRECEDENCE TABLE
 library(mgcv)
 # load temporal precedence data from SampleConstruction.Rmd
-tpdf=OutDFTmpPrec
+tpdf=readRDS('~/OutDFTmpPrec.rds')
 
 ```
 

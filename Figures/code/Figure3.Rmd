@@ -171,3 +171,4 @@ ggplot(new_data, aes(x = cbcl_scr_syn_external_r, y = predicted, color = interac
   labs(x = "cbcl_scr_syn_external_r", y = "Predicted Value")+theme_minimal()+xlim(c(0,40))
 
 ```
+
