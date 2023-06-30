@@ -777,23 +777,9 @@ ggplot(endingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_o
 
 ![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
 
-    ## Warning: NAs introduced by coercion
-
-    ## Warning in merge.data.frame(masterdf, ksads_y_rem, by = c("subjectkey", :
-    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
-    ## 'interview_date.y', 'collection_title.y', 'collection_id.x', 'dataset_id.x',
-    ## 'src_subject_id.y', 'interview_date.x', 'collection_title.x',
-    ## 'collection_id.y', 'dataset_id.y', 'src_subject_id.x', 'interview_date.y',
-    ## 'collection_title.y', 'src_subject_id.y' are duplicated in the result
-
-    ## Using subj as id variables
-
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
-
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-#### Chunk 16 prepares data for analysis of temporal precedence ##
+#### Chunk 15 prepares data for analysis of temporal precedence ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
 variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','Grades','pc2','pc3','income','sex','race_ethnicity','matched_group','eventname')
 # eliminate rows with NAs and ensure none without two-timepoint data
