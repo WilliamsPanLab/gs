@@ -1,5 +1,5 @@
 # read in master df and calculate deviance in g explained by cbcl scales vs asr scales
-libray(mgcv)
+library(mgcv)
 
 # load in data
 masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/gp_masterdf.rds')
@@ -11,7 +11,7 @@ dim(masterdf)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up # add cbcl subscales
-masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','parentPcount','g','subjectkey','interview_age','sex','income','Grades','pc2','pc3')]
+masterdf=masterdf[,c('parentPcount','cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRIntrusive','ASRRulB','ASRInt','ASRExt','g','subjectkey','interview_age')]
 # get length of df for later
 lenDF=dim(masterdf)[1]
 # convert cbcl scores to numeric
@@ -64,7 +64,7 @@ devExplParentRule=rep(0,10000)
 devExplParentAgg=rep(0,10000)
 # set seed
 set.seed(1)
-for (b in 1:10000){
+for (b in 1:2000){
 	print(b)
 	# get subjects to include in this bootstrap
         BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -124,4 +124,4 @@ for (b in 1:10000){
 }
 # save results
 outdf=data.frame(devExplTotProb,devExplInternal,devExplExternal,devExplSomatic,devExplAnxDep,devExplThought,devExplWithDep,devExplSocial,devExplAttention,devExplRuleBreak,devExplAggressive,devExplParentPcount,devExplParentInternal,devExplParentExternal,devExplParentSomatic,devExplParentAnx,devExplParentThought,devExplParentWith,devExplParentIntr,devExplParentAttn,devExplParentRule,devExplParentAgg)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/PvC_gdevExplBoots.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/PvC_gdevExplBoots2k.rds')
