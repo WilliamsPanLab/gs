@@ -148,6 +148,7 @@ attMax=rep(0,10000)
 rulMax=rep(0,10000)
 aggMax=rep(0,10000)
 intrMax=rep(0,10000)
+set.seed(1)
 # loop over manual bootstrap
 for (b in 1:2000){
 	print(b)

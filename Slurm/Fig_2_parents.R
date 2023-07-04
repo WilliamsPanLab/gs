@@ -149,10 +149,13 @@ rulMax=rep(0,10000)
 aggMax=rep(0,10000)
 intrMax=rep(0,10000)
 # loop over manual bootstrap
-for (b in 1:10000){
+for (b in 1:2000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
+
+	# try catch to account for potential incoherent modeling of undersampling of symtpoms in some bootstraps
+	tryCatch({
 	### inefficient but interpretable loop
 	# Create an empty dataframe to store the resampled observations
 	bootSamp <- data.frame()
@@ -409,15 +412,19 @@ for (b in 1:10000){
 	asrrulDeriv[b,1:basrrulmax]=forSplineasrrul$derivative
 	asraggDeriv[b,1:basraggmax]=forSplineasragg$derivative
 	asrintrDeriv[b,1:basrintrmax]=forSplineasrintr$derivative
+	}, error = function(e) {
+		paste0("iteration ",b," had unmodelable undersampling")
+	})
+	
 }
 # SAVEOUT
 # save out version with all cbcl and asr linboots
 outdf=data.frame(plinBoots,intlinBoots,extlinBoots,somLinBoots,anxLinBoots,thoLinBoots,witLinBoots,attLinBoots,rulLinBoots,aggLinBoots,asrpLinBoots,asrintLinBoots,asrextLinBoots,asrsomLinBoots,asranxLinBoots,asrthoLinBoots,asrwitLinBoots,asrattLinBoots,asrrulLinBoots,asraggLinBoots,asrintrLinBoots)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_asr.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_asr2k.rds')
 # save out version with all cbcl and asr derivs
 outdf=data.frame(pDeriv,intDeriv,extDeriv,somDeriv,anxDeriv,thoDeriv,witDeriv,attDeriv,rulDeriv,aggDeriv,asrpDeriv,asrintDeriv,asrextDeriv,asrsomDeriv,asranxDeriv,asrthoDeriv,asrwitDeriv,asrattDeriv,asrrulDeriv,asraggDeriv,asrintrDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_asr.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_asr2k.rds')
 # save out version with all cbcl and asr fits
 outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,attFit,rulFit,aggFit,asrPFit,asrintFit,asrextFit,asrsomFit,asranxFit,asrthoFit,asrwitFit,asrattFit,asrrulFit,asraggFit,asrintrFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_asr.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_asr2k.rds')
 print('done with g~p fit bootstrapping!')

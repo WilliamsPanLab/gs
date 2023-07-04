@@ -64,64 +64,93 @@ devExplParentRule=rep(0,10000)
 devExplParentAgg=rep(0,10000)
 # set seed
 set.seed(1)
-for (b in 1:2000){
-	print(b)
-	# get subjects to include in this bootstrap
-        BootSubjs=sample(subjs,numSubjs,replace=T)
-        ### inefficient but interpretable loop
-        # Create an empty dataframe to store the resampled observations
-        bootSamp <- data.frame()
-        for (j in 1:length(BootSubjs)){
-                subject_obs <- masterdf[masterdf$subjectkey == BootSubjs[j], ]
-                bootSamp <- rbind(bootSamp, subject_obs)
-        }
-	# fit each model explaining g with a single scale
-	TotProbMod=bam(g~s(cbcl_scr_syn_totprob_r),data=bootSamp)
-	InternalMod=bam(g~s(cbcl_scr_syn_internal_r),data=bootSamp)
-	ExternalMod=bam(g~s(cbcl_scr_syn_external_r),data=bootSamp)
-	SomaticMod=bam(g~s(cbcl_scr_syn_somatic_r),data=bootSamp)
-	AnxDepMod=bam(g~s(cbcl_scr_syn_anxdep_r),data=bootSamp)
-	ThoughtMod=bam(g~s(cbcl_scr_syn_thought_r),data=bootSamp)
-	WithDepMod=bam(g~s(cbcl_scr_syn_withdep_r),data=bootSamp)
-	SocialMod=bam(g~s(cbcl_scr_syn_social_r),data=bootSamp)
-	AttentionMod=bam(g~s(cbcl_scr_syn_attention_r),data=bootSamp)
-	RuleBreakMod=bam(g~s(cbcl_scr_syn_rulebreak_r),data=bootSamp)
-	AggressiveMod=bam(g~s(cbcl_scr_syn_aggressive_r),data=bootSamp)
-	ParentPcountMod=bam(g~s(parentPcount),data=bootSamp)
-	ParentInternalMod=bam(g~s(ASRInt),data=bootSamp)
-	ParentExternalMod=bam(g~s(ASRExt),data=bootSamp)
-	ParentSomaticMod=bam(g~s(ASR_somatic),data=bootSamp)
-	ParentAnxMod=bam(g~s(ASR_anxdep),data=bootSamp)
-	ParentThoughtMod=bam(g~s(ASR_thought),data=bootSamp)
-	ParentWithMod=bam(g~s(ASR_withdep),data=bootSamp)
-	ParentIntrMod=bam(g~s(ASR_intrusive),data=bootSamp)
-	ParentAttnMod=bam(g~s(ASR_attention),data=bootSamp)
-	ParentRuleMod=bam(g~s(ASR_rulebreak),data=bootSamp)
-	ParentAggMod=bam(g~s(ASR_aggressive),data=bootSamp)
-	# get deviance explained by each model
-	devExplTotProb[b]=summary(TotProbMod)$dev.expl
-	devExplInternal=summary(InternalMod)$dev.expl
-	devExplExternal=summary(ExternalMod)$dev.expl
-	devExplSomatic=summary(SomaticMod)$dev.expl
-	devExplAnxDep=summary(AnxDepMod)$dev.expl
-	devExplThought=summary(ThoughtMod)$dev.expl
-	devExplWithDep=summary(WithDepMod)$dev.expl
-	devExplSocial=summary(SocialMod)$dev.expl
-	devExplAttention=summary(AttentionMod)$dev.expl
-	devExplRuleBreak=summary(RuleBreakMod)$dev.expl
-	devExplAggressive=summary(AggressiveMod)$dev.expl
-	devExplParentPcount=summary(ParentPcountMod)$dev.expl
-	devExplParentInternal=summary(ParentInternalMod)$dev.expl
-	devExplParentExternal=summary(ParentExternalMod)$dev.expl
-	devExplParentSomatic=summary(ParentSomaticMod)$dev.expl
-	devExplParentAnx=summary(ParentAnxMod)$dev.expl
-	devExplParentThought=summary(ParentThoughtMod)$dev.expl
-	devExplParentWith=summary(ParentWithMod)$dev.expl
-	devExplParentIntr=summary(ParentIntrMod)$dev.expl
-	devExplParentAttn=summary(ParentAttnMod)$dev.expl
-	devExplParentRule=summary(ParentRuleMod)$dev.expl
-	devExplParentAgg=summary(ParentAggMod)$dev.expl
+for (b in 1:2000) {
+  print(b)
+  # get subjects to include in this bootstrap
+  BootSubjs <- sample(subjs, numSubjs, replace = TRUE)
+  
+  # Create an empty dataframe to store the resampled observations
+  bootSamp <- data.frame()
+  
+  tryCatch({
+    for (j in 1:length(BootSubjs)) {
+      subject_obs <- masterdf[masterdf$subjectkey == BootSubjs[j], ]
+      bootSamp <- rbind(bootSamp, subject_obs)
+    }
+    
+    # fit each model explaining g with a single scale
+    TotProbMod <- bam(g ~ s(cbcl_scr_syn_totprob_r), data = bootSamp)
+    InternalMod <- bam(g ~ s(cbcl_scr_syn_internal_r), data = bootSamp)
+    ExternalMod <- bam(g ~ s(cbcl_scr_syn_external_r), data = bootSamp)
+    SomaticMod <- bam(g ~ s(cbcl_scr_syn_somatic_r), data = bootSamp)
+    AnxDepMod <- bam(g ~ s(cbcl_scr_syn_anxdep_r), data = bootSamp)
+    ThoughtMod <- bam(g ~ s(cbcl_scr_syn_thought_r), data = bootSamp)
+    WithDepMod <- bam(g ~ s(cbcl_scr_syn_withdep_r), data = bootSamp)
+    SocialMod <- bam(g ~ s(cbcl_scr_syn_social_r), data = bootSamp)
+    AttentionMod <- bam(g ~ s(cbcl_scr_syn_attention_r), data = bootSamp)
+    RuleBreakMod <- bam(g ~ s(cbcl_scr_syn_rulebreak_r), data = bootSamp)
+    AggressiveMod <- bam(g ~ s(cbcl_scr_syn_aggressive_r), data = bootSamp)
+    ParentPcountMod <- bam(g ~ s(parentPcount), data = bootSamp)
+    ParentInternalMod <- bam(g ~ s(ASRInt), data = bootSamp)
+    ParentExternalMod <- bam(g ~ s(ASRExt), data = bootSamp)
+    ParentSomaticMod <- bam(g ~ s(ASR_somatic), data = bootSamp)
+    ParentAnxMod <- bam(g ~ s(ASR_anxdep), data = bootSamp)
+    ParentThoughtMod <- bam(g ~ s(ASR_thought), data = bootSamp)
+    ParentWithMod <- bam(g ~ s(ASR_withdep), data = bootSamp)
+    ParentIntrMod <- bam(g ~ s(ASR_intrusive), data = bootSamp)
+    ParentAttnMod <- bam(g ~ s(ASR_attention), data = bootSamp)
+    ParentRuleMod <- bam(g ~ s(ASR_rulebreak), data = bootSamp)
+    ParentAggMod <- bam(g ~ s(ASR_aggressive), data = bootSamp)
+    
+    # get deviance explained by each model
+    devExplTotProb[b] <- summary(TotProbMod)$dev.expl
+    devExplInternal[b] <- summary(InternalMod)$dev.expl
+    devExplExternal[b] <- summary(ExternalMod)$dev.expl
+    devExplSomatic[b] <- summary(SomaticMod)$dev.expl
+    devExplAnxDep[b] <- summary(AnxDepMod)$dev.expl
+    devExplThought[b] <- summary(ThoughtMod)$dev.expl
+    devExplWithDep[b] <- summary(WithDepMod)$dev.expl
+    devExplSocial[b] <- summary(SocialMod)$dev.expl
+    devExplAttention[b] <- summary(AttentionMod)$dev.expl
+    devExplRuleBreak[b] <- summary(RuleBreakMod)$dev.expl
+    devExplAggressive[b] <- summary(AggressiveMod)$dev.expl
+    devExplParentPcount[b] <- summary(ParentPcountMod)$dev.expl
+    devExplParentInternal[b] <- summary(ParentInternalMod)$dev.expl
+    devExplParentExternal[b] <- summary(ParentExternalMod)$dev.expl
+    devExplParentSomatic[b] <- summary(ParentSomaticMod)$dev.expl
+    devExplParentAnx[b] <- summary(ParentAnxMod)$dev.expl
+    devExplParentThought[b] <- summary(ParentThoughtMod)$dev.expl
+    devExplParentWith[b] <- summary(ParentWithMod)$dev.expl
+    devExplParentIntr[b] <- summary(ParentIntrMod)$dev.expl
+    devExplParentAttn[b] <- summary(ParentAttnMod)$dev.expl
+    devExplParentRule[b] <- summary(ParentRuleMod)$dev.expl
+    devExplParentAgg[b] <- summary(ParentAggMod)$dev.expl
+  }, error = function(e) {
+    # Assign "NA" to positions in case of error
+    devExplTotProb[b] <- NA
+    devExplInternal[b] <- NA
+    devExplExternal[b] <- NA
+    devExplSomatic[b] <- NA
+    devExplAnxDep[b] <- NA
+    devExplThought[b] <- NA
+    devExplWithDep[b] <- NA
+    devExplSocial[b] <- NA
+    devExplAttention[b] <- NA
+    devExplRuleBreak[b] <- NA
+    devExplAggressive[b] <- NA
+    devExplParentPcount[b] <- NA
+    devExplParentInternal[b] <- NA
+    devExplParentExternal[b] <- NA
+    devExplParentSomatic[b] <- NA
+    devExplParentAnx[b] <- NA
+    devExplParentThought[b] <- NA
+    devExplParentWith[b] <- NA
+    devExplParentIntr[b] <- NA
+    devExplParentAttn[b] <- NA
+    devExplParentRule[b] <- NA
+    devExplParentAgg[b] <- NA
+  })
 }
 # save results
 outdf=data.frame(devExplTotProb,devExplInternal,devExplExternal,devExplSomatic,devExplAnxDep,devExplThought,devExplWithDep,devExplSocial,devExplAttention,devExplRuleBreak,devExplAggressive,devExplParentPcount,devExplParentInternal,devExplParentExternal,devExplParentSomatic,devExplParentAnx,devExplParentThought,devExplParentWith,devExplParentIntr,devExplParentAttn,devExplParentRule,devExplParentAgg)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/PvC_gdevExplBoots2k.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/PvC_gdevExplBoots.rds')
