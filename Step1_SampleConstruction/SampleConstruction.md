@@ -563,8 +563,6 @@ ASRRulB=ASRdfNum$asr_q06_p+ASRdfNum$asr_q20_p+ASRdfNum$asr_q23_p+ASRdfNum$asr_q2
 
 ASRAggr=ASRdfNum$asr_q03_p+ASRdfNum$asr_q05_p+ASRdfNum$asr_q16_p+ASRdfNum$asr_q28_p+ASRdfNum$asr_q37_p+ASRdfNum$asr_q55_p+ASRdfNum$asr_q57_p+ASRdfNum$asr_q68_p+ASRdfNum$asr_q81_p+ASRdfNum$asr_q86_p+ASRdfNum$asr_q87_p+ASRdfNum$asr_q95_p+ASRdfNum$asr_q97_p+ASRdfNum$asr_q113_p+ASRdfNum$asr_q116_p+ASRdfNum$asr_q118_p+ASRdfNum$asr_q06_p+ASRdfNum$asr_q20_p+ASRdfNum$asr_q23_p+ASRdfNum$asr_q26_p+ASRdfNum$asr_q39_p+ASRdfNum$asr_q41_p+ASRdfNum$asr_q43_p+ASRdfNum$asr_q76_p+ASRdfNum$asr_q82_p+ASRdfNum$asr_q90_p+ASRdfNum$asr_q92_p+ASRdfNum$asr_q114_p+ASRdfNum$asr_q117_p+ASRdfNum$asr_q122_p
 
-ASRIntrusive=ASRdfNum$asr_q07_p+ASRdfNum$asr_q19_p+ASRdfNum$asr_q74_p+ASRdfNum$asr_q93_p+ASRdfNum$asr_q94_p+ASRdfNum$asr_q104_p
-
 # now internalizing and externalizing, to be equivalent with children
 ASRInt=ASRWithdrawn+ASRSomatic
 
@@ -589,7 +587,6 @@ asr$ASRSomatic=c(NA,ASRSomatic)
 asr$ASRThought=c(NA,ASRThought)
 asr$ASRAttn=c(NA,ASRAttn)
 asr$ASRAggr=c(NA,ASRAggr)
-asr$ASRIntrusive=c(NA,ASRIntrusive)
 asr$ASRRulB=c(NA,ASRRulB)
 asr$ASRInt=c(NA,ASRInt)
 asr$ASRExt=c(NA,ASRExt)
@@ -613,7 +610,7 @@ paste0(length(unique(masterdf$subjectkey)))
 
 ``` r
 # collapse to just variables of interest to prevent duplicate variables
-asr=asr[,c('parentPcount','subjectkey','eventname','interview_age','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRIntrusive','ASRInt','ASRExt')]
+asr=asr[,c('parentPcount','subjectkey','eventname','interview_age','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRInt','ASRExt')]
 # merge
 masterdf=merge(masterdf,asr,by=c('subjectkey','eventname','interview_age'))
 ```
