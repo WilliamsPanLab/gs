@@ -21,7 +21,7 @@ dim(masterdf)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up # add cbcl subscales
-masterdf=masterdf[,c('parentPcount','cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRIntrusive','ASRRulB','ASRInt','ASRExt','g','subjectkey','interview_age')]
+masterdf=masterdf[,c('parentPcount','cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRInt','ASRExt','g','subjectkey','interview_age')]
 # get length of df for later
 lenDF=dim(masterdf)[1]
 # convert all cbcl scores to numeric
@@ -43,7 +43,6 @@ masterdf$ASR_thought=as.numeric(masterdf$ASRThought)
 masterdf$ASR_attention=as.numeric(masterdf$ASRAttn)
 masterdf$ASR_aggressive=as.numeric(masterdf$ASRAggr)
 masterdf$ASR_rulebreak=as.numeric(masterdf$ASRRulB)
-masterdf$ASR_intrusive=as.numeric(masterdf$ASRIntrusive)
 masterdf$ASRInt=as.numeric(masterdf$ASRInt)
 masterdf$ASRExt=as.numeric(masterdf$ASRExt)
 # Note social for children is removed due to lack of equivalent and intrusive for adults
@@ -69,7 +68,6 @@ asrwitLinBoots=rep(0,10000)
 asrattLinBoots=rep(0,10000)
 asrrulLinBoots=rep(0,10000)
 asraggLinBoots=rep(0,10000)
-asrintrLinBoots=rep(0,10000)
 # predicted derivatives: set to maximum value for ncol
 pMaxVal=max(masterdf$parentPcount)
 iMaxVal=max(masterdf$ASRInt)
@@ -91,7 +89,6 @@ asrwitMaxVal=max(masterdf$ASR_withdep)
 asrattMaxVal=max(masterdf$ASR_attention)
 asrrulMaxVal=max(masterdf$ASR_rulebreak)
 asraggMaxVal=max(masterdf$ASR_aggressive)
-asrintrMaxVal=max(masterdf$ASR_intrusive)
 # predicted derivatives: 10000xncol
 pDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
 intDeriv=matrix(0,nrow=10000,ncol=iMaxVal)
@@ -113,7 +110,6 @@ asrwitDeriv=matrix(0,nrow=10000,ncol=asrwitMaxVal)
 asrattDeriv=matrix(0,nrow=10000,ncol=asrattMaxVal)
 asrrulDeriv=matrix(0,nrow=10000,ncol=asrrulMaxVal)
 asraggDeriv=matrix(0,nrow=10000,ncol=asraggMaxVal)
-asrintrDeriv=matrix(0,nrow=10000,ncol=asrintrMaxVal)
 # predicted values: set to maximum value for ncol
 pFit=matrix(0,nrow=10000,ncol=pMaxVal)
 intFit=matrix(0,nrow=10000,ncol=iMaxVal)
@@ -135,7 +131,6 @@ asrwitFit=matrix(0,nrow=10000,ncol=asrwitMaxVal)
 asrattFit=matrix(0,nrow=10000,ncol=asrattMaxVal)
 asrrulFit=matrix(0,nrow=10000,ncol=asrrulMaxVal)
 asraggFit=matrix(0,nrow=10000,ncol=asraggMaxVal)
-asrintrFit=matrix(0,nrow=10000,ncol=asrintrMaxVal)
 # maximum value in each iteration
 pMax=rep(0,10000)
 intMax=rep(0,10000)
@@ -147,15 +142,11 @@ witMax=rep(0,10000)
 attMax=rep(0,10000)
 rulMax=rep(0,10000)
 aggMax=rep(0,10000)
-intrMax=rep(0,10000)
 # loop over manual bootstrap
 for (b in 1:2000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
-
-	# try catch to account for potential incoherent modeling of undersampling of symtpoms in some bootstraps
-	tryCatch({
 	### inefficient but interpretable loop
 	# Create an empty dataframe to store the resampled observations
 	bootSamp <- data.frame()
@@ -185,7 +176,6 @@ for (b in 1:2000){
 	basrattmax=max(bootSamp$ASR_attention)
 	basrrulmax=max(bootSamp$ASR_rulebreak)
 	basraggmax=max(bootSamp$ASR_aggressive)
-	basrintrmax=max(bootSamp$ASR_intrusive)
 	######## I FORMALLY TEST FOR NON-LINEARITY
 	#### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
 	pgAge<-bam(g~cbcl_scr_syn_totprob_r+s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age),data=bootSamp)
@@ -229,8 +219,6 @@ for (b in 1:2000){
 	asrrulLinBoots[b]=summary(asrrulgAge)$s.pv[1]
 	asragggAge<-bam(g~ASR_aggressive+s(ASR_aggressive,m=c(2,0))+s(interview_age),data=bootSamp)
 	asraggLinBoots[b]=summary(asragggAge)$s.pv[1]
-	asrintrgAge<-bam(g~ASR_intrusive+s(ASR_intrusive,m=c(2,0))+s(interview_age),data=bootSamp)
-	asrintrLinBoots[b]=summary(asrintrgAge)$s.pv[1]
 	######## II PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
 	#### g as response variable, add asr and predict on asr
 	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+s(parentPcount),data=bootSamp)
@@ -254,7 +242,6 @@ for (b in 1:2000){
 	asrattgAge<-bam(g~s(ASR_attention)+s(interview_age),data=bootSamp)
 	asrrulgAge<-bam(g~s(ASR_rulebreak)+s(interview_age),data=bootSamp)
 	asragggAge<-bam(g~s(ASR_aggressive)+s(interview_age),data=bootSamp)
-	asrintrgAge<-bam(g~s(ASR_intrusive)+s(interview_age),data=bootSamp)
 	# use PREDICTED VALUES of model fit for each symptom count for saving
 	eachPcount=seq(1:bpmax)
 	eachIntcount=seq(1:bimax)
@@ -276,7 +263,6 @@ for (b in 1:2000){
 	eachasrAttcount=seq(1:basrattmax)
 	eachasrRulcount=seq(1:basrrulmax)
 	eachasrAggcount=seq(1:basraggmax)
-	eachasrIntrcount=seq(1:basrintrmax)
 	# set age to to median for predict df, also set child symptom score to median for predict df
 	#####################################
 	predictDFp=data.frame(eachasrPcount,rep(median(bootSamp$cbcl_scr_syn_totprob_r),basrpmax),rep(median(bootSamp$interview_age),basrpmax))
@@ -299,7 +285,6 @@ for (b in 1:2000){
 	predictDFasratt=data.frame(eachasrAttcount,rep(median(bootSamp$interview_age),basrattmax))
 	predictDFasrrul=data.frame(eachasrRulcount,rep(median(bootSamp$interview_age),basrrulmax))
 	predictDFasragg=data.frame(eachasrAggcount,rep(median(bootSamp$interview_age),basraggmax))
-	predictDFasrintr=data.frame(eachasrIntrcount,rep(median(bootSamp$interview_age),basrintrmax))
 	# set colnames so predict can work
 	colnames(predictDFp)=c('parentPcount','cbcl_scr_syn_totprob_r','interview_age')
 	colnames(predictDFint)=c('ASRInt','cbcl_scr_syn_internal_r','interview_age')
@@ -321,7 +306,6 @@ for (b in 1:2000){
 	colnames(predictDFasratt)=c('ASR_attention','interview_age')
 	colnames(predictDFasrrul)=c('ASR_rulebreak','interview_age')
 	colnames(predictDFasragg)=c('ASR_aggressive','interview_age')
-	colnames(predictDFasrintr)=c('ASR_intrusive','interview_age')
 	# predict
 	forFitP=predict(pgAge,predictDFp)
 	forFitInt=predict(intgAge,predictDFint)
@@ -343,7 +327,6 @@ for (b in 1:2000){
 	forFitasrAtt=predict(asrattgAge,predictDFasratt)
 	forFitasrRul=predict(asrrulgAge,predictDFasrrul)
 	forFitasrAgg=predict(asragggAge,predictDFasragg)
-	forFitasrIntr=predict(asrintrgAge,predictDFasrintr)
 	# print out fit
 	pFit[b,1:basrpmax]=forFitP
 	intFit[b,1:basrintmax]=forFitInt
@@ -365,7 +348,6 @@ for (b in 1:2000){
 	asrattFit[b,1:basrattmax]=forFitasrAtt
 	asrrulFit[b,1:basrrulmax]=forFitasrRul
 	asraggFit[b,1:basraggmax]=forFitasrAgg
-	asrintrFit[b,1:basrintrmax]=forFitasrIntr
 	# use DERIVATIVES of model fit for saving
 	forSplinep=derivatives(pgAge,term='s(parentPcount)',partial_match = TRUE,n=basrpmax)
 	forSplineint=derivatives(intgAge,term='s(ASRInt)',partial_match = TRUE,n=basrintmax)
@@ -388,7 +370,6 @@ for (b in 1:2000){
 	forSplineasratt=derivatives(asrattgAge,term='s(ASR_attention)',partial_match = TRUE,n=basrattmax)
 	forSplineasrrul=derivatives(asrrulgAge,term='s(ASR_rulebreak)',partial_match = TRUE,n=basrrulmax)
 	forSplineasragg=derivatives(asragggAge,term='s(ASR_aggressive)',partial_match = TRUE,n=basraggmax)
-	forSplineasrintr=derivatives(asrintrgAge,term='s(ASR_intrusive)',partial_match = TRUE,n=basrintrmax)
 	# print out fit derivatives
 	pDeriv[b,1:basrpmax]=forSplinep$derivative
 	intDeriv[b,1:basrintmax]=forSplineint$derivative
@@ -411,20 +392,15 @@ for (b in 1:2000){
 	asrattDeriv[b,1:basrattmax]=forSplineasratt$derivative
 	asrrulDeriv[b,1:basrrulmax]=forSplineasrrul$derivative
 	asraggDeriv[b,1:basraggmax]=forSplineasragg$derivative
-	asrintrDeriv[b,1:basrintrmax]=forSplineasrintr$derivative
-	}, error = function(e) {
-		paste0("iteration ",b," had unmodelable undersampling")
-	})
-	
 }
 # SAVEOUT
 # save out version with all cbcl and asr linboots
-outdf=data.frame(plinBoots,intlinBoots,extlinBoots,somLinBoots,anxLinBoots,thoLinBoots,witLinBoots,attLinBoots,rulLinBoots,aggLinBoots,asrpLinBoots,asrintLinBoots,asrextLinBoots,asrsomLinBoots,asranxLinBoots,asrthoLinBoots,asrwitLinBoots,asrattLinBoots,asrrulLinBoots,asraggLinBoots,asrintrLinBoots)
+outdf=data.frame(plinBoots,intlinBoots,extlinBoots,somLinBoots,anxLinBoots,thoLinBoots,witLinBoots,attLinBoots,rulLinBoots,aggLinBoots,asrpLinBoots,asrintLinBoots,asrextLinBoots,asrsomLinBoots,asranxLinBoots,asrthoLinBoots,asrwitLinBoots,asrattLinBoots,asrrulLinBoots,asraggLinBoots)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_asr2k.rds')
 # save out version with all cbcl and asr derivs
-outdf=data.frame(pDeriv,intDeriv,extDeriv,somDeriv,anxDeriv,thoDeriv,witDeriv,attDeriv,rulDeriv,aggDeriv,asrpDeriv,asrintDeriv,asrextDeriv,asrsomDeriv,asranxDeriv,asrthoDeriv,asrwitDeriv,asrattDeriv,asrrulDeriv,asraggDeriv,asrintrDeriv)
+outdf=data.frame(pDeriv,intDeriv,extDeriv,somDeriv,anxDeriv,thoDeriv,witDeriv,attDeriv,rulDeriv,aggDeriv,asrpDeriv,asrintDeriv,asrextDeriv,asrsomDeriv,asranxDeriv,asrthoDeriv,asrwitDeriv,asrattDeriv,asrrulDeriv,asraggDeriv)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_asr2k.rds')
 # save out version with all cbcl and asr fits
-outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,attFit,rulFit,aggFit,asrPFit,asrintFit,asrextFit,asrsomFit,asranxFit,asrthoFit,asrwitFit,asrattFit,asrrulFit,asraggFit,asrintrFit)
+outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,attFit,rulFit,aggFit,asrPFit,asrintFit,asrextFit,asrsomFit,asranxFit,asrthoFit,asrwitFit,asrattFit,asrrulFit,asraggFit)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_asr2k.rds')
 print('done with g~p fit bootstrapping!')
