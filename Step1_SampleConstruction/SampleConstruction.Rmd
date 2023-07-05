@@ -589,7 +589,7 @@ alph_order <- c("Asian", "Black", "Hispanic", "Missing", "Other", "White")
 my_colors <- c("red", "orange", "blue", "gray", "green","yellow")
 
 # preset x-axis names
-x_labs=c("CBCL (both timepoints)", "Grades","Grades (both)","ASR (both)","ACS","Cognitive data (both)","One sibling per family","ABCC")
+x_labs=c("CBCL", "CBCL (both timepoints)","Grades (both)","ASR (both)","ACS","Cognitive data (both)","One sibling per family","ABCC")
 
 #
 ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
