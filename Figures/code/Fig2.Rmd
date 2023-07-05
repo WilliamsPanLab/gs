@@ -172,22 +172,33 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 Fits=readRDS('~/Desktop/g_p/gParentpDerivBoots.rds')
 PFits=Fits[,481:640]
 MaxP=find_furthest_nonzero(PFits)
-# load in 2k data
-Fits=readRDS('~/Desktop/g_p/gpDerivBoots_asr2k.rds')
+# load in 1k data
+Fits=readRDS('~/Desktop/g_p/gpFitBoots_asr.rds')
 
-# remove instances where NA or 0 indicates that bootstrap was not populated
+IFits = Fits[1:1000,(161:190)+437]
+EFits = Fits[1:1000,(191:253)+437]
+SomFits = Fits[1:1000,(254:273)+437]
+AnxFits = Fits[1:1000,(274:304)+437]
+ThoFits = Fits[1:1000,(305:322)+437]
+WitFits = Fits[1:1000,(323:340)+437]
+AttFits = Fits[1:1000,(341:371)+437]
+RulFits = Fits[1:1000,(372:392)+437]
+AggFits = Fits[1:1000,(393:437)+437]
 
+MaxI=find_furthest_nonzero(IFits)
+MaxE=find_furthest_nonzero(EFits)
 
-IFits = Fits[1:2000,(161:190)+437]
-EFits = Fits[1:2000,(191:253)+437]
-SomFits = Fits[1:2000,(254:273)+437]
-AnxFits = Fits[1:2000,(274:304)+437]
-ThoFits = Fits[1:2000,(305:322)+437]
-WitFits = Fits[1:2000,(323:340)+437]
-AttFits = Fits[1:2000,(341:371)+437]
-RulFits = Fits[1:2000,(372:392)+437]
-AggFits = Fits[1:2000,(393:437)+437]
-IntrFits= Fits[1:2000,(438:447)+437]
+# actually plot em: some in main text as fig 2, some as fig s5
+plot_bootstraps_par(PFits,160,x_title,MaxP)
+plot_bootstraps_par(IFits,30,'Parental Internalizing',MaxI)
+plot_bootstraps_par(EFits,63,'Parental Externalizing',MaxE)
+plot_bootstraps_par(AnxFits,31,'Anxious Depression',MaxAnx)
+plot_bootstraps_par(ThoFits,18,'Thought',MaxTho,ThoBc,ThoC)
+plot_bootstraps_par(WitFits,18,'Withdrawn Depression',MaxWit,WitBc,WitC)
+plot_bootstraps_par(AttFits,31,'Attention',MaxAtt,AttBc,AttC)
+plot_bootstraps_par(RulFits,21,'Rule Breaking',MaxRul,RulBc,RulC)
+plot_bootstraps_par(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
+
 
 MaxI=find_furthest_nonzero(IFits)
 MaxE=find_furthest_nonzero(EFits)
@@ -199,24 +210,6 @@ MaxSom=find_furthest_nonzero(SomFits)
 MaxAtt=find_furthest_nonzero(AttFits)
 MaxRul=find_furthest_nonzero(RulFits)
 MaxAgg=find_furthest_nonzero(AggFits)
-MaxIntr=find_furthest_nonzero(IntrFits)
-
-# actually plot em
-plot_bootstraps_par(PFits,160,x_title,MaxP)
-plot_bootstraps_par(IFits,30,'Parental Internalizing',MaxI)
-plot_bootstraps_par(EFits,63,'Parental Externalizing',MaxE)
-# for figure S%
-plot_bootstraps_par(AnxFits,31,'Anxious Depression',MaxAnx)
-plot_bootstraps_par(ThoFits,18,'Thought',MaxTho)
-plot_bootstraps_par(WitFits,18,'Withdrawn Depression',MaxWit)
-plot_bootstraps_par(SomFits,20,'Somatic',MaxSom)
-plot_bootstraps_par(AttFits,31,'Attention',MaxAtt)
-plot_bootstraps_par(RulFits,21,'Rule Breaking',MaxRul)
-plot_bootstraps_par(AggFits,45,'Aggression',MaxAgg)
-plot_bootstraps_par(IntrFits,10,'Intrusive',MaxIntr)
-
-
-
 ```
 
 ```{r}
@@ -463,8 +456,6 @@ df <- data.frame(
   AnxDepr = apply(AnxFits[, 1:(MaxAnx/3)], 1, median),
   Thought = apply(ThoFits[, 1:(MaxTho/3)], 1, median),
   WithDepr = apply(WitFits[, 1:(MaxWit/3)], 1, median),
-  # to replace with intrusive
-  #Social = apply(SocFits[, 1:(MaxSoc/3)], 1, median),
   Attn = apply(AttFits[, 1:(MaxAtt/3)], 1, median),
   Rules = apply(RulFits[, 1:(MaxRul/3)], 1, median),
   Aggr = apply(AggFits[, 1:(MaxAgg/3)], 1, median)
