@@ -507,8 +507,8 @@ for (b in 1:2000){
 	pseudoPov2Group=subset(bootSamp,pseudopoverty2==1)
 	# find maximum cbcl_scr_syn_totprob_r value present across both subgroups, make prediction df with that range of cbcl_scr_syn_totprob_r values
 	bpmax_2=min(c(max(povertyGroup$cbcl_scr_syn_totprob_r),max(pseudoPov2Group$cbcl_scr_syn_totprob_r)))
-	eachPcount2=seq(0,bpmax_2)
-	predictDF_2=data.frame(eachPcount2,rep(median(bootSamp$interview_age)))
+	eachPcount2=seq(1,bpmax_2)
+	predictDF_2=data.frame(eachPcount2,rep(median(bootSamp$interview_age),bpmax_2))
 	# fit g~p to poverty group
 	pov_gp=gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=povertyGroup)
 	# fit g~p to same-size nonpoverty group
@@ -516,7 +516,7 @@ for (b in 1:2000){
 	# make prediction df to use for both models
 	colnames(predictDF_2)=c('cbcl_scr_syn_totprob_r','interview_age')
 	# extract fit (to become derivatives in postproc)
-	povFit[b,1:bpmax_2]=predict(pov_gp,newdata=predictDFp)
+	povFit[b,1:bpmax_2]=predict(pov_gp,newdata=predictDF_2)
 	pseudopovFit[b,1:bpmax_2]=predict(nonpov_gp,newdata=predictDF_2)
 }
 # SAVEOUT
