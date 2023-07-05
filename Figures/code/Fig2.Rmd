@@ -537,7 +537,7 @@ ggplot(df_tidy2, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
 
 
 ```{r}
-# supplemental figure
+# supplemental figure 1
 plot_bootstraps(SomFits,13,"Somatic",MaxSom,SomBc,SomC)
 plot_bootstraps(AnxFits,25,'Anxious Depression',MaxAnx,AnxBc,AnxC)
 plot_bootstraps(ThoFits,18,'Thought',MaxTho,ThoBc,ThoC)
@@ -547,3 +547,47 @@ plot_bootstraps(AttFits,19,'Attention',MaxAtt,AttBc,AttC)
 plot_bootstraps(RulFits,18,'Rule Breaking',MaxRul,RulBc,RulC)
 plot_bootstraps(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
 ```
+
+```{r}
+library(dplyr)
+# supplemental figure 2
+PvC_de=readRDS('~/Desktop/g_p/PvC_gdevExplBoots.rds')
+# 2k version
+PvC_de=PvC_de[1:2000,]
+
+# Find 0s (thrown error for insufficient bootstrap sampling of symptoms)
+zero_rows <- which(rowSums(PvC_de == 0) > 0)
+
+# Remove entire rows with 0s
+PvC_de <- PvC_de[-c(zero_rows), ]
+
+# rename columns for plotting
+new_colnames <- c("child p", "child int.", "child ext.", "child somatic", "child anxdep.", "child thought", "child withdep.", 
+                  "child social", "child attn.", "child rulebreak", "child aggr.", "parent p", "parent int.", 
+                  "parent ext.", "parent somatic", "parent anx", "parent thought", "parent withdep.", "parent intr.", 
+                  "parent attn.", "parent rulebreak", "parent aggr.")
+desiredOrder <- c("child p", "parent p","child int.", "parent int.","child ext.", "parent ext.", "child aggr.", "parent aggr.","child anxdep.","parent anx", "child attn.", "parent attn.","child rulebreak","parent rulebreak","child thought", "parent thought", "child somatic","parent somatic",  "child withdep.", "parent withdep.","child social","parent intr.")
+
+# set col names
+colnames(PvC_de)<-new_colnames
+
+# long format
+PvC_long=melt(PvC_de)
+# rename for clarity
+colnames(PvC_long)<-c("Subscale","value")
+# grouping variable for color
+PvC_long$Group <- ifelse(grepl("child", PvC_long$Subscale), "child", "parent")
+# order as desired
+PvC_long$Subscale <- factor(PvC_long$Subscale, levels = desiredOrder)
+
+PvC_long <- PvC_long %>%
+  filter(!(Subscale %in% c("child social", "parent intr.")))
+
+# Create the boxplot
+ggplot(PvC_long, aes(x = Subscale, y = value,fill=Group)) +
+  geom_boxplot() +
+  labs(x = "Subscale",
+       y = "Deviance Explained in Child g") +
+  theme_minimal(base_size=20)
+```
+
