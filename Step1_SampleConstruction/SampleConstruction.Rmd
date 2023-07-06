@@ -596,7 +596,7 @@ ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
   geom_stratum(aes(fill = factor(RaceEthn, levels = alph_order))) +
   geom_flow(aes(fill = factor(RaceEthn, levels = alph_order))) +
   scale_fill_manual(values = my_colors, breaks = alph_order) +
-  theme_bw(base_size = 28) + 
+  theme_bw(base_size = 30) + 
   labs(y = "Children", fill = "Race/Ethnicity", title = "Alluvial Consort Chart") +
   scale_x_discrete(labels = x_labs) +
   theme(axis.title.x = element_blank())
