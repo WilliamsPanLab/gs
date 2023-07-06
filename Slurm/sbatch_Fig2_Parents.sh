@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=Fig2Parents
+#SBATCH --job-name=Fig2ParentsFin
 #SBATCH --time=7-00:00:00
 #SBATCH -p leanew1  # Queue names you can submit to
 #SBATCH -n 1

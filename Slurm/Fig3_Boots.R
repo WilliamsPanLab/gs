@@ -40,59 +40,59 @@ masterdf$income<-as.numeric(masterdf$income)
 masterdf$poverty[masterdf$income<5]=1
 masterdf$poverty=as.ordered(masterdf$poverty)
 ### initialize cross-boot vectors
-# predicted derivatives: set to maximum value for ncol
+# predicted derivatives: set to maximum value for ncol +1, as 0-maxvalue is 1 longer than maxvalue
 pMaxVal=max(masterdf$cbcl_scr_syn_totprob_r)
 iMaxVal=max(masterdf$cbcl_scr_syn_internal_r)
 emaxVal=max(masterdf$cbcl_scr_syn_external_r)
-F_pDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
-M_pDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
-P_pDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
-R_pDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
-PF_pDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
-PM_pDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
-RF_pDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
-RM_pDeriv=matrix(0,nrow=10000,ncol=pMaxVal)
-F_intDeriv=matrix(0,nrow=10000,ncol=iMaxVal)
-M_intDeriv=matrix(0,nrow=10000,ncol=iMaxVal)
-P_intDeriv=matrix(0,nrow=10000,ncol=iMaxVal)
-R_intDeriv=matrix(0,nrow=10000,ncol=iMaxVal)
-PF_intDeriv=matrix(0,nrow=10000,ncol=iMaxVal)
-PM_intDeriv=matrix(0,nrow=10000,ncol=iMaxVal)
-RF_intDeriv=matrix(0,nrow=10000,ncol=iMaxVal)
-RM_intDeriv=matrix(0,nrow=10000,ncol=iMaxVal)
-F_extDeriv=matrix(0,nrow=10000,ncol=emaxVal)
-M_extDeriv=matrix(0,nrow=10000,ncol=emaxVal)
-P_extDeriv=matrix(0,nrow=10000,ncol=emaxVal)
-R_extDeriv=matrix(0,nrow=10000,ncol=emaxVal)
-PF_extDeriv=matrix(0,nrow=10000,ncol=emaxVal)
-PM_extDeriv=matrix(0,nrow=10000,ncol=emaxVal)
-RF_extDeriv=matrix(0,nrow=10000,ncol=emaxVal)
-RM_extDeriv=matrix(0,nrow=10000,ncol=emaxVal)
+F_pDeriv=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+M_pDeriv=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+P_pDeriv=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+R_pDeriv=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+PF_pDeriv=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+PM_pDeriv=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+RF_pDeriv=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+RM_pDeriv=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+F_intDeriv=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+M_intDeriv=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+P_intDeriv=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+R_intDeriv=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+PF_intDeriv=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+PM_intDeriv=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+RF_intDeriv=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+RM_intDeriv=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+F_extDeriv=matrix(0,nrow=10000,ncol=(emaxVal+1))
+M_extDeriv=matrix(0,nrow=10000,ncol=(emaxVal+1))
+P_extDeriv=matrix(0,nrow=10000,ncol=(emaxVal+1))
+R_extDeriv=matrix(0,nrow=10000,ncol=(emaxVal+1))
+PF_extDeriv=matrix(0,nrow=10000,ncol=(emaxVal+1))
+PM_extDeriv=matrix(0,nrow=10000,ncol=(emaxVal+1))
+RF_extDeriv=matrix(0,nrow=10000,ncol=(emaxVal+1))
+RM_extDeriv=matrix(0,nrow=10000,ncol=(emaxVal+1))
 # predicted values: set to maximum value for ncol
-F_pFit=matrix(0,nrow=10000,ncol=pMaxVal)
-M_pFit=matrix(0,nrow=10000,ncol=pMaxVal)
-P_pFit=matrix(0,nrow=10000,ncol=pMaxVal)
-R_pFit=matrix(0,nrow=10000,ncol=pMaxVal)
-PF_pFit=matrix(0,nrow=10000,ncol=pMaxVal)
-PM_pFit=matrix(0,nrow=10000,ncol=pMaxVal)
-RF_pFit=matrix(0,nrow=10000,ncol=pMaxVal)
-RM_pFit=matrix(0,nrow=10000,ncol=pMaxVal)
-F_intFit=matrix(0,nrow=10000,ncol=iMaxVal)
-M_intFit=matrix(0,nrow=10000,ncol=iMaxVal)
-P_intFit=matrix(0,nrow=10000,ncol=iMaxVal)
-R_intFit=matrix(0,nrow=10000,ncol=iMaxVal)
-PF_intFit=matrix(0,nrow=10000,ncol=iMaxVal)
-PM_intFit=matrix(0,nrow=10000,ncol=iMaxVal)
-RF_intFit=matrix(0,nrow=10000,ncol=iMaxVal)
-RM_intFit=matrix(0,nrow=10000,ncol=iMaxVal)
-F_extFit=matrix(0,nrow=10000,ncol=emaxVal)
-M_extFit=matrix(0,nrow=10000,ncol=emaxVal)
-P_extFit=matrix(0,nrow=10000,ncol=emaxVal)
-R_extFit=matrix(0,nrow=10000,ncol=emaxVal)
-PF_extFit=matrix(0,nrow=10000,ncol=emaxVal)
-PM_extFit=matrix(0,nrow=10000,ncol=emaxVal)
-RF_extFit=matrix(0,nrow=10000,ncol=emaxVal)
-RM_extFit=matrix(0,nrow=10000,ncol=emaxVal)
+F_pFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+M_pFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+P_pFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+R_pFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+PF_pFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+PM_pFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+RF_pFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+RM_pFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+F_intFit=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+M_intFit=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+P_intFit=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+R_intFit=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+PF_intFit=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+PM_intFit=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+RF_intFit=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+RM_intFit=matrix(0,nrow=10000,ncol=(iMaxVal+1))
+F_extFit=matrix(0,nrow=10000,ncol=(emaxVal+1))
+M_extFit=matrix(0,nrow=10000,ncol=(emaxVal+1))
+P_extFit=matrix(0,nrow=10000,ncol=(emaxVal+1))
+R_extFit=matrix(0,nrow=10000,ncol=(emaxVal+1))
+PF_extFit=matrix(0,nrow=10000,ncol=(emaxVal+1))
+PM_extFit=matrix(0,nrow=10000,ncol=(emaxVal+1))
+RF_extFit=matrix(0,nrow=10000,ncol=(emaxVal+1))
+RM_extFit=matrix(0,nrow=10000,ncol=(emaxVal+1))
 # F statistic vector for each interaction
 Fseg_p=rep(0,10000)
 Fpov_p=rep(0,10000)
@@ -151,8 +151,8 @@ pMax=rep(0,10000)
 intMax=rep(0,10000)
 extMax=rep(0,10000)
 # and modular fit for pov vs. psuedopov 2 (matched #) fits
-povFit=matrix(0,nrow=10000,ncol=pMaxVal)
-pseudopovFit=matrix(0,nrow=10000,ncol=pMaxVal)
+povFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+pseudopovFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
 #################################################
 ##################### loop over manual bootstraps
 #################################################
@@ -234,23 +234,23 @@ for (b in 1:10000){
 	#
 	
 	# use PREDICTED VALUES of model fit for each symptom count for saving
-	eachPcount=seq(1:bpmax)
-	eachIntcount=seq(1:bimax)
-	eachExtcount=seq(1:bemax)
-	# set age to to median for predict df
-	predictDFp=data.frame(eachPcount,rep(median(bootSamp$interview_age),bpmax))
-	predictDFint=data.frame(eachIntcount,rep(median(bootSamp$interview_age),bimax))
-	predictDFext=data.frame(eachExtcount,rep(median(bootSamp$interview_age),bemax))
+	eachPcount=seq(0:bpmax)
+	eachIntcount=seq(0:bimax)
+	eachExtcount=seq(0:bemax)
+	# set age to to median for predict df, +1 because 0:max sequence is one lnger than max
+	predictDFp=data.frame(eachPcount,rep(median(bootSamp$interview_age),(bpmax+1)))
+	predictDFint=data.frame(eachIntcount,rep(median(bootSamp$interview_age),(bimax+1)))
+	predictDFext=data.frame(eachExtcount,rep(median(bootSamp$interview_age),(bemax+1)))
 	# set predict df to interacting factors of interest (seg, poverty)
-	predictDF_segp=data.frame(eachPcount,rep(median(bootSamp$interview_age),bpmax),rep("F",bpmax))
-	predictDF_povp=data.frame(eachPcount,rep(median(bootSamp$interview_age),bpmax),rep("1",bpmax))
-	predictDF_segpovp=data.frame(eachPcount,rep(median(bootSamp$interview_age),bpmax),rep("F",bpmax),rep("1",bpmax))
-	predictDF_segint=data.frame(eachIntcount,rep(median(bootSamp$interview_age),bimax),rep("F",bimax))
-	predictDF_povint=data.frame(eachIntcount,rep(median(bootSamp$interview_age),bimax),rep("1",bimax))
-	predictDF_segpovint=data.frame(eachIntcount,rep(median(bootSamp$interview_age),bimax),rep("F",bimax),rep("1",bimax))
-	predictDF_segext=data.frame(eachExtcount,rep(median(bootSamp$interview_age),bemax),rep("F",bemax))
-	predictDF_povext=data.frame(eachExtcount,rep(median(bootSamp$interview_age),bemax),rep("1",bemax))
-	predictDF_segpovext=data.frame(eachExtcount,rep(median(bootSamp$interview_age),bemax),rep("F",bemax),rep("1",bemax))
+	predictDF_segp=data.frame(eachPcount,rep(median(bootSamp$interview_age),(bpmax+1)),rep("F",(bpmax+1)))
+	predictDF_povp=data.frame(eachPcount,rep(median(bootSamp$interview_age),(bpmax+1)),rep("1",(bpmax+1)))
+	predictDF_segpovp=data.frame(eachPcount,rep(median(bootSamp$interview_age),(bpmax+1)),rep("F",(bpmax+1)),rep("1",(bpmax+1)))
+	predictDF_segint=data.frame(eachIntcount,rep(median(bootSamp$interview_age),(bimax+1)),rep("F",(bimax+1)))
+	predictDF_povint=data.frame(eachIntcount,rep(median(bootSamp$interview_age),(bimax+1)),rep("1",(bimax+1)))
+	predictDF_segpovint=data.frame(eachIntcount,rep(median(bootSamp$interview_age),(bimax+1)),rep("F",(bimax+1)),rep("1",(bimax+1)))
+	predictDF_segext=data.frame(eachExtcount,rep(median(bootSamp$interview_age),(bemax+1)),rep("F",(bemax+1)))
+	predictDF_povext=data.frame(eachExtcount,rep(median(bootSamp$interview_age),(bemax+1)),rep("1",(bemax+1)))
+	predictDF_segpovext=data.frame(eachExtcount,rep(median(bootSamp$interview_age),(bemax+1)),rep("F",(bemax+1)),rep("1",(bemax+1)))
 	# set colnames so predict can work
 	colnames(predictDF_segp)=c('cbcl_scr_syn_totprob_r','interview_age','seg')
 	colnames(predictDF_povp)=c('cbcl_scr_syn_totprob_r','interview_age','poverty')
@@ -265,124 +265,124 @@ for (b in 1:10000){
 	forfitp_F=predict(pgAge_seg,predictDF_segp)
 	forfitint_F=predict(intgAge_seg,predictDF_segint)
 	forfitext_F=predict(extgAge_seg,predictDF_segext)
-	forDerivp_F=derivatives(pgAge_seg,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segp,n=bpmax)
-	forDerivint_F=derivatives(intgAge_seg,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segint,n=bimax)
-	forDerivext_F=derivatives(extgAge_seg,term="s(cbcl_scr_syn_external_r)",data=predictDF_segext,n=bemax)
+	forDerivp_F=derivatives(pgAge_seg,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segp,n=(bpmax+1))
+	forDerivint_F=derivatives(intgAge_seg,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segint,n=(bimax+1))
+	forDerivext_F=derivatives(extgAge_seg,term="s(cbcl_scr_syn_external_r)",data=predictDF_segext,n=(bemax+1))
 	# predict boy
-	predictDF_segp$seg=rep("M",bpmax)
+	predictDF_segp$seg=rep("M",(bpmax+1))
 	forfitp_M=predict(pgAge_seg,predictDF_segp)
-	forDerivp_M=derivatives(pgAge_seg,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segp,n=bpmax)
-	predictDF_segint$seg=rep("M",bimax)
+	forDerivp_M=derivatives(pgAge_seg,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segp,n=(bpmax+1))
+	predictDF_segint$seg=rep("M",(bimax+1))
 	forfitint_M=predict(intgAge_seg,predictDF_segint)
-	forDerivint_M=derivatives(intgAge_seg,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segint,n=bimax)
-	predictDF_segext$seg=rep("M",bemax)
+	forDerivint_M=derivatives(intgAge_seg,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segint,n=(bimax+1))
+	predictDF_segext$seg=rep("M",(bemax+1))
 	forfitext_M=predict(extgAge_seg,predictDF_segext)
-	forDerivext_M=derivatives(extgAge_seg,term="s(cbcl_scr_syn_external_r)",data=predictDF_segext,n=bemax)
+	forDerivext_M=derivatives(extgAge_seg,term="s(cbcl_scr_syn_external_r)",data=predictDF_segext,n=(bemax+1))
 	# predict poverty
 	forfitp_P=predict(pgAge_pov,predictDF_povp)
-	forDerivp_P=derivatives(pgAge_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_povp,n=bpmax)
+	forDerivp_P=derivatives(pgAge_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_povp,n=(bpmax+1))
 	forfitint_P=predict(intgAge_pov,predictDF_povint)
-	forDerivint_P=derivatives(intgAge_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_povint,n=bimax)
+	forDerivint_P=derivatives(intgAge_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_povint,n=(bimax+1))
 	forfitext_P=predict(extgAge_pov,predictDF_povext)
-	forDerivext_P=derivatives(extgAge_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_povext,n=bemax)
+	forDerivext_P=derivatives(extgAge_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_povext,n=(bemax+1))
 	# predict rich
-	predictDF_povp$poverty=rep("0",bpmax)
+	predictDF_povp$poverty=rep("0",(bpmax+1))
 	forfitp_R=predict(pgAge_pov,predictDF_povp)
-	forDerivp_R=derivatives(pgAge_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_povp,n=bpmax)
-	predictDF_povint$poverty=rep("0",bimax)
+	forDerivp_R=derivatives(pgAge_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_povp,n=(bpmax+1))
+	predictDF_povint$poverty=rep("0",(bimax+1))
 	forfitint_R=predict(intgAge_pov,predictDF_povint)
-	forDerivint_R=derivatives(intgAge_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_povint,n=bimax)
-	predictDF_povext$poverty=rep("0",bemax)
+	forDerivint_R=derivatives(intgAge_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_povint,n=(bimax+1))
+	predictDF_povext$poverty=rep("0",(bemax+1))
 	forfitext_R=predict(extgAge_pov,predictDF_povext)
-	forDerivext_R=derivatives(extgAge_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_povext,n=bemax)
+	forDerivext_R=derivatives(extgAge_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_povext,n=(bemax+1))
 	## predict across triple interaction, funtime
 	# poverty female
 	forfitp_PF=predict(pgAge_seg_pov,predictDF_segpovp)
-	forDerivp_PF=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=bpmax)
+	forDerivp_PF=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=(bpmax+1))
 	forfitint_PF=predict(intgAge_seg_pov,predictDF_segpovint)
-	forDerivint_PF=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=bimax)
+	forDerivint_PF=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=(bimax+1))
 	forfitext_PF=predict(extgAge_seg_pov,predictDF_segpovext)
-	forDerivext_PF=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=bemax)
+	forDerivext_PF=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=(bemax+1))
 	# poverty male
-	predictDF_segpovp$seg=rep("M",bpmax)
+	predictDF_segpovp$seg=rep("M",(bpmax+1))
 	forfitp_PM=predict(pgAge_seg_pov,predictDF_segpovp)
-	forDerivp_PM=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=bpmax)
-	predictDF_segpovint$seg=rep("M",bimax)
+	forDerivp_PM=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=(bpmax+1))
+	predictDF_segpovint$seg=rep("M",(bimax+1))
 	forfitint_PM=predict(intgAge_seg_pov,predictDF_segpovint)
-	forDerivint_PM=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=bimax)
-	predictDF_segpovext$seg=rep("M",bemax)
+	forDerivint_PM=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=(bimax+1))
+	predictDF_segpovext$seg=rep("M",(bemax+1))
 	forfitext_PM=predict(extgAge_seg_pov,predictDF_segpovext)
-	forDerivext_PM=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=bemax)
+	forDerivext_PM=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=(bemax+1))
 	# rich male
-	predictDF_segpovp$poverty=rep("0",bpmax)
+	predictDF_segpovp$poverty=rep("0",(bpmax+1))
 	forfitp_RM=predict(pgAge_seg_pov,predictDF_segpovp)
-	forDerivp_RM=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=bpmax)
-	predictDF_segpovint$poverty=rep("0",bimax)
+	forDerivp_RM=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=(bpmax+1))
+	predictDF_segpovint$poverty=rep("0",(bimax+1))
 	forfitint_RM=predict(intgAge_seg_pov,predictDF_segpovint)
-	forDerivint_RM=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=bimax)
-	predictDF_segpovext$poverty=rep("0",bemax)
+	forDerivint_RM=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=(bimax+1))
+	predictDF_segpovext$poverty=rep("0",(bemax+1))
 	forfitext_RM=predict(extgAge_seg_pov,predictDF_segpovext)
-	forDerivext_RM=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=bemax)
+	forDerivext_RM=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=(bemax+1))
 	# rich female
-	predictDF_segpovp$seg=rep("F",bpmax)
+	predictDF_segpovp$seg=rep("F",(bpmax+1))
 	forfitp_RF=predict(pgAge_seg_pov,predictDF_segpovp)
-	forDerivp_RF=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=bpmax)
-	predictDF_segpovint$seg=rep("F",bimax)
+	forDerivp_RF=derivatives(pgAge_seg_pov,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_segpovp,n=(bpmax+1))
+	predictDF_segpovint$seg=rep("F",(bimax+1))
 	forfitint_RF=predict(intgAge_seg_pov,predictDF_segpovint)
-	forDerivint_RF=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=bimax)
-	predictDF_segpovext$seg=rep("F",bemax)
+	forDerivint_RF=derivatives(intgAge_seg_pov,term="s(cbcl_scr_syn_internal_r)",data=predictDF_segpovint,n=(bimax+1))
+	predictDF_segpovext$seg=rep("F",(bemax+1))
 	forfitext_RF=predict(extgAge_seg_pov,predictDF_segpovext)
-	forDerivext_RF=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=bemax)
+	forDerivext_RF=derivatives(extgAge_seg_pov,term="s(cbcl_scr_syn_external_r)",data=predictDF_segpovext,n=(bemax+1))
 	# print out fit
-	F_pFit[b,1:bpmax]=forfitp_F
-	F_intFit[b,1:bimax]=forfitint_F
-	F_extFit[b,1:bemax]=forfitext_F
-	M_pFit[b,1:bpmax]=forfitp_M
-	M_intFit[b,1:bimax]=forfitint_M
-	M_extFit[b,1:bemax]=forfitext_M
-	P_pFit[b,1:bpmax]=forfitp_P
-	P_intFit[b,1:bimax]=forfitint_P
-	P_extFit[b,1:bemax]=forfitext_P
-	R_pFit[b,1:bpmax]=forfitp_R
-	R_intFit[b,1:bimax]=forfitint_R
-	R_extFit[b,1:bemax]=forfitext_R
-	PF_pFit[b,1:bpmax]=forfitp_PF
-	PF_intFit[b,1:bimax]=forfitint_PF
-	PF_extFit[b,1:bemax]=forfitext_PF
-	PM_pFit[b,1:bpmax]=forfitp_PM
-	PM_intFit[b,1:bimax]=forfitint_PM
-	PM_extFit[b,1:bemax]=forfitext_PM
-	RM_pFit[b,1:bpmax]=forfitp_RM
-	RM_intFit[b,1:bimax]=forfitint_RM
-	RM_extFit[b,1:bemax]=forfitext_RM
-	RF_pFit[b,1:bpmax]=forfitp_RF
-	RF_intFit[b,1:bimax]=forfitint_RF
-	RF_extFit[b,1:bemax]=forfitext_RF
+	F_pFit[b,1:(bpmax+1)]=forfitp_F
+	F_intFit[b,1:(bimax+1)]=forfitint_F
+	F_extFit[b,1:(bemax+1)]=forfitext_F
+	M_pFit[b,1:(bpmax+1)]=forfitp_M
+	M_intFit[b,1:(bimax+1)]=forfitint_M
+	M_extFit[b,1:(bemax+1)]=forfitext_M
+	P_pFit[b,1:(bpmax+1)]=forfitp_P
+	P_intFit[b,1:(bimax+1)]=forfitint_P
+	P_extFit[b,1:(bemax+1)]=forfitext_P
+	R_pFit[b,1:(bpmax+1)]=forfitp_R
+	R_intFit[b,1:(bimax+1)]=forfitint_R
+	R_extFit[b,1:(bemax+1)]=forfitext_R
+	PF_pFit[b,1:(bpmax+1)]=forfitp_PF
+	PF_intFit[b,1:(bimax+1)]=forfitint_PF
+	PF_extFit[b,1:(bemax+1)]=forfitext_PF
+	PM_pFit[b,1:(bpmax+1)]=forfitp_PM
+	PM_intFit[b,1:(bimax+1)]=forfitint_PM
+	PM_extFit[b,1:(bemax+1)]=forfitext_PM
+	RM_pFit[b,1:(bpmax+1)]=forfitp_RM
+	RM_intFit[b,1:(bimax+1)]=forfitint_RM
+	RM_extFit[b,1:(bemax+1)]=forfitext_RM
+	RF_pFit[b,1:(bpmax+1)]=forfitp_RF
+	RF_intFit[b,1:(bimax+1)]=forfitint_RF
+	RF_extFit[b,1:(bemax+1)]=forfitext_RF
 	# print out derivatives
-	F_pDeriv[b,1:bpmax]=forDerivp_F$derivative
-	F_intDeriv[b,1:bimax]=forDerivint_F$derivative
-	F_extDeriv[b,1:bemax]=forDerivext_F$derivative
-	M_pDeriv[b,1:bpmax]=forDerivp_M$derivative
-	M_intDeriv[b,1:bimax]=forDerivint_M$derivative
-	M_extDeriv[b,1:bemax]=forDerivext_M$derivative
-	P_pDeriv[b,1:bpmax]=forDerivp_P$derivative
-	P_intDeriv[b,1:bimax]=forDerivint_P$derivative
-	P_extDeriv[b,1:bemax]=forDerivext_P$derivative
-	R_pDeriv[b,1:bpmax]=forDerivp_R$derivative
-	R_intDeriv[b,1:bimax]=forDerivint_R$derivative
-	R_extDeriv[b,1:bemax]=forDerivext_R$derivative
-	PF_pDeriv[b,1:bpmax]=forDerivp_PF$derivative
-	PF_intDeriv[b,1:bimax]=forDerivint_PF$derivative
-	PF_extDeriv[b,1:bemax]=forDerivext_PF$derivative
-	PM_pDeriv[b,1:bpmax]=forDerivp_PM$derivative
-	PM_intDeriv[b,1:bimax]=forDerivint_PM$derivative
-	PM_extDeriv[b,1:bemax]=forDerivext_PM$derivative
-	RM_pDeriv[b,1:bpmax]=forDerivp_RM$derivative
-	RM_intDeriv[b,1:bimax]=forDerivint_RM$derivative
-	RM_extDeriv[b,1:bemax]=forDerivext_RM$derivative
-	RF_pDeriv[b,1:bpmax]=forDerivp_RF$derivative
-	RF_intDeriv[b,1:bimax]=forDerivint_RF$derivative
-	RF_extDeriv[b,1:bemax]=forDerivext_RF$derivative
+	F_pDeriv[b,1:(bpmax+1)]=forDerivp_F$derivative
+	F_intDeriv[b,1:(bimax+1)]=forDerivint_F$derivative
+	F_extDeriv[b,1:(bemax+1)]=forDerivext_F$derivative
+	M_pDeriv[b,1:(bpmax+1)]=forDerivp_M$derivative
+	M_intDeriv[b,1:(bimax+1)]=forDerivint_M$derivative
+	M_extDeriv[b,1:(bemax+1)]=forDerivext_M$derivative
+	P_pDeriv[b,1:(bpmax+1)]=forDerivp_P$derivative
+	P_intDeriv[b,1:(bimax+1)]=forDerivint_P$derivative
+	P_extDeriv[b,1:(bemax+1)]=forDerivext_P$derivative
+	R_pDeriv[b,1:(bpmax+1)]=forDerivp_R$derivative
+	R_intDeriv[b,1:(bimax+1)]=forDerivint_R$derivative
+	R_extDeriv[b,1:(bemax+1)]=forDerivext_R$derivative
+	PF_pDeriv[b,1:(bpmax+1)]=forDerivp_PF$derivative
+	PF_intDeriv[b,1:(bimax+1)]=forDerivint_PF$derivative
+	PF_extDeriv[b,1:(bemax+1)]=forDerivext_PF$derivative
+	PM_pDeriv[b,1:(bpmax+1)]=forDerivp_PM$derivative
+	PM_intDeriv[b,1:(bimax+1)]=forDerivint_PM$derivative
+	PM_extDeriv[b,1:(bemax+1)]=forDerivext_PM$derivative
+	RM_pDeriv[b,1:(bpmax+1)]=forDerivp_RM$derivative
+	RM_intDeriv[b,1:(bimax+1)]=forDerivint_RM$derivative
+	RM_extDeriv[b,1:(bemax+1)]=forDerivext_RM$derivative
+	RF_pDeriv[b,1:(bpmax+1)]=forDerivp_RF$derivative
+	RF_intDeriv[b,1:(bimax+1)]=forDerivint_RF$derivative
+	RF_extDeriv[b,1:(bemax+1)]=forDerivext_RF$derivative
 	# print out max of unconverted versions to anchor em later
 	pMax[b]=bpmax
 	intMax[b]=bimax
@@ -507,8 +507,8 @@ for (b in 1:10000){
 	pseudoPov2Group=subset(bootSamp,pseudopoverty2==1)
 	# find maximum cbcl_scr_syn_totprob_r value present across both subgroups, make prediction df with that range of cbcl_scr_syn_totprob_r values
 	bpmax_2=min(c(max(povertyGroup$cbcl_scr_syn_totprob_r),max(pseudoPov2Group$cbcl_scr_syn_totprob_r)))
-	eachPcount2=seq(1,bpmax_2)
-	predictDF_2=data.frame(eachPcount2,rep(median(bootSamp$interview_age),bpmax_2))
+	eachPcount2=seq(0,bpmax_2)
+	predictDF_2=data.frame(eachPcount2,rep(median(bootSamp$interview_age),(bpmax_2+1)))
 	# fit g~p to poverty group
 	pov_gp=gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=povertyGroup)
 	# fit g~p to same-size nonpoverty group
@@ -516,8 +516,8 @@ for (b in 1:10000){
 	# make prediction df to use for both models
 	colnames(predictDF_2)=c('cbcl_scr_syn_totprob_r','interview_age')
 	# extract fit (to become derivatives in postproc)
-	povFit[b,1:bpmax_2]=predict(pov_gp,newdata=predictDF_2)
-	pseudopovFit[b,1:bpmax_2]=predict(nonpov_gp,newdata=predictDF_2)
+	povFit[b,1:(bpmax_2+1)]=predict(pov_gp,newdata=predictDF_2)
+	pseudopovFit[b,1:(bpmax_2+1)]=predict(nonpov_gp,newdata=predictDF_2)
 }
 # SAVEOUT
 # save out version with all F stats and AICs, include max values for all iterations as well
