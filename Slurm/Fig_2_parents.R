@@ -143,7 +143,7 @@ attMax=rep(0,10000)
 rulMax=rep(0,10000)
 aggMax=rep(0,10000)
 # loop over manual bootstrap
-for (b in 1:2000){
+for (b in 1:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -396,11 +396,11 @@ for (b in 1:2000){
 # SAVEOUT
 # save out version with all cbcl and asr linboots
 outdf=data.frame(plinBoots,intlinBoots,extlinBoots,somLinBoots,anxLinBoots,thoLinBoots,witLinBoots,attLinBoots,rulLinBoots,aggLinBoots,asrpLinBoots,asrintLinBoots,asrextLinBoots,asrsomLinBoots,asranxLinBoots,asrthoLinBoots,asrwitLinBoots,asrattLinBoots,asrrulLinBoots,asraggLinBoots)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_asr2k.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_asr.rds')
 # save out version with all cbcl and asr derivs
 outdf=data.frame(pDeriv,intDeriv,extDeriv,somDeriv,anxDeriv,thoDeriv,witDeriv,attDeriv,rulDeriv,aggDeriv,asrpDeriv,asrintDeriv,asrextDeriv,asrsomDeriv,asranxDeriv,asrthoDeriv,asrwitDeriv,asrattDeriv,asrrulDeriv,asraggDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_asr2k.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_asr.rds')
 # save out version with all cbcl and asr fits
 outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,attFit,rulFit,aggFit,asrPFit,asrintFit,asrextFit,asrsomFit,asranxFit,asrthoFit,asrwitFit,asrattFit,asrrulFit,asraggFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_asr2k.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_asr.rds')
 print('done with g~p fit bootstrapping!')

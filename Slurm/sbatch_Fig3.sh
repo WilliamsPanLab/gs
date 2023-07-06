@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-#SBATCH --job-name=Fig3Fin
-#SBATCH --time=7-00:00:00
+#SBATCH --job-name=Fig3_2k
+#SBATCH --time=4-00:00:00
 #SBATCH -p leanew1  # Queue names you can submit to
 #SBATCH -n 1
 #SBATCH --mem=70G

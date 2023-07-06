@@ -153,10 +153,11 @@ extMax=rep(0,10000)
 # and modular fit for pov vs. psuedopov 2 (matched #) fits
 povFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
 pseudopovFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
+FullNonpovFit=matrix(0,nrow=10000,ncol=(pMaxVal+1))
 #################################################
 ##################### loop over manual bootstraps
 #################################################
-for (b in 1:10000){
+for (b in 1:2000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -505,6 +506,7 @@ for (b in 1:10000){
 	# extract poverty and pseudopov2 group
 	povertyGroup=subset(bootSamp,poverty==1)
 	pseudoPov2Group=subset(bootSamp,pseudopoverty2==1)
+	nonpovGroup=subset(bootSamp,poverty==0)
 	# find maximum cbcl_scr_syn_totprob_r value present across both subgroups, make prediction df with that range of cbcl_scr_syn_totprob_r values
 	bpmax_2=min(c(max(povertyGroup$cbcl_scr_syn_totprob_r),max(pseudoPov2Group$cbcl_scr_syn_totprob_r)))
 	eachPcount2=seq(0,bpmax_2)
@@ -513,23 +515,27 @@ for (b in 1:10000){
 	pov_gp=gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=povertyGroup)
 	# fit g~p to same-size nonpoverty group
 	nonpov_gp=gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=pseudoPov2Group)
+	# fit g~p to the full nonpoverty group
+	fnonpov_gp=gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=nonpovGroup)
 	# make prediction df to use for both models
 	colnames(predictDF_2)=c('cbcl_scr_syn_totprob_r','interview_age')
-	# extract fit (to become derivatives in postproc)
-	povFit[b,1:(bpmax_2+1)]=predict(pov_gp,newdata=predictDF_2)
-	pseudopovFit[b,1:(bpmax_2+1)]=predict(nonpov_gp,newdata=predictDF_2)
+	# extract fit derivatives
+	povFit[b,1:(bpmax_2+1)]=derivatives(pov_gp,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_2,n=(bpmax_2+1))$derivative
+	pseudopovFit[b,1:(bpmax_2+1)]=derivatives(nonpov_gp,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_2,n=(bpmax_2+1))$derivative
+	FullNonpovFit[b,1:(bpmax_2+1)]=derivatives(fnonpov_gp,term="s(cbcl_scr_syn_totprob_r)",data=predictDF_2,n=(bpmax_2+1))$derivative
+
 }
 # SAVEOUT
 # save out version with all F stats and AICs, include max values for all iterations as well
 outdf=data.frame(Fseg_p,Fseg_int,Fseg_ext,Fpov_p,Fpov_int,Fpov_ext,Fsegpov_p,Fsegpov_int,Fsegpov_ext,AICreduced_p,AICreduced_int,AICreduced_ext,AICseg_p,AICseg_int,AICseg_ext,AICpov_p,AICpov_int,AICpov_ext,AICsegpov_p,AICsegpov_int,AICsegpov_ext,Fseg_null_p,Fseg_null_int,Fseg_null_ext,Fpov_null_p,Fpov_null_int,Fpov_null_ext,Fsegpov_null_p,Fsegpov_null_int,Fsegpov_null_ext,AICseg_null_p,AICseg_null_int,AICseg_null_ext,AICpov_null_p,AICpov_null_int,AICpov_null_ext,AICsegpov_null_p,AICsegpov_null_int,AICsegpov_null_ext,AICseg_p_noIntrxn,AICseg_int_noIntrxn,AICseg_ext_noIntrxn,AICpov_p_noIntrxn,AICpov_int_noIntrxn,AICpov_ext_noIntrxn,AICsegpov_p_noIntrxn,AICsegpov_int_noIntrxn,AICsegpov_ext_noIntrxn,pMax,intMax,extMax)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFandAIC.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFandAIC2k.rds')
 # save out fits
 outdf=data.frame(F_pFit,F_intFit,F_extFit,M_pFit,M_intFit,M_extFit,P_pFit,P_intFit,P_extFit,R_pFit,R_intFit,R_extFit,PF_pFit,PF_intFit,PF_extFit,PM_pFit,PM_intFit,PM_extFit,RM_pFit,RM_intFit,RM_extFit,RF_pFit,RF_intFit,RF_extFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFits.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFits2k.rds')
 # save out derivatives
 outdf=data.frame(F_pDeriv,F_intDeriv,F_extDeriv,M_pDeriv,M_intDeriv,M_extDeriv,P_pDeriv,P_intDeriv,P_extDeriv,R_pDeriv,R_intDeriv,R_extDeriv,PF_pDeriv,PF_intDeriv,PF_extDeriv,PM_pDeriv,PM_intDeriv,PM_extDeriv,RM_pDeriv,RM_intDeriv,RM_extDeriv,RF_pDeriv,RF_intDeriv,RF_extDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpDerivs.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpDerivs2k.rds')
 print('done with g~p fit bootstrapping!')
 # save out modular poverty and equivlanetly-sized poverty fits
-outdf=data.frame(povFit,pseudopovFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpPovNonPov.rds')
+outdf=data.frame(povFit,pseudopovFit,FullNonpovFit)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpPovNonPov2k.rds')
