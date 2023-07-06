@@ -193,11 +193,11 @@ plot_bootstraps_par(PFits,160,x_title,MaxP)
 plot_bootstraps_par(IFits,30,'Parental Internalizing',MaxI)
 plot_bootstraps_par(EFits,63,'Parental Externalizing',MaxE)
 plot_bootstraps_par(AnxFits,31,'Anxious Depression',MaxAnx)
-plot_bootstraps_par(ThoFits,18,'Thought',MaxTho,ThoBc,ThoC)
-plot_bootstraps_par(WitFits,18,'Withdrawn Depression',MaxWit,WitBc,WitC)
-plot_bootstraps_par(AttFits,31,'Attention',MaxAtt,AttBc,AttC)
-plot_bootstraps_par(RulFits,21,'Rule Breaking',MaxRul,RulBc,RulC)
-plot_bootstraps_par(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
+plot_bootstraps_par(AnxFits,31,'Anxious Depression',MaxAnx)
+plot_bootstraps_par(WitFits,18,'Withdrawn Depression',MaxWit)
+plot_bootstraps_par(AttFits,31,'Attention',MaxAtt)
+plot_bootstraps_par(RulFits,21,'Rule Breaking',MaxRul)
+plot_bootstraps_par(AggFits,45,'Aggression',MaxAgg)
 
 
 MaxI=find_furthest_nonzero(IFits)
@@ -585,6 +585,7 @@ ggplot(PvC_long, aes(x = Subscale, y = value,fill=Group)) +
   geom_boxplot() +
   labs(x = "Subscale",
        y = "Deviance Explained in Child g") +
-  theme_minimal(base_size=20)
+  theme_minimal(base_size=35)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
