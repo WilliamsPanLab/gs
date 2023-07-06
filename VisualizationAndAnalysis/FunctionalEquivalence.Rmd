@@ -231,4 +231,8 @@ print(paste("BV: The AIC for gaussian is ", AIC(BVMod_gaus), " vs. ", AIC(BVMod_
 print(paste("BV: The BIC for gaussian is ", BIC(BVMod_gaus), " vs. ", BIC(BVMod_nb), " for negative binomial"))
 print(paste("Y2: The AIC for gaussian is ", AIC(Y2Mod_gaus), " vs. ", AIC(Y2Mod_nb), " for negative binomial"))
 print(paste("Y2: The BIC for gaussian is ", BIC(Y2Mod_gaus), " vs. ", BIC(Y2Mod_nb), " for negative binomial"))
+qq.gam(BVMod_gaus)
+qq.gam(BVMod_nb)
+qq.gam(Y2Mod_gaus)
+qq.gam(Y2Mod_nb)
 ```
