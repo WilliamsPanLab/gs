@@ -1,4 +1,4 @@
-Figure1
+Figure2
 ================
 2023-06-09
 
@@ -6,15 +6,6 @@ Figure1
 # load libraries
 library(ggplot2)
 library(hexbin)
-library(rgl)
-```
-
-    ## Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display
-
-    ## Warning: 'rgl.init' failed, running with 'rgl.useNULL = TRUE'.
-
-``` r
-library(shapes)
 library(reshape2)
 library(viridis)
 ```
@@ -67,7 +58,7 @@ library(tidyr)
 plot_bootstraps_par <- function(data,maxval,Name,maxValuePlot) {
   # Melt the data frame
   data_melt <- melt(t(data))
-  data_melt$Var1 <- rep(seq(1, maxval), nrow(data))
+  data_melt$Var1 <- rep(seq(0, maxval), nrow(data))
 
   # Calculate percentiles
   percentiles <- data %>%
@@ -79,7 +70,7 @@ plot_bootstraps_par <- function(data,maxval,Name,maxValuePlot) {
   data_melt$CI <- 0
   
   # Prepare CIs for insertion
-  CIs <- data.frame(rep(seq(1, maxval), 2), c(rep(1001, maxval), rep(1002, maxval)), percentiles_long$YValue, rep(1, (maxval*2)))
+  CIs <- data.frame(rep(seq(0, maxval), 2), c(rep(10001, (maxval+1)), rep(10002, (maxval+1))), percentiles_long$YValue, rep(1, ((maxval+1)*2)))
   colnames(CIs) <- colnames(data_melt)
   
   # Add CIs
@@ -92,7 +83,7 @@ plot_bootstraps_par <- function(data,maxval,Name,maxValuePlot) {
   ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2, color = Var2)) +
     geom_line(aes(alpha = CI), show.legend = FALSE) +
     scale_color_viridis_c(option = "inferno", direction = -1) +
-    scale_alpha_manual(values = c(0.1, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
+    scale_alpha_manual(values = c(0.01, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
     theme_minimal(base_size=35) + 
     ylab(y_title)+xlab(Name)+
     theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -102,7 +93,7 @@ plot_bootstraps_par <- function(data,maxval,Name,maxValuePlot) {
 plot_bootstrapDerivs <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Clinical) {
   # Melt the data frame
   data_melt <- melt(t(data))
-  data_melt$Var1 <- rep(seq(1, maxval), nrow(data))
+  data_melt$Var1 <- rep(seq(0, maxval), nrow(data))
 
   # Calculate percentiles
   percentiles <- data %>%
@@ -114,7 +105,7 @@ plot_bootstrapDerivs <- function(data,maxval,Name,maxValuePlot,BorderlineClinica
   data_melt$CI <- 0
   
   # Prepare CIs for insertion
-  CIs <- data.frame(rep(seq(1, maxval), 2), c(rep(10001, maxval), rep(10002, maxval)), percentiles_long$YValue, rep(1, (maxval*2)))
+  CIs <- data.frame(rep(seq(0, maxval), 2), c(rep(10001, (maxval+1)), rep(10002, (maxval+1))), percentiles_long$YValue, rep(1, ((maxval+1)*2)))
   colnames(CIs) <- colnames(data_melt)
   
   # Add CIs
@@ -147,6 +138,58 @@ my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1
 ``` r
 # master df from sample construction
 masterdf=readRDS('~/gp_masterdf.rds')
+
+# pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
+masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==65,]
+masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==69,]
+masterdfI_bc<-masterdf[masterdf$cbcl_scr_syn_internal_t==65,]
+masterdfI_c<-masterdf[masterdf$cbcl_scr_syn_internal_t==69,]
+masterdfE_bc<-masterdf[masterdf$cbcl_scr_syn_external_t==65,]
+masterdfE_c<-masterdf[masterdf$cbcl_scr_syn_external_t==69,]
+masterdfAnx_bc<-masterdf[masterdf$cbcl_scr_syn_anxdep_t==65,]
+masterdfAnx_c<-masterdf[masterdf$cbcl_scr_syn_anxdep_t==69,]
+masterdfTho_bc<-masterdf[masterdf$cbcl_scr_syn_thought_t==65,]
+masterdfTho_c<-masterdf[masterdf$cbcl_scr_syn_thought_t==69,]
+# note no one has t==65 in this dataset for withdrawn depression
+masterdfWit_bc<-masterdf[masterdf$cbcl_scr_syn_withdep_t==65,]
+masterdfWit_c<-masterdf[masterdf$cbcl_scr_syn_withdep_t==69,]
+masterdfSom_bc<-masterdf[masterdf$cbcl_scr_syn_somatic_t==65,]
+masterdfSom_c<-masterdf[masterdf$cbcl_scr_syn_somatic_t==69,]
+masterdfSoc_bc<-masterdf[masterdf$cbcl_scr_syn_social_t==65,]
+masterdfSoc_c<-masterdf[masterdf$cbcl_scr_syn_social_t==69,]
+masterdfAtt_bc<-masterdf[masterdf$cbcl_scr_syn_attention_t==65,]
+masterdfAtt_c<-masterdf[masterdf$cbcl_scr_syn_attention_t==69,]
+masterdfRul_bc<-masterdf[masterdf$cbcl_scr_syn_rulebreak_t==65,]
+masterdfRul_c<-masterdf[masterdf$cbcl_scr_syn_rulebreak_t==69,]
+masterdfAgg_bc<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==65,]
+masterdfAgg_c<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==69,]
+
+# borderline clinical and clinical cutoffs
+Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
+Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
+Ibc=mean(masterdfP_bc$cbcl_scr_syn_internal_r)
+Ic=mean(masterdfP_c$cbcl_scr_syn_internal_r)
+Ebc=mean(masterdfE_bc$cbcl_scr_syn_external_r)
+Ec=mean(masterdfE_c$cbcl_scr_syn_external_r)
+AnxBc=mean(as.numeric(masterdfAnx_bc$cbcl_scr_syn_anxdep_r))
+AnxC=mean(as.numeric(masterdfAnx_c$cbcl_scr_syn_anxdep_r))
+ThoBc=mean(as.numeric(masterdfTho_bc$cbcl_scr_syn_thought_r))
+ThoC=mean(as.numeric(masterdfTho_c$cbcl_scr_syn_thought_r))
+WitBc=mean(as.numeric(masterdfWit_bc$cbcl_scr_syn_withdep_r))
+WitC=mean(as.numeric(masterdfWit_c$cbcl_scr_syn_withdep_r))
+SomBc=mean(as.numeric(masterdfSom_bc$cbcl_scr_syn_somatic_r))
+SomC=mean(as.numeric(masterdfSom_c$cbcl_scr_syn_somatic_r))
+SocBc=mean(as.numeric(masterdfSom_bc$cbcl_scr_syn_social_r))
+SocC=mean(as.numeric(masterdfSoc_c$cbcl_scr_syn_social_r))
+AttBc=mean(as.numeric(masterdfAtt_bc$cbcl_scr_syn_attention_r))
+AttC=mean(as.numeric(masterdfAtt_c$cbcl_scr_syn_attention_r))
+RulBc=mean(as.numeric(masterdfRul_bc$cbcl_scr_syn_rulebreak_r))
+RulC=mean(as.numeric(masterdfRul_c$cbcl_scr_syn_rulebreak_r))
+AggBc=mean(as.numeric(masterdfAgg_bc$cbcl_scr_syn_aggressive_r))
+AggC=mean(as.numeric(masterdfAgg_c$cbcl_scr_syn_aggressive_r))
+```
+
+``` r
 # reference dataframe
 plotdf<-data.frame(masterdf$parentPcount,masterdf$g,masterdf$cbcl_scr_syn_totprob_r,masterdf$interview_age)
 colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
@@ -158,15 +201,15 @@ y1_title <- expression(paste("Child ", italic("p")))
 
 basic=ggplot(data = plotdf,aes(y = cbcl_scr_syn_totprob_r, x = parentPcount)) + geom_hex(bins=60)+
     geom_point(alpha=0)+
-    #geom_smooth(method = "lm",formula = y~x,color='gray') +
+    #geom_smooth(method = "gam",formula = y~s(x),color='gray') +
     scale_fill_viridis_c(option = "inferno") +
-    scale_y_continuous(limits=c(0,113),expand = expansion(mult = c(0, 0)))+
+    scale_y_continuous(expand = expansion(mult = c(0, 0)))+
     theme_minimal(base_size=35) + 
     xlab(x_title)+ylab(y1_title)+
-    geom_hline(yintercept = 60.225, linetype = "dashed")+
-    geom_hline(yintercept = 65.65574, linetype = "dashed")+
+    geom_hline(yintercept = Pbc, linetype = "dashed")+
+    geom_hline(yintercept = Pc, linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
-    scale_x_continuous(limits = c(0,135),expand = expansion(mult = c(0, 0)))+guides(fill=FALSE)
+    scale_x_continuous(expand = expansion(mult = c(0, 0)))+guides(fill=FALSE)
 ```
 
     ## Warning: The `size` argument of `element_rect()` is deprecated as of ggplot2 3.4.0.
@@ -185,15 +228,7 @@ basic=ggplot(data = plotdf,aes(y = cbcl_scr_syn_totprob_r, x = parentPcount)) + 
 ggMarginal(basic,type="histogram",size=3,binwidth=4,fill="gray")
 ```
 
-    ## Warning: Removed 15 rows containing non-finite values (`stat_binhex()`).
-
-    ## Warning: Removed 15 rows containing non-finite values (`stat_binhex()`).
-
-    ## Warning: Removed 35 rows containing missing values (`geom_hex()`).
-
-    ## Warning: Removed 15 rows containing missing values (`geom_point()`).
-
-![](Fig2_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 print(cor.test(masterdf$parentPcount,masterdf$cbcl_scr_syn_totprob_r))
@@ -212,15 +247,15 @@ print(cor.test(masterdf$parentPcount,masterdf$cbcl_scr_syn_totprob_r))
     ## 0.5666022
 
 ``` r
-### P boots plot with overlaid linear fit
+### P boots plot 
 # load in data
-Fits=readRDS('~/Desktop/g_p/gParentpFitBoots.rds')
+Fits=readRDS('~/gpFitBoots_asr.rds')
 # find mean shape and plot it: p
-PFits=Fits[,481:640]
+PFits=Fits[,448:608]
 MaxP=find_furthest_nonzero(PFits)
 # melt data for plotting each line
 data_melt <- melt(t(PFits))
-data_melt$Var1 <- rep(seq(1, 160), nrow(PFits))
+data_melt$Var1 <- rep(seq(0, 160), nrow(PFits))
 # Calculate percentiles
 percentiles <- PFits %>%
 summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
@@ -254,7 +289,7 @@ percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_
 data_melt$CI <- 0
   
 # Prepare CIs for insertion
-CIs <- data.frame(rep(seq(1, 160), 2), c(rep(10001, 160), rep(10002, 160)), percentiles_long$YValue, rep(1, (160*2)))
+CIs <- data.frame(rep(seq(0, 160), 2), c(rep(10001, 161), rep(10002, 161)), percentiles_long$YValue, rep(1, (161*2)))
 colnames(CIs) <- colnames(data_melt)
   
 # Add CIs
@@ -274,7 +309,7 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
   scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
 ```
 
-    ## Warning: Removed 250050 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 240048 rows containing missing values (`geom_line()`).
 
     ## Warning: The `guide` argument in `scale_*()` cannot be `FALSE`. This was deprecated in
     ## ggplot2 3.3.4.
@@ -283,30 +318,35 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 # load in data: 10,000 only done for p
-Fits=readRDS('~/Desktop/g_p/gParentpDerivBoots.rds')
-PFits=Fits[,481:640]
+Fits=readRDS('~/gpFitBoots_asr.rds')
+PFits=Fits[,448:608]
 MaxP=find_furthest_nonzero(PFits)
-# load in 1k data
-Fits=readRDS('~/Desktop/g_p/gpFitBoots_asr.rds')
 
-IFits = Fits[1:1000,(161:190)+437]
-EFits = Fits[1:1000,(191:253)+437]
-SomFits = Fits[1:1000,(254:273)+437]
-AnxFits = Fits[1:1000,(274:304)+437]
-ThoFits = Fits[1:1000,(305:322)+437]
-WitFits = Fits[1:1000,(323:340)+437]
-AttFits = Fits[1:1000,(341:371)+437]
-RulFits = Fits[1:1000,(372:392)+437]
-AggFits = Fits[1:1000,(393:437)+437]
+IFits = Fits[,(161:191)+448]
+EFits = Fits[,(192:255)+448]
+SomFits = Fits[,(256:276)+448]
+AnxFits = Fits[,(277:308)+448]
+ThoFits = Fits[,(309:327)+448]
+WitFits = Fits[,(328:346)+448]
+AttFits = Fits[,(347:378)+448]
+RulFits = Fits[,(379:400)+448]
+AggFits = Fits[,(401:446)+448]
 
 MaxI=find_furthest_nonzero(IFits)
 MaxE=find_furthest_nonzero(EFits)
+MaxAnx=find_furthest_nonzero(AnxFits)
+MaxTho=find_furthest_nonzero(ThoFits)
+MaxWit=find_furthest_nonzero(WitFits)
+MaxSom=find_furthest_nonzero(SomFits)
+MaxAtt=find_furthest_nonzero(AttFits)
+MaxRul=find_furthest_nonzero(RulFits)
+MaxAgg=find_furthest_nonzero(AggFits)
 
-# actually plot em
+# actually plot em: some in main text as fig 2, some as fig s5
 plot_bootstraps_par(PFits,160,x_title,MaxP)
 ```
 
@@ -318,9 +358,9 @@ plot_bootstraps_par(PFits,160,x_title,MaxP)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 250050 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 240048 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(IFits,30,'Parental Internalizing',MaxI)
@@ -334,9 +374,9 @@ plot_bootstraps_par(IFits,30,'Parental Internalizing',MaxI)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 5010 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 40009 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(EFits,63,'Parental Externalizing',MaxE)
@@ -350,45 +390,136 @@ plot_bootstraps_par(EFits,63,'Parental Externalizing',MaxE)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 17034 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 180036 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
 ``` r
-#plot_bootstraps_par(AnxFits,31,'anx.depr.',MaxAnx)
-#plot_bootstraps(ThoFits,18,'thought',MaxTho,ThoBc,ThoC)
-#plot_bootstraps(WitFits,16,'withdrawn',MaxWit,WitBc,WitC)
-#plot_bootstraps(SocFits,17,'social',MaxSoc,SocBc,SocC)
-#plot_bootstraps(AttFits,19,'attention',MaxAtt,AttBc,AttC)
-#plot_bootstraps(RulFits,18,'rulebreak',MaxRul,RulBc,RulC)
-#plot_bootstraps(AggFits,32,'aggressive',MaxAgg,AggBc,AggC)
-
-
-MaxI=find_furthest_nonzero(IFits)
-MaxE=find_furthest_nonzero(EFits)
-MaxAnx=find_furthest_nonzero(AnxFits)
-MaxTho=find_furthest_nonzero(ThoFits)
-MaxWit=find_furthest_nonzero(WitFits)
-#MaxSoc=find_furthest_nonzero(SocFits)
-MaxSom=find_furthest_nonzero(SomFits)
-MaxAtt=find_furthest_nonzero(AttFits)
-MaxRul=find_furthest_nonzero(RulFits)
-MaxAgg=find_furthest_nonzero(AggFits)
+plot_bootstraps_par(AnxFits,31,'Anxious Depression',MaxAnx)
 ```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 40008 rows containing missing values (`geom_line()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
+
+``` r
+plot_bootstraps_par(WitFits,18,'Withdrawn Depression',MaxWit)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 40009 rows containing missing values (`geom_line()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->
+
+``` r
+plot_bootstraps_par(AttFits,31,'Attention',MaxAtt)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 40008 rows containing missing values (`geom_line()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-6.png)<!-- -->
+
+``` r
+plot_bootstraps_par(RulFits,21,'Rule Breaking',MaxRul)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-7.png)<!-- -->
+
+``` r
+plot_bootstraps_par(AggFits,45,'Aggression',MaxAgg)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 110022 rows containing missing values (`geom_line()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-8.png)<!-- -->
+
+``` r
+plot_bootstraps_par(ThoFits,18,'Thought',MaxTho)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 40008 rows containing missing values (`geom_line()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-9.png)<!-- -->
+
+``` r
+plot_bootstraps_par(SomFits,20,'Somatic',MaxSom)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 30006 rows containing missing values (`geom_line()`).
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-10.png)<!-- -->
 
 ``` r
 # load in data
-Fits=readRDS('~/Desktop/g_p/gpDerivBoots_asr.rds')
+Fits=readRDS('~/gpDerivBoots_asr.rds')
 # find mean shape and plot it: p
-IFits = Fits[1:1000,(161:190)+437]
-EFits = Fits[1:1000,(191:253)+437]
-SomFits = Fits[1:1000,(254:273)+437]
-AnxFits = Fits[1:1000,(274:304)+437]
-ThoFits = Fits[1:1000,(305:322)+437]
-WitFits = Fits[1:1000,(323:340)+437]
-AttFits = Fits[1:1000,(341:371)+437]
-RulFits = Fits[1:1000,(373:392)+437]
-AggFits = Fits[1:1000,(393:437)+437]
+PFits=Fits[,448:608]
+IFits = Fits[,(161:191)+448]
+EFits = Fits[,(192:255)+448]
+SomFits = Fits[,(256:276)+448]
+AnxFits = Fits[,(277:308)+448]
+ThoFits = Fits[,(309:327)+448]
+WitFits = Fits[,(328:346)+448]
+AttFits = Fits[,(347:378)+448]
+RulFits = Fits[,(379:400)+448]
+AggFits = Fits[,(401:446)+448]
 
 # for p - saved out at 600x200, 300x200 for minor scales
 # get straightfoward of segment where 99% is over 0 or under
@@ -420,7 +551,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 26 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 # and a version with colorbar - for p only (same color mapping using throughout)
@@ -440,9 +571,9 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 48 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 49 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 ``` r
 # for int
@@ -450,8 +581,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
 positive_counts <- colSums(IFits > 0, na.rm = TRUE)
 negative_counts <- colSums(IFits < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>990
-negative_countsSig=negative_counts>990
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(IFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -472,7 +603,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
 
 ``` r
 # for ext
@@ -480,8 +611,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 positive_counts <- colSums(EFits > 0, na.rm = TRUE)
 negative_counts <- colSums(EFits < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>990
-negative_countsSig=negative_counts>990
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(EFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -503,9 +634,9 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 18 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 20 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
 
 ``` r
 # for som
@@ -513,8 +644,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 positive_counts <- colSums(SomFits > 0, na.rm = TRUE)
 negative_counts <- colSums(SomFits < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>990
-negative_countsSig=negative_counts>990
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(SomFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -538,14 +669,14 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
 
 ``` r
 # for anx
 positive_counts <- colSums(AnxFits > 0, na.rm = TRUE)
 negative_counts <- colSums(AnxFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>990
-negative_countsSig=negative_counts>990
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 data <- apply(AnxFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -564,16 +695,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-6.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->
 
 ``` r
 # for Tho
 positive_counts <- colSums(ThoFits > 0, na.rm = TRUE)
 negative_counts <- colSums(ThoFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>990
-negative_countsSig=negative_counts>990
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 data <- apply(ThoFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -592,16 +723,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-7.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->
 
 ``` r
 # for Wit
 positive_counts <- colSums(WitFits > 0, na.rm = TRUE)
 negative_counts <- colSums(WitFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>990
-negative_countsSig=negative_counts>990
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 data <- apply(WitFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -621,14 +752,14 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-8.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-8.png)<!-- -->
 
 ``` r
 # for Att
 positive_counts <- colSums(AttFits > 0, na.rm = TRUE)
 negative_counts <- colSums(AttFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>990
-negative_countsSig=negative_counts>990
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 data <- apply(AttFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -646,16 +777,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-9.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-9.png)<!-- -->
 
 ``` r
 # for Rul
 positive_counts <- colSums(RulFits > 0, na.rm = TRUE)
 negative_counts <- colSums(RulFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>990
-negative_countsSig=negative_counts>990
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 data <- apply(RulFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -673,16 +804,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 8 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-10.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-10.png)<!-- -->
 
 ``` r
 # for Agg
 positive_counts <- colSums(AggFits > 0, na.rm = TRUE)
 negative_counts <- colSums(AggFits < 0, na.rm = TRUE)
-positive_countsSig=positive_counts>990
-negative_countsSig=negative_counts>990
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 data <- apply(AggFits, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -700,33 +831,25 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 12 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-11.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-11.png)<!-- -->
 
 ``` r
-# for each bootstrap, recover median slope
+# for each bootstrap, recover median slope in bottom and top third
 df <- data.frame(
-  p = apply(PFits[, 1:MaxP], 1, median),
-  Internal = apply(IFits[, 1:MaxI], 1, median),
-  External = apply(EFits[, 1:MaxE], 1, median),
-  Somatic = apply(SomFits[, 1:MaxSom], 1, median),
-  AnxDepr = apply(AnxFits[, 1:MaxAnx], 1, median),
-  Thought = apply(ThoFits[, 1:MaxTho], 1, median),
-  WithDepr = apply(WitFits[, 1:MaxWit], 1, median),
-  # can replace with intrusive
-  #Social = apply(SocFits[, 1:MaxSoc], 1, median),
-  Attn = apply(AttFits[, 1:MaxAtt], 1, median),
-  Rules = apply(RulFits[, 1:MaxRul], 1, median),
-  Aggr = apply(AggFits[, 1:MaxAgg], 1, median)
+  p = apply(PFits[, 1:(MaxP/3)], 1, median),
+  Internal = apply(IFits[, 1:(MaxI/3)], 1, median),
+  External = apply(EFits[, 1:(MaxE/3)], 1, median),
+  Somatic = apply(SomFits[, 1:(MaxSom/3)], 1, median),
+  AnxDepr = apply(AnxFits[, 1:(MaxAnx/3)], 1, median),
+  Thought = apply(ThoFits[, 1:(MaxTho/3)], 1, median),
+  WithDepr = apply(WitFits[, 1:(MaxWit/3)], 1, median),
+  Attn = apply(AttFits[, 1:(MaxAtt/3)], 1, median),
+  Rules = apply(RulFits[, 1:(MaxRul/3)], 1, median),
+  Aggr = apply(AggFits[, 1:(MaxAgg/3)], 1, median)
 )
-```
 
-    ## Warning in data.frame(p = apply(PFits[, 1:MaxP], 1, median), Internal =
-    ## apply(IFits[, : row names were found from a short variable and have been
-    ## discarded
-
-``` r
 # Convert the data frame to a tidy format
 df_tidy <- df %>%
   gather(key = "Subscale", value = "MedianValue")
@@ -744,12 +867,101 @@ df_tidy$Subscale <- reorder(df_tidy$Subscale, -df_tidy$MedianValue, median)
 # Create the boxplot
 ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
   geom_boxplot() +
-  labs(title = "Median Association with Cognitive Score",
+  labs(title = "Median Association with Cognitive Score: Healthy Third",
        x = "Subscale",
        y = "Median Slope") +
-  theme_minimal(base_size=20)+scale_fill_gradientn(
+  theme_minimal(base_size=23)+scale_fill_gradientn(
     colors = my_palette(100),
-    limits = c(-.27,.27))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
+    limits = c(-.27,.27))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.25,.25))
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+``` r
+# and now a clinical risk group
+# only in clinical range
+df <- data.frame(
+  p = apply(PFits[, (MaxP/1.5):MaxP], 1, median),
+  Internal = apply(IFits[, (MaxI/1.5):MaxI], 1, median),
+  External = apply(EFits[, (MaxE/1.5):MaxE], 1, median),
+  Somatic = apply(SomFits[, (MaxSom/1.5):MaxSom], 1, median),
+  AnxDepr = apply(AnxFits[, (MaxAnx/1.5):MaxAnx], 1, median),
+  Thought = apply(ThoFits[, (MaxTho/1.5):MaxTho], 1, median),
+  WithDepr = apply(WitFits[, (MaxWit/1.5):MaxWit], 1, median),
+  # to replace with intrusive
+  #Social = apply(SocFits[, (MaxSoc/1.5):MaxSoc], 1, median),
+  Attn = apply(AttFits[, (MaxAtt/1.5):MaxAtt], 1, median),
+  Rules = apply(RulFits[, (MaxRul/1.5):MaxRul], 1, median),
+  Aggr = apply(AggFits[, (MaxAgg/1.5):MaxAgg], 1, median)
+)
+
+# Convert the data frame to a tidy format
+df_tidy2 <- df %>%
+  gather(key = "Subscale", value = "MedianValue")
+
+# Calculate the median for each subscale iteration
+df_median <- df_tidy2 %>%
+  group_by(Subscale) %>%
+  summarize(MedianIteration = median(MedianValue))
+
+# Join the MedianIteration column to df_tidy based on Subscale
+df_tidy2 <- left_join(df_tidy2, df_median, by = "Subscale")
+
+# note we are sorting by plot one's order
+df_tidy2$Subscale <- reorder(df_tidy2$Subscale, -df_tidy$MedianValue, median)
+
+# Create the boxplot
+ggplot(df_tidy2, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
+  geom_boxplot() +
+  labs(title = "Median Association with Cognitive Score: Clinical Third",
+       x = "Subscale",
+       y = "Median Slope") +
+  theme_minimal(base_size=23)+scale_fill_gradientn(
+    colors = my_palette(100),
+    limits = c(-.27,.27))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.25,.25))
+```
+
+![](Fig2_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+library(dplyr)
+# supplemental figure 2
+PvC_de=readRDS('~/PvC_gdevExplBoots.rds')
+
+# rename columns for plotting
+new_colnames <- c("child p", "child int.", "child ext.", "child somatic", "child anxdep.", "child thought", "child withdep.", 
+                  "child social", "child attn.", "child rulebreak", "child aggr.", "parent p", "parent int.", 
+                  "parent ext.", "parent somatic", "parent anx", "parent thought", "parent withdep.", 
+                  "parent attn.", "parent rulebreak", "parent aggr.")
+desiredOrder <- c("child p", "parent p","child int.", "parent int.","child ext.", "parent ext.", "child aggr.", "parent aggr.","child anxdep.","parent anx", "child attn.", "parent attn.","child rulebreak","parent rulebreak","child thought", "parent thought", "child somatic","parent somatic",  "child withdep.", "parent withdep.","child social")
+
+# set col names
+colnames(PvC_de)<-new_colnames
+
+# long format
+PvC_long=melt(PvC_de)
+```
+
+    ## No id variables; using all as measure variables
+
+``` r
+# rename for clarity
+colnames(PvC_long)<-c("Subscale","value")
+# grouping variable for color
+PvC_long$Group <- ifelse(grepl("child", PvC_long$Subscale), "child", "parent")
+# order as desired
+PvC_long$Subscale <- factor(PvC_long$Subscale, levels = desiredOrder)
+
+PvC_long <- PvC_long %>%
+  filter(!(Subscale %in% c("child social", "parent intr.")))
+
+# Create the boxplot
+ggplot(PvC_long, aes(x = Subscale, y = value,fill=Group)) +
+  geom_boxplot() +
+  labs(x = "Subscale",
+       y = "Deviance Explained in Child g") +
+  theme_minimal(base_size=35)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+![](Fig2_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->

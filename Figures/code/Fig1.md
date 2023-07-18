@@ -6,14 +6,6 @@ Figure1
 # load libraries
 library(ggplot2)
 library(hexbin)
-library(shapes)
-```
-
-    ## Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display
-
-    ## Warning: 'rgl.init' failed, running with 'rgl.useNULL = TRUE'.
-
-``` r
 library(reshape2)
 library(viridis)
 ```
@@ -70,7 +62,7 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Clinical) {
   # Melt the data frame
   data_melt <- melt(t(data))
-  data_melt$Var1 <- rep(seq(1, maxval), nrow(data))
+  data_melt$Var1 <- rep(seq(0, maxval), nrow(data))
 
   # Calculate percentiles
   percentiles <- data %>%
@@ -82,7 +74,7 @@ plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Cli
   data_melt$CI <- 0
   
   # Prepare CIs for insertion
-  CIs <- data.frame(rep(seq(1, maxval), 2), c(rep(10001, maxval), rep(10002, maxval)), percentiles_long$YValue, rep(1, (maxval*2)))
+  CIs <- data.frame(rep(seq(0, maxval), 2), c(rep(10001, maxval+1), rep(10002, maxval+1)), percentiles_long$YValue, rep(1, ((maxval+1)*2)))
   colnames(CIs) <- colnames(data_melt)
   
   # Add CIs
@@ -96,7 +88,7 @@ plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Cli
     geom_line(aes(alpha = CI), show.legend = FALSE) +
     scale_color_viridis_c(option = "inferno", direction = -1) +
     scale_alpha_manual(values = c(0.01, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
-    theme_minimal(base_size=35) + 
+    theme_minimal(base_size=34) + 
     ylab(expression(italic(g)))+xlab(Name)+
     geom_vline(xintercept = BorderlineClinical, linetype = "dashed")+
     geom_vline(xintercept = Clinical, linetype = "dashed")+
@@ -120,7 +112,7 @@ plot_bootstrapDerivs <- function(data,maxval,Name,maxValuePlot,BorderlineClinica
   data_melt$CI <- 0
   
   # Prepare CIs for insertion
-  CIs <- data.frame(rep(seq(1, maxval), 2), c(rep(10001, maxval), rep(10002, maxval)), percentiles_long$YValue, rep(1, (maxval*2)))
+  CIs <- data.frame(rep(seq(0, maxval), 2), c(rep(10001, maxval+1), rep(10002, maxval+1)), percentiles_long$YValue, rep(1, ((maxval+1)*2)))
   colnames(CIs) <- colnames(data_melt)
   
   # Add CIs
@@ -156,6 +148,16 @@ my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1
 ``` r
 # load in masterdf (saved out from sample construction)
 masterdf=readRDS('~/gp_masterdf.rds')
+
+# pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
+# https://onlinelibrary.wiley.com/doi/epdf/10.1002/mrdd.20071
+# https://aseba.org/wp-content/uploads/2019/02/cbclprofile.pdf
+masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==65,]
+masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==69,]
+# borderline clinical and clinical cutoffs
+Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
+Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
+
 # reference linear model
 plotdf<-data.frame(masterdf$parentPcount,masterdf$g,masterdf$cbcl_scr_syn_totprob_r,masterdf$interview_age)
 colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
@@ -169,8 +171,8 @@ basic=ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_h
     ylim(c(-3.9,4.7)) +
     theme_minimal(base_size=35) + 
     ylab(expression(italic(g)))+xlab(expression(italic(p)))+
-    geom_vline(xintercept = 60.225, linetype = "dashed")+
-    geom_vline(xintercept = 65.65574, linetype = "dashed")+
+    geom_vline(xintercept = Pbc, linetype = "dashed")+
+    geom_vline(xintercept = Pc, linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
     scale_x_continuous(limits = c(0,113),expand = expansion(mult = c(0, 0)))+guides(fill=FALSE)
 ```
@@ -211,21 +213,19 @@ fit_data<-ggplot_build(basic)$data[[3]]
     ## Warning: Removed 7 rows containing non-finite values (`stat_smooth()`).
 
 ``` r
+lmforBeta<-lm(resids~cbcl_scr_syn_totprob_r,data=plotdf)
+```
+
+``` r
 ### P boots plot with overlaid linear fit
 # load in data
 Fits=readRDS('~/gpFitBoots.rds')
 # extract p factor
-PFits=Fits[,1:127]
+PFits=Fits[,1:128]
 MaxP=find_furthest_nonzero(PFits)
-# pull clinical cutoff from master df: t scores > 68 = borderline clinical, 70 = clinical
-masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==65,]
-masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==70,]
-# borderline clinical and clinical cutoffs
-Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
-Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
 # melt data for plotting each line
 data_melt <- melt(t(PFits))
-data_melt$Var1 <- rep(seq(1, 127), nrow(PFits))
+data_melt$Var1 <- rep(seq(0, 127), nrow(PFits))
 # Calculate percentiles
 percentiles <- PFits %>%
 summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
@@ -259,7 +259,7 @@ percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_
 data_melt$CI <- 0
   
 # Prepare CIs for insertion
-CIs <- data.frame(rep(seq(1, 127), 2), c(rep(10001, 127), rep(10002, 127)), percentiles_long$YValue, rep(1, (127*2)))
+CIs <- data.frame(rep(seq(0, 127), 2), c(rep(10001, 128), rep(10002, 128)), percentiles_long$YValue, rep(1, (128*2)))
 colnames(CIs) <- colnames(data_melt)
   
 # Add CIs
@@ -271,6 +271,8 @@ data_melt2$CI <- as.factor(data_melt2$CI)
 
 # add in var2, only length of 80
 fit_data$Var2=rep(10003,80)
+
+# saved out at 600x600
 
 # Plotting the lines
 ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
@@ -292,7 +294,7 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 140028 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 130042 rows containing missing values (`geom_line()`).
 
     ## Warning: The `guide` argument in `scale_*()` cannot be `FALSE`. This was deprecated in
     ## ggplot2 3.3.4.
@@ -305,19 +307,19 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 
 ``` r
 # load in data
-Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
+Fits=readRDS('~/gpFitBoots.rds')
 # find mean shape and plot it: p
-PFits=Fits[,1:127]
-IFits=Fits[,128:178]
-EFits=Fits[,179:225]
-SomFits=Fits[,226:238]
-AnxFits=Fits[,239:263]
-ThoFits=Fits[,264:281]
-WitFits=Fits[,282:297]
-SocFits=Fits[,298:314]
-AttFits=Fits[,315:333]
-RulFits=Fits[,334:351]
-AggFits=Fits[,352:383]
+PFits=Fits[,1:128]
+IFits=Fits[,129:180]
+EFits=Fits[,181:228]
+SomFits=Fits[,229:242]
+AnxFits=Fits[,243:268]
+ThoFits=Fits[,269:287]
+WitFits=Fits[,288:304]
+SocFits=Fits[,305:322]
+AttFits=Fits[,323:342]
+RulFits=Fits[,343:361]
+AggFits=Fits[,362:394]
 
 MaxP=find_furthest_nonzero(PFits)
 MaxI=find_furthest_nonzero(IFits)
@@ -331,30 +333,30 @@ MaxAtt=find_furthest_nonzero(AttFits)
 MaxRul=find_furthest_nonzero(RulFits)
 MaxAgg=find_furthest_nonzero(AggFits)
 
-# pull clinical cutoff from master df: t scores > 68 = borderline clinical, 70 = clinical
+# pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
 masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==65,]
-masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==70,]
+masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==69,]
 masterdfI_bc<-masterdf[masterdf$cbcl_scr_syn_internal_t==65,]
-masterdfI_c<-masterdf[masterdf$cbcl_scr_syn_internal_t==70,]
+masterdfI_c<-masterdf[masterdf$cbcl_scr_syn_internal_t==69,]
 masterdfE_bc<-masterdf[masterdf$cbcl_scr_syn_external_t==65,]
-masterdfE_c<-masterdf[masterdf$cbcl_scr_syn_external_t==70,]
+masterdfE_c<-masterdf[masterdf$cbcl_scr_syn_external_t==69,]
 masterdfAnx_bc<-masterdf[masterdf$cbcl_scr_syn_anxdep_t==65,]
-masterdfAnx_c<-masterdf[masterdf$cbcl_scr_syn_anxdep_t==70,]
-masterdfTho_bc<-masterdf[masterdf$cbcl_scr_syn_thought_t==68,]
-masterdfTho_c<-masterdf[masterdf$cbcl_scr_syn_thought_t==70,]
+masterdfAnx_c<-masterdf[masterdf$cbcl_scr_syn_anxdep_t==69,]
+masterdfTho_bc<-masterdf[masterdf$cbcl_scr_syn_thought_t==65,]
+masterdfTho_c<-masterdf[masterdf$cbcl_scr_syn_thought_t==69,]
 # note no one has t==65 in this dataset for withdrawn depression
-masterdfWit_bc<-masterdf[masterdf$cbcl_scr_syn_withdep_t==64,]
-masterdfWit_c<-masterdf[masterdf$cbcl_scr_syn_withdep_t==70,]
+masterdfWit_bc<-masterdf[masterdf$cbcl_scr_syn_withdep_t==66,]
+masterdfWit_c<-masterdf[masterdf$cbcl_scr_syn_withdep_t==69,]
 masterdfSom_bc<-masterdf[masterdf$cbcl_scr_syn_somatic_t==65,]
-masterdfSom_c<-masterdf[masterdf$cbcl_scr_syn_somatic_t==70,]
+masterdfSom_c<-masterdf[masterdf$cbcl_scr_syn_somatic_t==69,]
 masterdfSoc_bc<-masterdf[masterdf$cbcl_scr_syn_social_t==65,]
-masterdfSoc_c<-masterdf[masterdf$cbcl_scr_syn_social_t==70,]
+masterdfSoc_c<-masterdf[masterdf$cbcl_scr_syn_social_t==69,]
 masterdfAtt_bc<-masterdf[masterdf$cbcl_scr_syn_attention_t==65,]
-masterdfAtt_c<-masterdf[masterdf$cbcl_scr_syn_attention_t==70,]
+masterdfAtt_c<-masterdf[masterdf$cbcl_scr_syn_attention_t==69,]
 masterdfRul_bc<-masterdf[masterdf$cbcl_scr_syn_rulebreak_t==65,]
-masterdfRul_c<-masterdf[masterdf$cbcl_scr_syn_rulebreak_t==70,]
+masterdfRul_c<-masterdf[masterdf$cbcl_scr_syn_rulebreak_t==69,]
 masterdfAgg_bc<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==65,]
-masterdfAgg_c<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==70,]
+masterdfAgg_c<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==69,]
 
 # borderline clinical and clinical cutoffs
 Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
@@ -392,7 +394,7 @@ plot_bootstraps(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 140032 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 130042 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
@@ -408,7 +410,7 @@ plot_bootstraps(IFits,51,'Internalizing',MaxI,Ibc,Ic)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 170034 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 160033 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
 
@@ -424,25 +426,25 @@ plot_bootstraps(EFits,47,'Externalizing',MaxE,Ebc,Ec)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 90019 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 70016 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
 
 ``` r
 # load in data
-Fits=readRDS('~/Desktop/g_p/gpDerivBoots.rds')
+Fits=readRDS('~/gpDerivBoots.rds')
 # find mean shape and plot it: p
-PFits=Fits[,1:127]
-IFits=Fits[,128:178]
-EFits=Fits[,179:225]
-SomFits=Fits[,226:238]
-AnxFits=Fits[,239:263]
-ThoFits=Fits[,264:281]
-WitFits=Fits[,282:297]
-SocFits=Fits[,298:314]
-AttFits=Fits[,315:333]
-RulFits=Fits[,334:351]
-AggFits=Fits[,352:383]
+PFits=Fits[,1:128]
+IFits=Fits[,129:180]
+EFits=Fits[,181:228]
+SomFits=Fits[,229:242]
+AnxFits=Fits[,243:268]
+ThoFits=Fits[,269:287]
+WitFits=Fits[,288:304]
+SocFits=Fits[,305:322]
+AttFits=Fits[,323:342]
+RulFits=Fits[,343:361]
+AggFits=Fits[,362:394]
 
 # for p - saved out at 600x200, 300x200 for minor scales
 # get straightfoward of segment where 99% is over 0 or under
@@ -494,7 +496,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 15 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 16 rows containing missing values (`geom_raster()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
@@ -557,7 +559,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
 
@@ -786,7 +788,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 ![](Fig1_files/figure-gfm/unnamed-chunk-6-12.png)<!-- -->
 
 ``` r
-# for each bootstrap, recover median slope in bottom and top tertiles
+# for each bootstrap, recover median slope in bottom and top Thirds
 df <- data.frame(
   p = apply(PFits[, 1:(MaxP/3)], 1, median),
   Internal = apply(IFits[, 1:(MaxI/3)], 1, median),
@@ -815,13 +817,13 @@ df_tidy <- left_join(df_tidy, df_median, by = "Subscale")
 
 df_tidy$Subscale <- reorder(df_tidy$Subscale, -df_tidy$MedianValue, median)
 
-# Create the boxplot
+# Create the boxplot - saved at 1300 x 500
 ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
   geom_boxplot() +
-  labs(title = "Median Association with Cognitive Score: Healthy Tertile",
+  labs(title = "Median Association with Cognitive Score: Healthy Third",
        x = "Subscale",
        y = "Median Slope") +
-  theme_minimal(base_size=20)+scale_fill_gradientn(
+  theme_minimal(base_size=23)+scale_fill_gradientn(
     colors = my_palette(100),
     limits = c(-.27,.27))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.25,.25))
 ```
@@ -863,14 +865,214 @@ df_tidy2$Subscale <- reorder(df_tidy2$Subscale, -df_tidy$MedianValue, median)
 # Create the boxplot
 ggplot(df_tidy2, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
   geom_boxplot() +
-  labs(title = "Median Association with Cognitive Score: Clinical Tertile",
+  labs(title = "Median Association with Cognitive Score: Clinical Third",
        x = "Subscale",
        y = "Median Slope") +
-  theme_minimal(base_size=20)+scale_fill_gradientn(
+  theme_minimal(base_size=23)+scale_fill_gradientn(
     colors = my_palette(100),
     limits = c(-.27,.27))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.25,.25))
 ```
 
-    ## Warning: Removed 1 rows containing non-finite values (`stat_boxplot()`).
+    ## Warning: Removed 2 rows containing non-finite values (`stat_boxplot()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+``` r
+# proof-of-concept g~p linear in healthy and clinical range
+masterdf=readRDS('~/gp_masterdf.rds')
+healthy=masterdf[masterdf$cbcl_scr_syn_totprob_r<Pbc,]
+clin=masterdf[masterdf$cbcl_scr_syn_totprob_r>Pc,]
+# reference linear model
+plotdf<-data.frame(clin$parentPcount,clin$g,clin$cbcl_scr_syn_totprob_r,clin$interview_age)
+colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
+modelforresids<-gam(g~s(interview_age),data=plotdf)
+plotdf$resids<-modelforresids$residuals
+
+ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=20)+
+    geom_point(alpha=0)+
+    geom_smooth(method = "lm",formula = y~x,color='gray') +
+    scale_fill_viridis_c(option = "inferno") +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    geom_vline(xintercept = Pc, linetype = "dashed")+
+    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
+    scale_x_continuous(limits = c(Pc,MaxP),expand = expansion(mult = c(0, 0)))
+```
+
+    ## Warning: Removed 7 rows containing non-finite values (`stat_binhex()`).
+
+    ## Warning: Removed 7 rows containing non-finite values (`stat_smooth()`).
+
+    ## Warning: Removed 7 rows containing missing values (`geom_point()`).
+
+![](Fig1_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+# and healthy version
+# reference linear model
+plotdf<-data.frame(healthy$parentPcount,healthy$g,healthy$cbcl_scr_syn_totprob_r,healthy$interview_age)
+colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
+modelforresids<-gam(g~s(interview_age),data=plotdf)
+plotdf$resids<-modelforresids$residuals
+
+ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=20)+
+    geom_point(alpha=0)+
+    geom_smooth(method = "lm",formula = y~x,color='gray') +
+    scale_fill_viridis_c(option = "inferno") +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    geom_vline(xintercept = Pbc, linetype = "dashed")+
+    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
+    scale_x_continuous(limits = c(0,Pbc),expand = expansion(mult = c(0, 0)))
+```
+
+    ## Warning: Removed 9 rows containing missing values (`geom_hex()`).
+
+![](Fig1_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+
+``` r
+# each subscale for supplementary figures
+# load in data
+Fits=readRDS('~/gpFitBoots.rds')
+# find mean shape and plot it: p
+PFits=Fits[,1:128]
+IFits=Fits[,129:180]
+EFits=Fits[,181:228]
+SomFits=Fits[,229:242]
+AnxFits=Fits[,243:268]
+ThoFits=Fits[,269:287]
+WitFits=Fits[,288:304]
+SocFits=Fits[,305:322]
+AttFits=Fits[,323:342]
+RulFits=Fits[,343:361]
+AggFits=Fits[,362:394]
+# actually plot em
+plot_bootstraps(SomFits,13,"Somatic",MaxSom,SomBc,SomC)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 10007 rows containing missing values (`geom_line()`).
+
+    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
+
+![](Fig1_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
+plot_bootstraps(AnxFits,25,'Anxious Depression',MaxAnx,AnxBc,AnxC)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 50011 rows containing missing values (`geom_line()`).
+
+![](Fig1_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+
+``` r
+plot_bootstraps(ThoFits,18,'Thought',MaxTho,ThoBc,ThoC)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 30006 rows containing missing values (`geom_line()`).
+
+    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
+
+![](Fig1_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->
+
+``` r
+plot_bootstraps(WitFits,16,"Withdrawn Depression",MaxWit,WitBc,WitC)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 30006 rows containing missing values (`geom_line()`).
+
+![](Fig1_files/figure-gfm/unnamed-chunk-10-4.png)<!-- -->
+
+``` r
+plot_bootstraps(SocFits,17,'Social',MaxSoc,SocBc,SocC)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Removed 30006 rows containing missing values (`geom_line()`).
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+![](Fig1_files/figure-gfm/unnamed-chunk-10-5.png)<!-- -->
+
+``` r
+plot_bootstraps(AttFits,19,'Attention',MaxAtt,AttBc,AttC)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 15 rows containing missing values (`geom_line()`).
+
+![](Fig1_files/figure-gfm/unnamed-chunk-10-6.png)<!-- -->
+
+``` r
+plot_bootstraps(RulFits,18,'Rule Breaking',MaxRul,RulBc,RulC)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 40016 rows containing missing values (`geom_line()`).
+
+![](Fig1_files/figure-gfm/unnamed-chunk-10-7.png)<!-- -->
+
+``` r
+plot_bootstraps(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
+```
+
+    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+    ## dplyr 1.1.0.
+    ## ℹ Please use `reframe()` instead.
+    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+    ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 30015 rows containing missing values (`geom_line()`).
+
+![](Fig1_files/figure-gfm/unnamed-chunk-10-8.png)<!-- -->
