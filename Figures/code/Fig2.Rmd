@@ -219,7 +219,7 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 
 
 ```{r}
-# load in data: 10,000 only done for p
+# load in data
 Fits=readRDS('~/gpFitBoots_asr.rds')
 PFits=Fits[,448:608]
 MaxP=find_furthest_nonzero(PFits)
