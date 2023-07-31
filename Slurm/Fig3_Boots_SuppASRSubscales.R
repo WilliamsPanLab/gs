@@ -18,7 +18,16 @@ dim(masterdf)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up # add cbcl subscales
-masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','g','subjectkey','interview_age','sex','income')]
+masterdf=masterdf[,c('parentPcount','cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRInt','ASRExt','g','subjectkey','interview_age')]
+masterdf$ASR_anxdep=as.numeric(masterdf$ASRAnxDepr)
+masterdf$ASR_withdep=as.numeric(masterdf$ASRWithdrawn)
+masterdf$ASR_somatic=as.numeric(masterdf$ASRSomatic)
+masterdf$ASR_thought=as.numeric(masterdf$ASRThought)
+masterdf$ASR_attention=as.numeric(masterdf$ASRAttn)
+masterdf$ASR_aggressive=as.numeric(masterdf$ASRAggr)
+masterdf$ASR_rulebreak=as.numeric(masterdf$ASRRulB)
+masterdf$ASRInt=as.numeric(masterdf$ASRInt)
+masterdf$ASRExt=as.numeric(masterdf$ASRExt)
 # get length of df for later
 lenDF=dim(masterdf)[1]
 # will need to get full and reduced models for each boot, as well as a null distribution
