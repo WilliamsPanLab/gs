@@ -147,17 +147,17 @@ for (b in 1:10000){
 	aggLinBoots[b]=summary(agggAge)$s.pv[1]
 	######## II PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
 	#### g as response variable
-	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=5)+s(interview_age),data=bootSamp)
-	intgAge<-bam(g~s(cbcl_scr_syn_internal_r,k=5)+s(interview_age),data=bootSamp)
-	extgAge<-bam(g~s(cbcl_scr_syn_external_r,k=5)+s(interview_age),data=bootSamp)
-	somgAge<-bam(g~s(cbcl_scr_syn_somatic_r,k=5)+s(interview_age),data=bootSamp)
-	anxgAge<-bam(g~s(cbcl_scr_syn_anxdep_r,k=5)+s(interview_age),data=bootSamp)
-	thogAge<-bam(g~s(cbcl_scr_syn_thought_r,k=5)+s(interview_age),data=bootSamp)
-	witgAge<-bam(g~s(cbcl_scr_syn_withdep_r,k=5)+s(interview_age),data=bootSamp)
-	socgAge<-bam(g~s(cbcl_scr_syn_social_r,k=5)+s(interview_age),data=bootSamp)
-	attgAge<-bam(g~s(cbcl_scr_syn_attention_r,k=5)+s(interview_age),data=bootSamp)
-	rulgAge<-bam(g~s(cbcl_scr_syn_rulebreak_r,k=5)+s(interview_age),data=bootSamp)
-	agggAge<-bam(g~s(cbcl_scr_syn_aggressive_r,k=5)+s(interview_age),data=bootSamp)
+	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age),data=bootSamp)
+	intgAge<-bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age),data=bootSamp)
+	extgAge<-bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age),data=bootSamp)
+	somgAge<-bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age),data=bootSamp)
+	anxgAge<-bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age),data=bootSamp)
+	thogAge<-bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age),data=bootSamp)
+	witgAge<-bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age),data=bootSamp)
+	socgAge<-bam(g~s(cbcl_scr_syn_social_r,k=4)+s(interview_age),data=bootSamp)
+	attgAge<-bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age),data=bootSamp)
+	rulgAge<-bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age),data=bootSamp)
+	agggAge<-bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age),data=bootSamp)
 	# use PREDICTED VALUES of model fit for each symptom count for saving
 	eachPcount=seq(0:bpmax)
 	eachIntcount=seq(0:bimax)
@@ -258,10 +258,10 @@ for (b in 1:10000){
 # SAVEOUT
 # save out version with all cbcl factors
 outdf=data.frame(plinBoots,intlinBoots,extlinBoots,somLinBoots,anxLinBoots,thoLinBoots,witLinBoots,socLinBoots,attLinBoots,rulLinBoots,aggLinBoots,pMax,intMax,extMax,somMax,anxMax,thoMax,witMax,socMax,attMax,rulMax,aggMax)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_k5.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_k4.rds')
 outdf=data.frame(pDeriv,intDeriv,extDeriv,somDeriv,anxDeriv,thoDeriv,witDeriv,socDeriv,attDeriv,rulDeriv,aggDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_k5.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_k4.rds')
 outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,socFit,attFit,rulFit,aggFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_k5.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_k4.rds')
 
 print('done with g~p fit bootstrapping!')
