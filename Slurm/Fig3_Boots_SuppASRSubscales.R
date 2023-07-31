@@ -19,32 +19,19 @@ subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up # add cbcl subscales
 masterdf=masterdf[,c('parentPcount','cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRInt','ASRExt','g','subjectkey','interview_age')]
-masterdf$ASR_anxdep=as.numeric(masterdf$ASRAnxDepr)
-masterdf$ASR_withdep=as.numeric(masterdf$ASRWithdrawn)
-masterdf$ASR_somatic=as.numeric(masterdf$ASRSomatic)
-masterdf$ASR_thought=as.numeric(masterdf$ASRThought)
-masterdf$ASR_attention=as.numeric(masterdf$ASRAttn)
-masterdf$ASR_aggressive=as.numeric(masterdf$ASRAggr)
-masterdf$ASR_rulebreak=as.numeric(masterdf$ASRRulB)
-masterdf$ASRInt=as.numeric(masterdf$ASRInt)
-masterdf$ASRExt=as.numeric(masterdf$ASRExt)
 # get length of df for later
 lenDF=dim(masterdf)[1]
-# will need to get full and reduced models for each boot, as well as a null distribution
-# in addition to derivatives and fits, save F values of interaction + null distribution F values
-# interactions to be tested: p*sex, p*poverty, p*sex*poverty
-# convert all cbcl scores to numeric
-masterdf$cbcl_scr_syn_totprob_r=as.numeric(masterdf$cbcl_scr_syn_totprob_r)
-masterdf$cbcl_scr_syn_internal_r=as.numeric(masterdf$cbcl_scr_syn_internal_r)
-masterdf$cbcl_scr_syn_external_r=as.numeric(masterdf$cbcl_scr_syn_external_r)
-masterdf$cbcl_scr_syn_somatic_r=as.numeric(masterdf$cbcl_scr_syn_somatic_r)
-masterdf$cbcl_scr_syn_anxdep_r=as.numeric(masterdf$cbcl_scr_syn_anxdep_r)
-masterdf$cbcl_scr_syn_thought_r=as.numeric(masterdf$cbcl_scr_syn_thought_r)
-masterdf$cbcl_scr_syn_withdep_r=as.numeric(masterdf$cbcl_scr_syn_withdep_r)
-masterdf$cbcl_scr_syn_social_r=as.numeric(masterdf$cbcl_scr_syn_social_r)
-masterdf$cbcl_scr_syn_attention_r=as.numeric(masterdf$cbcl_scr_syn_attention_r)
-masterdf$cbcl_scr_syn_rulebreak_r=as.numeric(masterdf$cbcl_scr_syn_rulebreak_r)
-masterdf$cbcl_scr_syn_aggressive_r=as.numeric(masterdf$cbcl_scr_syn_aggressive_r)
+# subbing in ASR scores for CBCL scores to keep equivaelence: no social score for adults
+masterdf$cbcl_scr_syn_totprob_r=as.numeric(masterdf$parentPcount)
+masterdf$cbcl_scr_syn_internal_r=as.numeric(masterdf$ASRInt)
+masterdf$cbcl_scr_syn_external_r=as.numeric(masterdf$ASRExt)
+masterdf$cbcl_scr_syn_somatic_r=as.numeric(masterdf$ASRSomatic)
+masterdf$cbcl_scr_syn_anxdep_r=as.numeric(masterdf$ASRAnxDepr)
+masterdf$cbcl_scr_syn_thought_r=as.numeric(masterdf$ASRThought)
+masterdf$cbcl_scr_syn_withdep_r=as.numeric(masterdf$ASRWithdrawn)
+masterdf$cbcl_scr_syn_attention_r=as.numeric(masterdf$ASRAttn)
+masterdf$cbcl_scr_syn_rulebreak_r=as.numeric(masterdf$ASRRulB)
+masterdf$cbcl_scr_syn_aggressive_r=as.numeric(masterdf$ASRAggr)
 # sex (g in for x to get co-pilot around its NSFW filter) and poverty to factors
 masterdf$seg<-as.ordered(masterdf$sex)
 masterdf$poverty=0
@@ -71,7 +58,6 @@ somMaxVal=max(masterdf$cbcl_scr_syn_somatic_r)
 anxMaxVal=max(masterdf$cbcl_scr_syn_anxdep_r)
 thoMaxVal=max(masterdf$cbcl_scr_syn_thought_r)
 depMaxVal=max(masterdf$cbcl_scr_syn_withdep_r)
-socMaxVal=max(masterdf$cbcl_scr_syn_social_r)
 attMaxVal=max(masterdf$cbcl_scr_syn_attention_r)
 rulMaxVal=max(masterdf$cbcl_scr_syn_rulebreak_r)
 aggMaxVal=max(masterdf$cbcl_scr_syn_aggressive_r)
@@ -105,11 +91,6 @@ F_witdepFit=matrix(0,nrow=10000,ncol=(depMaxVal+1))
 M_witdepFit=matrix(0,nrow=10000,ncol=(depMaxVal+1))
 P_witdepFit=matrix(0,nrow=10000,ncol=(depMaxVal+1))
 R_witdepFit=matrix(0,nrow=10000,ncol=(depMaxVal+1))
-# social
-F_socFit=matrix(0,nrow=10000,ncol=(socMaxVal+1))
-M_socFit=matrix(0,nrow=10000,ncol=(socMaxVal+1))
-P_socFit=matrix(0,nrow=10000,ncol=(socMaxVal+1))
-R_socFit=matrix(0,nrow=10000,ncol=(socMaxVal+1))
 # attention
 F_attFit=matrix(0,nrow=10000,ncol=(attMaxVal+1))
 M_attFit=matrix(0,nrow=10000,ncol=(attMaxVal+1))
@@ -155,7 +136,6 @@ for (b in 1:10000){
 	banxmax=max(bootSamp$cbcl_scr_syn_anxdep_r)
 	bthomax=max(bootSamp$cbcl_scr_syn_thought_r)
 	bwitdepmax=max(bootSamp$cbcl_scr_syn_withdep_r)
-	bsocmax=max(bootSamp$cbcl_scr_syn_social_r)
 	battmax=max(bootSamp$cbcl_scr_syn_attention_r)
 	brulmax=max(bootSamp$cbcl_scr_syn_rulebreak_r)
 	baggmax=max(bootSamp$cbcl_scr_syn_aggressive_r)
@@ -189,7 +169,6 @@ for (b in 1:10000){
 	AnxgAge_seg<-bam(g~s(cbcl_scr_syn_anxdep_r,by=seg)+s(cbcl_scr_syn_anxdep_r)+seg+s(interview_age),data=bootSamp)
 	ThogAge_seg<-bam(g~s(cbcl_scr_syn_thought_r,by=seg)+s(cbcl_scr_syn_thought_r)+seg+s(interview_age),data=bootSamp)
 	WitDepgAge_seg<-bam(g~s(cbcl_scr_syn_withdep_r,by=seg)+s(cbcl_scr_syn_withdep_r)+seg+s(interview_age),data=bootSamp)
-	SocgAge_seg<-bam(g~s(cbcl_scr_syn_social_r,by=seg)+s(cbcl_scr_syn_social_r)+seg+s(interview_age),data=bootSamp)
 	AttgAge_seg<-bam(g~s(cbcl_scr_syn_attention_r,by=seg)+s(cbcl_scr_syn_attention_r)+seg+s(interview_age),data=bootSamp)
 	RulgAge_seg<-bam(g~s(cbcl_scr_syn_rulebreak_r,by=seg)+s(cbcl_scr_syn_rulebreak_r)+seg+s(interview_age),data=bootSamp)
 	AgggAge_seg<-bam(g~s(cbcl_scr_syn_aggressive_r,by=seg)+s(cbcl_scr_syn_aggressive_r)+seg+s(interview_age),data=bootSamp)
@@ -199,7 +178,6 @@ for (b in 1:10000){
 	AnxgAge_pov<-bam(g~s(cbcl_scr_syn_anxdep_r,by=poverty)+s(cbcl_scr_syn_anxdep_r)+poverty+s(interview_age),data=bootSamp)
 	ThogAge_pov<-bam(g~s(cbcl_scr_syn_thought_r,by=poverty)+s(cbcl_scr_syn_thought_r)+poverty+s(interview_age),data=bootSamp)
 	WitDepgAge_pov<-bam(g~s(cbcl_scr_syn_withdep_r,by=poverty)+s(cbcl_scr_syn_withdep_r)+poverty+s(interview_age),data=bootSamp)
-	SocgAge_pov<-bam(g~s(cbcl_scr_syn_social_r,by=poverty)+s(cbcl_scr_syn_social_r)+poverty+s(interview_age),data=bootSamp)
 	AttgAge_pov<-bam(g~s(cbcl_scr_syn_attention_r,by=poverty)+s(cbcl_scr_syn_attention_r)+poverty+s(interview_age),data=bootSamp)
 	RulgAge_pov<-bam(g~s(cbcl_scr_syn_rulebreak_r,by=poverty)+s(cbcl_scr_syn_rulebreak_r)+poverty+s(interview_age),data=bootSamp)
 	AgggAge_pov<-bam(g~s(cbcl_scr_syn_aggressive_r,by=poverty)+s(cbcl_scr_syn_aggressive_r)+poverty+s(interview_age),data=bootSamp)
@@ -262,8 +240,6 @@ for (b in 1:10000){
 	predictDF_povTho=data.frame(eachThocount,rep(median(bootSamp$interview_age),(bthomax+1)),rep("1",(bthomax+1)))
 	predictDF_segWitDep=data.frame(eachWitDepcount,rep(median(bootSamp$interview_age),(bwitdepmax+1)),rep("F",(bwitdepmax+1)))
 	predictDF_povWitDep=data.frame(eachWitDepcount,rep(median(bootSamp$interview_age),(bwitdepmax+1)),rep("1",(bwitdepmax+1)))
-	predictDF_segSoc=data.frame(eachSoccount,rep(median(bootSamp$interview_age),(bsocmax+1)),rep("F",(bsocmax+1)))
-	predictDF_povSoc=data.frame(eachSoccount,rep(median(bootSamp$interview_age),(bsocmax+1)),rep("1",(bsocmax+1)))
 	predictDF_segAtt=data.frame(eachAttcount,rep(median(bootSamp$interview_age),(battmax+1)),rep("F",(battmax+1)))
 	predictDF_povAtt=data.frame(eachAttcount,rep(median(bootSamp$interview_age),(battmax+1)),rep("1",(battmax+1)))
 	predictDF_segRul=data.frame(eachRulcount,rep(median(bootSamp$interview_age),(brulmax+1)),rep("F",(brulmax+1)))
@@ -286,8 +262,6 @@ for (b in 1:10000){
 	colnames(predictDF_povTho)=c('cbcl_scr_syn_thought_r','interview_age','poverty')
 	colnames(predictDF_segWitDep)=c('cbcl_scr_syn_withdep_r','interview_age','seg')
 	colnames(predictDF_povWitDep)=c('cbcl_scr_syn_withdep_r','interview_age','poverty')
-	colnames(predictDF_segSoc)=c('cbcl_scr_syn_social_r','interview_age','seg')
-	colnames(predictDF_povSoc)=c('cbcl_scr_syn_social_r','interview_age','poverty')
 	colnames(predictDF_segAtt)=c('cbcl_scr_syn_attention_r','interview_age','seg')
 	colnames(predictDF_povAtt)=c('cbcl_scr_syn_attention_r','interview_age','poverty')
 	colnames(predictDF_segRul)=c('cbcl_scr_syn_rulebreak_r','interview_age','seg')
@@ -304,7 +278,6 @@ for (b in 1:10000){
 	forfitanx_F=predict(AnxgAge_seg,predictDF_segAnx)
 	forfittho_F=predict(ThogAge_seg,predictDF_segTho)
 	forfitwitdep_F=predict(WitDepgAge_seg,predictDF_segWitDep)
-	forfitsoc_F=predict(SocgAge_seg,predictDF_segSoc)
 	forfitatt_F=predict(AttgAge_seg,predictDF_segAtt)
 	forfitrul_F=predict(RulgAge_seg,predictDF_segRul)
 	forfitagg_F=predict(AgggAge_seg,predictDF_segAgg)
@@ -316,7 +289,6 @@ for (b in 1:10000){
 	predictDF_segAnx$seg=rep("M",(banxmax+1))
 	predictDF_segTho$seg=rep("M",(bthomax+1))
 	predictDF_segWitDep$seg=rep("M",(bwitdepmax+1))
-	predictDF_segSoc$seg=rep("M",(bsocmax+1))
 	predictDF_segAtt$seg=rep("M",(battmax+1))
 	predictDF_segRul$seg=rep("M",(brulmax+1))
 	predictDF_segAgg$seg=rep("M",(baggmax+1))
@@ -327,7 +299,6 @@ for (b in 1:10000){
 	forfitanx_M=predict(AnxgAge_seg,predictDF_segAnx)
 	forfittho_M=predict(ThogAge_seg,predictDF_segTho)
 	forfitwitdep_M=predict(WitDepgAge_seg,predictDF_segWitDep)
-	forfitsoc_M=predict(SocgAge_seg,predictDF_segSoc)
 	forfitatt_M=predict(AttgAge_seg,predictDF_segAtt)
 	forfitrul_M=predict(RulgAge_seg,predictDF_segRul)
 	forfitagg_M=predict(AgggAge_seg,predictDF_segAgg)
@@ -341,7 +312,6 @@ for (b in 1:10000){
 	forfitanx_P=predict(AnxgAge_pov,predictDF_povAnx)
 	forfittho_P=predict(ThogAge_pov,predictDF_povTho)
 	forfitwitdep_P=predict(WitDepgAge_pov,predictDF_povWitDep)
-	forfitsoc_P=predict(SocgAge_pov,predictDF_povSoc)
 	forfitatt_P=predict(AttgAge_pov,predictDF_povAtt)
 	forfitrul_P=predict(RulgAge_pov,predictDF_povRul)
 	forfitagg_P=predict(AgggAge_pov,predictDF_povAgg)
@@ -353,7 +323,6 @@ for (b in 1:10000){
 	predictDF_povAnx$poverty=rep("0",(banxmax+1))
 	predictDF_povTho$poverty=rep("0",(bthomax+1))
 	predictDF_povWitDep$poverty=rep("0",(bwitdepmax+1))
-	predictDF_povSoc$poverty=rep("0",(bsocmax+1))
 	predictDF_povAtt$poverty=rep("0",(battmax+1))
 	predictDF_povRul$poverty=rep("0",(brulmax+1))
 	predictDF_povAgg$poverty=rep("0",(baggmax+1))
@@ -364,7 +333,6 @@ for (b in 1:10000){
 	forfitanx_R=predict(AnxgAge_pov,predictDF_povAnx)
 	forfittho_R=predict(ThogAge_pov,predictDF_povTho)
 	forfitwitdep_R=predict(WitDepgAge_pov,predictDF_povWitDep)
-	forfitsoc_R=predict(SocgAge_pov,predictDF_povSoc)
 	forfitatt_R=predict(AttgAge_pov,predictDF_povAtt)
 	forfitrul_R=predict(RulgAge_pov,predictDF_povRul)
 	forfitagg_R=predict(AgggAge_pov,predictDF_povAgg)
@@ -398,10 +366,6 @@ for (b in 1:10000){
 	M_witdepFit[b,1:(bwitdepmax+1)]=forfitwitdep_M
 	P_witdepFit[b,1:(bwitdepmax+1)]=forfitwitdep_P
 	R_witdepFit[b,1:(bwitdepmax+1)]=forfitwitdep_R
-	F_socFit[b,1:(bsocmax+1)]=forfitsoc_F
-	M_socFit[b,1:(bsocmax+1)]=forfitsoc_M
-	P_socFit[b,1:(bsocmax+1)]=forfitsoc_P
-	R_socFit[b,1:(bsocmax+1)]=forfitsoc_R
 	F_attFit[b,1:(battmax+1)]=forfitatt_F
 	M_attFit[b,1:(battmax+1)]=forfitatt_M
 	P_attFit[b,1:(battmax+1)]=forfitatt_P
@@ -451,7 +415,7 @@ for (b in 1:10000){
 outdf=data.frame(F_pFit,M_pFit,P_pFit,R_pFit)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFits.rds')
 # save out fits of all 10 subscales (int, ext, som, anx, tho, withdep, soc, rulbreak, attention, agg) and all 4 (F,M,P,R) versions
-outdf=data.frame(F_intFit,M_intFit,P_intFit,R_intFit,F_extFit,M_extFit,P_extFit,R_extFit,F_somFit,M_somFit,P_somFit,R_somFit,F_anxFit,M_anxFit,P_anxFit,R_anxFit,F_thoFit,M_thoFit,P_thoFit,R_thoFit,F_witdepFit,M_witdepFit,P_witdepFit,R_witdepFit,F_socFit,M_socFit,P_socFit,R_socFit,F_rulFit,M_rulFit,P_rulFit,R_rulFit,F_attFit,M_attFit,P_attFit,R_attFit,F_aggFit,M_aggFit,P_aggFit,R_aggFit)
+outdf=data.frame(F_intFit,M_intFit,P_intFit,R_intFit,F_extFit,M_extFit,P_extFit,R_extFit,F_somFit,M_somFit,P_somFit,R_somFit,F_anxFit,M_anxFit,P_anxFit,R_anxFit,F_thoFit,M_thoFit,P_thoFit,R_thoFit,F_witdepFit,M_witdepFit,P_witdepFit,R_witdepFit,F_rulFit,M_rulFit,P_rulFit,R_rulFit,F_attFit,M_attFit,P_attFit,R_attFit,F_aggFit,M_aggFit,P_aggFit,R_aggFit)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpSubscaleFits.rds')
 # save out derivatives
 outdf=data.frame(F_pDeriv,M_pDeriv,P_pDeriv,R_pDeriv)
