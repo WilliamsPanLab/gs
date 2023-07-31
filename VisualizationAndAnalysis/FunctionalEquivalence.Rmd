@@ -11,6 +11,7 @@ date: "2023-02-10"
 ```
 
 ```{r}
+library(psych)
 library(nortest)
 # load in masterdf
 masterdf=readRDS('~/gp_masterdf.rds')
@@ -18,7 +19,7 @@ masterdf=readRDS('~/gp_masterdf.rds')
 
 ```{r}
 # pca prep.
-pcVars=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","pea_wiscv_tss","nihtbx_list_uncorrected","nihtbx_cardsort_uncorrected")
+pcVars=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","nihtbx_list_uncorrected","nihtbx_cardsort_uncorrected")
 # only pca vars, only timepoint 1 for eval of overlap with bpca
 masterdfbv=masterdf[masterdf$eventname=="baseline_year_1_arm_1",]
 masterdfbv=masterdfbv[complete.cases(masterdfbv[,pcVars]),]
@@ -60,7 +61,7 @@ library(ggplot2)
 plotdf<-compareG_df[,c('g','neurocog_pc1.bl')]
 
 y_title <- expression(paste(italic("g")," (pca-derived)"))
-x_title <- expression(paste(italic("g")," (bayesian pca-derived)"))
+x_title <- expression(paste(italic("g")," (Bayesian pca-derived)"))
 
 ggplot(data=plotdf,aes(x=g,y=neurocog_pc1.bl))+geom_smooth(method='lm',color='black')+geom_point(alpha=.05)+theme_classic(base_size=30)+ylab(y_title)+xlab(x_title)
 ### Can add cormat among loadings for all 3 components it looks like they are functionally equivalent all the way down

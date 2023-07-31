@@ -511,12 +511,10 @@ y.pca$loadings
 ``` r
 # assign scores to subjs
 Yextended$g<-y.pca$scores[,1]
-Yextended$pc2<-y.pca$scores[,2]
-Yextended$pc3<-y.pca$scores[,3]
+
 # merge in cog data
 masterdf$g<-Yextended$g
-masterdf$pc2<-Yextended$pc2
-masterdf$pc3<-Yextended$pc3
+
 # removal of one participant more than 3 S.D. from every other participant
 masterdf=masterdf[masterdf$g>-7.5,]
 ```
@@ -778,7 +776,7 @@ ggplot(endingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_o
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
 #### Chunk 15 prepares data for analysis of temporal precedence ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','Grades','pc2','pc3','income','sex','race_ethnicity','matched_group','eventname')
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','Grades','income','sex','race_ethnicity','matched_group','eventname')
 # eliminate rows with NAs and ensure none without two-timepoint data
 # variables of interest redux
 masterdf=masterdf[,c(variablesOfInterest)]
@@ -787,7 +785,7 @@ masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ]
 print(dim(masterdf))
 ```
 
-    ## [1] 9564   15
+    ## [1] 9564   13
 
 ``` r
 # and two-timepoint check
@@ -805,7 +803,7 @@ OutDFTmpPrec<-merge(df1,df2,by='subjectkey')
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 4782   29
+    ## [1] 4782   25
 
 ``` r
 # save it out
