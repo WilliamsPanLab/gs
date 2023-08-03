@@ -32,10 +32,8 @@ masterdf$parentPcount.x=as.numeric(masterdf$parentPcount.x)
 # initialize a vector for each of 10k bootstraps that will hold deviance unexplained by omission of terms from full model
 devExplBoots_tp1p=rep(0,10000)
 devExplBoots_g=rep(0,10000)
-devExplBoots_pcs=rep(0,10000)
 devExplBoots_Grades=rep(0,10000)
 devExplBoots_gparentP=rep(0,10000)
-devExplBoots_pcsparentP=rep(0,10000)
 devExplBoots_GradesparentP=rep(0,10000)
 set.seed(1)
 for (b in 1:10000){
@@ -50,28 +48,22 @@ for (b in 1:10000){
 		bootSamp <- rbind(bootSamp, subject_obs)
 	}
 	# deviance explained in p by timepoint 1 p
-	pmod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x),data=bootSamp,family=nb())
+	pmod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x,k=4),data=bootSamp,family=nb())
 	devExplBoots_tp1p[b]=summary(pmod)$dev.expl
 	# deviance explained by timepoint 1 p and g
-	gmod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x)+s(g.x),data=bootSamp,family=nb())
+	gmod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x,k=4)+s(g.x,k=4),data=bootSamp,family=nb())
 	devExplBoots_g[b]=summary(gmod)$dev.expl
-	# deviance explained by timepoint 1 p and all 3 pcs
-	pcsMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x)+s(pc2.x)+s(pc3.x)+s(g.x),data=bootSamp,family=nb())
-	devExplBoots_pcs[b]=summary(pcsMod)$dev.expl
 	# deviance explained by timepoint 1 p and Grades
-	GradesMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x)+Grades.x,data=bootSamp,family=nb())
+	GradesMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x,k=4)+Grades.x,data=bootSamp,family=nb())
 	devExplBoots_Grades[b]=summary(GradesMod)$dev.expl
 	# deviance explained by timepoint 1 p and g and parentPcount
-	gparentPMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x)+s(g.x)+s(parentPcount.x),data=bootSamp,family=nb())
+	gparentPMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x,k=4)+s(g.x,k=4)+s(parentPcount.x,k=4),data=bootSamp,family=nb())
 	devExplBoots_gparentP[b]=summary(gparentPMod)$dev.expl
-	# deviance explained by timepoint 1 p g, parentPcount, and pcs
-	pcsparentPMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x)+s(g.x)+s(parentPcount.x)+s(pc2.x)+s(pc3.x),data=bootSamp,family=nb())
-	devExplBoots_pcsparentP[b]=summary(pcsparentPMod)$dev.expl
 	# deviance explained by timepoint 1 p and parentPcount and Grades
-	GradesparentPMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x)+s(parentPcount.x)+Grades.x,data=bootSamp,family=nb())
+	GradesparentPMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x,k=4)+s(parentPcount.x,k=4)+Grades.x,data=bootSamp,family=nb())
 	devExplBoots_GradesparentP[b]=summary(GradesparentPMod)$dev.expl
 }
 # SAVEOUT
 # saveout all deviance explained vectors in one dataframe
-outdf=data.frame(devExplBoots_tp1p,devExplBoots_g,devExplBoots_pcs,devExplBoots_Grades,devExplBoots_gparentP,devExplBoots_pcsparentP,devExplBoots_GradesparentP)
+outdf=data.frame(devExplBoots_tp1p,devExplBoots_g,devExplBoots_Grades,devExplBoots_gparentP,devExplBoots_GradesparentP)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5DevExpl_longit.rds')

@@ -18,7 +18,7 @@ dim(masterdf)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up # add cbcl subscales
-masterdf=masterdf[,c('parentPcount','cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRInt','ASRExt','g','subjectkey','interview_age')]
+masterdf=masterdf[,c('income','sex','parentPcount','cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','cbcl_scr_syn_somatic_r','cbcl_scr_syn_anxdep_r','cbcl_scr_syn_thought_r','cbcl_scr_syn_withdep_r','cbcl_scr_syn_social_r','cbcl_scr_syn_attention_r','cbcl_scr_syn_rulebreak_r','cbcl_scr_syn_aggressive_r','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRInt','ASRExt','g','subjectkey','interview_age')]
 # get length of df for later
 lenDF=dim(masterdf)[1]
 # subbing in ASR scores for CBCL scores to keep equivaelence: no social score for adults
@@ -207,7 +207,6 @@ for (b in 1:10000){
 	eachAnxcount=seq(0:banxmax)
 	eachThocount=seq(0:bthomax)
 	eachWitDepcount=seq(0:bwitdepmax)
-	eachSoccount=seq(0:bsocmax)
 	eachAttcount=seq(0:battmax)
 	eachRulcount=seq(0:brulmax)
 	eachAggcount=seq(0:baggmax)
@@ -220,7 +219,6 @@ for (b in 1:10000){
 	predictDFa=data.frame(eachAnxcount,rep(median(bootSamp$interview_age),(banxmax+1)))
 	predictDFt=data.frame(eachThocount,rep(median(bootSamp$interview_age),(bthomax+1)))
 	predictDFwd=data.frame(eachWitDepcount,rep(median(bootSamp$interview_age),(bwitdepmax+1)))
-	predictDFsoc=data.frame(eachSoccount,rep(median(bootSamp$interview_age),(bsocmax+1)))
 	predictDFatt=data.frame(eachAttcount,rep(median(bootSamp$interview_age),(battmax+1)))
 	predictDFrul=data.frame(eachRulcount,rep(median(bootSamp$interview_age),(brulmax+1)))
 	predictDFagg=data.frame(eachAggcount,rep(median(bootSamp$interview_age),(baggmax+1)))
@@ -413,14 +411,14 @@ for (b in 1:10000){
 # save out version with all F stats and AICs, include max values for all iterations as well
 # save out fits
 outdf=data.frame(F_pFit,M_pFit,P_pFit,R_pFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFits.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpFits_asrSupp.rds')
 # save out fits of all 10 subscales (int, ext, som, anx, tho, withdep, soc, rulbreak, attention, agg) and all 4 (F,M,P,R) versions
 outdf=data.frame(F_intFit,M_intFit,P_intFit,R_intFit,F_extFit,M_extFit,P_extFit,R_extFit,F_somFit,M_somFit,P_somFit,R_somFit,F_anxFit,M_anxFit,P_anxFit,R_anxFit,F_thoFit,M_thoFit,P_thoFit,R_thoFit,F_witdepFit,M_witdepFit,P_witdepFit,R_witdepFit,F_rulFit,M_rulFit,P_rulFit,R_rulFit,F_attFit,M_attFit,P_attFit,R_attFit,F_aggFit,M_aggFit,P_aggFit,R_aggFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpSubscaleFits.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpSubscaleFits_asrSupp.rds')
 # save out derivatives
 outdf=data.frame(F_pDeriv,M_pDeriv,P_pDeriv,R_pDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpDerivs.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpDerivs_asrSupp.rds')
 print('done with g~p fit bootstrapping!')
 # save out modular poverty and equivlanetly-sized poverty fits
 outdf=data.frame(povFit,pseudopovFit,FullNonpovFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpPovNonPov.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpPovNonPov_asrSupp.rds')

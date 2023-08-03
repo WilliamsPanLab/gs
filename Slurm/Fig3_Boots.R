@@ -88,22 +88,22 @@ for (b in 1:10000){
 	#
 	
 	#### g as response variable: REDUCED MODELS
-	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=bootSamp)
+	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4),data=bootSamp)
 	#### FULL MODELS
-	pgAge_seg<-bam(g~s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_totprob_r)+seg+s(interview_age),data=bootSamp)
-	pgAge_pov<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r)+poverty+s(interview_age),data=bootSamp)
+	pgAge_seg<-bam(g~s(cbcl_scr_syn_totprob_r,by=seg,k=4)+s(cbcl_scr_syn_totprob_r,k=4)+seg+s(interview_age,k=4),data=bootSamp)
+	pgAge_pov<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty,k=4)+s(cbcl_scr_syn_totprob_r,k=4)+poverty+s(interview_age,k=4),data=bootSamp)
 	# comparison models to evaluate AIC gain from interactions specifically. Should include main effects but minus interaction of interest
-	pgAge_seg_noIntrxn=bam(g~s(cbcl_scr_syn_totprob_r)+seg+s(interview_age),data=bootSamp)
-	pgAge_pov_noIntrxn=bam(g~s(cbcl_scr_syn_totprob_r)+poverty+s(interview_age),data=bootSamp)
-	pgAge_seg_pov_noIntrxn<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_totprob_r)+seg*poverty+s(interview_age),data=bootSamp)
+	pgAge_seg_noIntrxn=bam(g~s(cbcl_scr_syn_totprob_r,k=4)+seg+s(interview_age,k=4),data=bootSamp)
+	pgAge_pov_noIntrxn=bam(g~s(cbcl_scr_syn_totprob_r,k=4)+poverty+s(interview_age,k=4),data=bootSamp)
+	pgAge_seg_pov_noIntrxn<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty,k=4)+s(cbcl_scr_syn_totprob_r,by=seg,k=4)+s(cbcl_scr_syn_totprob_r,k=4)+seg*poverty+s(interview_age,k=4),data=bootSamp)
 	#### VERY FULL MODELS
-	pgAge_seg_pov<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(cbcl_scr_syn_totprob_r,by=seg)+s(cbcl_scr_syn_totprob_r)+seg*poverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(seg, poverty)),data=bootSamp)
+	pgAge_seg_pov<-bam(g~s(cbcl_scr_syn_totprob_r,by=poverty,k=4)+s(cbcl_scr_syn_totprob_r,by=seg,k=4)+s(cbcl_scr_syn_totprob_r,k=4)+seg*poverty+s(interview_age,k=4)+s(cbcl_scr_syn_totprob_r, by = interaction(seg, poverty),k=4),data=bootSamp)
 	# fit null models for use later (no reduced, reduced is the same as real reduced)
 	#### FULL NULL MODELS
-	pgAge_seg_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedoseg)+s(cbcl_scr_syn_totprob_r)+psuedoseg+s(interview_age),data=bootSamp)
-	pgAge_pov_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedopoverty)+s(cbcl_scr_syn_totprob_r)+psuedopoverty+s(interview_age),data=bootSamp)
+	pgAge_seg_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedoseg,k=4)+s(cbcl_scr_syn_totprob_r,k=4)+psuedoseg+s(interview_age,k=4),data=bootSamp)
+	pgAge_pov_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedopoverty,k=4)+s(cbcl_scr_syn_totprob_r,k=4)+psuedopoverty+s(interview_age,k=4),data=bootSamp)
 	#### VERY FULL NULL MODELS
-	pgAge_seg_pov_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedopoverty)+s(cbcl_scr_syn_totprob_r,by=psuedoseg)+s(cbcl_scr_syn_totprob_r)+psuedoseg*psuedopoverty+s(interview_age)+s(cbcl_scr_syn_totprob_r, by = interaction(psuedoseg, psuedopoverty)),data=bootSamp)
+	pgAge_seg_pov_n<-bam(g~s(cbcl_scr_syn_totprob_r,by=psuedopoverty,k=4)+s(cbcl_scr_syn_totprob_r,by=psuedoseg,k=4)+s(cbcl_scr_syn_totprob_r,k=4)+psuedoseg*psuedopoverty+s(interview_age,k=4)+s(cbcl_scr_syn_totprob_r, by = interaction(psuedoseg, psuedopoverty),k=4),data=bootSamp)
 	
 	#
 	######## II PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
@@ -158,11 +158,11 @@ for (b in 1:10000){
 	eachPcount2=seq(0,bpmax_2)
 	predictDF_2=data.frame(eachPcount2,rep(median(bootSamp$interview_age),(bpmax_2+1)))
 	# fit g~p to poverty group
-	pov_gp=gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=povertyGroup)
+	pov_gp=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age),data=povertyGroup)
 	# fit g~p to same-size nonpoverty group
-	nonpov_gp=gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=pseudoPov2Group)
+	nonpov_gp=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age),data=pseudoPov2Group)
 	# fit g~p to the full nonpoverty group
-	fnonpov_gp=gam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age),data=nonpovGroup)
+	fnonpov_gp=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age),data=nonpovGroup)
 	# make prediction df to use for both models
 	colnames(predictDF_2)=c('cbcl_scr_syn_totprob_r','interview_age')
 	# extract fit derivatives

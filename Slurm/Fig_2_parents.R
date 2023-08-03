@@ -178,70 +178,70 @@ for (b in 1:10000){
 	basraggmax=max(bootSamp$ASR_aggressive)
 	######## I FORMALLY TEST FOR NON-LINEARITY
 	#### uses this proposed test https://stats.stackexchange.com/questions/449641/is-there-a-hypothesis-test-that-tells-us-whether-we-should-use-gam-vs-glm
-	pgAge<-bam(g~cbcl_scr_syn_totprob_r+s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age),data=bootSamp)
+	pgAge<-bam(g~cbcl_scr_syn_totprob_r+s(cbcl_scr_syn_totprob_r,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	plinBoots[b]=summary(pgAge)$s.pv[1]
-	intgAge<-bam(g~cbcl_scr_syn_internal_r+s(cbcl_scr_syn_internal_r,m=c(2,0))+s(interview_age),data=bootSamp)
+	intgAge<-bam(g~cbcl_scr_syn_internal_r+s(cbcl_scr_syn_internal_r,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	intlinBoots[b]=summary(intgAge)$s.pv[1]
-	extgAge<-bam(g~cbcl_scr_syn_external_r+s(cbcl_scr_syn_external_r,m=c(2,0))+s(interview_age),data=bootSamp)
+	extgAge<-bam(g~cbcl_scr_syn_external_r+s(cbcl_scr_syn_external_r,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	extlinBoots[b]=summary(extgAge)$s.pv[1]
-	somgAge<-bam(g~cbcl_scr_syn_somatic_r+s(cbcl_scr_syn_somatic_r,m=c(2,0))+s(interview_age),data=bootSamp)
+	somgAge<-bam(g~cbcl_scr_syn_somatic_r+s(cbcl_scr_syn_somatic_r,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	somLinBoots[b]=summary(somgAge)$s.pv[1]
-	anxgAge<-bam(g~cbcl_scr_syn_anxdep_r+s(cbcl_scr_syn_anxdep_r,m=c(2,0))+s(interview_age),data=bootSamp)
+	anxgAge<-bam(g~cbcl_scr_syn_anxdep_r+s(cbcl_scr_syn_anxdep_r,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	anxLinBoots[b]=summary(anxgAge)$s.pv[1]
-	thogAge<-bam(g~cbcl_scr_syn_thought_r+s(cbcl_scr_syn_thought_r,m=c(2,0))+s(interview_age),data=bootSamp)
+	thogAge<-bam(g~cbcl_scr_syn_thought_r+s(cbcl_scr_syn_thought_r,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	thoLinBoots[b]=summary(thogAge)$s.pv[1]
-	witgAge<-bam(g~cbcl_scr_syn_withdep_r+s(cbcl_scr_syn_withdep_r,m=c(2,0))+s(interview_age),data=bootSamp)
+	witgAge<-bam(g~cbcl_scr_syn_withdep_r+s(cbcl_scr_syn_withdep_r,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	witLinBoots[b]=summary(witgAge)$s.pv[1]
-	attgAge<-bam(g~cbcl_scr_syn_attention_r+s(cbcl_scr_syn_attention_r,m=c(2,0))+s(interview_age),data=bootSamp)
+	attgAge<-bam(g~cbcl_scr_syn_attention_r+s(cbcl_scr_syn_attention_r,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	attLinBoots[b]=summary(attgAge)$s.pv[1]
-	rulgAge<-bam(g~cbcl_scr_syn_rulebreak_r+s(cbcl_scr_syn_rulebreak_r,m=c(2,0))+s(interview_age),data=bootSamp)
+	rulgAge<-bam(g~cbcl_scr_syn_rulebreak_r+s(cbcl_scr_syn_rulebreak_r,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	rulLinBoots[b]=summary(rulgAge)$s.pv[1]
-	agggAge<-bam(g~cbcl_scr_syn_aggressive_r+s(cbcl_scr_syn_aggressive_r,m=c(2,0))+s(interview_age),data=bootSamp)
+	agggAge<-bam(g~cbcl_scr_syn_aggressive_r+s(cbcl_scr_syn_aggressive_r,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	aggLinBoots[b]=summary(agggAge)$s.pv[1]
 	#### ASR
-	asrpgAge<-bam(g~parentPcount+s(parentPcount,m=c(2,0))+s(interview_age),data=bootSamp)
+	asrpgAge<-bam(g~parentPcount+s(parentPcount,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	asrpLinBoots[b]=summary(asrpgAge)$s.pv[1]
-	asrintgAge<-bam(g~ASRInt+s(ASRInt,m=c(2,0))+s(interview_age),data=bootSamp)
+	asrintgAge<-bam(g~ASRInt+s(ASRInt,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	asrintLinBoots[b]=summary(asrintgAge)$s.pv[1]
-	asrextgAge<-bam(g~ASRExt+s(ASRExt,m=c(2,0))+s(interview_age),data=bootSamp)
+	asrextgAge<-bam(g~ASRExt+s(ASRExt,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	asrextLinBoots[b]=summary(asrextgAge)$s.pv[1]
-	asrsomgAge<-bam(g~ASR_somatic+s(ASR_somatic,m=c(2,0))+s(interview_age),data=bootSamp)
+	asrsomgAge<-bam(g~ASR_somatic+s(ASR_somatic,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	asrsomLinBoots[b]=summary(asrsomgAge)$s.pv[1]
-	asranxgAge<-bam(g~ASR_anxdep+s(ASR_anxdep,m=c(2,0))+s(interview_age),data=bootSamp)
+	asranxgAge<-bam(g~ASR_anxdep+s(ASR_anxdep,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	asranxLinBoots[b]=summary(asranxgAge)$s.pv[1]
-	asrthogAge<-bam(g~ASR_thought+s(ASR_thought,m=c(2,0))+s(interview_age),data=bootSamp)
+	asrthogAge<-bam(g~ASR_thought+s(ASR_thought,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	asrthoLinBoots[b]=summary(asrthogAge)$s.pv[1]
-	asrwitgAge<-bam(g~ASR_withdep+s(ASR_withdep,m=c(2,0))+s(interview_age),data=bootSamp)
+	asrwitgAge<-bam(g~ASR_withdep+s(ASR_withdep,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	asrwitLinBoots[b]=summary(asrwitgAge)$s.pv[1]
-	asrattgAge<-bam(g~ASR_attention+s(ASR_attention,m=c(2,0))+s(interview_age),data=bootSamp)
+	asrattgAge<-bam(g~ASR_attention+s(ASR_attention,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	asrattLinBoots[b]=summary(asrattgAge)$s.pv[1]
-	asrrulgAge<-bam(g~ASR_rulebreak+s(ASR_rulebreak,m=c(2,0))+s(interview_age),data=bootSamp)
+	asrrulgAge<-bam(g~ASR_rulebreak+s(ASR_rulebreak,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	asrrulLinBoots[b]=summary(asrrulgAge)$s.pv[1]
-	asragggAge<-bam(g~ASR_aggressive+s(ASR_aggressive,m=c(2,0))+s(interview_age),data=bootSamp)
+	asragggAge<-bam(g~ASR_aggressive+s(ASR_aggressive,m=c(2,0))+s(interview_age,k=4),data=bootSamp)
 	asraggLinBoots[b]=summary(asragggAge)$s.pv[1]
 	######## II PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
 	#### g as response variable, add asr and predict on asr
-	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r)+s(interview_age)+s(parentPcount),data=bootSamp)
-	intgAge<-bam(g~s(cbcl_scr_syn_internal_r)+s(interview_age)+s(ASRInt),data=bootSamp)
-	extgAge<-bam(g~s(cbcl_scr_syn_external_r)+s(interview_age)+s(ASRExt),data=bootSamp)
-	somgAge<-bam(g~s(cbcl_scr_syn_somatic_r)+s(interview_age)+s(ASR_somatic),data=bootSamp)
-	anxgAge<-bam(g~s(cbcl_scr_syn_anxdep_r)+s(interview_age)+s(ASR_anxdep),data=bootSamp)
-	thogAge<-bam(g~s(cbcl_scr_syn_thought_r)+s(interview_age)+s(ASR_thought),data=bootSamp)
-	witgAge<-bam(g~s(cbcl_scr_syn_withdep_r)+s(interview_age)+s(ASR_withdep),data=bootSamp)
-	attgAge<-bam(g~s(cbcl_scr_syn_attention_r)+s(interview_age)+s(ASR_attention),data=bootSamp)
-	rulgAge<-bam(g~s(cbcl_scr_syn_rulebreak_r)+s(interview_age)+s(ASR_rulebreak),data=bootSamp)
-	agggAge<-bam(g~s(cbcl_scr_syn_aggressive_r)+s(interview_age)+s(ASR_aggressive),data=bootSamp)
+	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(parentPcount,k=4),data=bootSamp)
+	intgAge<-bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+s(ASRInt,k=4),data=bootSamp)
+	extgAge<-bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+s(ASRExt,k=4),data=bootSamp)
+	somgAge<-bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age,k=4)+s(ASR_somatic,k=4),data=bootSamp)
+	anxgAge<-bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4)+s(ASR_anxdep,k=4),data=bootSamp)
+	thogAge<-bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4)+s(ASR_thought,k=4),data=bootSamp)
+	witgAge<-bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4)+s(ASR_withdep,k=4),data=bootSamp)
+	attgAge<-bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4)+s(ASR_attention,k=4),data=bootSamp)
+	rulgAge<-bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4)+s(ASR_rulebreak,k=4),data=bootSamp)
+	agggAge<-bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4)+s(ASR_aggressive,k=4),data=bootSamp)
 	#### ASR
-	asrpgAge<-bam(g~s(parentPcount)+s(interview_age),data=bootSamp)
-	asrintgAge<-bam(g~s(ASRInt)+s(interview_age),data=bootSamp)
-	asrextgAge<-bam(g~s(ASRExt)+s(interview_age),data=bootSamp)
-	asrsomgAge<-bam(g~s(ASR_somatic)+s(interview_age),data=bootSamp)
-	asranxgAge<-bam(g~s(ASR_anxdep)+s(interview_age),data=bootSamp)
-	asrthogAge<-bam(g~s(ASR_thought)+s(interview_age),data=bootSamp)
-	asrwitgAge<-bam(g~s(ASR_withdep)+s(interview_age),data=bootSamp)
-	asrattgAge<-bam(g~s(ASR_attention)+s(interview_age),data=bootSamp)
-	asrrulgAge<-bam(g~s(ASR_rulebreak)+s(interview_age),data=bootSamp)
-	asragggAge<-bam(g~s(ASR_aggressive)+s(interview_age),data=bootSamp)
+	asrpgAge<-bam(g~s(parentPcount,k=4)+s(interview_age,k=4),data=bootSamp)
+	asrintgAge<-bam(g~s(ASRInt,k=4)+s(interview_age,k=4),data=bootSamp)
+	asrextgAge<-bam(g~s(ASRExt,k=4)+s(interview_age,k=4),data=bootSamp)
+	asrsomgAge<-bam(g~s(ASR_somatic,k=4)+s(interview_age,k=4),data=bootSamp)
+	asranxgAge<-bam(g~s(ASR_anxdep,k=4)+s(interview_age,k=4),data=bootSamp)
+	asrthogAge<-bam(g~s(ASR_thought,k=4)+s(interview_age,k=4),data=bootSamp)
+	asrwitgAge<-bam(g~s(ASR_withdep,k=4)+s(interview_age,k=4),data=bootSamp)
+	asrattgAge<-bam(g~s(ASR_attention,k=4)+s(interview_age,k=4),data=bootSamp)
+	asrrulgAge<-bam(g~s(ASR_rulebreak,k=4)+s(interview_age,k=4),data=bootSamp)
+	asragggAge<-bam(g~s(ASR_aggressive,k=4)+s(interview_age,k=4),data=bootSamp)
 	# use PREDICTED VALUES of model fit for each symptom count for saving
 	eachPcount=seq(0:bpmax)
 	eachIntcount=seq(0:bimax)
