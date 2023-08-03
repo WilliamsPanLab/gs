@@ -147,7 +147,7 @@ lmforBeta<-lm(resids~cbcl_scr_syn_totprob_r,data=plotdf)
 ```{r}
 ### P boots plot with overlaid linear fit
 # load in data
-Fits=readRDS('~/Desktop/g_p/gpFitBoots_k5.rds')
+Fits=readRDS('~/Desktop/g_p/gpFitBoots_k4.rds')
 # extract p factor
 PFits=Fits[,1:128]
 MaxP=find_furthest_nonzero(PFits)
@@ -197,7 +197,7 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 
 ```{r}
 # load in data
-Fits=readRDS('~/Desktop/g_p/gpFitBoots_k5.rds')
+Fits=readRDS('~/Desktop/g_p/gpFitBoots_k4.rds')
 # find mean shape and plot it: p
 PFits=Fits[,1:128]
 IFits=Fits[,129:180]
@@ -281,7 +281,7 @@ plot_bootstraps(EFits,47,'Externalizing',MaxE,Ebc,Ec)
 
 ```{r}
 # load in data
-Fits=readRDS('~/Desktop/g_p/gpDerivBoots_k5.rds')
+Fits=readRDS('~/Desktop/g_p/gpDerivBoots_k4.rds')
 # find mean shape and plot it: p
 PFits=Fits[,1:128]
 IFits=Fits[,129:180]

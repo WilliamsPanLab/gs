@@ -336,7 +336,7 @@ ggplot(plotdf, aes(x = cbcl_scr_syn_totprob_r, y = poverty)) +
 
 ```{r}
 # poverty analysis
-povBootsdf=readRDS('~/F3_gpPovNonPov.rds')
+povBootsdf=readRDS('~/Desktop/g_p/F3_gpPovNonPov_k4.rds')
 povBoots=povBootsdf[,1:128]
 nonpovBoots=povBootsdf[,129:256]
 FullnonpovBoots=povBootsdf[,257:384]
@@ -346,12 +346,12 @@ FullnonpovBoots=povBootsdf[,257:384]
 # get furthest non zero
 print(find_furthest_nonzero(povBoots))
 # Select the first 79 columns from each dataframe
-povBoots_subset <- povBoots[, 1:79]
-nonpovBoots_subset <- nonpovBoots[, 1:79]
-FullnonpovBoots_subset <- FullnonpovBoots[, 1:79]
+povBoots_subset <- povBoots[, 1:77]
+nonpovBoots_subset <- nonpovBoots[, 1:77]
+FullnonpovBoots_subset <- FullnonpovBoots[, 1:77]
 
 # Create an index variable for the x-axis
-index <- 0:78
+index <- 0:76
 
 library(dplyr)
 library(tidyr)
