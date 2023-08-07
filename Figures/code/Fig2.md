@@ -249,7 +249,7 @@ print(cor.test(masterdf$parentPcount,masterdf$cbcl_scr_syn_totprob_r))
 ``` r
 ### P boots plot 
 # load in data
-Fits=readRDS('~/gpFitBoots_asr.rds')
+Fits=readRDS('~/Desktop/g_p/gpFitBoots_asr.rds')
 # find mean shape and plot it: p
 PFits=Fits[,448:608]
 MaxP=find_furthest_nonzero(PFits)
@@ -321,8 +321,8 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 ![](Fig2_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
-# load in data: 10,000 only done for p
-Fits=readRDS('~/gpFitBoots_asr.rds')
+# load in data
+Fits=readRDS('~/Desktop/g_p/gpFitBoots_asr.rds')
 PFits=Fits[,448:608]
 MaxP=find_furthest_nonzero(PFits)
 
@@ -374,7 +374,7 @@ plot_bootstraps_par(IFits,30,'Parental Internalizing',MaxI)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 40009 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 40008 rows containing missing values (`geom_line()`).
 
 ![](Fig2_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
@@ -390,7 +390,7 @@ plot_bootstraps_par(EFits,63,'Parental Externalizing',MaxE)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 180036 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 200040 rows containing missing values (`geom_line()`).
 
 ![](Fig2_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
@@ -419,10 +419,9 @@ plot_bootstraps_par(WitFits,18,'Withdrawn Depression',MaxWit)
     ## ℹ Please use `reframe()` instead.
     ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
     ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Removed 40008 rows containing missing values (`geom_line()`).
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
-
-    ## Warning: Removed 40009 rows containing missing values (`geom_line()`).
 
 ![](Fig2_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->
 
@@ -435,10 +434,9 @@ plot_bootstraps_par(AttFits,31,'Attention',MaxAtt)
     ## ℹ Please use `reframe()` instead.
     ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
     ##   always returns an ungrouped data frame and adjust accordingly.
+    ## Removed 40008 rows containing missing values (`geom_line()`).
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
-
-    ## Warning: Removed 40008 rows containing missing values (`geom_line()`).
 
 ![](Fig2_files/figure-gfm/unnamed-chunk-6-6.png)<!-- -->
 
@@ -454,7 +452,7 @@ plot_bootstraps_par(RulFits,21,'Rule Breaking',MaxRul)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 80017 rows containing missing values (`geom_line()`).
 
 ![](Fig2_files/figure-gfm/unnamed-chunk-6-7.png)<!-- -->
 
@@ -508,7 +506,7 @@ plot_bootstraps_par(SomFits,20,'Somatic',MaxSom)
 
 ``` r
 # load in data
-Fits=readRDS('~/gpDerivBoots_asr.rds')
+Fits=readRDS('~/Desktop/g_p/gpDerivBoots_asr.rds')
 # find mean shape and plot it: p
 PFits=Fits[,448:608]
 IFits = Fits[,(161:191)+448]
@@ -539,7 +537,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab(x_title)+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -558,7 +556,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 dervPlotDf$Slope=dervPlotDf$sig_deriv
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab(expression(italic(p)))+
     theme(legend.key.width=unit(3,"cm"),axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))+
@@ -594,7 +592,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlab('Parental Internalizing')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -624,7 +622,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxE))+xlab('Parental Externalizing')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -634,7 +632,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 20 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 22 rows containing missing values (`geom_raster()`).
 
 ![](Fig2_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
 
@@ -657,7 +655,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxSom))+xlab('Somatic')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -685,7 +683,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxAnx))+xlab('Anxious Depression')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -741,7 +739,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+xlim(c(0,MaxWit))+xlab('Withdrawn Depression')+
+      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+xlim(c(0,MaxWit))+xlab('Withdrawn Depression')+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
@@ -768,7 +766,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+xlim(c(0,MaxAtt))+xlab('Attention')+
+      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+xlim(c(0,MaxAtt))+xlab('Attention')+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxAtt),expand = expansion(mult = c(0, 0)))
@@ -795,7 +793,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+xlim(c(0,MaxRul))+xlab('Rule Breaking')+
+      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+xlim(c(0,MaxRul))+xlab('Rule Breaking')+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(breaks=c(0,3,6,9,12),limits = c(0,MaxRul),expand = expansion(mult = c(0, 0)))
@@ -822,7 +820,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.25),max(0.25)))+theme_minimal(base_size = 35)+xlim(c(0,MaxAgg))+xlab('Aggression')+
+      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+xlim(c(0,MaxAgg))+xlab('Aggression')+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxAgg),expand = expansion(mult = c(0, 0)))
@@ -910,30 +908,38 @@ df_tidy2 <- left_join(df_tidy2, df_median, by = "Subscale")
 # note we are sorting by plot one's order
 df_tidy2$Subscale <- reorder(df_tidy2$Subscale, -df_tidy$MedianValue, median)
 
+# combine
+df_tidy$third<-'First'
+df_tidy2$third<-'Last'
+
+df_tidy_merged<-rbind(df_tidy,df_tidy2)
+
 # Create the boxplot
-ggplot(df_tidy2, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
-  geom_boxplot() +
-  labs(title = "Median Association with Cognitive Score: Clinical Third",
-       x = "Subscale",
-       y = "Median Slope") +
-  theme_minimal(base_size=23)+scale_fill_gradientn(
-    colors = my_palette(100),
-    limits = c(-.27,.27))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.25,.25))
+ggplot(df_tidy_merged, aes(x = Subscale, y = MedianValue,fill=MedianIteration,outlier.shape=third)) +
+    geom_boxplot(position = position_dodge(0.6),outlier.alpha = .1) +
+    labs(title = "Median Association with Cognitive Score",
+         x = "Subscale",
+         y = "Median Slope") +
+    theme_minimal(base_size=23)+scale_fill_gradientn(
+        colors = my_palette(100),
+        limits = c(-.1,.1))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.24,.13))
 ```
+
+    ## Warning: Removed 1 rows containing non-finite values (`stat_boxplot()`).
 
 ![](Fig2_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 library(dplyr)
 # supplemental figure 2
-PvC_de=readRDS('~/PvC_gdevExplBoots.rds')
+PvC_de=readRDS('~/Desktop/g_p/PvC_gdevExplBoots.rds')
 
 # rename columns for plotting
 new_colnames <- c("child p", "child int.", "child ext.", "child somatic", "child anxdep.", "child thought", "child withdep.", 
                   "child social", "child attn.", "child rulebreak", "child aggr.", "parent p", "parent int.", 
                   "parent ext.", "parent somatic", "parent anx", "parent thought", "parent withdep.", 
                   "parent attn.", "parent rulebreak", "parent aggr.")
-desiredOrder <- c("child p", "parent p","child int.", "parent int.","child ext.", "parent ext.", "child aggr.", "parent aggr.","child anxdep.","parent anx", "child attn.", "parent attn.","child rulebreak","parent rulebreak","child thought", "parent thought", "child somatic","parent somatic",  "child withdep.", "parent withdep.","child social")
+desiredOrder <- c("child p", "parent p","child int.", "parent int.","child anxdep.","parent anx","child thought", "parent thought", "child somatic","parent somatic",  "child withdep.", "parent withdep.","child ext.", "parent ext.", "child aggr.", "parent aggr.", "child attn.", "parent attn.","child rulebreak","parent rulebreak","child social")
 
 # set col names
 colnames(PvC_de)<-new_colnames
@@ -959,7 +965,7 @@ PvC_long <- PvC_long %>%
 ggplot(PvC_long, aes(x = Subscale, y = value,fill=Group)) +
   geom_boxplot() +
   labs(x = "Subscale",
-       y = "Deviance Explained in Child g") +
+       y = "Deviance Explained in Child g",fill = "") +
   theme_minimal(base_size=35)+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```

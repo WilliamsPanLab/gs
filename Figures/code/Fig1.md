@@ -219,7 +219,7 @@ lmforBeta<-lm(resids~cbcl_scr_syn_totprob_r,data=plotdf)
 ``` r
 ### P boots plot with overlaid linear fit
 # load in data
-Fits=readRDS('~/gpFitBoots.rds')
+Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
 # extract p factor
 PFits=Fits[,1:128]
 MaxP=find_furthest_nonzero(PFits)
@@ -294,7 +294,7 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 130042 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 130026 rows containing missing values (`geom_line()`).
 
     ## Warning: The `guide` argument in `scale_*()` cannot be `FALSE`. This was deprecated in
     ## ggplot2 3.3.4.
@@ -307,7 +307,7 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 
 ``` r
 # load in data
-Fits=readRDS('~/gpFitBoots.rds')
+Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
 # find mean shape and plot it: p
 PFits=Fits[,1:128]
 IFits=Fits[,129:180]
@@ -342,7 +342,8 @@ masterdfE_bc<-masterdf[masterdf$cbcl_scr_syn_external_t==65,]
 masterdfE_c<-masterdf[masterdf$cbcl_scr_syn_external_t==69,]
 masterdfAnx_bc<-masterdf[masterdf$cbcl_scr_syn_anxdep_t==65,]
 masterdfAnx_c<-masterdf[masterdf$cbcl_scr_syn_anxdep_t==69,]
-masterdfTho_bc<-masterdf[masterdf$cbcl_scr_syn_thought_t==65,]
+# note no one has t==65 in this dataset for thought
+masterdfTho_bc<-masterdf[masterdf$cbcl_scr_syn_thought_t==66,]
 masterdfTho_c<-masterdf[masterdf$cbcl_scr_syn_thought_t==69,]
 # note no one has t==65 in this dataset for withdrawn depression
 masterdfWit_bc<-masterdf[masterdf$cbcl_scr_syn_withdep_t==66,]
@@ -394,7 +395,7 @@ plot_bootstraps(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 130042 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 130026 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
@@ -410,7 +411,7 @@ plot_bootstraps(IFits,51,'Internalizing',MaxI,Ibc,Ic)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 160033 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 160032 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
 
@@ -426,13 +427,13 @@ plot_bootstraps(EFits,47,'Externalizing',MaxE,Ebc,Ec)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 70016 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 70018 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
 
 ``` r
 # load in data
-Fits=readRDS('~/gpDerivBoots.rds')
+Fits=readRDS('~/Desktop/g_p/gpDerivBoots.rds')
 # find mean shape and plot it: p
 PFits=Fits[,1:128]
 IFits=Fits[,129:180]
@@ -464,7 +465,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab(expression(italic(p)))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -483,12 +484,12 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 dervPlotDf$Slope=dervPlotDf$sig_deriv
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxP))+xlab(expression(italic(p)))+
     theme(legend.key.width=unit(3,"cm"),axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
-    scale_x_continuous(limits = c(0,113),expand = expansion(mult = c(0, 0)))
+    scale_x_continuous(limits = c(0,113),expand = expansion(mult = c(0, 0)))+labs(fill = "")
 ```
 
     ## Scale for x is already present.
@@ -519,7 +520,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlab('Internalizing')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -549,7 +550,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxE))+xlab('Externalizing')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -582,7 +583,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxSom))+xlab('Somatic')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -610,7 +611,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxAnx))+xlab('Anxious Depression')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -638,7 +639,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
     xlim(c(0,MaxTho))+xlab('Thought')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
@@ -666,10 +667,10 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+xlim(c(0,MaxWit))+xlab('Withdrawn Depression')+
+      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+xlim(c(0,MaxWit))+xlab('Withdrawn Depression')+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-      scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
+      scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)),breaks = seq(0, MaxWit, by = 2))
 ```
 
     ## Scale for x is already present.
@@ -693,7 +694,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+xlim(c(0,MaxSoc))+xlab('Social')+
+      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+xlim(c(0,MaxSoc))+xlab('Social')+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(breaks=c(0,3,6,9,12),limits = c(0,MaxSoc),expand = expansion(mult = c(0, 0)))
@@ -720,7 +721,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+xlim(c(0,MaxAtt))+xlab('Attention')+
+      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+xlim(c(0,MaxAtt))+xlab('Attention')+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxAtt),expand = expansion(mult = c(0, 0)))
@@ -729,7 +730,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 2 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 3 rows containing missing values (`geom_raster()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-6-10.png)<!-- -->
 
@@ -747,7 +748,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+xlim(c(0,MaxRul))+xlab('Rule Breaking')+
+      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+xlim(c(0,MaxRul))+xlab('Rule Breaking')+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(breaks=c(0,3,6,9,12),limits = c(0,MaxRul),expand = expansion(mult = c(0, 0)))
@@ -774,7 +775,7 @@ dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_de
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.27),max(0.27)))+theme_minimal(base_size = 35)+xlim(c(0,MaxAgg))+xlab('Aggression')+
+      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+xlim(c(0,MaxAgg))+xlab('Aggression')+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxAgg),expand = expansion(mult = c(0, 0)))
@@ -783,7 +784,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
-    ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
+    ## Warning: Removed 7 rows containing missing values (`geom_raster()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-6-12.png)<!-- -->
 
@@ -813,19 +814,19 @@ df_median <- df_tidy %>%
   summarize(MedianIteration = median(MedianValue))
 
 # Join the MedianIteration column to df_tidy based on Subscale
-df_tidy <- left_join(df_tidy, df_median, by = "Subscale")
+df_tidy_1st3rd <- left_join(df_tidy, df_median, by = "Subscale")
 
-df_tidy$Subscale <- reorder(df_tidy$Subscale, -df_tidy$MedianValue, median)
+df_tidy_1st3rd$Subscale <- reorder(df_tidy_1st3rd$Subscale, -df_tidy_1st3rd$MedianValue, median)
 
-# Create the boxplot - saved at 1300 x 500
-ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
+# Create the boxplot - saved at 1300 x 800
+ggplot(df_tidy_1st3rd, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
   geom_boxplot() +
   labs(title = "Median Association with Cognitive Score: Healthy Third",
        x = "Subscale",
        y = "Median Slope") +
   theme_minimal(base_size=23)+scale_fill_gradientn(
     colors = my_palette(100),
-    limits = c(-.27,.27))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.25,.25))
+    limits = c(-.1,.1))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
 ```
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
@@ -857,23 +858,26 @@ df_median <- df_tidy2 %>%
   summarize(MedianIteration = median(MedianValue))
 
 # Join the MedianIteration column to df_tidy based on Subscale
-df_tidy2 <- left_join(df_tidy2, df_median, by = "Subscale")
+df_tidy_3rd3rd <- left_join(df_tidy2, df_median, by = "Subscale")
 
 # note we are sorting by plot one's order
-df_tidy2$Subscale <- reorder(df_tidy2$Subscale, -df_tidy$MedianValue, median)
+df_tidy_3rd3rd$Subscale <- reorder(df_tidy_3rd3rd$Subscale, -df_tidy_3rd3rd$MedianValue, median)
 
-# Create the boxplot
-ggplot(df_tidy2, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
-  geom_boxplot() +
-  labs(title = "Median Association with Cognitive Score: Clinical Third",
-       x = "Subscale",
-       y = "Median Slope") +
-  theme_minimal(base_size=23)+scale_fill_gradientn(
-    colors = my_palette(100),
-    limits = c(-.27,.27))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.25,.25))
+# merge for boxplot
+df_tidy_1st3rd$third<-'First'
+df_tidy_3rd3rd$third<-'Last'
+
+df_tidy_merged<-rbind(df_tidy_1st3rd,df_tidy_3rd3rd)
+# Create the boxplot - healthy and unhealthy third
+ggplot(df_tidy_merged, aes(x = Subscale, y = MedianValue,fill=MedianIteration,outlier.shape=third)) +
+    geom_boxplot(position = position_dodge(0.6),outlier.alpha = .1) +
+    labs(title = "Median Association with Cognitive Score",
+         x = "Subscale",
+         y = "Median Slope") +
+    theme_minimal(base_size=23)+scale_fill_gradientn(
+        colors = my_palette(100),
+        limits = c(-.1,.1))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.24,.13))
 ```
-
-    ## Warning: Removed 2 rows containing non-finite values (`stat_boxplot()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
@@ -933,7 +937,7 @@ ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bin
 ``` r
 # each subscale for supplementary figures
 # load in data
-Fits=readRDS('~/gpFitBoots.rds')
+Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
 # find mean shape and plot it: p
 PFits=Fits[,1:128]
 IFits=Fits[,129:180]
@@ -958,7 +962,7 @@ plot_bootstraps(SomFits,13,"Somatic",MaxSom,SomBc,SomC)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 10007 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 10005 rows containing missing values (`geom_line()`).
 
     ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
 
@@ -976,7 +980,7 @@ plot_bootstraps(AnxFits,25,'Anxious Depression',MaxAnx,AnxBc,AnxC)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 50011 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
@@ -994,8 +998,6 @@ plot_bootstraps(ThoFits,18,'Thought',MaxTho,ThoBc,ThoC)
 
     ## Warning: Removed 30006 rows containing missing values (`geom_line()`).
 
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-
 ![](Fig1_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->
 
 ``` r
@@ -1010,7 +1012,7 @@ plot_bootstraps(WitFits,16,"Withdrawn Depression",MaxWit,WitBc,WitC)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 30006 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 30015 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-10-4.png)<!-- -->
 
@@ -1023,9 +1025,10 @@ plot_bootstraps(SocFits,17,'Social',MaxSoc,SocBc,SocC)
     ## ℹ Please use `reframe()` instead.
     ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
     ##   always returns an ungrouped data frame and adjust accordingly.
-    ## Removed 30006 rows containing missing values (`geom_line()`).
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
+
+    ## Warning: Removed 30006 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-10-5.png)<!-- -->
 
@@ -1041,7 +1044,7 @@ plot_bootstraps(AttFits,19,'Attention',MaxAtt,AttBc,AttC)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 15 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 10003 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-10-6.png)<!-- -->
 
@@ -1057,7 +1060,7 @@ plot_bootstraps(RulFits,18,'Rule Breaking',MaxRul,RulBc,RulC)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 40016 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 40011 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-10-7.png)<!-- -->
 
@@ -1073,6 +1076,6 @@ plot_bootstraps(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: Removed 30015 rows containing missing values (`geom_line()`).
+    ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
 ![](Fig1_files/figure-gfm/unnamed-chunk-10-8.png)<!-- -->
