@@ -1,24 +1,62 @@
----
-title: "Figure3"
-output: github_document
-date: "2023-05-06"
----
+Figure3
+================
+2023-05-06
 
-```{r}
+``` r
 # figure 3
 library(mgcv)
+```
+
+    ## Loading required package: nlme
+
+    ## This is mgcv 1.8-42. For overview type 'help("mgcv-package")'.
+
+``` r
 library(visreg)
 library(gratia)
 library(dplyr)
+```
+
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following object is masked from 'package:nlme':
+    ## 
+    ##     collapse
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+``` r
 library(tidyr)
 library(stringr)
 library(data.table)
+```
+
+    ## 
+    ## Attaching package: 'data.table'
+
+    ## The following objects are masked from 'package:dplyr':
+    ## 
+    ##     between, first, last
+
+``` r
 library(ggridges)
 library(ggbeeswarm)
+```
+
+    ## Loading required package: ggplot2
+
+``` r
 library(ggExtra)
 ```
 
-```{r}
+``` r
 # set functions
 plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Clinical) {
   # Melt the data frame
@@ -65,11 +103,9 @@ find_furthest_nonzero <- function(data) {
 
 # set colors
 my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1c", "#a80009"))
-
 ```
 
-
-```{r}
+``` r
 # load in fits: ordered as follows:
 # F_pFit,M_pFit,P_pFit,R_pFit
 Fits=readRDS('~/Desktop/g_p/F3_gpFits.rds')
@@ -86,7 +122,7 @@ Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
 Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
 ```
 
-```{r}
+``` r
 # isolate Female, Male, Poor, Rich
 F_PFits=Fits[,1:128]
 
@@ -99,7 +135,7 @@ col_means=colMeans(F_PFits_Coverage)
 FP_medians <- apply(F_PFits_Coverage, 2, median)
 ```
 
-```{r}
+``` r
 # isolate male fits
 M_PFits=Fits[,129:256]
 
@@ -134,10 +170,26 @@ ggplot(data, aes(x = x, y = y_boys)) +
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         # 78 is max value in poverty subset: match here for figure consistency
         scale_x_continuous(limits = c(0,78),expand = expansion(mult = c(0, 0)))
-
 ```
 
-```{r}
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: The `size` argument of `element_rect()` is deprecated as of ggplot2 3.4.0.
+    ## ℹ Please use the `linewidth` argument instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Warning: Removed 35 rows containing missing values (`geom_line()`).
+    ## Removed 35 rows containing missing values (`geom_line()`).
+
+![](Fig3_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+``` r
 # and derivatives
 # Create an empty matrix to store the derivatives
 F_P_derivative_matrix <- matrix(0, nrow = nrow(F_PFits), ncol = ncol(F_PFits) - 1)
@@ -192,7 +244,22 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
+```
 
+    ## Warning: The `<scale>` argument of `guides()` cannot be `FALSE`. Use "none" instead as
+    ## of ggplot2 3.3.4.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
+
+    ## Warning: Removed 14 rows containing missing values (`geom_raster()`).
+
+![](Fig3_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+``` r
 # get straightfoward of segment where 99% is over 0 or under
 positive_counts <- colSums(M_P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(M_P_derivative_matrix < 0, na.rm = TRUE)
@@ -215,11 +282,16 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
-
 ```
 
+    ## Scale for x is already present.
+    ## Adding another scale for x, which will replace the existing scale.
 
-```{r}
+    ## Warning: Removed 14 rows containing missing values (`geom_raster()`).
+
+![](Fig3_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+
+``` r
 # grades plots from master df
 grade_levels <- c(5, 4, 3, 2, 1)
 grade_labels <- c("F", "Failing", "C", "B", "A")
@@ -239,7 +311,13 @@ ggplot(girlsWealth, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
        y = "Grades")+theme_minimal(base_size=25)+xlim(0,113)+
       geom_vline(xintercept = Pbc, linetype = "dashed")+
       geom_vline(xintercept = Pc, linetype = "dashed")
+```
 
+    ## Warning: Removed 3 rows containing non-finite values (`stat_boxplot()`).
+
+![](Fig3_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+``` r
 ggplot(girlsPoor, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
   geom_boxplot(fill="#923eb5") +
   labs(title = "Girls below poverty line",
@@ -247,7 +325,13 @@ ggplot(girlsPoor, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
        y = "Grades")+theme_minimal(base_size=25)+xlim(0,113)+
       geom_vline(xintercept = Pbc, linetype = "dashed")+
       geom_vline(xintercept = Pc, linetype = "dashed")
-  
+```
+
+    ## Warning: Removed 2 rows containing non-finite values (`stat_boxplot()`).
+
+![](Fig3_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+
+``` r
 # plot boys
 boysWealth=subset(boys_data, income >5)
 boysPoor=subset(boys_data, income <5)
@@ -259,7 +343,13 @@ ggplot(boysWealth, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
        y = "Grades")+theme_minimal(base_size=25)+xlim(0,113)+
       geom_vline(xintercept = Pbc, linetype = "dashed")+
       geom_vline(xintercept = Pc, linetype = "dashed")
+```
 
+    ## Warning: Removed 1 rows containing non-finite values (`stat_boxplot()`).
+
+![](Fig3_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
+
+``` r
 ggplot(boysPoor, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
   geom_boxplot(fill="#fbad24")+
   labs(title = "Boys below poverty line",
@@ -269,8 +359,11 @@ ggplot(boysPoor, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
       geom_vline(xintercept = Pc, linetype = "dashed")
 ```
 
+    ## Warning: Removed 2 rows containing non-finite values (`stat_boxplot()`).
 
-```{r}
+![](Fig3_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
+
+``` r
 # deviance explained plots
 DevExpl=readRDS('~/Desktop/g_p/F3-5DevExpl.rds')
 DevExpl_L=readRDS('~/Desktop/g_p/F3-5DevExpl_longit.rds')
@@ -278,6 +371,11 @@ DevExpl_L=readRDS('~/Desktop/g_p/F3-5DevExpl_longit.rds')
 DevExpl_L_Relative=DevExpl_L-DevExpl_L[,1]
 
 df_long <- reshape2::melt(DevExpl)
+```
+
+    ## No id variables; using all as measure variables
+
+``` r
 custom_labels <- c(expression(italic(g)), "Grades", expression(paste(italic(g), " + Parental ", italic("p"))),expression(paste("Grades + Parental ", italic("p"))))
 # Create the boxplot - 1350 x 800 dimensions
 ggplot(df_long, aes(x = variable, y = value)) +
@@ -285,11 +383,21 @@ ggplot(df_long, aes(x = variable, y = value)) +
   xlab("Variables") +
   scale_x_discrete(labels = custom_labels) +
   ylab("Cross-sectional Deviance Explained") + theme_minimal(base_size=26)
+```
 
+    ## Warning: Removed 4 rows containing non-finite values (`stat_boxplot()`).
+
+![](Fig3_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+``` r
 # now for longitudinal variables
 custom_labels <- c(expression(italic(g)), "Grades", expression(paste(italic(g), " + Parental ", italic("p"))),expression(paste("Grades + Parental ", italic("p"))))
 df_long <- reshape2::melt(DevExpl_L_Relative[,2:5])
+```
 
+    ## No id variables; using all as measure variables
+
+``` r
 # Create the boxplot
 ggplot(df_long, aes(x = variable, y = value)) +
   geom_boxplot(outlier.alpha = 0.1) +
@@ -298,7 +406,11 @@ ggplot(df_long, aes(x = variable, y = value)) +
   ylab("Longitudinal Deviance Explained") + theme_minimal(base_size=26)
 ```
 
-```{r}
+    ## Warning: Removed 3 rows containing non-finite values (`stat_boxplot()`).
+
+![](Fig3_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+
+``` r
 # grades plots from master df
 grade_levels <- c(5, 4, 3, 2, 1)
 grade_labels <- c("F", "Failing", "C", "B", "A")
@@ -311,7 +423,11 @@ ggplot(plotdf, aes(x = g, y = plotGrades)) +
   labs(title = "All Children",
        x = expression(italic(g)),
        y = "Grades")+theme_minimal(base_size=25)+xlim(-4,4.6)
+```
 
+![](Fig3_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
 # poverty plots from master df
 masterdf$income<-as.numeric(masterdf$income)
 # note that poverty is defined as income < 5: https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups
@@ -330,11 +446,11 @@ ggplot(plotdf, aes(x = cbcl_scr_syn_totprob_r, y = poverty)) +
   labs(title = "All Children",
        x = expression(italic(p)),
        y = "Parental Income")+theme_minimal(base_size=25)
-
 ```
 
+![](Fig3_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
 
-```{r}
+``` r
 # poverty analysis
 povBootsdf=readRDS('~/Desktop/g_p/F3_gpPovNonPov.rds')
 povBoots=povBootsdf[,1:128]
@@ -342,9 +458,14 @@ nonpovBoots=povBootsdf[,129:256]
 FullnonpovBoots=povBootsdf[,257:384]
 ```
 
-```{r}
+``` r
 # get furthest non zero
 print(find_furthest_nonzero(povBoots))
+```
+
+    ## [1] 77
+
+``` r
 # Select the first 79 columns from each dataframe
 povBoots_subset <- povBoots[, 1:77]
 nonpovBoots_subset <- nonpovBoots[, 1:77]
@@ -368,10 +489,9 @@ nonpovBoots_long <- nonpovBoots_subset %>%
 FullnonpovBoots_long <- FullnonpovBoots_subset %>%
   mutate(row = row_number()) %>%
   pivot_longer(-row, names_to = "Column", values_to = "Value")
-
 ```
 
-```{r}
+``` r
 # deriv plot pov
 
 # get straightfoward of segment where 90% is over 0 or under
@@ -396,8 +516,13 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,find_furthest_nonzero(povBoots)),expand = expansion(mult = c(0, 0)))
+```
 
+    ## Warning: Removed 1 rows containing missing values (`geom_raster()`).
 
+![](Fig3_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+``` r
 # deriv plot nonpov
 # get straightfoward of segment where 99% is over 0 or under
 positive_counts <- colSums(nonpovBoots_subset > 0, na.rm = TRUE)
@@ -421,8 +546,13 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,find_furthest_nonzero(povBoots)),expand = expansion(mult = c(0, 0)))
+```
 
+    ## Warning: Removed 1 rows containing missing values (`geom_raster()`).
 
+![](Fig3_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+
+``` r
 # deriv nonpov full
 # deriv plot nonpov
 # get straightfoward of segment where 90% is over 0 or under
@@ -447,10 +577,13 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,find_furthest_nonzero(povBoots)),expand = expansion(mult = c(0, 0)))
-
 ```
 
-```{r}
+    ## Warning: Removed 1 rows containing missing values (`geom_raster()`).
+
+![](Fig3_files/figure-gfm/unnamed-chunk-12-3.png)<!-- -->
+
+``` r
 #### TEMPORAL PRECEDENCE TABLE
 library(mgcv)
 # load temporal precedence data from SampleConstruction.Rmd
@@ -458,8 +591,12 @@ tpdf=readRDS('~/OutDFTmpPrec.rds')
 
 # Load the "lavaan" package
 library(lavaan)
+```
 
+    ## This is lavaan 0.6-15
+    ## lavaan is FREE software! Please report any bugs.
 
+``` r
 # Define the model syntax for the cross-lagged panel analysis
 model <- '
   # Autoregressive effects
@@ -532,9 +669,6 @@ model <- '
 
 # Fit the model to the data using maximum likelihood estimation
 efit <- sem(model, data = tpdf)
-
 ```
 
-```
-
-
+\`\`\`
