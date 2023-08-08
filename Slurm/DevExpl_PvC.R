@@ -148,10 +148,10 @@ for (b in 1:10000) {
   devExpl_Anx_both[b] <- summary(Anx_bothMod)$dev.expl
   devExpl_Tho_both[b] <- summary(Tho_bothMod)$dev.expl
   devExpl_With_both[b] <- summary(With_bothMod)$dev.expl
-  devExpl_Attn_both[b] <- summary(Attn_bothMod)$dev.expl
-  devExpl_Rule_both[b] <- summary(Rule_bothMod)$dev.expl
+  devExpl_Att_both[b] <- summary(Attn_bothMod)$dev.expl
+  devExpl_Rul_both[b] <- summary(Rule_bothMod)$dev.expl
   devExpl_Agg_both[b] <- summary(Agg_bothMod)$dev.expl
 }
 # save results of all vectors into one outdf dataframe
-outdf=data.frame(devExplTotProb,devExplInternal,devExplExternal,devExplSomatic,devExplAnxDep,devExplThought,devExplWithDep,devExplSocial,devExplAttention,devExplRuleBreak,devExplAggressive,devExplParentPcount,devExplParentInternal,devExplParentExternal,devExplParentSomatic,devExplParentAnx,devExplParentThought,devExplParentWith,devExplParentAttn,devExplParentRule,devExplParentAgg,devExpl_p_both,devExpl_Int_both,devExpl_Ext_both,devExpl_Som_both,devExpl_Anx_both,devExpl_Tho_both,devExpl_With_both,devExpl_Attn_both,devExpl_Rule_both,devExpl_Agg_both)
+outdf=data.frame(devExplTotProb,devExplInternal,devExplExternal,devExplSomatic,devExplAnxDep,devExplThought,devExplWithDep,devExplSocial,devExplAttention,devExplRuleBreak,devExplAggressive,devExplParentPcount,devExplParentInternal,devExplParentExternal,devExplParentSomatic,devExplParentAnx,devExplParentThought,devExplParentWith,devExplParentAttn,devExplParentRule,devExplParentAgg,devExpl_p_both,devExpl_Int_both,devExpl_Ext_both,devExpl_Som_both,devExpl_Anx_both,devExpl_Tho_both,devExpl_With_both,devExpl_Att_both,devExpl_Rul_both,devExpl_Agg_both)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/PvC_gdevExplBoots.rds')
