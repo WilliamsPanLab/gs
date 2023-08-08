@@ -136,14 +136,73 @@ basic=ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_h
     geom_vline(xintercept = Pbc, linetype = "dashed")+
     geom_vline(xintercept = Pc, linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
-    scale_x_continuous(limits = c(0,113),expand = expansion(mult = c(0, 0)))+guides(fill=FALSE)
+    scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))#+guides(fill=FALSE)
 
 basic
+
 # extract line of best fit for comparison
 fit_data<-ggplot_build(basic)$data[[3]]
 lmforBeta<-lm(resids~cbcl_scr_syn_totprob_r,data=plotdf)
-```
 
+# get rs and r^2
+# r full
+cor.test(plotdf$cbcl_scr_syn_totprob_r,plotdf$resids)
+# r^2 full
+cor.test(plotdf$cbcl_scr_syn_totprob_r,plotdf$resids)$estimate^2
+# rclinical
+clindf<-masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_r)>Pc,]
+# same covarying for age
+modelforresids<-gam(g~s(interview_age),data=clindf)
+clindf$resids<-modelforresids$residuals
+cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)
+# r^2 clinical
+cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)$estimate^2
+# rsubclinical
+sclindf<-masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_r)<Pbc,]
+# same covarying for age
+modelforresids<-gam(g~s(interview_age),data=sclindf)
+sclindf$resids<-modelforresids$residuals
+cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)
+# r^2 subclinical
+cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)$estimate^2
+# ratios
+(cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)$estimate^2)/(cor.test(plotdf$cbcl_scr_syn_totprob_r,plotdf$resids)$estimate^2)
+(cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)$estimate^2)/(cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)$estimate^2)
+
+# plot out clinical and subclinical with line of best fit, covarying for age
+plotdf<-data.frame(clindf$parentPcount,clindf$g,clindf$cbcl_scr_syn_totprob_r,clindf$interview_age)
+colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
+modelforresids<-gam(g~s(interview_age),data=plotdf)
+plotdf$resids<-modelforresids$residuals
+# clinical
+ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=30)+
+    geom_point(alpha=0)+
+    geom_smooth(method = "lm",formula = y~x,color='gray') +
+    scale_fill_viridis_c(option = "inferno") +
+    ylim(c(-3.9,4.7)) +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    geom_vline(xintercept = Pbc, linetype = "dashed")+
+    geom_vline(xintercept = min(clindf$cbcl_scr_syn_totprob_r), linetype = "dashed")+
+    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
+    scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))
+# subclinical
+plotdf<-data.frame(sclindf$parentPcount,sclindf$g,sclindf$cbcl_scr_syn_totprob_r,sclindf$interview_age)
+colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
+modelforresids<-gam(g~s(interview_age),data=plotdf)
+plotdf$resids<-modelforresids$residuals
+ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=40)+
+    geom_point(alpha=0)+
+    geom_smooth(method = "lm",formula = y~x,color='gray') +
+    scale_fill_viridis_c(option = "inferno") +
+    ylim(c(-3.9,4.7)) +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    geom_vline(xintercept = Pbc, linetype = "dashed")+
+    geom_vline(xintercept = min(clindf$cbcl_scr_syn_totprob_r), linetype = "dashed")+
+    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
+    scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))
+```
 ```{r}
 ### P boots plot with overlaid linear fit
 # load in data

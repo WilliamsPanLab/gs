@@ -61,6 +61,17 @@ devExplParentIntr=rep(0,10000)
 devExplParentAttn=rep(0,10000)
 devExplParentRule=rep(0,10000)
 devExplParentAgg=rep(0,10000)
+# add a deviance explained by both set of vectors
+devExpl_p_both=rep(0,10000)
+devExpl_Int_both=rep(0,10000)
+devExpl_Ext_both=rep(0,10000)
+devExpl_Som_both=rep(0,10000)
+devExpl_Anx_both=rep(0,10000)
+devExpl_Tho_both=rep(0,10000)
+devExpl_With_both=rep(0,10000)
+devExpl_Att_both=rep(0,10000)
+devExpl_Rul_both=rep(0,10000)
+devExpl_Agg_both=rep(0,10000)
 # set seed
 set.seed(1)
 for (b in 1:10000) {
@@ -96,7 +107,18 @@ for (b in 1:10000) {
   ParentWithMod <- bam(g ~ s(ASR_withdep,k=4), data = bootSamp)
   ParentAttnMod <- bam(g ~ s(ASR_attention,k=4), data = bootSamp)
   ParentRuleMod <- bam(g ~ s(ASR_rulebreak,k=4), data = bootSamp)
-  ParentAggMod <- bam(g ~ s(ASR_aggressive,k=4), data = bootSamp)  
+  ParentAggMod <- bam(g ~ s(ASR_aggressive,k=4), data = bootSamp) 
+  # make models with both
+  p_bothMod <- bam(g ~ s(cbcl_scr_syn_totprob_r,k=4) + s(parentPcount,k=4), data = bootSamp)
+  Int_bothMod <- bam(g ~ s(cbcl_scr_syn_internal_r,k=4) + s(ASRInt,k=4), data = bootSamp)
+  Ext_bothMod <- bam(g ~ s(cbcl_scr_syn_external_r,k=4) + s(ASRExt,k=4), data = bootSamp)
+  Som_bothMod <- bam(g ~ s(cbcl_scr_syn_somatic_r,k=4) + s(ASR_somatic,k=4), data = bootSamp)
+  Anx_bothMod <- bam(g ~ s(cbcl_scr_syn_anxdep_r,k=4) + s(ASR_anxdep,k=4), data = bootSamp)
+  Tho_bothMod <- bam(g ~ s(cbcl_scr_syn_thought_r,k=4) + s(ASR_thought,k=4), data = bootSamp)
+  With_bothMod <- bam(g ~ s(cbcl_scr_syn_withdep_r,k=4) + s(ASR_withdep,k=4), data = bootSamp)
+  Attn_bothMod <- bam(g ~ s(cbcl_scr_syn_attention_r,k=4) + s(ASR_attention,k=4), data = bootSamp)
+  Rule_bothMod <- bam(g ~ s(cbcl_scr_syn_rulebreak_r,k=4) + s(ASR_rulebreak,k=4), data = bootSamp)
+  Agg_bothMod <- bam(g ~ s(cbcl_scr_syn_aggressive_r,k=4) + s(ASR_aggressive,k=4), data = bootSamp)
   # get deviance explained by each model
   devExplTotProb[b] <- summary(TotProbMod)$dev.expl
   devExplInternal[b] <- summary(InternalMod)$dev.expl
@@ -119,7 +141,17 @@ for (b in 1:10000) {
   devExplParentAttn[b] <- summary(ParentAttnMod)$dev.expl
   devExplParentRule[b] <- summary(ParentRuleMod)$dev.expl
   devExplParentAgg[b] <- summary(ParentAggMod)$dev.expl
+  devExpl_p_both[b] <- summary(p_bothMod)$dev.expl
+  devExpl_Int_both[b] <- summary(Int_bothMod)$dev.expl
+  devExpl_Ext_both[b] <- summary(Ext_bothMod)$dev.expl
+  devExpl_Som_both[b] <- summary(Som_bothMod)$dev.expl
+  devExpl_Anx_both[b] <- summary(Anx_bothMod)$dev.expl
+  devExpl_Tho_both[b] <- summary(Tho_bothMod)$dev.expl
+  devExpl_With_both[b] <- summary(With_bothMod)$dev.expl
+  devExpl_Attn_both[b] <- summary(Attn_bothMod)$dev.expl
+  devExpl_Rule_both[b] <- summary(Rule_bothMod)$dev.expl
+  devExpl_Agg_both[b] <- summary(Agg_bothMod)$dev.expl
 }
-# save results
-outdf=data.frame(devExplTotProb,devExplInternal,devExplExternal,devExplSomatic,devExplAnxDep,devExplThought,devExplWithDep,devExplSocial,devExplAttention,devExplRuleBreak,devExplAggressive,devExplParentPcount,devExplParentInternal,devExplParentExternal,devExplParentSomatic,devExplParentAnx,devExplParentThought,devExplParentWith,devExplParentAttn,devExplParentRule,devExplParentAgg)
+# save results of all vectors into one outdf dataframe
+outdf=data.frame(devExplTotProb,devExplInternal,devExplExternal,devExplSomatic,devExplAnxDep,devExplThought,devExplWithDep,devExplSocial,devExplAttention,devExplRuleBreak,devExplAggressive,devExplParentPcount,devExplParentInternal,devExplParentExternal,devExplParentSomatic,devExplParentAnx,devExplParentThought,devExplParentWith,devExplParentAttn,devExplParentRule,devExplParentAgg,devExpl_p_both,devExpl_Int_both,devExpl_Ext_both,devExpl_Som_both,devExpl_Anx_both,devExpl_Tho_both,devExpl_With_both,devExpl_Attn_both,devExpl_Rule_both,devExpl_Agg_both)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/PvC_gdevExplBoots.rds')
