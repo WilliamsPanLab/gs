@@ -588,14 +588,17 @@ ggplot(df_tidy_merged, aes(x = Subscale, y = MedianValue,fill=MedianIteration,ou
 ```{r}
 library(dplyr)
 # supplemental figure 2
-PvC_de=readRDS('~/Desktop/g_p/PvC_gdevExplBoots.rds')
+PvC_de=readRDS('~/Desktop/g_p/PvC_gdevExplBoots1k.rds')
+
+# for 1k version
+PvC_de=PvC_de[1:1000,]
 
 # rename columns for plotting
 new_colnames <- c("child p", "child int.", "child ext.", "child somatic", "child anxdep.", "child thought", "child withdep.", 
                   "child social", "child attn.", "child rulebreak", "child aggr.", "parent p", "parent int.", 
                   "parent ext.", "parent somatic", "parent anx", "parent thought", "parent withdep.", 
-                  "parent attn.", "parent rulebreak", "parent aggr.")
-desiredOrder <- c("child p", "parent p","child int.", "parent int.","child anxdep.","parent anx","child thought", "parent thought", "child somatic","parent somatic",  "child withdep.", "parent withdep.","child ext.", "parent ext.", "child aggr.", "parent aggr.", "child attn.", "parent attn.","child rulebreak","parent rulebreak","child social")
+                  "parent attn.", "parent rulebreak", "parent aggr.","p both","int. both", "ext. both","somatic both","anx both","thought both","withdep both","attn. both","rulebreak both","aggr. both")
+desiredOrder <- c("child p", "parent p","p both","child int.", "parent int.","int. both","child anxdep.","parent anx","anx both","child thought", "parent thought","thought both", "child somatic","parent somatic", "somatic both", "child withdep.", "parent withdep.","withdep both","child ext.", "parent ext.", "ext. both","child aggr.", "parent aggr.", "aggr. both","child attn.", "parent attn.","attn. both","child rulebreak","parent rulebreak","rulebreak both","child social")
 
 # set col names
 colnames(PvC_de)<-new_colnames
@@ -605,7 +608,9 @@ PvC_long=melt(PvC_de)
 # rename for clarity
 colnames(PvC_long)<-c("Subscale","value")
 # grouping variable for color
-PvC_long$Group <- ifelse(grepl("child", PvC_long$Subscale), "child", "parent")
+PvC_long$Group <- ifelse(grepl("child", PvC_long$Subscale), "child",
+                         ifelse(grepl("parent", PvC_long$Subscale), "parent",
+                                ifelse(grepl("both", PvC_long$Subscale), "both", NA)))
 # order as desired
 PvC_long$Subscale <- factor(PvC_long$Subscale, levels = desiredOrder)
 
@@ -614,10 +619,11 @@ PvC_long <- PvC_long %>%
 
 # Create the boxplot
 ggplot(PvC_long, aes(x = Subscale, y = value,fill=Group)) +
-  geom_boxplot() +
+  geom_boxplot(outlier.alpha = .1) +
   labs(x = "Subscale",
        y = "Deviance Explained in Child g",fill = "") +
   theme_minimal(base_size=35)+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+scale_fill_manual(values = c("#F9665E", "#AFC7D0", "#799FCB"))
+# saved out at 3000x1000
 ```
 
