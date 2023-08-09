@@ -35,7 +35,7 @@ As prior, we'll take masterdf from the sample construction step and run 10,000 [
 
 ## Upon completion, we should have F3_gpFits.rds, F3_gpDerivs.rds, and F3_gpPovNonPov.rds for use in the subsequent plotting script
 
-## Plotting steps (assuming above .rds files are derived and locally available)
+## Plotting steps (assuming above .rds files are derived and locally available). Script referenced is available [here](https://github.com/WilliamsPanLab/gp/blob/master/Figures/code/Figure3.Rmd)
 
 1. Chunk 1: load needed libraries.
 2. Chunk 2 establishes some functions that we'll use throughout the markdown. One is to plot bootstraps with a fair amount of ggplot specifications, and the other is to find the furthest extent of symptoms reported in each bootstrap. For context: the significance testing we've employed uses the total number of bootstraps to derive p-values. If certain levels of symptoms are not included in some bootstraps, this changes how we can consider statistical significance. To maximize statistical certainty, only symptom ranges that were included in all bootstraps are considered. Therefore, we need this function `find_furthest_nonzero` to determine what the highest symptom count that was included across all all 10k iterations was. Finally, we set a color palette that will be used throughout.
