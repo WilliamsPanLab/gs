@@ -105,6 +105,9 @@ my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1
 ```
 
 ``` r
+# set y title used throughout
+y_title <- expression(paste("Child ", italic("g")))
+
 # load in fits: ordered as follows:
 # F_intFit,M_intFit,P_intFit,R_intFit,F_extFit,M_extFit,P_extFit,R_extFit,F_somFit,M_somFit,P_somFit,R_somFit,F_anxFit,M_anxFit,P_anxFit,R_anxFit,F_thoFit,M_thoFit,P_thoFit,R_thoFit,F_witdepFit,M_witdepFit,P_witdepFit,R_witdepFit,F_socFit,M_socFit,P_socFit,R_socFit,F_rulFit,M_rulFit,P_rulFit,R_rulFit,F_attFit,M_attFit,P_attFit,R_attFit,F_aggFit,M_aggFit,P_aggFit,R_aggFit
 
@@ -179,7 +182,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_boys)) +
   geom_line(aes(), color = "#fbad24", size = 3) +
   geom_line(aes(y=y_girls),color = "#923eb5", size = 3) +
-  labs(x = 'Internalizing', y = expression(italic(g))) +
+  labs(x = 'Parental Internalizing', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -254,7 +257,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Int.')+
+    xlim(c(0,MaxP))+xlab('Parental Int: Girls')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -299,7 +302,7 @@ paste(max(abs(dervPlotDf$sig_deriv)))
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Int.*')+
+    xlim(c(0,MaxP))+xlab('Parental Int: Boys*')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -417,7 +420,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_pov)) +
   geom_line(aes(), color = "#FF5003", size = 3) +
   geom_line(aes(y=y_nonpov),color = "#003F7D", size = 3) +
-  labs(x = 'Internalizing', y = expression(italic(g))) +
+  labs(x = 'Parental Internalizing', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -480,7 +483,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Pov. Int.')+
+    xlim(c(0,MaxP))+xlab('Parental Int: Pov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -512,7 +515,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('NonPov. Int.')+
+    xlim(c(0,MaxP))+xlab('Parental Int: NonPov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -572,7 +575,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_boys)) +
   geom_line(aes(), color = "#fbad24", size = 3) +
   geom_line(aes(y=y_girls),color = "#923eb5", size = 3) +
-  labs(x = 'Externalizing', y = expression(italic(g))) +
+  labs(x = 'Parental Externalizing', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -635,7 +638,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Ext.')+
+    xlim(c(0,MaxP))+xlab('Parental Ext: Girl')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -667,7 +670,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Ext.')+
+    xlim(c(0,MaxP))+xlab('Parental Ext: Boy')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -719,7 +722,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_pov)) +
   geom_line(aes(), color = "#FF5003", size = 3) +
   geom_line(aes(y=y_nonpov),color = "#003F7D", size = 3) +
-  labs(x = 'Externalizing', y = expression(italic(g))) +
+  labs(x = 'Parental Externalizing', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -782,7 +785,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Pov. Ext.')+
+    xlim(c(0,MaxP))+xlab('Parental Ext: Pov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -814,7 +817,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('NonPov. Ext.')+
+    xlim(c(0,MaxP))+xlab('Parental Ext: NonPov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -874,7 +877,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_boys)) +
   geom_line(aes(), color = "#fbad24", size = 3) +
   geom_line(aes(y=y_girls),color = "#923eb5", size = 3) +
-  labs(x = 'Somatic', y = expression(italic(g))) +
+  labs(x = 'Parental Somatic', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -937,7 +940,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Som.')+
+    xlim(c(0,MaxP))+xlab('Parental Som: Girl')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -969,7 +972,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Som.')+
+    xlim(c(0,MaxP))+xlab('Parental Som: Boy')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1021,7 +1024,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_pov)) +
   geom_line(aes(), color = "#FF5003", size = 3) +
   geom_line(aes(y=y_nonpov),color = "#003F7D", size = 3) +
-  labs(x = 'Somatic', y = expression(italic(g))) +
+  labs(x = 'Parental Somatic', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -1084,7 +1087,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Pov. Som.')+
+    xlim(c(0,MaxP))+xlab('Parental Som: Pov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1116,7 +1119,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('NonPov. Som.')+
+    xlim(c(0,MaxP))+xlab('Parental Som: NonPov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1176,12 +1179,12 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_boys)) +
   geom_line(aes(), color = "#fbad24", size = 3) +
   geom_line(aes(y=y_girls),color = "#923eb5", size = 3) +
-  labs(x = 'Anxious Depression', y = expression(italic(g))) +
+  labs(x = 'Parental Anxious Depression', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
         legend.title = element_blank(),
-        legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
+        legend.background = element_rect(fill = "white"),axis.title.x = element_text(size = 28))+ylim(-1.5,1.5)+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
@@ -1239,7 +1242,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl AnxDep.')+
+    xlim(c(0,MaxP))+xlab('Parental AnxDep: Girl')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1271,7 +1274,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy AnxDep.')+
+    xlim(c(0,MaxP))+xlab('Parental AnxDep: Boy')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1323,13 +1326,13 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_pov)) +
   geom_line(aes(), color = "#FF5003", size = 3) +
   geom_line(aes(y=y_nonpov),color = "#003F7D", size = 3) +
-  labs(x = 'Anxious Depression', y = expression(italic(g))) +
+  labs(x = 'Parental Anxious Depression', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1),axis.title.x = element_text(size = 28))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
 
@@ -1386,7 +1389,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Pov. AnxDep.')+
+    xlim(c(0,MaxP))+xlab('Parental AnxDep: Pov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1418,7 +1421,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('NonPov. AnxDep.')+
+    xlim(c(0,MaxP))+xlab('Parental AnxDep: NonPov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1478,7 +1481,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_boys)) +
   geom_line(aes(), color = "#fbad24", size = 3) +
   geom_line(aes(y=y_girls),color = "#923eb5", size = 3) +
-  labs(x = 'Thought', y = expression(italic(g))) +
+  labs(x = 'Parental Thought', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -1548,7 +1551,7 @@ paste(max(abs(dervPlotDf$sig_deriv)))
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Thought*')+
+    xlim(c(0,MaxP))+xlab('Parental Thought: Girl*')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1587,7 +1590,7 @@ paste(max(abs(dervPlotDf$sig_deriv)))
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.3),max(0.3)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Thought***')+
+    xlim(c(0,MaxP))+xlab('Parental Thought: Boy***')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1639,7 +1642,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_pov)) +
   geom_line(aes(), color = "#FF5003", size = 3) +
   geom_line(aes(y=y_nonpov),color = "#003F7D", size = 3) +
-  labs(x = 'Thought', y = expression(italic(g))) +
+  labs(x = 'Parental Thought', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -1702,7 +1705,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.2),max(0.2)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Pov. Thought**')+
+    xlim(c(0,MaxP))+xlab('Parental Thought: Pov.**')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1734,7 +1737,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('NonPov. Thought')+
+    xlim(c(0,MaxP))+xlab('Parental Thought: NonPov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1794,13 +1797,13 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_boys)) +
   geom_line(aes(), color = "#fbad24", size = 3) +
   geom_line(aes(y=y_girls),color = "#923eb5", size = 3) +
-  labs(x = 'Withdrawn Depression', y = expression(italic(g))) +
+  labs(x = 'Parental Withdrawn Depression', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1),axis.title.x = element_text(size = 25))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
 
@@ -1857,7 +1860,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl WithDep.')+
+    xlim(c(0,MaxP))+xlab('Parental WithDep: Girl')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1889,7 +1892,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy WithDep.')+
+    xlim(c(0,MaxP))+xlab('Parental WithDep: Boy')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1941,13 +1944,13 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_pov)) +
   geom_line(aes(), color = "#FF5003", size = 3) +
   geom_line(aes(y=y_nonpov),color = "#003F7D", size = 3) +
-  labs(x = 'Withdrawn Depression', y = expression(italic(g))) +
+  labs(x = 'Parental Withdrawn Depression', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-        theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+        theme(panel.border = element_rect(color = "black", fill = NA, size = 1),axis.title.x = element_text(size = 28))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
 
@@ -2004,7 +2007,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Pov. WithDep.')+
+    xlim(c(0,MaxP))+xlab('Parental WithDep: Pov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2036,7 +2039,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('NonPov. WithDep.')+
+    xlim(c(0,MaxP))+xlab('Parental WithDep: NonPov. ')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2096,7 +2099,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_boys)) +
   geom_line(aes(), color = "#fbad24", size = 3) +
   geom_line(aes(y=y_girls),color = "#923eb5", size = 3) +
-  labs(x = 'Rule Breaking', y = expression(italic(g))) +
+  labs(x = 'Parental Rule Breaking', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -2159,7 +2162,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Rules')+
+    xlim(c(0,MaxP))+xlab('Parental Rules: Girl')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2191,7 +2194,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Rules')+
+    xlim(c(0,MaxP))+xlab('Parental Rules: Boy')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2243,7 +2246,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_pov)) +
   geom_line(aes(), color = "#FF5003", size = 3) +
   geom_line(aes(y=y_nonpov),color = "#003F7D", size = 3) +
-  labs(x = 'Rules', y = expression(italic(g))) +
+  labs(x = 'Parental Rules', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -2306,7 +2309,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Pov. Rules')+
+    xlim(c(0,MaxP))+xlab('Parental Rules: Pov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2338,7 +2341,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('NonPov. Rules')+
+    xlim(c(0,MaxP))+xlab('Parental Rules: NonPov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2398,7 +2401,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_boys)) +
   geom_line(aes(), color = "#fbad24", size = 3) +
   geom_line(aes(y=y_girls),color = "#923eb5", size = 3) +
-  labs(x = 'Attention', y = expression(italic(g))) +
+  labs(x = 'Parental Attention', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -2461,7 +2464,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Attention')+
+    xlim(c(0,MaxP))+xlab('Parental Attn: Girl')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2493,7 +2496,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Attention')+
+    xlim(c(0,MaxP))+xlab('Parental Attn: Boy')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2545,7 +2548,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_pov)) +
   geom_line(aes(), color = "#FF5003", size = 3) +
   geom_line(aes(y=y_nonpov),color = "#003F7D", size = 3) +
-  labs(x = 'Attention', y = expression(italic(g))) +
+  labs(x = 'Parental Attention', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -2608,7 +2611,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.2),max(0.2)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Pov. Attention**')+
+    xlim(c(0,MaxP))+xlab('Parental Attn: Pov.**')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2640,7 +2643,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('NonPov. Attention')+
+    xlim(c(0,MaxP))+xlab('Parental Attn: NonPov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2700,7 +2703,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_boys)) +
   geom_line(aes(), color = "#fbad24", size = 3) +
   geom_line(aes(y=y_girls),color = "#923eb5", size = 3) +
-  labs(x = 'Aggression', y = expression(italic(g))) +
+  labs(x = 'Parental Aggression', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -2763,7 +2766,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Aggr.')+
+    xlim(c(0,MaxP))+xlab('Parental Aggr. Girl')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2795,7 +2798,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Aggr.')+
+    xlim(c(0,MaxP))+xlab('Parental Aggr: Boy')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2847,7 +2850,7 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_pov)) +
   geom_line(aes(), color = "#FF5003", size = 3) +
   geom_line(aes(y=y_nonpov),color = "#003F7D", size = 3) +
-  labs(x = 'Aggression', y = expression(italic(g))) +
+  labs(x = 'Parental Aggression', y = y_title) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
@@ -2910,7 +2913,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Pov. Aggr.')+
+    xlim(c(0,MaxP))+xlab('Parental Aggr: Pov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2942,7 +2945,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('NonPov. Aggr.')+
+    xlim(c(0,MaxP))+xlab('Parental Aggr: NonPov.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))

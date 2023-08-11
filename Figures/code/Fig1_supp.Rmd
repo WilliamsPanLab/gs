@@ -120,136 +120,12 @@ masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==69,]
 Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
 Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
 
-# reference linear model
-plotdf<-data.frame(masterdf$parentPcount,masterdf$g,masterdf$cbcl_scr_syn_totprob_r,masterdf$interview_age)
-colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
-modelforresids<-gam(g~s(interview_age),data=plotdf)
-plotdf$resids<-modelforresids$residuals
-
-basic=ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=60)+
-    geom_point(alpha=0)+
-    geom_smooth(method = "lm",formula = y~x,color='gray') +
-    scale_fill_viridis_c(option = "inferno") +
-    ylim(c(-3.9,4.7)) +
-    theme_minimal(base_size=35) + 
-    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
-    geom_vline(xintercept = Pbc, linetype = "dashed")+
-    geom_vline(xintercept = Pc, linetype = "dashed")+
-    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
-    scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))#+guides(fill=FALSE)
-
-basic
-
-# extract line of best fit for comparison
-fit_data<-ggplot_build(basic)$data[[3]]
-lmforBeta<-lm(resids~cbcl_scr_syn_totprob_r,data=plotdf)
-
-# get rs and r^2
-# r full
-cor.test(plotdf$cbcl_scr_syn_totprob_r,plotdf$resids)
-# r^2 full
-cor.test(plotdf$cbcl_scr_syn_totprob_r,plotdf$resids)$estimate^2
-# rclinical
-clindf<-masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_r)>Pc,]
-# same covarying for age
-modelforresids<-gam(g~s(interview_age),data=clindf)
-clindf$resids<-modelforresids$residuals
-cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)
-# r^2 clinical
-cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)$estimate^2
-# rsubclinical
-sclindf<-masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_r)<Pbc,]
-# same covarying for age
-modelforresids<-gam(g~s(interview_age),data=sclindf)
-sclindf$resids<-modelforresids$residuals
-cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)
-# r^2 subclinical
-cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)$estimate^2
-# ratios
-(cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)$estimate^2)/(cor.test(plotdf$cbcl_scr_syn_totprob_r,plotdf$resids)$estimate^2)
-(cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)$estimate^2)/(cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)$estimate^2)
-
-# plot out clinical and subclinical with line of best fit, covarying for age
-plotdf<-data.frame(clindf$parentPcount,clindf$g,clindf$cbcl_scr_syn_totprob_r,clindf$interview_age)
-colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
-modelforresids<-gam(g~s(interview_age),data=plotdf)
-plotdf$resids<-modelforresids$residuals
-# clinical
-ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=30)+
-    geom_point(alpha=0)+
-    geom_smooth(method = "lm",formula = y~x,color='gray') +
-    scale_fill_viridis_c(option = "inferno") +
-    ylim(c(-3.9,4.7)) +
-    theme_minimal(base_size=35) + 
-    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
-    geom_vline(xintercept = Pbc, linetype = "dashed")+
-    geom_vline(xintercept = min(clindf$cbcl_scr_syn_totprob_r), linetype = "dashed")+
-    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
-    scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))
-# subclinical
-plotdf<-data.frame(sclindf$parentPcount,sclindf$g,sclindf$cbcl_scr_syn_totprob_r,sclindf$interview_age)
-colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
-modelforresids<-gam(g~s(interview_age),data=plotdf)
-plotdf$resids<-modelforresids$residuals
-ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=40)+
-    geom_point(alpha=0)+
-    geom_smooth(method = "lm",formula = y~x,color='gray') +
-    scale_fill_viridis_c(option = "inferno") +
-    ylim(c(-3.9,4.7)) +
-    theme_minimal(base_size=35) + 
-    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
-    geom_vline(xintercept = Pbc, linetype = "dashed")+
-    geom_vline(xintercept = min(clindf$cbcl_scr_syn_totprob_r), linetype = "dashed")+
-    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
-    scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))
-```
-```{r}
 ### P boots plot with overlaid linear fit
 # load in data
 Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
 # extract p factor
 PFits=Fits[,1:128]
 MaxP=find_furthest_nonzero(PFits)
-# melt data for plotting each line
-data_melt <- melt(t(PFits))
-data_melt$Var1 <- rep(seq(0, 127), nrow(PFits))
-# Calculate percentiles
-percentiles <- PFits %>%
-summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
-percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_to = "Percentile", values_to = "YValue")
-
-# Add CI column
-data_melt$CI <- 0
-  
-# Prepare CIs for insertion
-CIs <- data.frame(rep(seq(0, 127), 2), c(rep(10001, 128), rep(10002, 128)), percentiles_long$YValue, rep(1, (128*2)))
-colnames(CIs) <- colnames(data_melt)
-  
-# Add CIs
-data_melt2 <- rbind(data_melt, CIs)
-  
-# Convert CI column to factor
-data_melt2$CI <- as.factor(data_melt2$CI)
-  
-
-# add in var2, only length of 80
-fit_data$Var2=rep(10003,80)
-
-# saved out at 600x600
-
-# Plotting the lines
-ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
-  geom_line(aes(alpha = CI, color = Var2), show.legend = FALSE) +
-  scale_color_viridis_c(option = "inferno", direction = -1) +
-  scale_alpha_manual(values = c(0.01, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
-  theme_minimal(base_size=35) + 
-  ylab(expression(italic(g)))+xlab(expression(italic(p)))+
-  geom_vline(xintercept = Pbc, linetype = "dashed")+
-  geom_vline(xintercept = Pc, linetype = "dashed")+
-  theme(panel.border = element_rect(color = "black", fill = NA, size = 1)) +
-  scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0))) + 
-  geom_line(data = fit_data, aes(x = x, y = y), color = "gray",size=1.5)
-
 ```
 
 
@@ -298,7 +174,8 @@ masterdfTho_c<-masterdf[masterdf$cbcl_scr_syn_thought_t==69,]
 masterdfWit_bc<-masterdf[masterdf$cbcl_scr_syn_withdep_t==66,]
 masterdfWit_c<-masterdf[masterdf$cbcl_scr_syn_withdep_t==69,]
 masterdfSom_bc<-masterdf[masterdf$cbcl_scr_syn_somatic_t==65,]
-masterdfSom_c<-masterdf[masterdf$cbcl_scr_syn_somatic_t==69,]
+# no values at som=69
+masterdfSom_c<-masterdf[masterdf$cbcl_scr_syn_somatic_t==70,]
 masterdfSoc_bc<-masterdf[masterdf$cbcl_scr_syn_social_t==65,]
 masterdfSoc_c<-masterdf[masterdf$cbcl_scr_syn_social_t==69,]
 masterdfAtt_bc<-masterdf[masterdf$cbcl_scr_syn_attention_t==65,]

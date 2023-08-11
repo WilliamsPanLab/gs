@@ -153,7 +153,8 @@ masterdfTho_c<-masterdf[masterdf$cbcl_scr_syn_thought_t==69,]
 masterdfWit_bc<-masterdf[masterdf$cbcl_scr_syn_withdep_t==66,]
 masterdfWit_c<-masterdf[masterdf$cbcl_scr_syn_withdep_t==69,]
 masterdfSom_bc<-masterdf[masterdf$cbcl_scr_syn_somatic_t==65,]
-masterdfSom_c<-masterdf[masterdf$cbcl_scr_syn_somatic_t==69,]
+# no one has t=69
+masterdfSom_c<-masterdf[masterdf$cbcl_scr_syn_somatic_t==70,]
 masterdfSoc_bc<-masterdf[masterdf$cbcl_scr_syn_social_t==65,]
 masterdfSoc_c<-masterdf[masterdf$cbcl_scr_syn_social_t==69,]
 masterdfAtt_bc<-masterdf[masterdf$cbcl_scr_syn_attention_t==65,]
@@ -209,7 +210,7 @@ MaxP_M=find_furthest_nonzero(M_PFits)
 # use lowest common value for plots
 MaxP <- min(MaxP_M, MaxP_F)
 
-# get median value girl
+# get median value Girls
 F_PFits_Coverage=F_PFits[,seq(1:MaxP)]
 col_means=colMeans(F_PFits_Coverage)
 FP_medians <- apply(F_PFits_Coverage, 2, median)
@@ -308,7 +309,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Int.')+
+    xlim(c(0,MaxP))+xlab('Girls Int.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -346,7 +347,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Int.')+
+    xlim(c(0,MaxP))+xlab('Boys Int.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -603,7 +604,7 @@ MaxP_M=find_furthest_nonzero(M_PFits)
 # use lowest common value for plots
 MaxP <- min(MaxP_M, MaxP_F)
 
-# get median value girl
+# get median value Girls
 F_PFits_Coverage=F_PFits[,seq(1:MaxP)]
 col_means=colMeans(F_PFits_Coverage)
 FP_medians <- apply(F_PFits_Coverage, 2, median)
@@ -690,7 +691,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Ext.')+
+    xlim(c(0,MaxP))+xlab('Girls Ext.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -722,7 +723,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Ext.')+
+    xlim(c(0,MaxP))+xlab('Boys Ext.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -909,7 +910,7 @@ MaxP_M=find_furthest_nonzero(M_PFits)
 # use lowest common value for plots
 MaxP <- min(MaxP_M, MaxP_F)
 
-# get median value girl
+# get median value Girls
 F_PFits_Coverage=F_PFits[,seq(1:MaxP)]
 col_means=colMeans(F_PFits_Coverage)
 FP_medians <- apply(F_PFits_Coverage, 2, median)
@@ -942,8 +943,6 @@ ggplot(data, aes(x = x, y = y_boys)) +
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
-
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
@@ -998,7 +997,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Som.')+
+    xlim(c(0,MaxP))+xlab('Girls Som.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1030,7 +1029,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Som.')+
+    xlim(c(0,MaxP))+xlab('Boys Som.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1093,8 +1092,6 @@ ggplot(data, aes(x = x, y = y_pov)) +
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
-
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
 
@@ -1219,7 +1216,7 @@ MaxP_M=find_furthest_nonzero(M_PFits)
 # use lowest common value for plots
 MaxP <- min(MaxP_M, MaxP_F)
 
-# get median value girl
+# get median value Girls
 F_PFits_Coverage=F_PFits[,seq(1:MaxP)]
 col_means=colMeans(F_PFits_Coverage)
 FP_medians <- apply(F_PFits_Coverage, 2, median)
@@ -1306,7 +1303,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl AnxDep.')+
+    xlim(c(0,MaxP))+xlab('Girls AnxDep.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1338,7 +1335,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy AnxDep.')+
+    xlim(c(0,MaxP))+xlab('Boys AnxDep.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1525,7 +1522,7 @@ MaxP_M=find_furthest_nonzero(M_PFits)
 # use lowest common value for plots
 MaxP <- min(MaxP_M, MaxP_F)
 
-# get median value girl
+# get median value Girls
 F_PFits_Coverage=F_PFits[,seq(1:MaxP)]
 col_means=colMeans(F_PFits_Coverage)
 FP_medians <- apply(F_PFits_Coverage, 2, median)
@@ -1618,9 +1615,9 @@ paste(max(abs(dervPlotDf$sig_deriv)))
 ``` r
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
-    # GIRL THOUGHT REQUIRES AN EXPANDED COLOR SCALE. NEGATIVE SLOPE IS BEYOND COLOR LIMITS OF ALL OTHER FIGURES BY .02
+    # Girls THOUGHT REQUIRES AN EXPANDED COLOR SCALE. NEGATIVE SLOPE IS BEYOND COLOR LIMITS OF ALL OTHER FIGURES BY .02
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Thought*')+
+    xlim(c(0,MaxP))+xlab('Girls Thought*')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1652,7 +1649,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Thought')+
+    xlim(c(0,MaxP))+xlab('Boys Thought')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1839,7 +1836,7 @@ MaxP_M=find_furthest_nonzero(M_PFits)
 # use lowest common value for plots
 MaxP <- min(MaxP_M, MaxP_F)
 
-# get median value girl
+# get median value Girls
 F_PFits_Coverage=F_PFits[,seq(1:MaxP)]
 col_means=colMeans(F_PFits_Coverage)
 FP_medians <- apply(F_PFits_Coverage, 2, median)
@@ -1867,14 +1864,11 @@ ggplot(data, aes(x = x, y = y_boys)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = WitC, linetype = "dashed")+
+  geom_vline(xintercept = WitBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
-
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-    ## Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
@@ -1929,7 +1923,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl WithDep.')+
+    xlim(c(0,MaxP))+xlab('Girls WithDep.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1961,7 +1955,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy WithDep.')+
+    xlim(c(0,MaxP))+xlab('Boys WithDep.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2148,7 +2142,7 @@ MaxP_M=find_furthest_nonzero(M_PFits)
 # use lowest common value for plots
 MaxP <- min(MaxP_M, MaxP_F)
 
-# get median value girl
+# get median value Girls
 F_PFits_Coverage=F_PFits[,seq(1:MaxP)]
 col_means=colMeans(F_PFits_Coverage)
 FP_medians <- apply(F_PFits_Coverage, 2, median)
@@ -2235,7 +2229,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Social')+
+    xlim(c(0,MaxP))+xlab('Girls Social')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2267,7 +2261,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Social')+
+    xlim(c(0,MaxP))+xlab('Boys Social')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2454,7 +2448,7 @@ MaxP_M=find_furthest_nonzero(M_PFits)
 # use lowest common value for plots
 MaxP <- min(MaxP_M, MaxP_F)
 
-# get median value girl
+# get median value Girls
 F_PFits_Coverage=F_PFits[,seq(1:MaxP)]
 col_means=colMeans(F_PFits_Coverage)
 FP_medians <- apply(F_PFits_Coverage, 2, median)
@@ -2541,7 +2535,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Rules')+
+    xlim(c(0,MaxP))+xlab('Girls Rules')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2573,7 +2567,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Rules')+
+    xlim(c(0,MaxP))+xlab('Boys Rules')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2760,7 +2754,7 @@ MaxP_M=find_furthest_nonzero(M_PFits)
 # use lowest common value for plots
 MaxP <- min(MaxP_M, MaxP_F)
 
-# get median value girl
+# get median value Girls
 F_PFits_Coverage=F_PFits[,seq(1:MaxP)]
 col_means=colMeans(F_PFits_Coverage)
 FP_medians <- apply(F_PFits_Coverage, 2, median)
@@ -2847,7 +2841,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Attention')+
+    xlim(c(0,MaxP))+xlab('Girls Attention')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -2879,7 +2873,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Attention')+
+    xlim(c(0,MaxP))+xlab('Boys Attention')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -3066,7 +3060,7 @@ MaxP_M=find_furthest_nonzero(M_PFits)
 # use lowest common value for plots
 MaxP <- min(MaxP_M, MaxP_F)
 
-# get median value girl
+# get median value Girls
 F_PFits_Coverage=F_PFits[,seq(1:MaxP)]
 col_means=colMeans(F_PFits_Coverage)
 FP_medians <- apply(F_PFits_Coverage, 2, median)
@@ -3153,7 +3147,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Aggr.')+
+    xlim(c(0,MaxP))+xlab('Girls Aggr.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -3185,7 +3179,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Boy Aggr.')+
+    xlim(c(0,MaxP))+xlab('Boys Aggr.')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
