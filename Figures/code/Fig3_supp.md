@@ -474,7 +474,7 @@ ggplot(data, aes(x = x, y = y_pov)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
+  geom_vline(xintercept = Ec, linetype = "dashed")+
   geom_vline(xintercept = Ibc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
@@ -631,8 +631,8 @@ ggplot(data, aes(x = x, y = y_boys)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = Ec, linetype = "dashed")+
+  geom_vline(xintercept = Ebc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
@@ -780,8 +780,8 @@ ggplot(data, aes(x = x, y = y_pov)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = Ec, linetype = "dashed")+
+  geom_vline(xintercept = Ebc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
@@ -937,14 +937,13 @@ ggplot(data, aes(x = x, y = y_boys)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = SomC, linetype = "dashed")+
+  geom_vline(xintercept = SomBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
 
     ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-    ## Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
@@ -1089,14 +1088,13 @@ ggplot(data, aes(x = x, y = y_pov)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = SomC, linetype = "dashed")+
+  geom_vline(xintercept = SomBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
 
     ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-    ## Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
 
@@ -1249,8 +1247,8 @@ ggplot(data, aes(x = x, y = y_boys)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = AnxC, linetype = "dashed")+
+  geom_vline(xintercept = AnxBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
@@ -1398,8 +1396,8 @@ ggplot(data, aes(x = x, y = y_pov)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = AnxC, linetype = "dashed")+
+  geom_vline(xintercept = AnxBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
@@ -1489,7 +1487,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('NonPov. AnxDep.')+
+    xlim(c(0,MaxP))+xlab('NonPov. AnxDep.,')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1555,14 +1553,11 @@ ggplot(data, aes(x = x, y = y_boys)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = ThoC, linetype = "dashed")+
+  geom_vline(xintercept = ThoBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
-
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-    ## Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
@@ -1624,8 +1619,8 @@ paste(max(abs(dervPlotDf$sig_deriv)))
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     # GIRL THOUGHT REQUIRES AN EXPANDED COLOR SCALE. NEGATIVE SLOPE IS BEYOND COLOR LIMITS OF ALL OTHER FIGURES BY .02
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.12),max(0.12)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab('Girl Thought')+
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.15),max(0.15)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab('Girl Thought*')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -1715,14 +1710,11 @@ ggplot(data, aes(x = x, y = y_pov)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = ThoC, linetype = "dashed")+
+  geom_vline(xintercept = ThoBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
-
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-    ## Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-10-4.png)<!-- -->
 
@@ -2027,14 +2019,11 @@ ggplot(data, aes(x = x, y = y_pov)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = WitC, linetype = "dashed")+
+  geom_vline(xintercept = WitBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
-
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-    ## Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-11-4.png)<!-- -->
 
@@ -2187,14 +2176,11 @@ ggplot(data, aes(x = x, y = y_boys)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = SocC, linetype = "dashed")+
+  geom_vline(xintercept = SocBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
-
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-    ## Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
@@ -2333,20 +2319,17 @@ data <- data.frame(
 ggplot(data, aes(x = x, y = y_pov)) +
   geom_line(aes(), color = "#FF5003", size = 3) +
   geom_line(aes(y=y_nonpov),color = "#003F7D", size = 3) +
-  labs(x = 'Anx.Dep.', y = expression(italic(g))) +
+  labs(x = 'Social', y = expression(italic(g))) +
   theme_minimal(base_size = 35) +
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = SocC, linetype = "dashed")+
+  geom_vline(xintercept = SocBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
-
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-    ## Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-12-4.png)<!-- -->
 
@@ -2499,14 +2482,11 @@ ggplot(data, aes(x = x, y = y_boys)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = RulC, linetype = "dashed")+
+  geom_vline(xintercept = RulBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
-
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-    ## Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
@@ -2651,14 +2631,11 @@ ggplot(data, aes(x = x, y = y_pov)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = RulC, linetype = "dashed")+
+  geom_vline(xintercept = RulBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
-
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-    ## Removed 1 rows containing missing values (`geom_vline()`).
 
 ![](Fig3_supp_files/figure-gfm/unnamed-chunk-13-4.png)<!-- -->
 
@@ -2811,8 +2788,8 @@ ggplot(data, aes(x = x, y = y_boys)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = AttC, linetype = "dashed")+
+  geom_vline(xintercept = AttBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
@@ -2960,8 +2937,8 @@ ggplot(data, aes(x = x, y = y_pov)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = AttC, linetype = "dashed")+
+  geom_vline(xintercept = AttBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
@@ -3117,8 +3094,8 @@ ggplot(data, aes(x = x, y = y_boys)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = AggC, linetype = "dashed")+
+  geom_vline(xintercept = AggBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
@@ -3266,8 +3243,8 @@ ggplot(data, aes(x = x, y = y_pov)) +
         legend.position = "top",
         legend.title = element_blank(),
         legend.background = element_rect(fill = "white"))+ylim(-1.5,1.5)+
-  geom_vline(xintercept = Ic, linetype = "dashed")+
-  geom_vline(xintercept = Ibc, linetype = "dashed")+
+  geom_vline(xintercept = AggC, linetype = "dashed")+
+  geom_vline(xintercept = AggBc, linetype = "dashed")+
         theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
         scale_x_continuous(limits = c(0,MaxP-1),expand = expansion(mult = c(0, 0)))
 ```
