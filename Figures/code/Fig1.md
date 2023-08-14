@@ -148,7 +148,261 @@ my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1
 ``` r
 # load in masterdf (saved out from sample construction)
 masterdf=readRDS('~/gp_masterdf.rds')
+# convert all cbcl scores to numeric
+masterdf$cbcl_scr_syn_totprob_r=as.numeric(masterdf$cbcl_scr_syn_totprob_r)
+masterdf$cbcl_scr_syn_internal_r=as.numeric(masterdf$cbcl_scr_syn_internal_r)
+masterdf$cbcl_scr_syn_external_r=as.numeric(masterdf$cbcl_scr_syn_external_r)
+masterdf$cbcl_scr_syn_somatic_r=as.numeric(masterdf$cbcl_scr_syn_somatic_r)
+masterdf$cbcl_scr_syn_anxdep_r=as.numeric(masterdf$cbcl_scr_syn_anxdep_r)
+masterdf$cbcl_scr_syn_thought_r=as.numeric(masterdf$cbcl_scr_syn_thought_r)
+masterdf$cbcl_scr_syn_withdep_r=as.numeric(masterdf$cbcl_scr_syn_withdep_r)
+masterdf$cbcl_scr_syn_social_r=as.numeric(masterdf$cbcl_scr_syn_social_r)
+masterdf$cbcl_scr_syn_attention_r=as.numeric(masterdf$cbcl_scr_syn_attention_r)
+masterdf$cbcl_scr_syn_rulebreak_r=as.numeric(masterdf$cbcl_scr_syn_rulebreak_r)
+masterdf$cbcl_scr_syn_aggressive_r=as.numeric(masterdf$cbcl_scr_syn_aggressive_r)
+# AIC to confirm spline use
+# p factor
+pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4),data=masterdf)
+pgAgeL<-bam(g~cbcl_scr_syn_totprob_r+s(interview_age,k=4),data=masterdf)
+AIC(pgAge)
+```
 
+    ## [1] 26237.54
+
+``` r
+AIC(pgAgeL)
+```
+
+    ## [1] 26242.94
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('p nonlin:',AIC(pgAge)<AIC(pgAgeL))
+```
+
+    ## [1] "p nonlin: TRUE"
+
+``` r
+# internalizing
+intAge<-bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4),data=masterdf)
+intAgeL<-bam(g~cbcl_scr_syn_internal_r+s(interview_age,k=4),data=masterdf)
+AIC(intAge)
+```
+
+    ## [1] 26243.8
+
+``` r
+AIC(intAgeL)
+```
+
+    ## [1] 26265.45
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('int nonlin:',AIC(intAge)<AIC(intAgeL))
+```
+
+    ## [1] "int nonlin: TRUE"
+
+``` r
+# externalizing
+extAge<-bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4),data=masterdf)
+extAgeL<-bam(g~cbcl_scr_syn_external_r+s(interview_age,k=4),data=masterdf)
+AIC(extAge)
+```
+
+    ## [1] 26214.29
+
+``` r
+AIC(extAgeL)
+```
+
+    ## [1] 26214.1
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('ext nonlin:',AIC(extAge)<AIC(extAgeL))
+```
+
+    ## [1] "ext nonlin: FALSE"
+
+``` r
+# somatic
+somAge<-bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age,k=4),data=masterdf)
+somAgeL<-bam(g~cbcl_scr_syn_somatic_r+s(interview_age,k=4),data=masterdf)
+AIC(somAge)
+```
+
+    ## [1] 26254.34
+
+``` r
+AIC(somAgeL)
+```
+
+    ## [1] 26260.71
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('somatic nonlin:',AIC(somAge)<AIC(somAgeL))
+```
+
+    ## [1] "somatic nonlin: TRUE"
+
+``` r
+# attention
+attAge<-bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4),data=masterdf)
+attAgeL<-bam(g~cbcl_scr_syn_attention_r+s(interview_age,k=4),data=masterdf)
+AIC(attAge)
+```
+
+    ## [1] 26192.55
+
+``` r
+AIC(attAgeL)
+```
+
+    ## [1] 26192.55
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('attn. nonlin:',AIC(attAge)<AIC(attAgeL))
+```
+
+    ## [1] "attn. nonlin: FALSE"
+
+``` r
+# thought
+thoAge<-bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4),data=masterdf)
+thoAgeL<-bam(g~cbcl_scr_syn_thought_r+s(interview_age,k=4),data=masterdf)
+AIC(thoAge)
+```
+
+    ## [1] 26237.91
+
+``` r
+AIC(thoAgeL)
+```
+
+    ## [1] 26264.4
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('thought nonlin:',AIC(thoAge)<AIC(thoAgeL))
+```
+
+    ## [1] "thought nonlin: TRUE"
+
+``` r
+# social
+socAge<-bam(g~s(cbcl_scr_syn_social_r,k=4)+s(interview_age,k=4),data=masterdf)
+socAgeL<-bam(g~cbcl_scr_syn_social_r+s(interview_age,k=4),data=masterdf)
+AIC(socAge)
+```
+
+    ## [1] 26167.41
+
+``` r
+AIC(socAgeL)
+```
+
+    ## [1] 26168.58
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('social nonlin:',AIC(socAge)<AIC(socAgeL))
+```
+
+    ## [1] "social nonlin: TRUE"
+
+``` r
+# anxious depression
+anxdepAge<-bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4),data=masterdf)
+anxdepAgeL<-bam(g~cbcl_scr_syn_anxdep_r+s(interview_age,k=4),data=masterdf)
+AIC(anxdepAge)
+```
+
+    ## [1] 26224.38
+
+``` r
+AIC(anxdepAgeL)
+```
+
+    ## [1] 26245.84
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('anx. dep. nonlin:',AIC(anxdepAge)<AIC(anxdepAgeL))
+```
+
+    ## [1] "anx. dep. nonlin: TRUE"
+
+``` r
+# withdrawn depression
+withdepAge<-bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4),data=masterdf)
+withdepAgeL<-bam(g~cbcl_scr_syn_withdep_r+s(interview_age,k=4),data=masterdf)
+AIC(withdepAge)
+```
+
+    ## [1] 26261.42
+
+``` r
+AIC(withdepAgeL)
+```
+
+    ## [1] 26268.38
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('with. dep. nonlin:',AIC(withdepAge)<AIC(withdepAgeL))
+```
+
+    ## [1] "with. dep. nonlin: TRUE"
+
+``` r
+# rule breaking
+ruleAge<-bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4),data=masterdf)
+ruleAgeL<-bam(g~cbcl_scr_syn_rulebreak_r+s(interview_age,k=4),data=masterdf)
+AIC(ruleAge)
+```
+
+    ## [1] 26178.49
+
+``` r
+AIC(ruleAgeL)
+```
+
+    ## [1] 26178.49
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('rule breaking nonlin:',AIC(ruleAge)<AIC(ruleAgeL))
+```
+
+    ## [1] "rule breaking nonlin: FALSE"
+
+``` r
+# aggressive behavior
+aggAge<-bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4),data=masterdf)
+aggAgeL<-bam(g~cbcl_scr_syn_aggressive_r+s(interview_age,k=4),data=masterdf)
+AIC(aggAge)
+```
+
+    ## [1] 26234.75
+
+``` r
+AIC(aggAgeL)
+```
+
+    ## [1] 26234.42
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('aggr. nonlin:',AIC(aggAge)<AIC(aggAgeL))
+```
+
+    ## [1] "aggr. nonlin: FALSE"
+
+``` r
 # pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
 # https://onlinelibrary.wiley.com/doi/epdf/10.1002/mrdd.20071
 # https://aseba.org/wp-content/uploads/2019/02/cbclprofile.pdf
@@ -174,7 +428,7 @@ basic=ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_h
     geom_vline(xintercept = Pbc, linetype = "dashed")+
     geom_vline(xintercept = Pc, linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
-    scale_x_continuous(limits = c(0,113),expand = expansion(mult = c(0, 0)))+guides(fill=FALSE)
+    scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))#+guides(fill=FALSE)
 ```
 
     ## Warning: The `size` argument of `element_rect()` is deprecated as of ggplot2 3.4.0.
@@ -183,38 +437,161 @@ basic=ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_h
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-    ## Warning: The `<scale>` argument of `guides()` cannot be `FALSE`. Use "none" instead as
-    ## of ggplot2 3.3.4.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
 ``` r
 basic
 ```
 
-    ## Warning: Removed 7 rows containing non-finite values (`stat_binhex()`).
+    ## Warning: Removed 24 rows containing missing values (`geom_hex()`).
 
-    ## Warning: Removed 7 rows containing non-finite values (`stat_smooth()`).
-
-    ## Warning: Removed 23 rows containing missing values (`geom_hex()`).
-
-    ## Warning: Removed 7 rows containing missing values (`geom_point()`).
-
-![](Fig1_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 # extract line of best fit for comparison
 fit_data<-ggplot_build(basic)$data[[3]]
+lmforBeta<-lm(resids~cbcl_scr_syn_totprob_r,data=plotdf)
+
+# get rs and r^2
+# r full
+cor.test(plotdf$cbcl_scr_syn_totprob_r,plotdf$resids)
 ```
 
-    ## Warning: Removed 7 rows containing non-finite values (`stat_binhex()`).
-
-    ## Warning: Removed 7 rows containing non-finite values (`stat_smooth()`).
+    ## 
+    ##  Pearson's product-moment correlation
+    ## 
+    ## data:  plotdf$cbcl_scr_syn_totprob_r and plotdf$resids
+    ## t = -5.1109, df = 9562, p-value = 3.268e-07
+    ## alternative hypothesis: true correlation is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.07216192 -0.03218733
+    ## sample estimates:
+    ##         cor 
+    ## -0.05219553
 
 ``` r
-lmforBeta<-lm(resids~cbcl_scr_syn_totprob_r,data=plotdf)
+# r^2 full
+cor.test(plotdf$cbcl_scr_syn_totprob_r,plotdf$resids)$estimate^2
 ```
+
+    ##         cor 
+    ## 0.002724374
+
+``` r
+# rclinical
+clindf<-masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_r)>Pc,]
+# same covarying for age
+modelforresids<-gam(g~s(interview_age),data=clindf)
+clindf$resids<-modelforresids$residuals
+cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)
+```
+
+    ## 
+    ##  Pearson's product-moment correlation
+    ## 
+    ## data:  clindf$cbcl_scr_syn_totprob_r and clindf$resids
+    ## t = -2.4905, df = 272, p-value = 0.01335
+    ## alternative hypothesis: true correlation is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.26315700 -0.03136833
+    ## sample estimates:
+    ##        cor 
+    ## -0.1493133
+
+``` r
+# r^2 clinical
+cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)$estimate^2
+```
+
+    ##        cor 
+    ## 0.02229445
+
+``` r
+# rsubclinical
+sclindf<-masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_r)<Pbc,]
+# same covarying for age
+modelforresids<-gam(g~s(interview_age),data=sclindf)
+sclindf$resids<-modelforresids$residuals
+cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)
+```
+
+    ## 
+    ##  Pearson's product-moment correlation
+    ## 
+    ## data:  sclindf$cbcl_scr_syn_totprob_r and sclindf$resids
+    ## t = -2.1581, df = 9082, p-value = 0.03095
+    ## alternative hypothesis: true correlation is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.043184046 -0.002075942
+    ## sample estimates:
+    ##         cor 
+    ## -0.02263956
+
+``` r
+# r^2 subclinical
+cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)$estimate^2
+```
+
+    ##          cor 
+    ## 0.0005125498
+
+``` r
+# ratios
+(cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)$estimate^2)/(cor.test(plotdf$cbcl_scr_syn_totprob_r,plotdf$resids)$estimate^2)
+```
+
+    ##     cor 
+    ## 8.18333
+
+``` r
+(cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)$estimate^2)/(cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)$estimate^2)
+```
+
+    ##      cor 
+    ## 43.49713
+
+``` r
+# plot out clinical and subclinical with line of best fit, covarying for age
+plotdf<-data.frame(clindf$parentPcount,clindf$g,clindf$cbcl_scr_syn_totprob_r,clindf$interview_age)
+colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
+modelforresids<-gam(g~s(interview_age),data=plotdf)
+plotdf$resids<-modelforresids$residuals
+# clinical
+ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=30)+
+    geom_point(alpha=0)+
+    geom_smooth(method = "lm",formula = y~x,color='gray') +
+    scale_fill_viridis_c(option = "inferno") +
+    ylim(c(-3.9,4.7)) +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    geom_vline(xintercept = Pbc, linetype = "dashed")+
+    geom_vline(xintercept = min(clindf$cbcl_scr_syn_totprob_r), linetype = "dashed")+
+    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
+    scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))
+```
+
+![](Fig1_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
+
+``` r
+# subclinical
+plotdf<-data.frame(sclindf$parentPcount,sclindf$g,sclindf$cbcl_scr_syn_totprob_r,sclindf$interview_age)
+colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
+modelforresids<-gam(g~s(interview_age),data=plotdf)
+plotdf$resids<-modelforresids$residuals
+ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=40)+
+    geom_point(alpha=0)+
+    geom_smooth(method = "lm",formula = y~x,color='gray') +
+    scale_fill_viridis_c(option = "inferno") +
+    ylim(c(-3.9,4.7)) +
+    theme_minimal(base_size=35) + 
+    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    geom_vline(xintercept = Pbc, linetype = "dashed")+
+    geom_vline(xintercept = min(clindf$cbcl_scr_syn_totprob_r), linetype = "dashed")+
+    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
+    scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))
+```
+
+    ## Warning: Removed 18 rows containing missing values (`geom_hex()`).
+
+![](Fig1_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
 
 ``` r
 ### P boots plot with overlaid linear fit
@@ -296,6 +673,8 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 
     ## Warning: Removed 130026 rows containing missing values (`geom_line()`).
 
+    ## Warning: Removed 9 rows containing missing values (`geom_line()`).
+
     ## Warning: The `guide` argument in `scale_*()` cannot be `FALSE`. This was deprecated in
     ## ggplot2 3.3.4.
     ## ℹ Please use "none" instead.
@@ -303,7 +682,7 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig1_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 # load in data
@@ -349,7 +728,8 @@ masterdfTho_c<-masterdf[masterdf$cbcl_scr_syn_thought_t==69,]
 masterdfWit_bc<-masterdf[masterdf$cbcl_scr_syn_withdep_t==66,]
 masterdfWit_c<-masterdf[masterdf$cbcl_scr_syn_withdep_t==69,]
 masterdfSom_bc<-masterdf[masterdf$cbcl_scr_syn_somatic_t==65,]
-masterdfSom_c<-masterdf[masterdf$cbcl_scr_syn_somatic_t==69,]
+# no one has t==69
+masterdfSom_c<-masterdf[masterdf$cbcl_scr_syn_somatic_t==70,]
 masterdfSoc_bc<-masterdf[masterdf$cbcl_scr_syn_social_t==65,]
 masterdfSoc_c<-masterdf[masterdf$cbcl_scr_syn_social_t==69,]
 masterdfAtt_bc<-masterdf[masterdf$cbcl_scr_syn_attention_t==65,]
@@ -397,7 +777,7 @@ plot_bootstraps(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
 
     ## Warning: Removed 130026 rows containing missing values (`geom_line()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 plot_bootstraps(IFits,51,'Internalizing',MaxI,Ibc,Ic)
@@ -413,7 +793,7 @@ plot_bootstraps(IFits,51,'Internalizing',MaxI,Ibc,Ic)
 
     ## Warning: Removed 160032 rows containing missing values (`geom_line()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 ``` r
 plot_bootstraps(EFits,47,'Externalizing',MaxE,Ebc,Ec)
@@ -429,7 +809,7 @@ plot_bootstraps(EFits,47,'Externalizing',MaxE,Ebc,Ec)
 
     ## Warning: Removed 70018 rows containing missing values (`geom_line()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
 ``` r
 # load in data
@@ -472,12 +852,18 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
 ```
 
+    ## Warning: The `<scale>` argument of `guides()` cannot be `FALSE`. Use "none" instead as
+    ## of ggplot2 3.3.4.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
     ## Scale for x is already present.
     ## Adding another scale for x, which will replace the existing scale.
 
     ## Warning: Removed 15 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 # and a version with colorbar - for p only (same color mapping using throughout)
@@ -499,7 +885,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
 
     ## Warning: Removed 16 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 ``` r
 # for int
@@ -529,7 +915,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 18 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
 
 ``` r
 # for ext
@@ -562,7 +948,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
 
 ``` r
 # for som
@@ -595,7 +981,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 3 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
 
 ``` r
 # for anx
@@ -623,7 +1009,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 7 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-6.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->
 
 ``` r
 # for Tho
@@ -651,7 +1037,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-7.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->
 
 ``` r
 # for Wit
@@ -678,7 +1064,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-8.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-8.png)<!-- -->
 
 ``` r
 # for Soc
@@ -705,7 +1091,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-9.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-9.png)<!-- -->
 
 ``` r
 # for Att
@@ -732,7 +1118,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 3 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-10.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-10.png)<!-- -->
 
 ``` r
 # for Rul
@@ -759,7 +1145,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-11.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-11.png)<!-- -->
 
 ``` r
 # for Agg
@@ -786,22 +1172,22 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 7 rows containing missing values (`geom_raster()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-6-12.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-7-12.png)<!-- -->
 
 ``` r
-# for each bootstrap, recover median slope in bottom and top Thirds
+# for each bootstrap, recover median slope from subclinical and clinical
 df <- data.frame(
-  p = apply(PFits[, 1:(MaxP/3)], 1, median),
-  Internal = apply(IFits[, 1:(MaxI/3)], 1, median),
-  External = apply(EFits[, 1:(MaxE/3)], 1, median),
-  Somatic = apply(SomFits[, 1:(MaxSom/3)], 1, median),
-  AnxDepr = apply(AnxFits[, 1:(MaxAnx/3)], 1, median),
-  Thought = apply(ThoFits[, 1:(MaxTho/3)], 1, median),
-  WithDepr = apply(WitFits[, 1:(MaxWit/3)], 1, median),
-  Social = apply(SocFits[, 1:(MaxSoc/3)], 1, median),
-  Attn = apply(AttFits[, 1:(MaxAtt/3)], 1, median),
-  Rules = apply(RulFits[, 1:(MaxRul/3)], 1, median),
-  Aggr = apply(AggFits[, 1:(MaxAgg/3)], 1, median)
+  p = apply(PFits[, 1:round(Pbc+1)], 1, median),
+  Internal = apply(IFits[, 1:round(Ibc+1)], 1, median),
+  External = apply(EFits[, 1:round(Ebc+1)], 1, median),
+  Somatic = apply(SomFits[, 1:round(SomBc+1)], 1, median),
+  AnxDepr = apply(AnxFits[, 1:round(AnxBc+1)], 1, median),
+  Thought = apply(ThoFits[, 1:round(ThoBc+1)], 1, median),
+  WithDepr = apply(WitFits[, 1:round(WitBc+1)], 1, median),
+  Social = apply(SocFits[, 1:round(SocBc+1)], 1, median),
+  Attn = apply(AttFits[, 1:round(AttBc+1)], 1, median),
+  Rules = apply(RulFits[, 1:round(RulBc+1)], 1, median),
+  Aggr = apply(AggFits[, 1:round(AggBc+1)], 1, median)
 )
 
 # Convert the data frame to a tidy format
@@ -818,10 +1204,10 @@ df_tidy_1st3rd <- left_join(df_tidy, df_median, by = "Subscale")
 
 df_tidy_1st3rd$Subscale <- reorder(df_tidy_1st3rd$Subscale, -df_tidy_1st3rd$MedianValue, median)
 
-# Create the boxplot - saved at 1300 x 800
+# Create the boxplot - saved at 1300 x 860
 ggplot(df_tidy_1st3rd, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
   geom_boxplot() +
-  labs(title = "Median Association with Cognitive Score: Healthy Third",
+  labs(title = "Median Association with Cognitive Score: Subclinical",
        x = "Subscale",
        y = "Median Slope") +
   theme_minimal(base_size=23)+scale_fill_gradientn(
@@ -829,23 +1215,23 @@ ggplot(df_tidy_1st3rd, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) 
     limits = c(-.1,.1))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
 ```
 
-![](Fig1_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 # and now a clinical risk group
 # only in clinical range
 df <- data.frame(
-  p = apply(PFits[, (MaxP/1.5):MaxP], 1, median),
-  Internal = apply(IFits[, (MaxI/1.5):MaxI], 1, median),
-  External = apply(EFits[, (MaxE/1.5):MaxE], 1, median),
-  Somatic = apply(SomFits[, (MaxSom/1.5):MaxSom], 1, median),
-  AnxDepr = apply(AnxFits[, (MaxAnx/1.5):MaxAnx], 1, median),
-  Thought = apply(ThoFits[, (MaxTho/1.5):MaxTho], 1, median),
-  WithDepr = apply(WitFits[, (MaxWit/1.5):MaxWit], 1, median),
-  Social = apply(SocFits[, (MaxSoc/1.5):MaxSoc], 1, median),
-  Attn = apply(AttFits[, (MaxAtt/1.5):MaxAtt], 1, median),
-  Rules = apply(RulFits[, (MaxRul/1.5):MaxRul], 1, median),
-  Aggr = apply(AggFits[, (MaxAgg/1.5):MaxAgg], 1, median)
+  p = apply(PFits[, (Pc+1):MaxP], 1, median),
+  Internal = apply(IFits[, (Ic+1):MaxI], 1, median),
+  External = apply(EFits[, (Ec+1):MaxE], 1, median),
+  Somatic = apply(SomFits[, (SomC+1):MaxSom], 1, median),
+  AnxDepr = apply(AnxFits[, (AnxC+1):MaxAnx], 1, median),
+  Thought = apply(ThoFits[, (ThoC+1):MaxTho], 1, median),
+  WithDepr = apply(WitFits[, (WitC+1):MaxWit], 1, median),
+  Social = apply(SocFits[, (SocC+1):MaxSoc], 1, median),
+  Attn = apply(AttFits[, (AttC+1):MaxAtt], 1, median),
+  Rules = apply(RulFits[, (RulC+1):MaxRul], 1, median),
+  Aggr = apply(AggFits[, (AggC+1):MaxAgg], 1, median)
 )
 
 # Convert the data frame to a tidy format
@@ -869,17 +1255,19 @@ df_tidy_3rd3rd$third<-'Last'
 
 df_tidy_merged<-rbind(df_tidy_1st3rd,df_tidy_3rd3rd)
 # Create the boxplot - healthy and unhealthy third
-ggplot(df_tidy_merged, aes(x = Subscale, y = MedianValue,fill=MedianIteration,outlier.shape=third)) +
+ggplot(df_tidy_merged, aes(x= Subscale, y = MedianValue,fill=MedianIteration,outlier.shape=third)) +
     geom_boxplot(position = position_dodge(0.6),outlier.alpha = .1) +
-    labs(title = "Median Association with Cognitive Score",
+    labs(title = "Cognitive association in subclinical (left) and clinical (right) ranges",
          x = "Subscale",
          y = "Median Slope") +
     theme_minimal(base_size=23)+scale_fill_gradientn(
         colors = my_palette(100),
-        limits = c(-.1,.1))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.24,.13))
+        limits = c(-.1,.1))+guides(fill=F)+theme(axis.text.x = element_text(angle = 35, hjust = 1),panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.24,.13))
 ```
 
-![](Fig1_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+    ## Warning: Removed 7 rows containing non-finite values (`stat_boxplot()`).
+
+![](Fig1_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 # proof-of-concept g~p linear in healthy and clinical range
@@ -909,7 +1297,7 @@ ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bin
 
     ## Warning: Removed 7 rows containing missing values (`geom_point()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 # and healthy version
@@ -932,7 +1320,7 @@ ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bin
 
     ## Warning: Removed 9 rows containing missing values (`geom_hex()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
 ``` r
 # each subscale for supplementary figures
@@ -964,9 +1352,7 @@ plot_bootstraps(SomFits,13,"Somatic",MaxSom,SomBc,SomC)
 
     ## Warning: Removed 10005 rows containing missing values (`geom_line()`).
 
-    ## Warning: Removed 1 rows containing missing values (`geom_vline()`).
-
-![](Fig1_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 plot_bootstraps(AnxFits,25,'Anxious Depression',MaxAnx,AnxBc,AnxC)
@@ -982,7 +1368,7 @@ plot_bootstraps(AnxFits,25,'Anxious Depression',MaxAnx,AnxBc,AnxC)
 
     ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
 
 ``` r
 plot_bootstraps(ThoFits,18,'Thought',MaxTho,ThoBc,ThoC)
@@ -998,7 +1384,7 @@ plot_bootstraps(ThoFits,18,'Thought',MaxTho,ThoBc,ThoC)
 
     ## Warning: Removed 30006 rows containing missing values (`geom_line()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-11-3.png)<!-- -->
 
 ``` r
 plot_bootstraps(WitFits,16,"Withdrawn Depression",MaxWit,WitBc,WitC)
@@ -1014,7 +1400,7 @@ plot_bootstraps(WitFits,16,"Withdrawn Depression",MaxWit,WitBc,WitC)
 
     ## Warning: Removed 30015 rows containing missing values (`geom_line()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-10-4.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-11-4.png)<!-- -->
 
 ``` r
 plot_bootstraps(SocFits,17,'Social',MaxSoc,SocBc,SocC)
@@ -1030,7 +1416,7 @@ plot_bootstraps(SocFits,17,'Social',MaxSoc,SocBc,SocC)
 
     ## Warning: Removed 30006 rows containing missing values (`geom_line()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-10-5.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-11-5.png)<!-- -->
 
 ``` r
 plot_bootstraps(AttFits,19,'Attention',MaxAtt,AttBc,AttC)
@@ -1046,7 +1432,7 @@ plot_bootstraps(AttFits,19,'Attention',MaxAtt,AttBc,AttC)
 
     ## Warning: Removed 10003 rows containing missing values (`geom_line()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-10-6.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-11-6.png)<!-- -->
 
 ``` r
 plot_bootstraps(RulFits,18,'Rule Breaking',MaxRul,RulBc,RulC)
@@ -1062,7 +1448,7 @@ plot_bootstraps(RulFits,18,'Rule Breaking',MaxRul,RulBc,RulC)
 
     ## Warning: Removed 40011 rows containing missing values (`geom_line()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-10-7.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-11-7.png)<!-- -->
 
 ``` r
 plot_bootstraps(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
@@ -1078,4 +1464,4 @@ plot_bootstraps(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
 
     ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
-![](Fig1_files/figure-gfm/unnamed-chunk-10-8.png)<!-- -->
+![](Fig1_files/figure-gfm/unnamed-chunk-11-8.png)<!-- -->

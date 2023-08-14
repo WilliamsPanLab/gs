@@ -100,7 +100,103 @@ my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1
 ```{r}
 # master df from sample construction
 masterdf=readRDS('~/gp_masterdf.rds')
+# convert all scores to numeric
+masterdf$parentPcount=as.numeric(masterdf$parentPcount)
+masterdf$cbcl_scr_syn_totprob_r=as.numeric(masterdf$cbcl_scr_syn_totprob_r)
+masterdf$cbcl_scr_syn_internal_r=as.numeric(masterdf$cbcl_scr_syn_internal_r)
+masterdf$cbcl_scr_syn_external_r=as.numeric(masterdf$cbcl_scr_syn_external_r)
+masterdf$cbcl_scr_syn_somatic_r=as.numeric(masterdf$cbcl_scr_syn_somatic_r)
+masterdf$cbcl_scr_syn_anxdep_r=as.numeric(masterdf$cbcl_scr_syn_anxdep_r)
+masterdf$cbcl_scr_syn_thought_r=as.numeric(masterdf$cbcl_scr_syn_thought_r)
+masterdf$cbcl_scr_syn_withdep_r=as.numeric(masterdf$cbcl_scr_syn_withdep_r)
+masterdf$cbcl_scr_syn_social_r=as.numeric(masterdf$cbcl_scr_syn_social_r)
+masterdf$cbcl_scr_syn_attention_r=as.numeric(masterdf$cbcl_scr_syn_attention_r)
+masterdf$cbcl_scr_syn_rulebreak_r=as.numeric(masterdf$cbcl_scr_syn_rulebreak_r)
+masterdf$cbcl_scr_syn_aggressive_r=as.numeric(masterdf$cbcl_scr_syn_aggressive_r)
+masterdf$parentPcount=as.numeric(masterdf$parentPcount)
+masterdf$ASRInt=as.numeric(masterdf$ASRInt)
+masterdf$ASRExt=as.numeric(masterdf$ASRExt)
+masterdf$ASRSomatic=as.numeric(masterdf$ASRSomatic)
+masterdf$ASRAnxDepr=as.numeric(masterdf$ASRAnxDepr)
+masterdf$ASRThought=as.numeric(masterdf$ASRThought)
+masterdf$ASRWithdrawn=as.numeric(masterdf$ASRWithdrawn)
+masterdf$ASRAttn=as.numeric(masterdf$ASRAttn)
+masterdf$ASRRulB=as.numeric(masterdf$ASRRulB)
+masterdf$ASRAggr=as.numeric(masterdf$ASRAggr)
+# AIC to confirm spline use
+# p factor
+pgAge<-bam(g~s(parentPcount,k=4)+s(interview_age,k=4),data=masterdf)
+pgAgeL<-bam(g~parentPcount+s(interview_age,k=4),data=masterdf)
+AIC(pgAge)
+AIC(pgAgeL)
+# confirm linear is higher AIC than nonlin
+paste('parentPcount nonlin:',AIC(pgAge)<AIC(pgAgeL))
+# internalizing
+intAge<-bam(g~s(ASRInt,k=4)+s(interview_age,k=4),data=masterdf)
+intAgeL<-bam(g~ASRInt+s(interview_age,k=4),data=masterdf)
+AIC(intAge)
+AIC(intAgeL)
+# confirm linear is higher AIC than nonlin
+paste('int nonlin:',AIC(intAge)<AIC(intAgeL))
+# externalizing
+extAge<-bam(g~s(ASRExt,k=4)+s(interview_age,k=4),data=masterdf)
+extAgeL<-bam(g~ASRExt+s(interview_age,k=4),data=masterdf)
+AIC(extAge)
+AIC(extAgeL)
+# confirm linear is higher AIC than nonlin
+paste('ext nonlin:',AIC(extAge)<AIC(extAgeL))
+# somatic
+somAge<-bam(g~s(ASRSomatic,k=4)+s(interview_age,k=4),data=masterdf)
+somAgeL<-bam(g~ASRSomatic+s(interview_age,k=4),data=masterdf)
+AIC(somAge)
+AIC(somAgeL)
+# confirm linear is higher AIC than nonlin
+paste('somatic nonlin:',AIC(somAge)<AIC(somAgeL))
+# attention
+attAge<-bam(g~s(ASRAttn,k=4)+s(interview_age,k=4),data=masterdf)
+attAgeL<-bam(g~ASRAttn+s(interview_age,k=4),data=masterdf)
+AIC(attAge)
+AIC(attAgeL)
+# confirm linear is higher AIC than nonlin
+paste('attn. nonlin:',AIC(attAge)<AIC(attAgeL))
+# thought
+thoAge<-bam(g~s(ASRThought,k=4)+s(interview_age,k=4),data=masterdf)
+thoAgeL<-bam(g~ASRThought+s(interview_age,k=4),data=masterdf)
+AIC(thoAge)
+AIC(thoAgeL)
+# confirm linear is higher AIC than nonlin
+paste('thought nonlin:',AIC(thoAge)<AIC(thoAgeL))
+# anxious depression
+anxdepAge<-bam(g~s(ASRAnxDepr,k=4)+s(interview_age,k=4),data=masterdf)
+anxdepAgeL<-bam(g~ASRAnxDepr+s(interview_age,k=4),data=masterdf)
+AIC(anxdepAge)
+AIC(anxdepAgeL)
+# confirm linear is higher AIC than nonlin
+paste('anx. dep. nonlin:',AIC(anxdepAge)<AIC(anxdepAgeL))
+# withdrawn depression
+withdepAge<-bam(g~s(ASRWithdrawn,k=4)+s(interview_age,k=4),data=masterdf)
+withdepAgeL<-bam(g~ASRWithdrawn+s(interview_age,k=4),data=masterdf)
+AIC(withdepAge)
+AIC(withdepAgeL)
+# confirm linear is higher AIC than nonlin
+paste('with. dep. nonlin:',AIC(withdepAge)<AIC(withdepAgeL))
+# rule breaking
+ruleAge<-bam(g~s(ASRRulB,k=4)+s(interview_age,k=4),data=masterdf)
+ruleAgeL<-bam(g~ASRRulB+s(interview_age,k=4),data=masterdf)
+AIC(ruleAge)
+AIC(ruleAgeL)
+# confirm linear is higher AIC than nonlin
+paste('rule breaking nonlin:',AIC(ruleAge)<AIC(ruleAgeL))
+# aggressive behavior
+aggAge<-bam(g~s(ASRAggr,k=4)+s(interview_age,k=4),data=masterdf)
+aggAgeL<-bam(g~ASRAggr+s(interview_age,k=4),data=masterdf)
+AIC(aggAge)
+AIC(aggAgeL)
+# confirm linear is higher AIC than nonlin
+paste('aggr. nonlin:',AIC(aggAge)<AIC(aggAgeL))
+```
 
+```{r}
 # pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
 masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==65,]
 masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==69,]
@@ -627,3 +723,50 @@ ggplot(PvC_long, aes(x = Subscale, y = value,fill=Group)) +
 # saved out at 3000x1000
 ```
 
+```{r}
+# unbootstrapped model comparison for deviance explained
+# fit each model explaining g with a single scale
+TotProbMod <- bam(g ~ s(cbcl_scr_syn_totprob_r,k=4), data = masterdf)
+InternalMod <- bam(g ~ s(cbcl_scr_syn_internal_r,k=4), data = masterdf)
+ExternalMod <- bam(g ~ s(cbcl_scr_syn_external_r,k=4), data = masterdf)
+SomaticMod <- bam(g ~ s(cbcl_scr_syn_somatic_r,k=4), data = masterdf)
+AnxDepMod <- bam(g ~ s(cbcl_scr_syn_anxdep_r,k=4), data = masterdf)
+ThoughtMod <- bam(g ~ s(cbcl_scr_syn_thought_r,k=4), data = masterdf)
+WithDepMod <- bam(g ~ s(cbcl_scr_syn_withdep_r,k=4), data = masterdf)
+SocialMod <- bam(g ~ s(cbcl_scr_syn_social_r,k=4), data = masterdf)
+AttentionMod <- bam(g ~ s(cbcl_scr_syn_attention_r,k=4), data = masterdf)
+RuleBreakMod <- bam(g ~ s(cbcl_scr_syn_rulebreak_r,k=4), data = masterdf)
+AggressiveMod <- bam(g ~ s(cbcl_scr_syn_aggressive_r,k=4), data = masterdf)
+ParentPcountMod <- bam(g ~ s(parentPcount,k=4), data = masterdf) 
+ParentInternalMod <- bam(g ~ s(ASRInt,k=4), data = masterdf)
+ParentExternalMod <- bam(g ~ s(ASRExt,k=4), data = masterdf)
+ParentSomaticMod <- bam(g ~ s(ASRSomatic,k=4), data = masterdf)
+ParentAnxMod <- bam(g ~ s(ASRAnxDepr,k=4), data = masterdf)
+ParentThoughtMod <- bam(g ~ s(ASRThought,k=4), data = masterdf)
+ParentWithMod <- bam(g ~ s(ASRWithdrawn,k=4), data = masterdf)
+ParentAttnMod <- bam(g ~ s(ASRAttn,k=4), data = masterdf)
+ParentRuleMod <- bam(g ~ s(ASRRulB,k=4), data = masterdf)
+ParentAggMod <- bam(g ~ s(ASRAggr,k=4), data = masterdf) 
+# make models with both
+p_bothMod <- bam(g ~ s(cbcl_scr_syn_totprob_r,k=4) + s(parentPcount,k=4), data = masterdf)
+Int_bothMod <- bam(g ~ s(cbcl_scr_syn_internal_r,k=4) + s(ASRInt,k=4), data = masterdf)
+Ext_bothMod <- bam(g ~ s(cbcl_scr_syn_external_r,k=4) + s(ASRExt,k=4), data = masterdf)
+Som_bothMod <- bam(g ~ s(cbcl_scr_syn_somatic_r,k=4) + s(ASRSomatic,k=4), data = masterdf)
+Anx_bothMod <- bam(g ~ s(cbcl_scr_syn_anxdep_r,k=4) + s(ASRAnxDepr,k=4), data = masterdf)
+Tho_bothMod <- bam(g ~ s(cbcl_scr_syn_thought_r,k=4) + s(ASRThought,k=4), data = masterdf)
+With_bothMod <- bam(g ~ s(cbcl_scr_syn_withdep_r,k=4) + s(ASRWithdrawn,k=4), data = masterdf)
+Attn_bothMod <- bam(g ~ s(cbcl_scr_syn_attention_r,k=4) + s(ASRAttn,k=4), data = masterdf)
+Rule_bothMod <- bam(g ~ s(cbcl_scr_syn_rulebreak_r,k=4) + s(ASRRulB,k=4), data = masterdf)
+Agg_bothMod <- bam(g ~ s(cbcl_scr_syn_aggressive_r,k=4) + s(ASRAggr,k=4), data = masterdf)
+# print AIC from all
+print(paste('p AIC:',AIC(TotProbMod), 'parent p AIC:', AIC(ParentPcountMod), 'both AIC:', AIC(p_bothMod)))
+print(paste('internal AIC:',AIC(InternalMod), 'parent internal AIC:', AIC(ParentInternalMod), 'both AIC:', AIC(Int_bothMod)))
+print(paste('external AIC:',AIC(ExternalMod), 'parent external AIC:', AIC(ParentExternalMod), 'both AIC:', AIC(Ext_bothMod)))
+print(paste('somatic AIC:',AIC(SomaticMod), 'parent somatic AIC:', AIC(ParentSomaticMod), 'both AIC:', AIC(Som_bothMod)))
+print(paste('anxdep AIC:',AIC(AnxDepMod), 'parent anxdep AIC:', AIC(ParentAnxMod), 'both AIC:', AIC(Anx_bothMod)))
+print(paste('thought AIC:',AIC(ThoughtMod), 'parent thought AIC:', AIC(ParentThoughtMod), 'both AIC:', AIC(Tho_bothMod)))
+print(paste('withdep AIC:',AIC(WithDepMod), 'parent withdep AIC:', AIC(ParentWithMod), 'both AIC:', AIC(With_bothMod)))
+print(paste('attention AIC:',AIC(AttentionMod), 'parent attention AIC:', AIC(ParentAttnMod), 'both AIC:', AIC(Attn_bothMod)))
+print(paste('rulebreak AIC:',AIC(RuleBreakMod), 'parent rulebreak AIC:', AIC(ParentRuleMod), 'both AIC:', AIC(Rule_bothMod)))
+print(paste('aggressive AIC:',AIC(AggressiveMod), 'parent aggressive AIC:', AIC(ParentAggMod), 'both AIC:', AIC(Agg_bothMod)))
+```

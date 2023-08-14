@@ -138,7 +138,250 @@ my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1
 ``` r
 # master df from sample construction
 masterdf=readRDS('~/gp_masterdf.rds')
+# convert all scores to numeric
+masterdf$parentPcount=as.numeric(masterdf$parentPcount)
+masterdf$cbcl_scr_syn_totprob_r=as.numeric(masterdf$cbcl_scr_syn_totprob_r)
+masterdf$cbcl_scr_syn_internal_r=as.numeric(masterdf$cbcl_scr_syn_internal_r)
+masterdf$cbcl_scr_syn_external_r=as.numeric(masterdf$cbcl_scr_syn_external_r)
+masterdf$cbcl_scr_syn_somatic_r=as.numeric(masterdf$cbcl_scr_syn_somatic_r)
+masterdf$cbcl_scr_syn_anxdep_r=as.numeric(masterdf$cbcl_scr_syn_anxdep_r)
+masterdf$cbcl_scr_syn_thought_r=as.numeric(masterdf$cbcl_scr_syn_thought_r)
+masterdf$cbcl_scr_syn_withdep_r=as.numeric(masterdf$cbcl_scr_syn_withdep_r)
+masterdf$cbcl_scr_syn_social_r=as.numeric(masterdf$cbcl_scr_syn_social_r)
+masterdf$cbcl_scr_syn_attention_r=as.numeric(masterdf$cbcl_scr_syn_attention_r)
+masterdf$cbcl_scr_syn_rulebreak_r=as.numeric(masterdf$cbcl_scr_syn_rulebreak_r)
+masterdf$cbcl_scr_syn_aggressive_r=as.numeric(masterdf$cbcl_scr_syn_aggressive_r)
+masterdf$parentPcount=as.numeric(masterdf$parentPcount)
+masterdf$ASRInt=as.numeric(masterdf$ASRInt)
+masterdf$ASRExt=as.numeric(masterdf$ASRExt)
+masterdf$ASRSomatic=as.numeric(masterdf$ASRSomatic)
+masterdf$ASRAnxDepr=as.numeric(masterdf$ASRAnxDepr)
+masterdf$ASRThought=as.numeric(masterdf$ASRThought)
+masterdf$ASRWithdrawn=as.numeric(masterdf$ASRWithdrawn)
+masterdf$ASRAttn=as.numeric(masterdf$ASRAttn)
+masterdf$ASRRulB=as.numeric(masterdf$ASRRulB)
+masterdf$ASRAggr=as.numeric(masterdf$ASRAggr)
+# AIC to confirm spline use
+# p factor
+pgAge<-bam(g~s(parentPcount,k=4)+s(interview_age,k=4),data=masterdf)
+pgAgeL<-bam(g~parentPcount+s(interview_age,k=4),data=masterdf)
+AIC(pgAge)
+```
 
+    ## [1] 26206.17
+
+``` r
+AIC(pgAgeL)
+```
+
+    ## [1] 26265.3
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('parentPcount nonlin:',AIC(pgAge)<AIC(pgAgeL))
+```
+
+    ## [1] "parentPcount nonlin: TRUE"
+
+``` r
+# internalizing
+intAge<-bam(g~s(ASRInt,k=4)+s(interview_age,k=4),data=masterdf)
+intAgeL<-bam(g~ASRInt+s(interview_age,k=4),data=masterdf)
+AIC(intAge)
+```
+
+    ## [1] 26223.19
+
+``` r
+AIC(intAgeL)
+```
+
+    ## [1] 26245.8
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('int nonlin:',AIC(intAge)<AIC(intAgeL))
+```
+
+    ## [1] "int nonlin: TRUE"
+
+``` r
+# externalizing
+extAge<-bam(g~s(ASRExt,k=4)+s(interview_age,k=4),data=masterdf)
+extAgeL<-bam(g~ASRExt+s(interview_age,k=4),data=masterdf)
+AIC(extAge)
+```
+
+    ## [1] 26236.85
+
+``` r
+AIC(extAgeL)
+```
+
+    ## [1] 26236.54
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('ext nonlin:',AIC(extAge)<AIC(extAgeL))
+```
+
+    ## [1] "ext nonlin: FALSE"
+
+``` r
+# somatic
+somAge<-bam(g~s(ASRSomatic,k=4)+s(interview_age,k=4),data=masterdf)
+somAgeL<-bam(g~ASRSomatic+s(interview_age,k=4),data=masterdf)
+AIC(somAge)
+```
+
+    ## [1] 26241.9
+
+``` r
+AIC(somAgeL)
+```
+
+    ## [1] 26245.29
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('somatic nonlin:',AIC(somAge)<AIC(somAgeL))
+```
+
+    ## [1] "somatic nonlin: TRUE"
+
+``` r
+# attention
+attAge<-bam(g~s(ASRAttn,k=4)+s(interview_age,k=4),data=masterdf)
+attAgeL<-bam(g~ASRAttn+s(interview_age,k=4),data=masterdf)
+AIC(attAge)
+```
+
+    ## [1] 26261.24
+
+``` r
+AIC(attAgeL)
+```
+
+    ## [1] 26266.71
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('attn. nonlin:',AIC(attAge)<AIC(attAgeL))
+```
+
+    ## [1] "attn. nonlin: TRUE"
+
+``` r
+# thought
+thoAge<-bam(g~s(ASRThought,k=4)+s(interview_age,k=4),data=masterdf)
+thoAgeL<-bam(g~ASRThought+s(interview_age,k=4),data=masterdf)
+AIC(thoAge)
+```
+
+    ## [1] 26210.82
+
+``` r
+AIC(thoAgeL)
+```
+
+    ## [1] 26255.37
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('thought nonlin:',AIC(thoAge)<AIC(thoAgeL))
+```
+
+    ## [1] "thought nonlin: TRUE"
+
+``` r
+# anxious depression
+anxdepAge<-bam(g~s(ASRAnxDepr,k=4)+s(interview_age,k=4),data=masterdf)
+anxdepAgeL<-bam(g~ASRAnxDepr+s(interview_age,k=4),data=masterdf)
+AIC(anxdepAge)
+```
+
+    ## [1] 26256.62
+
+``` r
+AIC(anxdepAgeL)
+```
+
+    ## [1] 26266.56
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('anx. dep. nonlin:',AIC(anxdepAge)<AIC(anxdepAgeL))
+```
+
+    ## [1] "anx. dep. nonlin: TRUE"
+
+``` r
+# withdrawn depression
+withdepAge<-bam(g~s(ASRWithdrawn,k=4)+s(interview_age,k=4),data=masterdf)
+withdepAgeL<-bam(g~ASRWithdrawn+s(interview_age,k=4),data=masterdf)
+AIC(withdepAge)
+```
+
+    ## [1] 26249.96
+
+``` r
+AIC(withdepAgeL)
+```
+
+    ## [1] 26259.85
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('with. dep. nonlin:',AIC(withdepAge)<AIC(withdepAgeL))
+```
+
+    ## [1] "with. dep. nonlin: TRUE"
+
+``` r
+# rule breaking
+ruleAge<-bam(g~s(ASRRulB,k=4)+s(interview_age,k=4),data=masterdf)
+ruleAgeL<-bam(g~ASRRulB+s(interview_age,k=4),data=masterdf)
+AIC(ruleAge)
+```
+
+    ## [1] 26236.96
+
+``` r
+AIC(ruleAgeL)
+```
+
+    ## [1] 26236.96
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('rule breaking nonlin:',AIC(ruleAge)<AIC(ruleAgeL))
+```
+
+    ## [1] "rule breaking nonlin: FALSE"
+
+``` r
+# aggressive behavior
+aggAge<-bam(g~s(ASRAggr,k=4)+s(interview_age,k=4),data=masterdf)
+aggAgeL<-bam(g~ASRAggr+s(interview_age,k=4),data=masterdf)
+AIC(aggAge)
+```
+
+    ## [1] 26238.22
+
+``` r
+AIC(aggAgeL)
+```
+
+    ## [1] 26240.35
+
+``` r
+# confirm linear is higher AIC than nonlin
+paste('aggr. nonlin:',AIC(aggAge)<AIC(aggAgeL))
+```
+
+    ## [1] "aggr. nonlin: TRUE"
+
+``` r
 # pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
 masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==65,]
 masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==69,]
@@ -228,7 +471,7 @@ basic=ggplot(data = plotdf,aes(y = cbcl_scr_syn_totprob_r, x = parentPcount)) + 
 ggMarginal(basic,type="histogram",size=3,binwidth=4,fill="gray")
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 print(cor.test(masterdf$parentPcount,masterdf$cbcl_scr_syn_totprob_r))
@@ -318,7 +561,7 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 # load in data
@@ -360,7 +603,7 @@ plot_bootstraps_par(PFits,160,x_title,MaxP)
 
     ## Warning: Removed 240048 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(IFits,30,'Parental Internalizing',MaxI)
@@ -376,7 +619,7 @@ plot_bootstraps_par(IFits,30,'Parental Internalizing',MaxI)
 
     ## Warning: Removed 40008 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(EFits,63,'Parental Externalizing',MaxE)
@@ -392,7 +635,7 @@ plot_bootstraps_par(EFits,63,'Parental Externalizing',MaxE)
 
     ## Warning: Removed 200040 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(AnxFits,31,'Anxious Depression',MaxAnx)
@@ -408,7 +651,7 @@ plot_bootstraps_par(AnxFits,31,'Anxious Depression',MaxAnx)
 
     ## Warning: Removed 40008 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(WitFits,18,'Withdrawn Depression',MaxWit)
@@ -423,7 +666,7 @@ plot_bootstraps_par(WitFits,18,'Withdrawn Depression',MaxWit)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(AttFits,31,'Attention',MaxAtt)
@@ -438,7 +681,7 @@ plot_bootstraps_par(AttFits,31,'Attention',MaxAtt)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-6.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(RulFits,21,'Rule Breaking',MaxRul)
@@ -454,7 +697,7 @@ plot_bootstraps_par(RulFits,21,'Rule Breaking',MaxRul)
 
     ## Warning: Removed 80017 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-7.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(AggFits,45,'Aggression',MaxAgg)
@@ -470,7 +713,7 @@ plot_bootstraps_par(AggFits,45,'Aggression',MaxAgg)
 
     ## Warning: Removed 110022 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-8.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-8.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(ThoFits,18,'Thought',MaxTho)
@@ -486,7 +729,7 @@ plot_bootstraps_par(ThoFits,18,'Thought',MaxTho)
 
     ## Warning: Removed 40008 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-9.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-9.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(SomFits,20,'Somatic',MaxSom)
@@ -502,7 +745,7 @@ plot_bootstraps_par(SomFits,20,'Somatic',MaxSom)
 
     ## Warning: Removed 30006 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-6-10.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-10.png)<!-- -->
 
 ``` r
 # load in data
@@ -549,7 +792,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 26 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 # and a version with colorbar - for p only (same color mapping using throughout)
@@ -571,7 +814,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
 
     ## Warning: Removed 49 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
 ``` r
 # for int
@@ -601,7 +844,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
 
 ``` r
 # for ext
@@ -634,7 +877,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 22 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
 
 ``` r
 # for som
@@ -667,7 +910,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 5 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-5.png)<!-- -->
 
 ``` r
 # for anx
@@ -695,7 +938,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-6.png)<!-- -->
 
 ``` r
 # for Tho
@@ -723,7 +966,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-7.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-7.png)<!-- -->
 
 ``` r
 # for Wit
@@ -750,7 +993,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-8.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-8.png)<!-- -->
 
 ``` r
 # for Att
@@ -777,7 +1020,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-9.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-9.png)<!-- -->
 
 ``` r
 # for Rul
@@ -804,7 +1047,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-10.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-10.png)<!-- -->
 
 ``` r
 # for Agg
@@ -831,7 +1074,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-11.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-11.png)<!-- -->
 
 ``` r
 # for each bootstrap, recover median slope in bottom and top third
@@ -873,7 +1116,7 @@ ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
     limits = c(-.27,.27))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.25,.25))
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 # and now a clinical risk group
@@ -927,7 +1170,7 @@ ggplot(df_tidy_merged, aes(x = Subscale, y = MedianValue,fill=MedianIteration,ou
 
     ## Warning: Removed 1 rows containing non-finite values (`stat_boxplot()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 library(dplyr)
@@ -975,8 +1218,103 @@ ggplot(PvC_long, aes(x = Subscale, y = value,fill=Group)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+scale_fill_manual(values = c("#F9665E", "#AFC7D0", "#799FCB"))
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 # saved out at 3000x1000
 ```
+
+``` r
+# unbootstrapped model comparison for deviance explained
+# fit each model explaining g with a single scale
+TotProbMod <- bam(g ~ s(cbcl_scr_syn_totprob_r,k=4), data = masterdf)
+InternalMod <- bam(g ~ s(cbcl_scr_syn_internal_r,k=4), data = masterdf)
+ExternalMod <- bam(g ~ s(cbcl_scr_syn_external_r,k=4), data = masterdf)
+SomaticMod <- bam(g ~ s(cbcl_scr_syn_somatic_r,k=4), data = masterdf)
+AnxDepMod <- bam(g ~ s(cbcl_scr_syn_anxdep_r,k=4), data = masterdf)
+ThoughtMod <- bam(g ~ s(cbcl_scr_syn_thought_r,k=4), data = masterdf)
+WithDepMod <- bam(g ~ s(cbcl_scr_syn_withdep_r,k=4), data = masterdf)
+SocialMod <- bam(g ~ s(cbcl_scr_syn_social_r,k=4), data = masterdf)
+AttentionMod <- bam(g ~ s(cbcl_scr_syn_attention_r,k=4), data = masterdf)
+RuleBreakMod <- bam(g ~ s(cbcl_scr_syn_rulebreak_r,k=4), data = masterdf)
+AggressiveMod <- bam(g ~ s(cbcl_scr_syn_aggressive_r,k=4), data = masterdf)
+ParentPcountMod <- bam(g ~ s(parentPcount,k=4), data = masterdf) 
+ParentInternalMod <- bam(g ~ s(ASRInt,k=4), data = masterdf)
+ParentExternalMod <- bam(g ~ s(ASRExt,k=4), data = masterdf)
+ParentSomaticMod <- bam(g ~ s(ASRSomatic,k=4), data = masterdf)
+ParentAnxMod <- bam(g ~ s(ASRAnxDepr,k=4), data = masterdf)
+ParentThoughtMod <- bam(g ~ s(ASRThought,k=4), data = masterdf)
+ParentWithMod <- bam(g ~ s(ASRWithdrawn,k=4), data = masterdf)
+ParentAttnMod <- bam(g ~ s(ASRAttn,k=4), data = masterdf)
+ParentRuleMod <- bam(g ~ s(ASRRulB,k=4), data = masterdf)
+ParentAggMod <- bam(g ~ s(ASRAggr,k=4), data = masterdf) 
+# make models with both
+p_bothMod <- bam(g ~ s(cbcl_scr_syn_totprob_r,k=4) + s(parentPcount,k=4), data = masterdf)
+Int_bothMod <- bam(g ~ s(cbcl_scr_syn_internal_r,k=4) + s(ASRInt,k=4), data = masterdf)
+Ext_bothMod <- bam(g ~ s(cbcl_scr_syn_external_r,k=4) + s(ASRExt,k=4), data = masterdf)
+Som_bothMod <- bam(g ~ s(cbcl_scr_syn_somatic_r,k=4) + s(ASRSomatic,k=4), data = masterdf)
+Anx_bothMod <- bam(g ~ s(cbcl_scr_syn_anxdep_r,k=4) + s(ASRAnxDepr,k=4), data = masterdf)
+Tho_bothMod <- bam(g ~ s(cbcl_scr_syn_thought_r,k=4) + s(ASRThought,k=4), data = masterdf)
+With_bothMod <- bam(g ~ s(cbcl_scr_syn_withdep_r,k=4) + s(ASRWithdrawn,k=4), data = masterdf)
+Attn_bothMod <- bam(g ~ s(cbcl_scr_syn_attention_r,k=4) + s(ASRAttn,k=4), data = masterdf)
+Rule_bothMod <- bam(g ~ s(cbcl_scr_syn_rulebreak_r,k=4) + s(ASRRulB,k=4), data = masterdf)
+Agg_bothMod <- bam(g ~ s(cbcl_scr_syn_aggressive_r,k=4) + s(ASRAggr,k=4), data = masterdf)
+# print AIC from all
+print(paste('p AIC:',AIC(TotProbMod), 'parent p AIC:', AIC(ParentPcountMod), 'both AIC:', AIC(p_bothMod)))
+```
+
+    ## [1] "p AIC: 26979.3864695786 parent p AIC: 26949.9340158867 both AIC: 26915.0527352003"
+
+``` r
+print(paste('internal AIC:',AIC(InternalMod), 'parent internal AIC:', AIC(ParentInternalMod), 'both AIC:', AIC(Int_bothMod)))
+```
+
+    ## [1] "internal AIC: 27003.607544264 parent internal AIC: 26974.9422295133 both AIC: 26945.913888693"
+
+``` r
+print(paste('external AIC:',AIC(ExternalMod), 'parent external AIC:', AIC(ParentExternalMod), 'both AIC:', AIC(Ext_bothMod)))
+```
+
+    ## [1] "external AIC: 26951.8028499851 parent external AIC: 26976.681518493 both AIC: 26941.3621831095"
+
+``` r
+print(paste('somatic AIC:',AIC(SomaticMod), 'parent somatic AIC:', AIC(ParentSomaticMod), 'both AIC:', AIC(Som_bothMod)))
+```
+
+    ## [1] "somatic AIC: 27004.0056411687 parent somatic AIC: 26995.3637666406 both AIC: 26989.306951996"
+
+``` r
+print(paste('anxdep AIC:',AIC(AnxDepMod), 'parent anxdep AIC:', AIC(ParentAnxMod), 'both AIC:', AIC(Anx_bothMod)))
+```
+
+    ## [1] "anxdep AIC: 26990.8209877241 parent anxdep AIC: 27005.9031936197 both AIC: 26970.595756605"
+
+``` r
+print(paste('thought AIC:',AIC(ThoughtMod), 'parent thought AIC:', AIC(ParentThoughtMod), 'both AIC:', AIC(Tho_bothMod)))
+```
+
+    ## [1] "thought AIC: 27000.44725001 parent thought AIC: 26951.4687739407 both AIC: 26928.1804935251"
+
+``` r
+print(paste('withdep AIC:',AIC(WithDepMod), 'parent withdep AIC:', AIC(ParentWithMod), 'both AIC:', AIC(With_bothMod)))
+```
+
+    ## [1] "withdep AIC: 27010.7264106238 parent withdep AIC: 26998.8335592584 both AIC: 26986.2358515443"
+
+``` r
+print(paste('attention AIC:',AIC(AttentionMod), 'parent attention AIC:', AIC(ParentAttnMod), 'both AIC:', AIC(Attn_bothMod)))
+```
+
+    ## [1] "attention AIC: 26930.785665745 parent attention AIC: 27009.1487066642 both AIC: 26895.8388200494"
+
+``` r
+print(paste('rulebreak AIC:',AIC(RuleBreakMod), 'parent rulebreak AIC:', AIC(ParentRuleMod), 'both AIC:', AIC(Rule_bothMod)))
+```
+
+    ## [1] "rulebreak AIC: 26921.7953039541 parent rulebreak AIC: 26980.150010959 both AIC: 26909.3292555632"
+
+``` r
+print(paste('aggressive AIC:',AIC(AggressiveMod), 'parent aggressive AIC:', AIC(ParentAggMod), 'both AIC:', AIC(Agg_bothMod)))
+```
+
+    ## [1] "aggressive AIC: 26973.2527976302 parent aggressive AIC: 26977.4704078169 both AIC: 26957.7006228559"

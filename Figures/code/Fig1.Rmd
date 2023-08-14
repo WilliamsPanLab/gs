@@ -110,7 +110,99 @@ my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1
 ```{r}
 # load in masterdf (saved out from sample construction)
 masterdf=readRDS('~/gp_masterdf.rds')
+# convert all cbcl scores to numeric
+masterdf$cbcl_scr_syn_totprob_r=as.numeric(masterdf$cbcl_scr_syn_totprob_r)
+masterdf$cbcl_scr_syn_internal_r=as.numeric(masterdf$cbcl_scr_syn_internal_r)
+masterdf$cbcl_scr_syn_external_r=as.numeric(masterdf$cbcl_scr_syn_external_r)
+masterdf$cbcl_scr_syn_somatic_r=as.numeric(masterdf$cbcl_scr_syn_somatic_r)
+masterdf$cbcl_scr_syn_anxdep_r=as.numeric(masterdf$cbcl_scr_syn_anxdep_r)
+masterdf$cbcl_scr_syn_thought_r=as.numeric(masterdf$cbcl_scr_syn_thought_r)
+masterdf$cbcl_scr_syn_withdep_r=as.numeric(masterdf$cbcl_scr_syn_withdep_r)
+masterdf$cbcl_scr_syn_social_r=as.numeric(masterdf$cbcl_scr_syn_social_r)
+masterdf$cbcl_scr_syn_attention_r=as.numeric(masterdf$cbcl_scr_syn_attention_r)
+masterdf$cbcl_scr_syn_rulebreak_r=as.numeric(masterdf$cbcl_scr_syn_rulebreak_r)
+masterdf$cbcl_scr_syn_aggressive_r=as.numeric(masterdf$cbcl_scr_syn_aggressive_r)
+# AIC to confirm spline use
+# p factor
+pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4),data=masterdf)
+pgAgeL<-bam(g~cbcl_scr_syn_totprob_r+s(interview_age,k=4),data=masterdf)
+AIC(pgAge)
+AIC(pgAgeL)
+# confirm linear is higher AIC than nonlin
+paste('p nonlin:',AIC(pgAge)<AIC(pgAgeL))
+# internalizing
+intAge<-bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4),data=masterdf)
+intAgeL<-bam(g~cbcl_scr_syn_internal_r+s(interview_age,k=4),data=masterdf)
+AIC(intAge)
+AIC(intAgeL)
+# confirm linear is higher AIC than nonlin
+paste('int nonlin:',AIC(intAge)<AIC(intAgeL))
+# externalizing
+extAge<-bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4),data=masterdf)
+extAgeL<-bam(g~cbcl_scr_syn_external_r+s(interview_age,k=4),data=masterdf)
+AIC(extAge)
+AIC(extAgeL)
+# confirm linear is higher AIC than nonlin
+paste('ext nonlin:',AIC(extAge)<AIC(extAgeL))
+# somatic
+somAge<-bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age,k=4),data=masterdf)
+somAgeL<-bam(g~cbcl_scr_syn_somatic_r+s(interview_age,k=4),data=masterdf)
+AIC(somAge)
+AIC(somAgeL)
+# confirm linear is higher AIC than nonlin
+paste('somatic nonlin:',AIC(somAge)<AIC(somAgeL))
+# attention
+attAge<-bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4),data=masterdf)
+attAgeL<-bam(g~cbcl_scr_syn_attention_r+s(interview_age,k=4),data=masterdf)
+AIC(attAge)
+AIC(attAgeL)
+# confirm linear is higher AIC than nonlin
+paste('attn. nonlin:',AIC(attAge)<AIC(attAgeL))
+# thought
+thoAge<-bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4),data=masterdf)
+thoAgeL<-bam(g~cbcl_scr_syn_thought_r+s(interview_age,k=4),data=masterdf)
+AIC(thoAge)
+AIC(thoAgeL)
+# confirm linear is higher AIC than nonlin
+paste('thought nonlin:',AIC(thoAge)<AIC(thoAgeL))
+# social
+socAge<-bam(g~s(cbcl_scr_syn_social_r,k=4)+s(interview_age,k=4),data=masterdf)
+socAgeL<-bam(g~cbcl_scr_syn_social_r+s(interview_age,k=4),data=masterdf)
+AIC(socAge)
+AIC(socAgeL)
+# confirm linear is higher AIC than nonlin
+paste('social nonlin:',AIC(socAge)<AIC(socAgeL))
+# anxious depression
+anxdepAge<-bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4),data=masterdf)
+anxdepAgeL<-bam(g~cbcl_scr_syn_anxdep_r+s(interview_age,k=4),data=masterdf)
+AIC(anxdepAge)
+AIC(anxdepAgeL)
+# confirm linear is higher AIC than nonlin
+paste('anx. dep. nonlin:',AIC(anxdepAge)<AIC(anxdepAgeL))
+# withdrawn depression
+withdepAge<-bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4),data=masterdf)
+withdepAgeL<-bam(g~cbcl_scr_syn_withdep_r+s(interview_age,k=4),data=masterdf)
+AIC(withdepAge)
+AIC(withdepAgeL)
+# confirm linear is higher AIC than nonlin
+paste('with. dep. nonlin:',AIC(withdepAge)<AIC(withdepAgeL))
+# rule breaking
+ruleAge<-bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4),data=masterdf)
+ruleAgeL<-bam(g~cbcl_scr_syn_rulebreak_r+s(interview_age,k=4),data=masterdf)
+AIC(ruleAge)
+AIC(ruleAgeL)
+# confirm linear is higher AIC than nonlin
+paste('rule breaking nonlin:',AIC(ruleAge)<AIC(ruleAgeL))
+# aggressive behavior
+aggAge<-bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4),data=masterdf)
+aggAgeL<-bam(g~cbcl_scr_syn_aggressive_r+s(interview_age,k=4),data=masterdf)
+AIC(aggAge)
+AIC(aggAgeL)
+# confirm linear is higher AIC than nonlin
+paste('aggr. nonlin:',AIC(aggAge)<AIC(aggAgeL))
+```
 
+```{r}
 # pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
 # https://onlinelibrary.wiley.com/doi/epdf/10.1002/mrdd.20071
 # https://aseba.org/wp-content/uploads/2019/02/cbclprofile.pdf
@@ -593,19 +685,19 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 ```
 
 ```{r}
-# for each bootstrap, recover median slope in bottom and top Thirds
+# for each bootstrap, recover median slope from subclinical and clinical
 df <- data.frame(
-  p = apply(PFits[, 1:(MaxP/3)], 1, median),
-  Internal = apply(IFits[, 1:(MaxI/3)], 1, median),
-  External = apply(EFits[, 1:(MaxE/3)], 1, median),
-  Somatic = apply(SomFits[, 1:(MaxSom/3)], 1, median),
-  AnxDepr = apply(AnxFits[, 1:(MaxAnx/3)], 1, median),
-  Thought = apply(ThoFits[, 1:(MaxTho/3)], 1, median),
-  WithDepr = apply(WitFits[, 1:(MaxWit/3)], 1, median),
-  Social = apply(SocFits[, 1:(MaxSoc/3)], 1, median),
-  Attn = apply(AttFits[, 1:(MaxAtt/3)], 1, median),
-  Rules = apply(RulFits[, 1:(MaxRul/3)], 1, median),
-  Aggr = apply(AggFits[, 1:(MaxAgg/3)], 1, median)
+  p = apply(PFits[, 1:round(Pbc+1)], 1, median),
+  Internal = apply(IFits[, 1:round(Ibc+1)], 1, median),
+  External = apply(EFits[, 1:round(Ebc+1)], 1, median),
+  Somatic = apply(SomFits[, 1:round(SomBc+1)], 1, median),
+  AnxDepr = apply(AnxFits[, 1:round(AnxBc+1)], 1, median),
+  Thought = apply(ThoFits[, 1:round(ThoBc+1)], 1, median),
+  WithDepr = apply(WitFits[, 1:round(WitBc+1)], 1, median),
+  Social = apply(SocFits[, 1:round(SocBc+1)], 1, median),
+  Attn = apply(AttFits[, 1:round(AttBc+1)], 1, median),
+  Rules = apply(RulFits[, 1:round(RulBc+1)], 1, median),
+  Aggr = apply(AggFits[, 1:round(AggBc+1)], 1, median)
 )
 
 # Convert the data frame to a tidy format
@@ -622,10 +714,10 @@ df_tidy_1st3rd <- left_join(df_tidy, df_median, by = "Subscale")
 
 df_tidy_1st3rd$Subscale <- reorder(df_tidy_1st3rd$Subscale, -df_tidy_1st3rd$MedianValue, median)
 
-# Create the boxplot - saved at 1300 x 800
+# Create the boxplot - saved at 1300 x 860
 ggplot(df_tidy_1st3rd, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
   geom_boxplot() +
-  labs(title = "Median Association with Cognitive Score: Healthy Third",
+  labs(title = "Median Association with Cognitive Score: Subclinical",
        x = "Subscale",
        y = "Median Slope") +
   theme_minimal(base_size=23)+scale_fill_gradientn(
@@ -638,17 +730,17 @@ ggplot(df_tidy_1st3rd, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) 
 # and now a clinical risk group
 # only in clinical range
 df <- data.frame(
-  p = apply(PFits[, (MaxP/1.5):MaxP], 1, median),
-  Internal = apply(IFits[, (MaxI/1.5):MaxI], 1, median),
-  External = apply(EFits[, (MaxE/1.5):MaxE], 1, median),
-  Somatic = apply(SomFits[, (MaxSom/1.5):MaxSom], 1, median),
-  AnxDepr = apply(AnxFits[, (MaxAnx/1.5):MaxAnx], 1, median),
-  Thought = apply(ThoFits[, (MaxTho/1.5):MaxTho], 1, median),
-  WithDepr = apply(WitFits[, (MaxWit/1.5):MaxWit], 1, median),
-  Social = apply(SocFits[, (MaxSoc/1.5):MaxSoc], 1, median),
-  Attn = apply(AttFits[, (MaxAtt/1.5):MaxAtt], 1, median),
-  Rules = apply(RulFits[, (MaxRul/1.5):MaxRul], 1, median),
-  Aggr = apply(AggFits[, (MaxAgg/1.5):MaxAgg], 1, median)
+  p = apply(PFits[, (Pc+1):MaxP], 1, median),
+  Internal = apply(IFits[, (Ic+1):MaxI], 1, median),
+  External = apply(EFits[, (Ec+1):MaxE], 1, median),
+  Somatic = apply(SomFits[, (SomC+1):MaxSom], 1, median),
+  AnxDepr = apply(AnxFits[, (AnxC+1):MaxAnx], 1, median),
+  Thought = apply(ThoFits[, (ThoC+1):MaxTho], 1, median),
+  WithDepr = apply(WitFits[, (WitC+1):MaxWit], 1, median),
+  Social = apply(SocFits[, (SocC+1):MaxSoc], 1, median),
+  Attn = apply(AttFits[, (AttC+1):MaxAtt], 1, median),
+  Rules = apply(RulFits[, (RulC+1):MaxRul], 1, median),
+  Aggr = apply(AggFits[, (AggC+1):MaxAgg], 1, median)
 )
 
 # Convert the data frame to a tidy format
@@ -672,14 +764,14 @@ df_tidy_3rd3rd$third<-'Last'
 
 df_tidy_merged<-rbind(df_tidy_1st3rd,df_tidy_3rd3rd)
 # Create the boxplot - healthy and unhealthy third
-ggplot(df_tidy_merged, aes(x = Subscale, y = MedianValue,fill=MedianIteration,outlier.shape=third)) +
+ggplot(df_tidy_merged, aes(x= Subscale, y = MedianValue,fill=MedianIteration,outlier.shape=third)) +
     geom_boxplot(position = position_dodge(0.6),outlier.alpha = .1) +
-    labs(title = "Median Association with Cognitive Score",
+    labs(title = "Cognitive association in subclinical (left) and clinical (right) ranges",
          x = "Subscale",
          y = "Median Slope") +
     theme_minimal(base_size=23)+scale_fill_gradientn(
         colors = my_palette(100),
-        limits = c(-.1,.1))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.24,.13))
+        limits = c(-.1,.1))+guides(fill=F)+theme(axis.text.x = element_text(angle = 35, hjust = 1),panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.24,.13))
 ```
 
 ```{r}
