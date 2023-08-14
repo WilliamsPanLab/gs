@@ -18,7 +18,7 @@ dim(masterdf)
 subjs=unique(masterdf$subjectkey)
 numSubjs=length(subjs)
 # cut df to just variables of interest to speed stuff up # add cbcl subscales
-masterdf=masterdf[,c('cbcl_scr_syn_totprob_r.y','cbcl_scr_syn_totprob_r.x','parentPcount.x','g.x','subjectkey','interview_age.x','sex.x','income.x','Grades.x','pc2.x','pc3.x')]
+masterdf=masterdf[,c('cbcl_scr_syn_totprob_r.y','cbcl_scr_syn_totprob_r.x','parentPcount.x','g.x','subjectkey','interview_age.x','sex.x','income.x','Grades.x')]
 # get length of df for later
 lenDF=dim(masterdf)[1]
 # will need to get full and reduced models for each boot, as well as a null distribution
