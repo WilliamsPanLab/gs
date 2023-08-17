@@ -6,7 +6,7 @@ These analyses take place over three scripts: sample construction (done already)
 
 ## Bootstrapping/computational steps (assuming sample construction is done)
 
-1. Port masterdf over to Sherlock with scp. Subsequent steps in Fig2_Boots_xSectional.R.
+1. Port masterdf over to Sherlock with scp. Subsequent steps in Fig1_Boots.R, which is called to be sbatched (slurm equiv. of SGE qsub) by [this script](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/sbatch_Fig1.sh)
 2. module load R/4.1 on sherlock and open R (terminal)
 3. Load needed master dataframe
 4. Glean number of subjects for bootstrapping purposes later
