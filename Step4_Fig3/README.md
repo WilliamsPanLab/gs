@@ -7,7 +7,7 @@ As prior, we'll take masterdf from the sample construction step and run 10,000 [
 ## Bootstrapping/computational steps using masterdf from sample construction
 
 1. Port masterdf over to Sherlock with scp. 
-2. module load R/4.1 on sherlock and open R (terminal). Subsequent steps in Fig3_Boots.R
+2. module load R/4.1 on sherlock and open R (terminal). Subsequent steps in Fig3_Boots.R, which is called to be "sbatched" (slurm equivalent to qsub on SGE) by [this script](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/sbatch_Fig3.sh)
 4. Load needed master dataframe
 5. Glean number of subjects for bootstrapping purposes later
 6. Convert all Child Behavioral Checklist scores of interest to numeric
