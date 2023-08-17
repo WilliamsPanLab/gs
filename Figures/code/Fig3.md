@@ -57,7 +57,7 @@ library(ggExtra)
 ```
 
 ``` r
-# set functions
+# set functions: note that functions are set for 10k bootstrap iterations!
 plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Clinical) {
   # Melt the data frame
   data_melt <- melt(t(data))
@@ -671,4 +671,86 @@ model <- '
 efit <- sem(model, data = tpdf)
 ```
 
-\`\`\`
+``` r
+# AIC of deviance in p explained by variables of interest: cross-sectional
+gmod=bam(cbcl_scr_syn_totprob_r~s(g,k=4),data=masterdf,family=nb())
+# deviance explained by Grades
+GradesMod=bam(cbcl_scr_syn_totprob_r~s(g,k=4)+Grades,data=masterdf,family=nb())
+# deviance explained by g and parentPcount
+gparentPMod=bam(cbcl_scr_syn_totprob_r~s(g,k=4)+s(parentPcount,k=4),data=masterdf,family=nb())
+# deviance explained by parentPcount and Grades
+GradesparentPMod=bam(cbcl_scr_syn_totprob_r~s(parentPcount,k=4)+Grades,data=masterdf,family=nb())
+AIC(gmod)
+```
+
+    ## [1] 73839.02
+
+``` r
+AIC(GradesMod)
+```
+
+    ## [1] 73215.33
+
+``` r
+AIC(gparentPMod)
+```
+
+    ## [1] 70125.89
+
+``` r
+AIC(GradesparentPMod)
+```
+
+    ## [1] 69531.53
+
+``` r
+# deviance explained in timepoint 2 p
+masterdf=readRDS('~/OutDFTmpPrec.rds')
+# cut df to just variables of interest to speed stuff up # add cbcl subscales
+masterdf=masterdf[,c('cbcl_scr_syn_totprob_r.y','cbcl_scr_syn_totprob_r.x','parentPcount.x','g.x','subjectkey','interview_age.x','sex.x','income.x','Grades.x')]
+# convert cbcl scores to numeric
+masterdf$cbcl_scr_syn_totprob_r.x=as.numeric(masterdf$cbcl_scr_syn_totprob_r.x)
+masterdf$cbcl_scr_syn_totprob_r.y=as.numeric(masterdf$cbcl_scr_syn_totprob_r.y)
+# convert parentPcount to numeric
+masterdf$parentPcount.x=as.numeric(masterdf$parentPcount.x)
+
+# construct models
+pmod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x,k=4),data=masterdf,family=nb())
+# deviance explained by timepoint 1 p and g
+gmod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x,k=4)+s(g.x,k=4),data=masterdf,family=nb())
+# deviance explained by timepoint 1 p and Grades
+GradesMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x,k=4)+Grades.x,data=masterdf,family=nb())
+# deviance explained by timepoint 1 p and parentPcount
+parentPMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x,k=4)+s(parentPcount.x,k=4),data=masterdf,family=nb())
+# deviance explained by timepoint 1 p and parentPcount and Grades
+GradesparentPMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x,k=4)+s(parentPcount.x,k=4)+Grades.x,data=masterdf,family=nb())
+
+# print AICs
+AIC(pmod)
+```
+
+    ## [1] 33577.95
+
+``` r
+AIC(gmod)
+```
+
+    ## [1] 33579.23
+
+``` r
+AIC(GradesMod)
+```
+
+    ## [1] 33579.71
+
+``` r
+AIC(gparentPMod)
+```
+
+    ## [1] 70125.89
+
+``` r
+AIC(GradesparentPMod)
+```
+
+    ## [1] 33520.14

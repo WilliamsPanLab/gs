@@ -19,7 +19,7 @@ library(ggExtra)
 ```
 
 ```{r}
-# set functions
+# set functions: note that functions are set for 10k bootstrap iterations!
 plot_bootstraps <- function(data,maxval,Name,maxValuePlot,BorderlineClinical,Clinical) {
   # Melt the data frame
   data_melt <- melt(t(data))
