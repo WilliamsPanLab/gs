@@ -122,7 +122,7 @@ masterdf$cbcl_scr_syn_social_r=as.numeric(masterdf$cbcl_scr_syn_social_r)
 masterdf$cbcl_scr_syn_attention_r=as.numeric(masterdf$cbcl_scr_syn_attention_r)
 masterdf$cbcl_scr_syn_rulebreak_r=as.numeric(masterdf$cbcl_scr_syn_rulebreak_r)
 masterdf$cbcl_scr_syn_aggressive_r=as.numeric(masterdf$cbcl_scr_syn_aggressive_r)
-# AIC to confirm spline use
+# AIC to confirm nonlinearities 
 # p factor
 pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4),data=masterdf)
 pgAgeL<-bam(g~cbcl_scr_syn_totprob_r+s(interview_age,k=4),data=masterdf)
@@ -295,6 +295,65 @@ ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bin
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
     scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))
 ```
+
+```{r}
+library(ggplot2)
+library(gganimate)
+library(dplyr)
+
+# Calculate percentiles and create a new column for grouping
+percentile_df <- plotdf %>%
+  mutate(percentile_group = cut_interval(cbcl_scr_syn_totprob_r, n = 4, labels = FALSE))
+
+# Calculate beta values for each percentile group
+corr_values <- list()
+for (pg in unique(percentile_df$percentile_group)) {
+  data = percentile_df %>% filter(percentile_group == pg)
+  lm_model <- cor.test(data$resids,data$cbcl_scr_syn_totprob_r)
+  corr_values[[as.character(pg)]] <- lm_model[4]
+}
+
+# Create a data frame for beta annotation
+beta_df <- data.frame(percentile_group = unique(percentile_df$percentile_group),
+                      beta = unlist(corr_values))
+
+# Create the animated plot
+animated_plot <- ggplot(percentile_df, aes(x = cbcl_scr_syn_totprob_r, y = resids)) +
+  geom_hex(bins = 60) +
+  geom_point(alpha = 0) +
+  geom_smooth(method = "lm", formula = y ~ x, color = '#e8e6e6', size = 2) +
+  scale_fill_viridis_c(option = "inferno") +
+  ylim(c(-3.9, 4.7)) +
+  theme_minimal(base_size = 35) +
+  ylab('General Cognition') + xlab('General Psychopathology') +
+  geom_vline(xintercept = Pbc, linetype = "dashed") +
+  geom_vline(xintercept = Pc, linetype = "dashed") +
+  theme(legend.position = "bottom", panel.border = element_rect(color = "black", fill = NA, size = 1),
+        legend.margin = margin(-25, 0, 0, 0, "pt"), legend.key.width = unit(2.5, "cm")) +
+  scale_x_continuous(limits = c(0, 110), expand = expansion(mult = c(0, 0))) +
+  transition_states(percentile_group, transition_length = 2) +
+  enter_fade() +
+  exit_fade()
+
+# Create the animation with corr annotation
+animated_plot <- animated_plot +
+  theme(plot.title = element_text(size = 12)) +
+  geom_text(data = beta_df,
+            aes(x = 80, y = 4, label = sprintf("Corr = %.2f", beta)),
+            size = 6, color = "black")
+
+# Save the animation as a GIF
+anim_save(
+  filename = "gp_corr.gif",
+  animation = animated_plot,
+  width = 520,  # Set the desired width in pixels
+  height = 520,  # Set the desired height in pixels
+  renderer = gifski_renderer()
+)
+
+
+```
+
 ```{r}
 ### P boots plot with overlaid linear fit
 # load in data
@@ -764,14 +823,15 @@ df_tidy_3rd3rd$third<-'Last'
 
 df_tidy_merged<-rbind(df_tidy_1st3rd,df_tidy_3rd3rd)
 # Create the boxplot - healthy and unhealthy third
+# 1300 x 750
 ggplot(df_tidy_merged, aes(x= Subscale, y = MedianValue,fill=MedianIteration,outlier.shape=third)) +
     geom_boxplot(position = position_dodge(0.6),outlier.alpha = .1) +
     labs(title = "Cognitive association in subclinical (left) and clinical (right) ranges",
          x = "Subscale",
          y = "Median Slope") +
-    theme_minimal(base_size=23)+scale_fill_gradientn(
+    theme_minimal(base_size=30)+scale_fill_gradientn(
         colors = my_palette(100),
-        limits = c(-.1,.1))+guides(fill=F)+theme(axis.text.x = element_text(angle = 35, hjust = 1),panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.24,.13))
+        limits = c(-.1,.1))+guides(fill=F)+theme(axis.text.x = element_text(angle = 35, hjust = 1),plot.title = element_text(size = 27),panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.225,.18))
 ```
 
 ```{r}

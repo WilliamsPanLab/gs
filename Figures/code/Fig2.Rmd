@@ -584,9 +584,6 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxAgg),expand = expansion(mult = c(0, 0)))
-
-
-
 ```
 
 
@@ -671,14 +668,15 @@ df_tidy2$third<-'Last'
 df_tidy_merged<-rbind(df_tidy,df_tidy2)
 
 # Create the boxplot
+# 1300x750
 ggplot(df_tidy_merged, aes(x = Subscale, y = MedianValue,fill=MedianIteration,outlier.shape=third)) +
     geom_boxplot(position = position_dodge(0.6),outlier.alpha = .1) +
-    labs(title = "Median Association with Cognitive Score",
+    labs(title = "Cognitive association in low (left) and high (right) ranges",
          x = "Subscale",
          y = "Median Slope") +
-    theme_minimal(base_size=23)+scale_fill_gradientn(
+    theme_minimal(base_size=30)+scale_fill_gradientn(
         colors = my_palette(100),
-        limits = c(-.1,.1))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.24,.13))
+        limits = c(-.1,.1))+guides(fill=F)+theme(axis.text.x = element_text(angle = 35, hjust = 1),plot.title = element_text(size = 26),panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.225,.18))
 ```
 
 ```{r}

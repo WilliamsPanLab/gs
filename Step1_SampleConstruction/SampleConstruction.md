@@ -514,9 +514,6 @@ Yextended$g<-y.pca$scores[,1]
 
 # merge in cog data
 masterdf$g<-Yextended$g
-
-# removal of one participant more than 3 S.D. from every other participant
-masterdf=masterdf[masterdf$g>-7.5,]
 ```
 
 ``` r
@@ -809,3 +806,87 @@ print(dim(OutDFTmpPrec))
 # save it out
 saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec.rds')
 ```
+
+``` r
+# basic t-test for boys vs. girls: baseline
+bBV=subset(df1,sex=="M")
+gBV=subset(df1,sex=="F")
+t.test(bBV$cbcl_scr_syn_totprob_r,gBV$cbcl_scr_syn_totprob_r)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  bBV$cbcl_scr_syn_totprob_r and gBV$cbcl_scr_syn_totprob_r
+    ## t = 7.1696, df = 4762.6, p-value = 8.681e-13
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  2.566046 4.497530
+    ## sample estimates:
+    ## mean of x mean of y 
+    ##  19.45597  15.92418
+
+``` r
+# basic t-test for boys vs. girls: 2-years
+b2=subset(df2,sex=="M")
+g2=subset(df2,sex=="F")
+t.test(b2$cbcl_scr_syn_totprob_r,g2$cbcl_scr_syn_totprob_r)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  b2$cbcl_scr_syn_totprob_r and g2$cbcl_scr_syn_totprob_r
+    ## t = 5.6814, df = 4779.4, p-value = 1.415e-08
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  1.763247 3.621259
+    ## sample estimates:
+    ## mean of x mean of y 
+    ##  17.62646  14.93420
+
+``` r
+# and by poverty status # new subsetting
+masterdf$poverty=0
+masterdf$income<-as.numeric(masterdf$income)
+# note that poverty is defined as income < 5: https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups
+masterdf$poverty[masterdf$income<5]=1
+masterdf$poverty=as.ordered(masterdf$poverty)
+df1=masterdf[masterdf$eventname=='baseline_year_1_arm_1',]
+df2=masterdf[masterdf$eventname=='2_year_follow_up_y_arm_1',]
+# now divide
+pBV=subset(df1,poverty==1)
+npBV=subset(df1,poverty==0)
+t.test(pBV$cbcl_scr_syn_totprob_r,npBV$cbcl_scr_syn_totprob_r)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  pBV$cbcl_scr_syn_totprob_r and npBV$cbcl_scr_syn_totprob_r
+    ## t = 5.3176, df = 723.47, p-value = 1.403e-07
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  3.047795 6.615467
+    ## sample estimates:
+    ## mean of x mean of y 
+    ##  21.96921  17.13758
+
+``` r
+# basic t-test for boys vs. girls: 2-years
+p2=subset(df2,poverty==1)
+np2=subset(df2,poverty==0)
+t.test(p2$cbcl_scr_syn_totprob_r,np2$cbcl_scr_syn_totprob_r)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  p2$cbcl_scr_syn_totprob_r and np2$cbcl_scr_syn_totprob_r
+    ## t = 4.4975, df = 718.63, p-value = 8.014e-06
+    ## alternative hypothesis: true difference in means is not equal to 0
+    ## 95 percent confidence interval:
+    ##  2.242508 5.717012
+    ## sample estimates:
+    ## mean of x mean of y 
+    ##  19.80065  15.82089

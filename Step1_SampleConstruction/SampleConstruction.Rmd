@@ -400,9 +400,6 @@ Yextended$g<-y.pca$scores[,1]
 
 # merge in cog data
 masterdf$g<-Yextended$g
-
-# removal of one participant more than 3 S.D. from every other participant
-masterdf=masterdf[masterdf$g>-7.5,]
 ```
 
 ```{r}
@@ -578,6 +575,9 @@ subjectsInPtsv=participantsTSV$subjectkey
 infoDf=data.frame(raceEth,subjectsInPtsv)
 colnames(infoDf)<-c('RaceEthn','subj')
 plotdf2=merge(plotdf,infoDf,by='subj')
+
+# remove participants tsv stratum, as the depicted stratum are predicated on participants tsv data being present
+plotdf2=plotdf2[plotdf2$variable!='pTSV',]
 # overwrite race with "empty" if missing after each checkpoint
 plotdf2$RaceEthn<-factor(plotdf2$RaceEthn,levels=c(1,2,3,4,5,6),labels=c("White","Black","Hispanic","Asian","Other","Missing"))
 plotdf2$RaceEthn[plotdf2$value==0]="Missing"
@@ -587,7 +587,7 @@ alph_order <- c("Asian", "Black", "Hispanic", "Missing", "Other", "White")
 my_colors <- c("red", "orange", "blue", "gray", "green","yellow")
 
 # preset x-axis names
-x_labs=c("CBCL", "CBCL (both timepoints)","Grades (both)","ASR (both)","ACS","Cognitive data (both)","One sibling per family","ABCC")
+x_labs=c("CBCL", "CBCL (both timepoints)","Grades (both)","ASR (both)","ACS","Cognitive data (both)","One sibling per family")
 
 #
 ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +

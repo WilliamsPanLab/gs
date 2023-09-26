@@ -366,7 +366,11 @@ ggplot(boysPoor, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
 ``` r
 # deviance explained plots
 DevExpl=readRDS('~/Desktop/g_p/F3-5DevExpl.rds')
+# filter to just children
+DevExpl=DevExpl[,1:2]
 DevExpl_L=readRDS('~/Desktop/g_p/F3-5DevExpl_longit.rds')
+# filter to just children
+DevExpl_L=DevExpl_L[,1:3]
 # extract deviance explained above-any-beyond dev expl py timepoint 1 p
 DevExpl_L_Relative=DevExpl_L-DevExpl_L[,1]
 
@@ -376,7 +380,7 @@ df_long <- reshape2::melt(DevExpl)
     ## No id variables; using all as measure variables
 
 ``` r
-custom_labels <- c(expression(italic(g)), "Grades", expression(paste(italic(g), " + Parental ", italic("p"))),expression(paste("Grades + Parental ", italic("p"))))
+custom_labels <- c(expression(italic(g)), "Grades")
 # Create the boxplot - 1350 x 800 dimensions
 ggplot(df_long, aes(x = variable, y = value)) +
   geom_boxplot(outlier.alpha = 0.1) +
@@ -385,14 +389,14 @@ ggplot(df_long, aes(x = variable, y = value)) +
   ylab("Cross-sectional Deviance Explained") + theme_minimal(base_size=26)
 ```
 
-    ## Warning: Removed 4 rows containing non-finite values (`stat_boxplot()`).
+    ## Warning: Removed 3 rows containing non-finite values (`stat_boxplot()`).
 
 ![](Fig3_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 # now for longitudinal variables
-custom_labels <- c(expression(italic(g)), "Grades", expression(paste(italic(g), " + Parental ", italic("p"))),expression(paste("Grades + Parental ", italic("p"))))
-df_long <- reshape2::melt(DevExpl_L_Relative[,2:5])
+custom_labels <- c(expression(italic(g)), "Grades")
+df_long <- reshape2::melt(DevExpl_L_Relative[,2:3])
 ```
 
     ## No id variables; using all as measure variables
@@ -406,7 +410,7 @@ ggplot(df_long, aes(x = variable, y = value)) +
   ylab("Longitudinal Deviance Explained") + theme_minimal(base_size=26)
 ```
 
-    ## Warning: Removed 3 rows containing non-finite values (`stat_boxplot()`).
+    ## Warning: Removed 1 rows containing non-finite values (`stat_boxplot()`).
 
 ![](Fig3_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
