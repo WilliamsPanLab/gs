@@ -1,1 +1,1 @@
-Please note you will need to install all R libraries (install.packages()) utilized prior to loading them (library()).
+Please note you will need to install all R libraries (install.packages()) utilized prior to loading them (library()). Also note that Figure 2 is contained with code denoted by figure *3* in this repository. Filenames will be resolved when versioning is.
