@@ -1,4 +1,4 @@
-# Figure 3: Demographic and scholastic analyses
+# Figure 2: Demographic and scholastic analyses
 
 Here, the goal is to submit 10k iteration of non-linear firts of g to p on sherlock for boys and girls above and below the federal poverty line. That script [is here](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/Fig3_Boots.R). We'll also run some bootstrap iterations on scholastic data to determine relative deviance explained (relative to g). The cross-sectional script for deviance explained is [here](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/DevExplBoots.R), and the longitudinal one measuring deviance epxlained in timepoint 2 is [here](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/DevExplBoots_longit.R). 
 
