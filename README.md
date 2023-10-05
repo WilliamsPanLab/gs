@@ -4,7 +4,5 @@ This is the main page hosting the code repository and replication guide for "The
 
 [Step 2](https://github.com/WilliamsPanLab/gp/tree/master/Step2_Fig1) corresponds to figure 1, and executes bootstrap iterations to reveal the linear and non-linear relationship between *g* and *p*, as well as more granular psychopathology scores. 
 
-[Step 3](https://github.com/WilliamsPanLab/gp/tree/master/Step3_Fig2) corresponds to figure 2, and executes bootstraps for parental mental health and child g factor scores.
-
-[Step 4](https://github.com/WilliamsPanLab/gp/tree/master/Step4_Fig3) corresponds to figure 3, and executes bootstraps to interrogate demographic effects (sex and poverty in *g*~*p*)
+[Step 3](https://github.com/WilliamsPanLab/gp/tree/master/Step4_Fig3) corresponds to figure 2, and executes bootstraps to interrogate demographic effects (sex and poverty in *g*~*p*)
 
