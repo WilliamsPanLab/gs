@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=Fig1Fin
+#SBATCH --job-name=DevExplainedBoots
 #SBATCH --time=7-00:00:00
 #SBATCH -p leanew1  # Queue names you can submit to
 #SBATCH -n 1
@@ -10,5 +10,4 @@
 #SBATCH --mail-type=ALL
 # ------------------------------------------
 module load R/4.1
-
-Rscript Fig1_Boots_Poly.R
+Rscript DevExpl_PvC_1k.R  

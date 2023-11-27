@@ -12,7 +12,7 @@ library(visreg)
 library(ggExtra)
 
 get_derivs <- function(fit) {
-  derivative_arr=zeros(1,length(fit)-1)
+  derivative_arr=rep(0,length(fit)-1)
   # Calculate the derivative for each column
   for (i in 1:(length(fit) - 1)) {
     # Calculate the differences in x (assuming a constant difference)

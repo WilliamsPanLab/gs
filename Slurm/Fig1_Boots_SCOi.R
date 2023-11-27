@@ -23,7 +23,7 @@ masterdf$cbcl_scr_syn_internal_r=as.numeric(masterdf$cbcl_scr_syn_internal_r)
 # initialize output betas
 pBeta=rep(0,1000)
 # loop over manual bootstrap
-for (b in 1:50){
+for (b in 1:1000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
