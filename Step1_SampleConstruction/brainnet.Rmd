@@ -1,0 +1,359 @@
+---
+title: "Ispot"
+output: html_document
+date: "2023-06-05"
+---
+
+```{r}
+library(mice)
+library(ggplot2)
+library(mgcv)
+
+# load in data
+data=read.csv('~/Downloads/PanLabMergedDatabase-MergedCogPsych_DATA_2023-11-28_1501.csv')
+
+# remove columns with absolutely nothing
+naCols=colSums(is.na(data))
+emptyIndex=(naCols==dim(data)[1])
+data=data[,!emptyIndex]
+
+### sep. out integneuro
+ig_feats=grep(pattern = 'in_', names(data), value = T)
+# remove norm features
+ig_feats <- ig_feats[!grepl(pattern = 'norm', ig_feats)]
+
+# remove integneuro variables that don't make sense to include
+# nonCog
+ig_feats=ig_feats[!(ig_feats %in% c('in_date','in_getstsd','in_gettrtd','in_gngsdrt','in_lhsdp','in_oddsdrt','in_rhsdp','in_swoadut1','in_t_prbias','in_t_sdprop','in_tapdomn','in_tapdomsd','in_tapndmsd','in_wmsd'))]
+# no label
+ig_feats=ig_feats[!(ig_feats %in% c('in_cdsgcna','in_cdsgcnd','in_cdsgcnf','in_cdsgcnh','in_cdsgcns','in_cdsgcrta','in_cdsgcrtd','in_cdsgcrtf','in_cdsgcrth','in_cdsgcrtn','in_cdsgcrts','in_getcrta','in_getcrtd','in_getcrtf','in_getcrth','in_getcrtn','in_getcrts','in_scavr0t1','in_swoaert1','in_vcnne','in_vcnne2'))]
+# redundant
+ig_feats=ig_feats[!(ig_feats %in% c('in_mem1in5','in_mem5in6','in_mem5in7','in_memotb5','in_memotb6','in_memotb7','in_memrec1','in_memrec2','in_memrec3','in_memrec4','in_memrec5','in_memrec6','in_memrec7','in_swoadur1'))]
+# add id to feats to keep track
+ig_feats=c(ig_feats,'id')
+# Find rows with at least 80% of integneuro variables populated
+ig_peeps<- data[rowSums(!is.na(data[, ig_feats])) >= 0.8 * length(ig_feats), ]
+
+# Find columns with at least 80% of values populated
+ig_feats <- ig_feats[colMeans(!is.na(ig_peeps[, ig_feats])) >= 0.8]
+
+# Remove unpopulated variables from the data
+ig_peeps <- ig_peeps[, ig_feats]
+
+# save ids
+i_ids=ig_peeps$id
+
+# remove IDs for imputing
+ig_peeps <- ig_peeps[, -which(names(ig_peeps) == 'id')]
+
+# Perform imputation using mice package
+Integ_imputed_data <- mice(ig_peeps,method='rf')
+
+# create completed df
+completed_datai <- complete(Integ_imputed_data, 1) 
+# temp df for merging back
+temp=data.frame(i_ids)
+colnames(temp)='id'
+
+# Perform PCA on the imputed data
+pca_result <- prcomp(completed_datai,scale=T)
+# plop back into df
+g=pca_result$x[,1]
+hist(g)
+sort(pca_result$rotation[,1])
+temp$g<-g
+# flip g so high scores is good ef
+temp$g=-temp$g
+# merge back into df
+in_data=merge(data,temp,by='id')
+hist(in_data$dass42_dep_score)
+```
+
+```{r}
+# Extract the proportion of variance explained by each principal component
+explained_variance_ratio <- pca_result$sdev^2 / sum(pca_result$sdev^2)
+# Create a data frame with the explained variance ratio
+explained_variance_df <- data.frame(
+  PC = factor(1:length(explained_variance_ratio)),
+  ExplainedVarianceRatio = explained_variance_ratio
+)
+# Create a scree plot
+scree_plot <- ggplot(explained_variance_df, aes(x = PC, y = ExplainedVarianceRatio)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  labs(title = "Scree Plot",
+       x = "Principal Component",
+       y = "Proportion of Variance Explained")
+# Display the scree plot
+print(scree_plot)
+
+```
+
+```{r}
+### sep. out webneuro
+wg_feats=grep(pattern = 'wn_', names(data), value = T)
+# remove norm features
+wg_feats <- wg_feats[!grepl(pattern = 'norm', wg_feats)]
+
+# remove integneuro variables that don't make sense to include
+# nonCog
+wg_feats=wg_feats[!(wg_feats %in% c('wn_date','wn_dgtstsd','wn_gettrtd','wn_gngsdrt','wn_lhsdp','wn_oddsdrt','wn_rhsdp','wn_swoadut1','wn_t_prbias','wn_t_sdprop','wn_tapdomn','wn_tapdomsd','wn_tapndmsd','wn_wmsd','wn_g2sdrtk','wn_getstsd','wn_gettsdd','wn_gettsdf','wn_gettsdh','wn_gettsdn','wn_gettsds','wn_tdomsdk'))]
+
+# no label
+wg_feats=wg_feats[!(wg_feats %in% c('wn_dgtcna','wn_dgtcnd','wn_dgtcnf','wn_dgtcnh','wn_dgtcns','wn_cdsgcrta','wn_cdsgcrtd','wn_cdsgcrtf','wn_cdsgcrth','wn_cdsgcrtn','wn_cdsgcrts','wn_getcrta','wn_getcrtd','wn_getcrtf','wn_getcrth','wn_getcrtn','wn_getcrts','wn_scavr0t1','wn_swoaert1','wn_vcnne','wn_vcnne2','wn_dgttsdd','wn_getnumaa','wn_getnumad','wn_getnumaf','wn_getnumah','wn_getnuman','wn_getnumas','"wn_getnumda','wn_getnumdd','wn_getnumdf','wn_getnumdh','wn_getnumdn','wn_getnumds','wn_getnumfa','wn_getnumfd','wn_getnumff','wn_getnumfh','wn_getnumfn','wn_getnumfs','wn_getnumha','wn_getnumhd','wn_getnumhf','wn_getnumhh','wn_getnumhn','wn_getnumhs','wn_getnumna','wn_getnumnd','wn_getnumnf','wn_getnumnh','wn_getnumnn','wn_getnumns','wn_getnumsa','wn_getnumsd','wn_getnumsf','wn_getnumsh','wn_getnumsn','wn_getnumss'))]
+
+# redundant - note some unexpected redundant items at end after swoadur1
+wg_feats=wg_feats[!(wg_feats %in% c('wn_ctmerr1','wn_ctmerr2','wn_ctmerr3','wn_ctmerr4','wn_ctmrec1','wn_ctmrec2','wn_ctmrec3','wn_ctmrec4','wn_memrec3','wn_memrec4','wn_memrec5','wn_memrec6','wn_memrec7','wn_swoadur1','wn_emzinitk'))]
+
+# add id to feats to keep track
+wg_feats=c(wg_feats,'id')
+# convert all is.empty to is.na
+data[which(wg_feats == ""),] <- NA
+# Find rows with at least 80% of integneuro variables populated
+wg_peeps<- data[rowSums(!is.na(data[, wg_feats])) >= 0.8 * length(wg_feats), ]
+
+# Find columns with at least 80% of values populated
+wg_feats <- wg_feats[colMeans(!is.na(wg_peeps[, wg_feats])) >= 0.8]
+
+# Remove unpopulated variables from the data
+wg_peeps <- wg_peeps[, wg_feats]
+
+# save ids
+w_ids=wg_peeps$id
+
+# remove IDs for imputing
+wg_peeps <- wg_peeps[, -which(names(wg_peeps) == 'id')]
+# Perform imputation using mice package
+WebN_imputed_data <- mice(wg_peeps,method="rf")
+
+# create completed df
+completed_data <- complete(WebN_imputed_data, 1) 
+# residual na
+a=rowSums(is.na(completed_data))
+completerows <- which(a == 0)
+completed_dataw=completed_data[completerows,]
+# make sure to also correct ids
+w_ids=w_ids[completerows]
+# temp df for merging back
+temp=data.frame(w_ids)
+colnames(temp)='id'
+
+# Perform PCA on the imputed data
+pca_result <- prcomp(completed_dataw,scale=T)
+# plop back into df
+g=pca_result$x[,1]
+hist(g)
+sort(pca_result$rotation[,1])
+temp$g<-g
+# flip g so high scores is good ef
+temp$g=-temp$g
+# merge back into df
+wn_data=merge(data,temp,by='id')
+hist(wn_data$dass42_dep_score)
+
+```
+
+```{r}
+# try pca on integrated
+completed_datai$id=i_ids
+completed_dataw$id=w_ids
+completed_datai$test='IN'
+completed_dataw$test='WN'
+
+colnames(completed_dataw) <- gsub("wn_", "in_", colnames(completed_dataw))
+
+# Find common column names
+common_cols <- intersect(colnames(completed_dataw), colnames(completed_datai))
+
+# Subset data frames using common column names
+subset_dataw <- completed_dataw[, common_cols]
+subset_datai <- completed_datai[, common_cols]
+
+newdf <- rbind(subset_dataw, subset_datai)
+newIds=newdf$id
+newTests=newdf$test
+newdf=newdf[,-which(names(newdf)=='id')]
+newdf=newdf[,-which(names(newdf)=='test')]
+
+pca_result <- prcomp(newdf,scale=T)
+g=pca_result$x[,1]
+hist(g)
+sort(pca_result$rotation[,1])
+
+temp=data.frame(newIds)
+colnames(temp)='id'
+temp$test=as.factor(newTests)
+temp$g<-g
+# flip g so high scores is good ef
+temp$g=-temp$g
+# merge back into df
+merged_data=merge(data,temp,by='id')
+
+
+
+```
+```{r}
+# Extract the proportion of variance explained by each principal component
+explained_variance_ratio <- pca_result$sdev^2 / sum(pca_result$sdev^2)
+# Create a data frame with the explained variance ratio
+explained_variance_df <- data.frame(
+  PC = factor(1:length(explained_variance_ratio)),
+  ExplainedVarianceRatio = explained_variance_ratio
+)
+# Create a scree plot
+scree_plot <- ggplot(explained_variance_df, aes(x = PC, y = ExplainedVarianceRatio)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  labs(title = "Scree Plot",
+       x = "Principal Component",
+       y = "Proportion of Variance Explained")
+# Display the scree plot
+print(scree_plot)
+
+```
+
+```{r}
+model<-gam(g~s(dass42_anx_score,by=test)+s(age)+test,data=merged_data)
+plot(model, pages = 1)
+# get in years edu
+full=read.csv('~/Downloads/PanLabMergedDatabase-MergedCogPsych_DATA_2023-11-29_1528.csv')
+# extract edu
+edu=full$education_years
+eduIds=full$id
+edudf=data.frame(edu,eduIds)
+colnames(edudf)=c('edu','id')
+eduMerge=merge(merged_data,edudf,by='id')
+model<-gam(g~ti(dass42_anx_score,edu)+s(age)+test+edu,data=eduMerge)
+vis.gam(model, view = "s(dass42_anx_score):edu", plot.type = "persp")
+
+```
+
+```{r}
+# Assuming your GAM model is named 'model'
+model <- gam(g ~ s(dass42_str_score,k=4) + s(age), data = wn_data)
+
+a=derivatives(model,term='s(dass42_str_score)',partial_match = TRUE)
+
+# Create a new data frame with the values for which you want to calculate derivatives
+new_data <- data.frame(dass42_anx_score = seq(0,max(wn_data$dass42_anx_score)), age = mean(wn_data$age))
+
+# Predict the model on the new data
+predictions <- predict(model, newdata = new_data, type = "lpmatrix")
+
+# Extract the derivatives with respect to dass42_anx_score
+derivative_dass42_anx_score <- predictions[, grep("s(dass42_anx_score)", colnames(predictions))]
+
+# Print the derivatives
+print(derivative_dass42_anx_score)
+```
+
+```{r}
+#p_feats=c('qids_01', 'qids_02', 'qids_03', 'qids_04', 'qids_05', 'qids_06', 'qids_07', 'qids_08', 'qids_09', 'qids_10', 'qids_11', 'qids_12', 'qids_13', 'qids_14', 'qids_15', 'qids_16', 'hdrs21_01', 'hdrs21_02', 'hdrs21_03', 'hdrs21_04', 'hdrs21_05', 'hdrs21_06', 'hdrs21_07', 'hdrs21_08', 'hdrs21_09', 'hdrs21_10', 'hdrs21_11', 'hdrs21_12', 'hdrs21_13', 'hdrs21_14', 'hdrs21_15', 'hdrs21_16', 'hdrs21_17', 'hdrs21_18', 'hdrs21_19', 'hdrs21_20', 'hdrs21_21', 'dass42_01', 'dass42_02', 'dass42_03', 'dass42_04', 'dass42_05', 'dass42_06', 'dass42_07', 'dass42_08', 'dass42_09', 'dass42_10', 'dass42_11', 'dass42_12', 'dass42_13', 'dass42_14', 'dass42_15', 'dass42_16', 'dass42_17', 'dass42_18', 'dass42_19', 'dass42_20', 'dass42_21', 'dass42_22', 'dass42_23', 'dass42_24', 'dass42_25', 'dass42_26', 'dass42_27', 'dass42_28', 'dass42_29', 'dass42_30', 'dass42_31', 'dass42_32', 'dass42_33', 'dass42_34', 'dass42_35', 'dass42_36', 'dass42_37', 'dass42_38', 'dass42_39', 'dass42_40', 'dass42_41', 'dass42_42')
+g_feats=grep(pattern = '_norm', names(bl), value = T)
+
+### to impute
+# Filter out subjects with >80% of items present
+bl_filtered <- bl[rowSums(is.na(bl[p_feats]))/length(p_feats) <= 0.2, ]
+ids=bl_filtered$id
+# Perform imputation using mice package
+imputed_data <- mice(bl_filtered[, p_feats])
+#### PCA FOR p ####
+# Extract completed datasets
+completed_data <- imputed_data$data
+completed_data$id<-ids
+completed_data=na.omit(completed_data[, c('id', p_feats)])
+# temp df for merging back
+temp=data.frame(completed_data$id)
+colnames(temp)='id'
+# Perform PCA on the imputed data
+pca_result <- prcomp(completed_data[, p_feats])
+
+# Create a scree plot
+# Extract the proportion of variance explained by each principal component
+explained_variance_ratio <- pca_result$sdev^2 / sum(pca_result$sdev^2)
+# Create a data frame with the explained variance ratio
+explained_variance_df <- data.frame(
+  PC = factor(1:length(explained_variance_ratio)),
+  ExplainedVarianceRatio = explained_variance_ratio
+)
+# Create a scree plot
+scree_plot <- ggplot(explained_variance_df, aes(x = PC, y = ExplainedVarianceRatio)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  labs(title = "Scree Plot",
+       x = "Principal Component",
+       y = "Proportion of Variance Explained")
+# Display the scree plot
+print(scree_plot)
+
+```
+
+
+```{r}
+# Extract the loadings from the PCA result and map back to dataframe
+temp$p_pc1=pca_result$x[, 1]
+bl_filtered=merge(temp[, c('id','p_pc1')], bl_filtered, all = T)
+```
+
+```{r}
+#### PCA FOR g ####
+temp=na.omit(bl_filtered[, c('id', g_feats)])
+
+# Filter out subjects with >80% of items present
+bl_filtered2 <- bl_filtered[rowSums(is.na(bl_filtered[g_feats]))/length(g_feats) <= 0.2, ]
+ids=bl_filtered2$id
+# Perform imputation using mice package
+imputed_data <- mice(bl_filtered2[, g_feats])
+#### PCA FOR p ####
+# Extract completed datasets
+completed_data <- imputed_data$data
+completed_data$id<-ids
+completed_data=na.omit(completed_data[, c('id', g_feats)])
+# temp df for merging back
+temp=data.frame(completed_data$id)
+colnames(temp)='id'
+# Perform PCA on the imputed data
+pca_result <- prcomp(completed_data[, g_feats])
+
+# Create a scree plot
+# Extract the proportion of variance explained by each principal component
+explained_variance_ratio <- pca_result$sdev^2 / sum(pca_result$sdev^2)
+# Create a data frame with the explained variance ratio
+explained_variance_df <- data.frame(
+  PC = factor(1:length(explained_variance_ratio)),
+  ExplainedVarianceRatio = explained_variance_ratio
+)
+# Create a scree plot
+scree_plot <- ggplot(explained_variance_df, aes(x = PC, y = ExplainedVarianceRatio)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  labs(title = "Scree Plot",
+       x = "Principal Component",
+       y = "Proportion of Variance Explained")
+# Display the scree plot
+print(scree_plot)
+
+# Step 1: Extract the loadings from the PCA result and map back to dataframe
+temp$g_pc1=pca_result$x[, 1]
+bl_filtered3=merge(temp[, c('id','g_pc1')], bl_filtered2, all = T)
+bl_filtered4=bl_filtered3[bl_filtered3$mdd_current==0,]
+```
+
+```{r}
+# why is there huge age effect?
+model<-gam(g_pc1~s(p_pc1)+s(age),data=bl_filtered3)
+
+visreg(model,"q_pc1",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)
+get_derivs_and_plot(model,smooth_var="g_pc1")
+
+# now for each sex
+bl1<-bl[bl$gender==1,]
+model<-gam(b_pc1~s(q_pc1,k=4),data=bl1)
+get_derivs_and_plot(model,smooth_var="q_pc1")
+visreg(model,"q_pc1",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)
+
+bl2<-bl[bl$gender==2,]
+model<-gam(b_pc1~s(q_pc1,k=4),data=bl2)
+get_derivs_and_plot(model,smooth_var="q_pc1")
+visreg(model,"q_pc1",gg=TRUE,ylab="g",xlab="p",line.par=list(size=2,col='black'),alpha=0.05)+theme_minimal(base_size=25)
+```
