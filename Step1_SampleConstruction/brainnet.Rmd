@@ -150,8 +150,28 @@ temp$g=-temp$g
 # merge back into df
 wn_data=merge(data,temp,by='id')
 hist(wn_data$dass42_dep_score)
-
+model<-gam(g~s(dass42_anx_score)+s(age),data=in_data)
 ```
+
+```{r}
+# Extract the proportion of variance explained by each principal component
+explained_variance_ratio <- pca_result$sdev^2 / sum(pca_result$sdev^2)
+# Create a data frame with the explained variance ratio
+explained_variance_df <- data.frame(
+  PC = factor(1:length(explained_variance_ratio)),
+  ExplainedVarianceRatio = explained_variance_ratio
+)
+# Create a scree plot
+scree_plot <- ggplot(explained_variance_df, aes(x = PC, y = ExplainedVarianceRatio)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  labs(title = "Scree Plot",
+       x = "Principal Component",
+       y = "Proportion of Variance Explained")
+# Display the scree plot
+print(scree_plot)
+```
+
 
 ```{r}
 # try pca on integrated
@@ -209,6 +229,7 @@ scree_plot <- ggplot(explained_variance_df, aes(x = PC, y = ExplainedVarianceRat
        y = "Proportion of Variance Explained")
 # Display the scree plot
 print(scree_plot)
+
 
 ```
 

@@ -558,6 +558,177 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$pTSV=1
 print(paste0(newList6-participantsTSVSubjs,' participants lost after needing complete data in participantstsv'))
 paste0(participantsTSVSubjs,' remain')
 
+
+#### get more fine-grained demographics
+fg_demo=read.delim('~/Downloads/Package_1206931/abcd_lpds01.txt',sep="\t")
+# INR is Household Income : Poverty line for this # of people
+# convert Household income
+HouseholdIncome=as.factor(fg_demo$demo_comb_income_v2_l)
+# to be replaced with numerican "median" income
+fg_demo$HouseholdIncome=NULL
+# to be replace with number of household members
+fg_demo$NumPeeps=NULL
+# to be replaced with number of people-specific poverty line
+fg_demo$PL=NULL
+# to be replaced with INR
+fg_demo$INR=NULL
+
+# 1 is less than 5k
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==1]=median(c(0,5000))
+# 2 is 5-12k
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==2]=median(c(5000,11999))
+# 3 is 12-16k
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==3]=median(c(12000,15999))
+# 4 is 16-25k
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==4]=median(c(16000,24999))
+# 5 25-35 k
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==5]=median(c(25000,34999))
+# 6 35-50 k
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==6]=median(c(35000,49999))
+# 7 50-75 k
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==7]=median(c(50000,74999))
+# 8 75-100 k
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==8]=median(c(75000,99999))
+# 9 100-200 k
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==9]=median(c(100000,199999))
+# 10 > 200k: note 500k is top bound for median purposes
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==10]=median(c(200000,500000))
+# 999 idk
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==999]=NA
+# 777 refuse to answer
+fg_demo$HouseholdIncome[fg_demo$demo_comb_income_v2_l==777]=NA
+# convert number of people
+fg_demo$NumPeeps=as.numeric(fg_demo$demo_roster_v2_l)
+# Separate out income bins to match to their poverty line: https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines/prior-hhs-poverty-guidelines-federal-register-references/2017-poverty-guidelines
+# 12,060 for 1 (note 1 should not be included in analyses, indicates child does not live there)
+fg_demo$PL[fg_demo$NumPeeps==1]=12060
+# 16,240 for 2
+fg_demo$PL[fg_demo$NumPeeps==2]=16240
+# 20,420 for 3
+fg_demo$PL[fg_demo$NumPeeps==3]=20420
+# 24,600 for 4
+fg_demo$PL[fg_demo$NumPeeps==4]=24600
+# 28,780 for 5
+fg_demo$PL[fg_demo$NumPeeps==5]=28780
+# 32,960 for 6
+fg_demo$PL[fg_demo$NumPeeps==6]=32960
+# 37,140 for 7
+fg_demo$PL[fg_demo$NumPeeps==7]=37140
+# 41,320 for 8
+fg_demo$PL[fg_demo$NumPeeps==8]=41320
+# 41,320 + 4,180 for 9
+fg_demo$PL[fg_demo$NumPeeps==9]=45300
+# 41,320 + 2*(4,180) for 10
+fg_demo$PL[fg_demo$NumPeeps==10]=49480
+# 41,320 + 3*(4,180) for 11
+fg_demo$PL[fg_demo$NumPeeps==11]=53660
+# 41,320 + 4*(4,180) for 12
+fg_demo$PL[fg_demo$NumPeeps==12]=57840
+# 41,320 + 5*(4,180) for 13
+fg_demo$PL[fg_demo$NumPeeps==13]=62020
+# 41,320 + 6*(4,180) for 14
+fg_demo$PL[fg_demo$NumPeeps==14]=66200
+# 41,320 + 7*(4,180) for 15
+fg_demo$PL[fg_demo$NumPeeps==15]=70380
+# 41,320 + 8*(4,180) for 16
+fg_demo$PL[fg_demo$NumPeeps==16]=74560
+# INR is Household Income : Poverty line for this # of people
+fg_demo$INR=fg_demo$HouseholdIncome/fg_demo$PL
+
+# fix age for merge
+fg_demo$interview_age=as.numeric(fg_demo$interview_age)/12
+# merge back in
+masterdf=merge(masterdf,fg_demo,by=c('subjectkey','sex','interview_age','eventname'))
+
+# consider INR adjusted for local COL in supp.
+
+# new merge and count
+parentDemo_TSVSubjs=length(unique(masterdf$subjectkey))
+# add to included subjs DF
+includedSubjects$PD=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$PD=1
+
+print(paste0(participantsTSVSubjs-parentDemo_TSVSubjs,' participants lost after needing complete data in Parent demographics'))
+paste0(parentDemo_TSVSubjs,' remain')
+```
+
+```{r}
+# load in kid self-report
+youthReport=read.delim('~/Downloads/Package_1216656/abcd_ksad501.txt',sep="\t")
+
+# get all column names with "Symptom - " as start, filter for those
+SymptomColumns=colnames(youthReport)[grepl("Symptom - ",youthReport[1,])]
+# out of those columns, get those ending in "Present", filter for those
+SymptomPresentColumns=colnames(youthReport)[grepl("Present",youthReport[1,])]
+# get intersection of two
+SymptomPresentColumns=intersect(SymptomColumns,SymptomPresentColumns)
+# replace "" with "0", "555" with "0", "888" with 0 in these columns
+youthReport[,SymptomPresentColumns][youthReport[,SymptomPresentColumns]==""]=0
+youthReport[,SymptomPresentColumns][youthReport[,SymptomPresentColumns]=="555"]=0
+youthReport[,SymptomPresentColumns][youthReport[,SymptomPresentColumns]=="888"]=0
+# convert these columns to numeric (0 and "0", 1 at "1")
+youthReport[,SymptomPresentColumns]=apply(youthReport[,SymptomPresentColumns],2,as.numeric)
+# get a sum 'p' factor across all metrics
+youthReport$ksads_scr_syn_totprob_r=rowSums(youthReport[,SymptomPresentColumns])
+
+# fix age and merge
+youthReport$interview_age=as.numeric(youthReport$interview_age)/12
+masterdf2=merge(masterdf,youthReport,by=c('subjectkey','sex','interview_age','eventname'))
+
+# get difference measure: 
+# z-score of child on parent report cbcl_scr_syn_totprob_r
+masterdf2$cbcl_scr_syn_totprob_z=(masterdf2$cbcl_scr_syn_totprob_r-mean(masterdf2$cbcl_scr_syn_totprob_r))/sd(masterdf2$cbcl_scr_syn_totprob_r)
+# z score of self-report ksads_scr_syn_totprob_r
+masterdf2$ksads_scr_syn_totprob_z=(masterdf2$ksads_scr_syn_totprob_r-mean(masterdf2$ksads_scr_syn_totprob_r))/sd(masterdf2$ksads_scr_syn_totprob_r)
+# get difference
+masterdf2$cbcl_ksads_diff=masterdf2$cbcl_scr_syn_totprob_z-masterdf2$ksads_scr_syn_totprob_z
+# 
+```
+
+```{r}
+# pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
+# https://onlinelibrary.wiley.com/doi/epdf/10.1002/mrdd.20071
+# https://aseba.org/wp-content/uploads/2019/02/cbclprofile.pdf
+masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==65,]
+masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==69,]
+# borderline clinical and clinical cutoffs
+Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
+Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
+masterdfI_bc<-masterdf[masterdf$cbcl_scr_syn_internal_t==65,]
+masterdfI_c<-masterdf[masterdf$cbcl_scr_syn_internal_t==69,]
+masterdfE_bc<-masterdf[masterdf$cbcl_scr_syn_external_t==65,]
+masterdfE_c<-masterdf[masterdf$cbcl_scr_syn_external_t==69,]
+Ibc=mean(masterdfP_bc$cbcl_scr_syn_internal_r)
+Ic=mean(masterdfP_c$cbcl_scr_syn_internal_r)
+Ebc=mean(masterdfE_bc$cbcl_scr_syn_external_r)
+Ec=mean(masterdfE_c$cbcl_scr_syn_external_r)
+# Save out Clinical-only DFs
+CO_df=masterdf[masterdf$cbcl_scr_syn_totprob_r>Pc,]
+saveRDS(CO_df,'~/gp_COp_masterdf.rds')
+CO_df=masterdf[masterdf$cbcl_scr_syn_internal_r>Ic,]
+saveRDS(CO_df,'~/gp_COi_masterdf.rds')
+CO_df=masterdf[masterdf$cbcl_scr_syn_external_r>Ec,]
+saveRDS(CO_df,'~/gp_COe_masterdf.rds')
+# save out Subclinical-only DFs
+SCO_df=masterdf[masterdf$cbcl_scr_syn_totprob_r<Pbc,]
+saveRDS(SCO_df,'~/gp_SCOp_masterdf.rds')
+SCO_df=masterdf[masterdf$cbcl_scr_syn_internal_r<Pbc,]
+saveRDS(SCO_df,'~/gp_SCOi_masterdf.rds')
+SCO_df=masterdf[masterdf$cbcl_scr_syn_external_r<Pbc,]
+saveRDS(SCO_df,'~/gp_SCOe_masterdf.rds')
+
+# randomize splits
+SubjsFull=unique(masterdf$subjectkey)
+set.seed(1)
+SH1_subjs=sample(SubjsFull,length(SubjsFull)/2,replace = F)
+SH2_subjs=setdiff(SubjsFull,SH1_subjs)
+# Save out split-half 1 df
+SH1=masterdf[masterdf$subjectkey %in% SH1_subjs,]
+saveRDS(SCO_df,'~/gp_SH1_masterdf.rds')
+# save out split-half 2 df
+SH2=masterdf[masterdf$subjectkey %in% SH2_subjs,]
+saveRDS(SH2,'~/gp_SH2_masterdf.rds')
+
 ```
 
 ```{r, echo=FALSE, fig.dim = c(20, 6)}
