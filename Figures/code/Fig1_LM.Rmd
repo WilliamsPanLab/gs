@@ -357,7 +357,28 @@ anim_save(
 ```{r}
 ### P boots plot with overlaid linear fit
 # load in data
-Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
+CFits=readRDS('~/Desktop/g_p/gp_COp_Boots.rds')
+SCFits=readRDS('~/Desktop/g_p/gp_SCOp_Boots.rds')
+Cp=CFits$pBeta
+SCp=SCFits$pBeta
+# plot side-by side iqr
+boxplot(SCp,Cp,main='p beta, subclinical vs. clinical')
+# internal
+CFits=readRDS('~/Desktop/g_p/gp_COi_Boots.rds')
+SCFits=readRDS('~/Desktop/g_p/gp_SCOi_Boots.rds')
+Cp=CFits$pBeta[1:50]
+SCp=SCFits$pBeta[1:50]
+# plot side-by side iqr
+boxplot(SCp,Cp,main='Int beta, subclinical vs. clinical')
+# external
+# load in data
+CFits=readRDS('~/Desktop/g_p/gp_COe_Boots.rds')
+SCFits=readRDS('~/Desktop/g_p/gp_SCOe_Boots.rds')
+Cp=CFits$pBeta
+SCp=SCFits$pBeta
+boxplot(SCp,Cp,main='Ext beta, subclinical vs. clinical')
+
+
 # extract p factor
 PFits=Fits[,1:128]
 MaxP=find_furthest_nonzero(PFits)

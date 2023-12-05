@@ -13,7 +13,6 @@ library(rapportools)
 library(reshape2)
 library(ggplot2)
 library(ggalluvial)
-library(mgcv)
 
 ### TO DO's
 # check for less missingness in newer packages
@@ -566,6 +565,38 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$pTSV=1
 print(paste0(newList6-participantsTSVSubjs,' participants lost after needing complete data in participantstsv'))
 paste0(participantsTSVSubjs,' remain')
 ```
+
+```{r}
+# temp interactions with big 3 g and parental income 
+# will re-download parent demographics to see if number of kids or INR explains dynamics better
+Inc_P<-gam(cbcl_scr_syn_totprob_r~s(g)+s(income),data=masterdf,family=nb())
+Inc_P_intrxn<-gam(cbcl_scr_syn_totprob_r~ti(g,income)+s(g)+s(income),data=masterdf,family=nb())
+anova.gam(Inc_P,Inc_P_intrxn,test='Chisq')
+# internalizing
+Inc_Int<-gam(cbcl_scr_syn_internal_r~s(g)+s(income),data=masterdf,family=nb())
+Inc_Int_intrxn<-gam(cbcl_scr_syn_internal_r~ti(g,income)+s(g)+s(income),data=masterdf,family=nb())
+anova.gam(Inc_Int,Inc_Int_intrxn,test='Chisq')
+Inc_Ext<-gam(cbcl_scr_syn_external_r~s(g)+s(income),data=masterdf,family=nb())
+Inc_Ext_intrxn<-gam(cbcl_scr_syn_external_r~ti(g,income)+s(g)+s(income),data=masterdf,family=nb())
+anova.gam(Inc_Ext,Inc_Ext_intrxn,test='Chisq')
+
+g_Inc_P<-gam(g~s(cbcl_scr_syn_totprob_r)+s(income),data=masterdf)
+g_Inc_P_intrxn<-gam(g~ti(cbcl_scr_syn_totprob_r,income)+s(cbcl_scr_syn_totprob_r)+s(income),data=masterdf)
+anova.gam(g_Inc_P,g_Inc_P_intrxn,test='Chisq')
+# internalizing
+g_Inc_Int<-gam(g~s(cbcl_scr_syn_internal_r)+s(income),data=masterdf)
+g_Inc_Int_intrxn<-gam(g~ti(cbcl_scr_syn_internal_r,income)+s(cbcl_scr_syn_internal_r)+s(income),data=masterdf)
+anova.gam(g_Inc_Int,g_Inc_Int_intrxn,test='Chisq')
+g_Inc_Ext<-gam(g~s(cbcl_scr_syn_external_r)+s(income),data=masterdf)
+g_Inc_Ext_intrxn<-gam(g~ti(cbcl_scr_syn_external_r,income)+s(cbcl_scr_syn_external_r)+s(income),data=masterdf)
+anova.gam(g_Inc_Ext,g_Inc_Ext_intrxn,test='Chisq')
+
+# with NumKids
+
+# with INR
+
+```
+
 ```{r}
 
 #### get more fine-grained demographics
@@ -641,41 +672,22 @@ fg_demo$PL[fg_demo$NumPeeps==14]=66200
 fg_demo$PL[fg_demo$NumPeeps==15]=70380
 # 41,320 + 8*(4,180) for 16
 fg_demo$PL[fg_demo$NumPeeps==16]=74560
-
-# drop interview age for merge
-fg_demo <- fg_demo[, !(names(fg_demo) %in% "interview_age")]
-
-## write a loop that sees if HouseholdIncome and NumPeeps are present for each subject, at any of 3 timepoinst, and apply the value to the other timepoints
-## Create a vector of permissible event names
-#permissible_events <- c('baseline_year_1_arm_1', '1_year_follow_up_y_arm_1', '2_year_follow_up_y_arm_1')
-#
-## Iterate over each subject
-#for (subject_id in unique(fg_demo$subjectkey)) {
-#  # Subset data for the current subject
-#  subject_data <- fg_demo[fg_demo$subjectkey == subject_id, ]
-#  
-#  # Check if HouseholdIncome and NumPeeps are present for any permissible event
-#  if (any(!is.na(subject_data$HouseholdIncome) & !is.na(subject_data$NumPeeps) & subject_data$eventname %in% permissible_events)) {
-#    # Extract values from the first valid row
-#    valid_row <- subject_data[!is.na(subject_data$HouseholdIncome) & !is.na(subject_data$NumPeeps) & subject_data$eventname %in% permissible_events, ][1, ]
-#    
-#    # Update values for other timepoints
-#    fg_demo$HouseholdIncome[fg_demo$subjectkey == subject_id] <- ifelse(is.na(fg_demo$HouseholdIncome[fg_demo$subjectkey == subject_id]), valid_row$HouseholdIncome, #fg_demo$HouseholdIncome[fg_demo$subjectkey == subject_id])
-#    
-#    fg_demo$NumPeeps[fg_demo$subjectkey == subject_id] <- ifelse(is.na(fg_demo$NumPeeps[fg_demo$subjectkey == subject_id]), valid_row$NumPeeps, #fg_demo$NumPeeps[fg_demo$subjectkey == subject_id])
-#  }
-#}
-
 # INR is Household Income : Poverty line for this # of people
 fg_demo$INR=fg_demo$HouseholdIncome/fg_demo$PL
 # new pov classification
 fg_demo$Pov_v2=as.factor(fg_demo$HouseholdIncome<fg_demo$PL)
 
-
+# fix age for merge
+fg_demo$interview_age=as.numeric(fg_demo$interview_age)/12
+# omit 3 year FUP
+fg_demo=fg_demo[fg_demo$eventname!='3_year_follow_up_y_arm_1',]
+fg_demo=fg_demo[fg_demo$eventname!='1_year_follow_up_y_arm_1',]
 # retain only those with actual INR data
 fg_demo=fg_demo[!is.na(fg_demo$INR),]
 # merge back in
-masterdf2=merge(masterdf,fg_demo,by=c('subjectkey','sex'))
+masterdf2=merge(masterdf,fg_demo,by=c('subjectkey','sex','interview_age','eventname'))
+
+# NEED cleaner version of fg_demo to not lose 80% of sample on merge
 
 # new merge and count
 parentDemo_TSVSubjs=length(unique(masterdf$subjectkey))
@@ -685,51 +697,6 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$PD=1
 
 print(paste0(participantsTSVSubjs-parentDemo_TSVSubjs,' participants lost after needing complete data in Parent demographics'))
 paste0(parentDemo_TSVSubjs,' remain')
-```
-
-```{r}
-# poverty measures
-masterdf2$poverty=0
-masterdf2$income<-as.numeric(masterdf2$income)
-# note that poverty is defined as income < 5: https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups
-masterdf2$poverty[masterdf2$income<5]=1
-masterdf2$poverty=as.ordered(masterdf2$poverty)
-### initialize cross-boot vectors
-
-# poverty measures
-masterdf2$povertyINR=0
-# note that poverty is defined as income < 5: https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups
-masterdf2$povertyINR[masterdf2$INR<1]=1
-masterdf2$povertyINR=as.ordered(masterdf2$povertyINR)
-
-# will re-download parent demographics to see if number of kids or INR explains dynamics better
-Inc_P<-gam(g~s(cbcl_scr_syn_totprob_r,by=poverty)+s(interview_age),data=masterdf2)
-
-
-Inc_P_intrxn<-gam(cbcl_scr_syn_totprob_r~ti(g,income)+s(g)+s(income),data=masterdf2,family=nb())
-anova.gam(Inc_P,Inc_P_intrxn,test='Chisq')
-# internalizing
-Inc_Int<-gam(cbcl_scr_syn_internal_r~s(g)+s(income),data=masterdf2,family=nb())
-Inc_Int_intrxn<-gam(cbcl_scr_syn_internal_r~ti(g,income)+s(g)+s(income),data=masterdf2,family=nb())
-anova.gam(Inc_Int,Inc_Int_intrxn,test='Chisq')
-Inc_Ext<-gam(cbcl_scr_syn_external_r~s(g)+s(income),data=masterdf2,family=nb())
-Inc_Ext_intrxn<-gam(cbcl_scr_syn_external_r~ti(g,income)+s(g)+s(income),data=masterdf2,family=nb())
-anova.gam(Inc_Ext,Inc_Ext_intrxn,test='Chisq')
-
-g_Inc_P<-gam(g~s(cbcl_scr_syn_totprob_r)+s(income),data=masterdf2)
-g_Inc_P_intrxn<-gam(g~ti(cbcl_scr_syn_totprob_r,income)+s(cbcl_scr_syn_totprob_r)+s(income),data=masterdf2)
-anova.gam(g_Inc_P,g_Inc_P_intrxn,test='Chisq')
-# internalizing
-g_Inc_Int<-gam(g~s(cbcl_scr_syn_internal_r)+s(income),data=masterdf2)
-g_Inc_Int_intrxn<-gam(g~ti(cbcl_scr_syn_internal_r,income)+s(cbcl_scr_syn_internal_r)+s(income),data=masterdf2)
-anova.gam(g_Inc_Int,g_Inc_Int_intrxn,test='Chisq')
-g_Inc_Ext<-gam(g~s(cbcl_scr_syn_external_r)+s(income),data=masterdf2)
-g_Inc_Ext_intrxn<-gam(g~ti(cbcl_scr_syn_external_r,income)+s(cbcl_scr_syn_external_r)+s(income),data=masterdf2)
-anova.gam(g_Inc_Ext,g_Inc_Ext_intrxn,test='Chisq')
-
-# with NumKids
-
-# with INR
 ```
 
 ```{r}
