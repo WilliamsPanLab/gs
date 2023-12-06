@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=Fig3_2k
+#SBATCH --job-name=Fig3
 #SBATCH --time=4-00:00:00
 #SBATCH -p leanew1  # Queue names you can submit to
 #SBATCH -n 1

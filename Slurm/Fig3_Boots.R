@@ -30,8 +30,8 @@ masterdf$cbcl_scr_syn_totprob_r=as.numeric(masterdf$cbcl_scr_syn_totprob_r)
 masterdf$seg<-as.ordered(masterdf$sex)
 masterdf$poverty=0
 masterdf$income<-as.numeric(masterdf$income)
-# note that poverty is defined as income < 5: https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups
-masterdf$poverty[masterdf$income<5]=1
+# poverty now defined in sample construction
+masterdf$poverty[masterdf$Pov_v2==1]=1
 masterdf$poverty=as.ordered(masterdf$poverty)
 ### initialize cross-boot vectors
 # predicted derivatives: set to maximum value for ncol +1, as 0-maxvalue is 1 longer than maxvalue
@@ -182,4 +182,4 @@ saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpDerivs.rds
 print('done with g~p fit bootstrapping!')
 # save out modular poverty and equivlanetly-sized poverty fits
 outdf=data.frame(povFit,pseudopovFit,FullNonpovFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpPovNonPov.rds')
+saveRDS(o`utdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3_gpPovNonPov.rds')
