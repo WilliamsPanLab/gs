@@ -150,6 +150,28 @@ asrwitFitNonPov=matrix(0,nrow=10000,ncol=(asrwitMaxVal)+1)
 asrattFitNonPov=matrix(0,nrow=10000,ncol=(asrattMaxVal)+1)
 asrrulFitNonPov=matrix(0,nrow=10000,ncol=(asrrulMaxVal)+1)
 asraggFitNonPov=matrix(0,nrow=10000,ncol=(asraggMaxVal)+1)
+# initialize difference in AIC for each cbcl model with and without poverty interaction
+pDiff=rep(0,10000)
+intDiff=rep(0,10000)
+extDiff=rep(0,10000)
+somDiff=rep(0,10000)
+anxDiff=rep(0,10000)
+thoDiff=rep(0,10000)
+witDiff=rep(0,10000)
+attDiff=rep(0,10000)
+rulDiff=rep(0,10000)
+aggDiff=rep(0,10000)
+# difference in AIC for each cbcl model with psuedo poverty interaction
+pDiffPseudo=rep(0,10000)
+intDiffPseudo=rep(0,10000)
+extDiffPseudo=rep(0,10000)
+somDiffPseudo=rep(0,10000)
+anxDiffPseudo=rep(0,10000)
+thoDiffPseudo=rep(0,10000)
+witDiffPseudo=rep(0,10000)
+attDiffPseudo=rep(0,10000)
+rulDiffPseudo=rep(0,10000)
+aggDiffPseudo=rep(0,10000)
 # initialize difference in AIC for each asr model with and without poverty interaction
 asrPDiff=rep(0,10000)
 asrintDiff=rep(0,10000)
@@ -172,6 +194,28 @@ asrwitDiffPseudo=rep(0,10000)
 asrattDiffPseudo=rep(0,10000)
 asrrulDiffPseudo=rep(0,10000)
 asraggDiffPseudo=rep(0,10000)
+# initialize difference in adjusted r^2 for each cbcl model with and without poverty interaction
+pDiffAdj=rep(0,10000)
+intDiffAdj=rep(0,10000)
+extDiffAdj=rep(0,10000)
+somDiffAdj=rep(0,10000)
+anxDiffAdj=rep(0,10000)
+thoDiffAdj=rep(0,10000)
+witDiffAdj=rep(0,10000)
+attDiffAdj=rep(0,10000)
+rulDiffAdj=rep(0,10000)
+aggDiffAdj=rep(0,10000)
+# initialize difference in adjusted r^2 for each cbcl model with psuedo poverty interaction
+pDiffAdjPseudo=rep(0,10000)
+intDiffAdjPseudo=rep(0,10000)
+extDiffAdjPseudo=rep(0,10000)
+somDiffAdjPseudo=rep(0,10000)
+anxDiffAdjPseudo=rep(0,10000)
+thoDiffAdjPseudo=rep(0,10000)
+witDiffAdjPseudo=rep(0,10000)
+attDiffAdjPseudo=rep(0,10000)
+rulDiffAdjPseudo=rep(0,10000)
+aggDiffAdjPseudo=rep(0,10000)
 # initialize difference in adjusted r^2 for each asr model with and without poverty interaction
 asrPDiffAdj=rep(0,10000)
 asrintDiffAdj=rep(0,10000)
@@ -256,16 +300,16 @@ for (b in 1:10){
 	basraggmax=max(bootSamp$ASR_aggressive)
 	######## I PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
 	#### g as response variable, add asr and predict on asr
-	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(parentPcount,k=4),data=bootSamp)
-	intgAge<-bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+s(ASRInt,k=4),data=bootSamp)
-	extgAge<-bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+s(ASRExt,k=4),data=bootSamp)
-	somgAge<-bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age,k=4)+s(ASR_somatic,k=4),data=bootSamp)
-	anxgAge<-bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4)+s(ASR_anxdep,k=4),data=bootSamp)
-	thogAge<-bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4)+s(ASR_thought,k=4),data=bootSamp)
-	witgAge<-bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4)+s(ASR_withdep,k=4),data=bootSamp)
-	attgAge<-bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4)+s(ASR_attention,k=4),data=bootSamp)
-	rulgAge<-bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4)+s(ASR_rulebreak,k=4),data=bootSamp)
-	agggAge<-bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4)+s(ASR_aggressive,k=4),data=bootSamp)
+	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4),data=bootSamp)
+	intgAge<-bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4),data=bootSamp)
+	extgAge<-bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4),data=bootSamp)
+	somgAge<-bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age,k=4),data=bootSamp)
+	anxgAge<-bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4),data=bootSamp)
+	thogAge<-bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4),data=bootSamp)
+	witgAge<-bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4),data=bootSamp)
+	attgAge<-bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4),data=bootSamp)
+	rulgAge<-bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4),data=bootSamp)
+	agggAge<-bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4),data=bootSamp)
 	#### ASR
 	asrpgAge<-bam(g~s(parentPcount,k=4)+s(interview_age,k=4),data=bootSamp)
 	asrintgAge<-bam(g~s(ASRInt,k=4)+s(interview_age,k=4),data=bootSamp)
@@ -300,37 +344,37 @@ for (b in 1:10){
 	eachasrAggcount=seq(0:basraggmax)
 	# set age to to median for predict df, also set child symptom score to median for predict df
 	#####################################
-	predictDFp=data.frame(eachasrPcount,rep(median(bootSamp$cbcl_scr_syn_totprob_r),(basrpmax+1)),rep(median(bootSamp$interview_age),(basrpmax+1)))
-	predictDFint=data.frame(eachasrIntcount,rep(median(bootSamp$cbcl_scr_syn_internal_r),(basrintmax+1)),rep(median(bootSamp$interview_age),(basrintmax+1)))
-	predictDFext=data.frame(eachasrExtcount,rep(median(bootSamp$cbcl_scr_syn_external_r),(basrextmax+1)),rep(median(bootSamp$interview_age),(basrextmax+1)))
-	predictDFsom=data.frame(eachasrSomcount,rep(median(bootSamp$cbcl_scr_syn_somatic_r),(basrsommax+1)),rep(median(bootSamp$interview_age),(basrsommax+1)))
-	predictDFanx=data.frame(eachasrAnxcount,rep(median(bootSamp$cbcl_scr_syn_anxdep_r),(basranxmax+1)),rep(median(bootSamp$interview_age),(basranxmax+1)))
-	predictDFtho=data.frame(eachasrThocount,rep(median(bootSamp$cbcl_scr_syn_thought_r),(basrthomax+1)),rep(median(bootSamp$interview_age),(basrthomax+1)))
-	predictDFwit=data.frame(eachasrWitcount,rep(median(bootSamp$cbcl_scr_syn_withdep_r),(basrwitmax+1)),rep(median(bootSamp$interview_age),(basrwitmax+1)))
-	predictDFatt=data.frame(eachasrAttcount,rep(median(bootSamp$cbcl_scr_syn_attention_r),(basrattmax+1)),rep(median(bootSamp$interview_age),(basrattmax+1)))
-	predictDFrul=data.frame(eachasrRulcount,rep(median(bootSamp$cbcl_scr_syn_rulebreak_r),(basrrulmax+1)),rep(median(bootSamp$interview_age),(basrrulmax+1)))
-	predictDFagg=data.frame(eachasrAggcount,rep(median(bootSamp$cbcl_scr_syn_aggressive_r),(basraggmax+1)),rep(median(bootSamp$interview_age),(basraggmax+1)))
-	predictDFasrp=data.frame(eachasrPcount,rep(median(bootSamp$interview_age),(basrpmax+1)))
-	predictDFasrint=data.frame(eachasrIntcount,rep(median(bootSamp$interview_age),(basrintmax+1)))
-	predictDFasrext=data.frame(eachasrExtcount,rep(median(bootSamp$interview_age),(basrextmax+1)))
-	predictDFasrsom=data.frame(eachasrSomcount,rep(median(bootSamp$interview_age),(basrsommax+1)))
-	predictDFasranx=data.frame(eachasrAnxcount,rep(median(bootSamp$interview_age),(basranxmax+1)))
-	predictDFasrtho=data.frame(eachasrThocount,rep(median(bootSamp$interview_age),(basrthomax+1)))
-	predictDFasrwit=data.frame(eachasrWitcount,rep(median(bootSamp$interview_age),(basrwitmax+1)))
-	predictDFasratt=data.frame(eachasrAttcount,rep(median(bootSamp$interview_age),(basrattmax+1)))
-	predictDFasrrul=data.frame(eachasrRulcount,rep(median(bootSamp$interview_age),(basrrulmax+1)))
-	predictDFasragg=data.frame(eachasrAggcount,rep(median(bootSamp$interview_age),(basraggmax+1)))
+	predictDFp=data.frame(eachPcount,rep(median(masterdf$interview_age),(bpmax+1)))
+	predictDFint=data.frame(eachIntcount,rep(median(masterdf$interview_age),(bintmax+1)))
+	predictDFext=data.frame(eachExtcount,rep(median(masterdf$interview_age),(bextmax+1)))
+	predictDFsom=data.frame(eachSomcount,rep(median(masterdf$interview_age),(bsommax+1)))
+	predictDFanx=data.frame(eachAnxcount,rep(median(masterdf$interview_age),(banxmax+1)))
+	predictDFtho=data.frame(eachThocount,rep(median(masterdf$interview_age),(bthomax+1)))
+	predictDFwit=data.frame(eachWitcount,rep(median(masterdf$interview_age),(bwitmax+1)))
+	predictDFatt=data.frame(eachAttcount,rep(median(masterdf$interview_age),(battmax+1)))
+	predictDFrul=data.frame(eachRulcount,rep(median(masterdf$interview_age),(brulmax+1)))
+	predictDFagg=data.frame(eachAggcount,rep(median(masterdf$interview_age),(baggmax+1)))
+	predictDFasrp=data.frame(eachPcount,rep(median(masterdf$interview_age),(basrpmax+1)))
+	predictDFasrint=data.frame(eachasrIntcount,rep(median(masterdf$interview_age),(basrintmax+1)))
+	predictDFasrext=data.frame(eachasrExtcount,rep(median(masterdf$interview_age),(basrextmax+1)))
+	predictDFasrsom=data.frame(eachasrSomcount,rep(median(masterdf$interview_age),(basrsommax+1)))
+	predictDFasranx=data.frame(eachasrAnxcount,rep(median(masterdf$interview_age),(basranxmax+1)))
+	predictDFasrtho=data.frame(eachasrThocount,rep(median(masterdf$interview_age),(basrthomax+1)))
+	predictDFasrwit=data.frame(eachasrWitcount,rep(median(masterdf$interview_age),(basrwitmax+1)))
+	predictDFasratt=data.frame(eachasrAttcount,rep(median(masterdf$interview_age),(basrattmax+1)))
+	predictDFasrrul=data.frame(eachasrRulcount,rep(median(masterdf$interview_age),(basrrulmax+1)))
+	predictDFasragg=data.frame(eachasrAggcount,rep(median(masterdf$interview_age),(basraggmax+1)))
 	# set colnames so predict can work
-	colnames(predictDFp)=c('parentPcount','cbcl_scr_syn_totprob_r','interview_age')
-	colnames(predictDFint)=c('ASRInt','cbcl_scr_syn_internal_r','interview_age')
-	colnames(predictDFext)=c('ASRExt','cbcl_scr_syn_external_r','interview_age')
-	colnames(predictDFsom)=c('ASR_somatic','cbcl_scr_syn_somatic_r','interview_age')
-	colnames(predictDFanx)=c('ASR_anxdep','cbcl_scr_syn_anxdep_r','interview_age')
-	colnames(predictDFtho)=c('ASR_thought','cbcl_scr_syn_thought_r','interview_age')
-	colnames(predictDFwit)=c('ASR_withdep','cbcl_scr_syn_withdep_r','interview_age')
-	colnames(predictDFatt)=c('ASR_attention','cbcl_scr_syn_attention_r','interview_age')
-	colnames(predictDFrul)=c('ASR_rulebreak','cbcl_scr_syn_rulebreak_r','interview_age')
-	colnames(predictDFagg)=c('ASR_aggressive','cbcl_scr_syn_aggressive_r','interview_age')
+	colnames(predictDFp)=c('cbcl_scr_syn_totprob_r','interview_age')
+	colnames(predictDFint)=c('cbcl_scr_syn_internal_r','interview_age')
+	colnames(predictDFext)=c('cbcl_scr_syn_external_r','interview_age')
+	colnames(predictDFsom)=c('cbcl_scr_syn_somatic_r','interview_age')
+	colnames(predictDFanx)=c('cbcl_scr_syn_anxdep_r','interview_age')
+	colnames(predictDFtho)=c('cbcl_scr_syn_thought_r','interview_age')
+	colnames(predictDFwit)=c('cbcl_scr_syn_withdep_r','interview_age')
+	colnames(predictDFatt)=c('cbcl_scr_syn_attention_r','interview_age')
+	colnames(predictDFrul)=c('cbcl_scr_syn_rulebreak_r','interview_age')
+	colnames(predictDFagg)=c('cbcl_scr_syn_aggressive_r','interview_age')
 	colnames(predictDFasrp)=c('parentPcount','interview_age')
 	colnames(predictDFasrint)=c('ASRInt','interview_age')
 	colnames(predictDFasrext)=c('ASRExt','interview_age')
@@ -429,6 +473,51 @@ for (b in 1:10){
 	asraggDeriv[b,1:(basraggmax+1)]=forSplineasragg$derivative
 	####### II PREDICT POVERTY INTERACTIONS #######
 	# fit models with standalone poverty term
+	# cbcl
+	pgAge_pov=bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pintgAge_pov=bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pextgAge_pov=bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	psomgAge_pov=bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	panxgAge_pov=bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pthogAge_pov=bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pwitgAge_pov=bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pattgAge_pov=bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	prulgAge_pov=bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pagggAge_pov=bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	# fit versions with poverty interactions on symptoms
+	pgAge_povint=bam(g~s(cbcl_scr_syn_totprob_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pintgAge_povint=bam(g~s(cbcl_scr_syn_internal_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pextgAge_povint=bam(g~s(cbcl_scr_syn_external_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	psomgAge_povint=bam(g~s(cbcl_scr_syn_somatic_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	panxgAge_povint=bam(g~s(cbcl_scr_syn_anxdep_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pthogAge_povint=bam(g~s(cbcl_scr_syn_thought_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pwitgAge_povint=bam(g~s(cbcl_scr_syn_withdep_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pattgAge_povint=bam(g~s(cbcl_scr_syn_attention_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	prulgAge_povint=bam(g~s(cbcl_scr_syn_rulebreak_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	pagggAge_povint=bam(g~s(cbcl_scr_syn_aggressive_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	# fit version on pseudopoverty variable
+	pgAge_povpseudo=bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pintgAge_povpseudo=bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pextgAge_povpseudo=bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	psomgAge_povpseudo=bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	panxgAge_povpseudo=bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pthogAge_povpseudo=bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pwitgAge_povpseudo=bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pattgAge_povpseudo=bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	prulgAge_povpseudo=bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pagggAge_povpseudo=bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	# fit version on pseudopoverty variable with interactions
+	pgAge_povpseudoint=bam(g~s(cbcl_scr_syn_totprob_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pintgAge_povpseudoint=bam(g~s(cbcl_scr_syn_internal_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pextgAge_povpseudoint=bam(g~s(cbcl_scr_syn_external_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	psomgAge_povpseudoint=bam(g~s(cbcl_scr_syn_somatic_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	panxgAge_povpseudoint=bam(g~s(cbcl_scr_syn_anxdep_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pthogAge_povpseudoint=bam(g~s(cbcl_scr_syn_thought_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pwitgAge_povpseudoint=bam(g~s(cbcl_scr_syn_withdep_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pattgAge_povpseudoint=bam(g~s(cbcl_scr_syn_attention_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	prulgAge_povpseudoint=bam(g~s(cbcl_scr_syn_rulebreak_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	pagggAge_povpseudoint=bam(g~s(cbcl_scr_syn_aggressive_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	# asr
 	asrpgAge_pov=bam(g~s(parentPcount,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	asrintgAge_pov=bam(g~s(ASRInt,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	asrextgAge_pov=bam(g~s(ASRExt,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
@@ -473,6 +562,28 @@ for (b in 1:10){
 	asrrulgAge_povpseudoint=bam(g~s(ASR_rulebreak,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	asragggAge_povpseudoint=bam(g~s(ASR_aggressive,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	# get AIC differences
+	# cbcl
+	pDiff[b]=AIC(pgAge_pov)-AIC(pgAge_povint)
+	intDiff[b]=AIC(intgAge_pov)-AIC(intgAge_povint)
+	extDiff[b]=AIC(extgAge_pov)-AIC(extgAge_povint)
+	somDiff[b]=AIC(somgAge_pov)-AIC(somgAge_povint)
+	anxDiff[b]=AIC(anxgAge_pov)-AIC(anxgAge_povint)
+	thoDiff[b]=AIC(thogAge_pov)-AIC(thogAge_povint)
+	witDiff[b]=AIC(witgAge_pov)-AIC(witgAge_povint)
+	attDiff[b]=AIC(attgAge_pov)-AIC(attgAge_povint)
+	rulDiff[b]=AIC(rulgAge_pov)-AIC(rulgAge_povint)
+	aggDiff[b]=AIC(agggAge_pov)-AIC(agggAge_povint)
+	pDiffPseudo[b]=AIC(pgAge_povpseudo)-AIC(pgAge_povpseudoint)
+	intDiffPseudo[b]=AIC(intgAge_povpseudo)-AIC(intgAge_povpseudoint)
+	extDiffPseudo[b]=AIC(extgAge_povpseudo)-AIC(extgAge_povpseudoint)
+	somDiffPseudo[b]=AIC(somgAge_povpseudo)-AIC(somgAge_povpseudoint)
+	anxDiffPseudo[b]=AIC(anxgAge_povpseudo)-AIC(anxgAge_povpseudoint)
+	thoDiffPseudo[b]=AIC(thogAge_povpseudo)-AIC(thogAge_povpseudoint)
+	witDiffPseudo[b]=AIC(witgAge_povpseudo)-AIC(witgAge_povpseudoint)
+	attDiffPseudo[b]=AIC(attgAge_povpseudo)-AIC(attgAge_povpseudoint)
+	rulDiffPseudo[b]=AIC(rulgAge_povpseudo)-AIC(rulgAge_povpseudoint)
+	aggDiffPseudo[b]=AIC(agggAge_povpseudo)-AIC(agggAge_povpseudoint)
+	# asr
 	asrPDiff[b]=AIC(asrpgAge_pov)-AIC(asrpgAge_povint)
 	asrintDiff[b]=AIC(asrintgAge_pov)-AIC(asrintgAge_povint)
 	asrextDiff[b]=AIC(asrextgAge_pov)-AIC(asrextgAge_povint)
@@ -494,6 +605,28 @@ for (b in 1:10){
 	asrrulDiffPseudo[b]=AIC(asrrulgAge_povpseudo)-AIC(asrrulgAge_povpseudoint)
 	asraggDiffPseudo[b]=AIC(asragggAge_povpseudo)-AIC(asragggAge_povpseudoint)
 	# get adjusted r^2 diffferences
+	# cbcl
+	pDiffAdj[b]=summary(pgAge_povint)$r.sq-summary(pgAge_pov)$r.sq
+	intDiffAdj[b]=summary(intgAge_povint)$r.sq-summary(intgAge_pov)$r.sq
+	extDiffAdj[b]=summary(extgAge_povint)$r.sq-summary(extgAge_pov)$r.sq
+	somDiffAdj[b]=summary(somgAge_povint)$r.sq-summary(somgAge_pov)$r.sq
+	anxDiffAdj[b]=summary(anxgAge_povint)$r.sq-summary(anxgAge_pov)$r.sq
+	thoDiffAdj[b]=summary(thogAge_povint)$r.sq-summary(thogAge_pov)$r.sq
+	witDiffAdj[b]=summary(witgAge_povint)$r.sq-summary(witgAge_pov)$r.sq
+	attDiffAdj[b]=summary(attgAge_povint)$r.sq-summary(attgAge_pov)$r.sq
+	rulDiffAdj[b]=summary(rulgAge_povint)$r.sq-summary(rulgAge_pov)$r.sq
+	aggDiffAdj[b]=summary(agggAge_povint)$r.sq-summary(agggAge_pov)$r.sq
+	pDiffAdjPseudo[b]=summary(pgAge_povpseudo)$r.sq-summary(pgAge_povpseudoint)$r.sq
+	intDiffAdjPseudo[b]=summary(intgAge_povpseudo)$r.sq-summary(intgAge_povpseudoint)$r.sq
+	extDiffAdjPseudo[b]=summary(extgAge_povpseudo)$r.sq-summary(extgAge_povpseudoint)$r.sq
+	somDiffAdjPseudo[b]=summary(somgAge_povpseudo)$r.sq-summary(somgAge_povpseudoint)$r.sq
+	anxDiffAdjPseudo[b]=summary(anxgAge_povpseudo)$r.sq-summary(anxgAge_povpseudoint)$r.sq
+	thoDiffAdjPseudo[b]=summary(thogAge_povpseudo)$r.sq-summary(thogAge_povpseudoint)$r.sq
+	witDiffAdjPseudo[b]=summary(witgAge_povpseudo)$r.sq-summary(witgAge_povpseudoint)$r.sq
+	attDiffAdjPseudo[b]=summary(attgAge_povpseudo)$r.sq-summary(attgAge_povpseudoint)$r.sq
+	rulDiffAdjPseudo[b]=summary(rulgAge_povpseudo)$r.sq-summary(rulgAge_povpseudoint)$r.sq
+	aggDiffAdjPseudo[b]=summary(agggAge_povpseudo)$r.sq-summary(agggAge_povpseudoint)$r.sq
+	# asr
 	asrPDiffAdj[b]=summary(asrpgAge_povint)$r.sq-summary(asrpgAge_pov)$r.sq
 	asrintDiffAdj[b]=summary(asrintgAge_povint)$r.sq-summary(asrintgAge_pov)$r.sq
 	asrextDiffAdj[b]=summary(asrextgAge_povint)$r.sq-summary(asrextgAge_pov)$r.sq
@@ -515,6 +648,18 @@ for (b in 1:10){
 	asrrulDiffAdjPseudo[b]=summary(asrrulgAge_povpseudoint)$r.sq-summary(asrrulgAge_povpseudo)$r.sq
 	asraggDiffAdjPseudo[b]=summary(asragggAge_povpseudoint)$r.sq-summary(asragggAge_povpseudo)$r.sq
 	# make new predict dataframes with poverty variable
+	# cbcl
+	predictDFp$poverty=1
+	predictDFint$poverty=1
+	predictDFext$poverty=1
+	predictDFsom$poverty=1
+	predictDFanx$poverty=1
+	predictDFtho$poverty=1	
+	predictDFwit$poverty=1
+	predictDFatt$poverty=1
+	predictDFrul$poverty=1
+	predictDFagg$poverty=1
+	# asr
 	predictDFasrp$poverty=1
 	predictDFasrint$poverty=1
 	predictDFasrext$poverty=1
@@ -526,6 +671,18 @@ for (b in 1:10){
 	predictDFasrrul$poverty=1
 	predictDFasragg$poverty=1
 	# get poverty fits
+	# cbcl
+	forFitp=predict(pAge_povint,predictDFp)
+	forFitint=predict(pintgAge_povint,predictDFint)
+	forFitext=predict(pextgAge_povint,predictDFext)
+	forFitsom=predict(psomgAge_povint,predictDFsom)
+	forFitanx=predict(panxgAge_povint,predictDFanx)
+	forFittho=predict(pthogAge_povint,predictDFtho)
+	forFitwit=predict(pwitgAge_povint,predictDFwit)
+	forFitatt=predict(pattgAge_povint,predictDFatt)
+	forFitrul=predict(prulgAge_povint,predictDFrul)
+	forFitagg=predict(pagggAge_povint,predictDFagg)
+	# asr
 	forFitasrP=predict(asrpgAge_povint,predictDFasrp)
 	forFitasrInt=predict(asrintgAge_povint,predictDFasrint)
 	forFitasrExt=predict(asrextgAge_povint,predictDFasrext)
@@ -537,6 +694,18 @@ for (b in 1:10){
 	forFitasrRul=predict(asrrulgAge_povint,predictDFasrrul)
 	forFitasrAgg=predict(asragggAge_povint,predictDFasragg)
 	# print out fit
+	# cbcl
+	pFitPov[b,1:(bpmax+1)]=forFitp
+	pintFitPov[b,1:(bpintmax+1)]=forFitint
+	pextFitPov[b,1:(bpextmax+1)]=forFitext
+	psomFitPov[b,1:(bpsommax+1)]=forFitsom
+	panxFitPov[b,1:(bpanxmax+1)]=forFitanx
+	pthoFitPov[b,1:(bpthomax+1)]=forFittho
+	pwitFitPov[b,1:(bpwitmax+1)]=forFitwit
+	pattFitPov[b,1:(bpattmax+1)]=forFitatt
+	prulFitPov[b,1:(bprulmax+1)]=forFitrul
+	paggFitPov[b,1:(bpaggmax+1)]=forFitagg
+	# asr
 	asrPFitPov[b,1:(basrpmax+1)]=forFitasrP
 	asrintFitPov[b,1:(basrintmax+1)]=forFitasrInt
 	asrextFitPov[b,1:(basrextmax+1)]=forFitasrExt
@@ -548,6 +717,18 @@ for (b in 1:10){
 	asrrulFitPov[b,1:(basrrulmax+1)]=forFitasrRul
 	asraggFitPov[b,1:(basraggmax+1)]=forFitasrAgg
 	# update predict df to nonpoverty, get nonpoverty fits
+	# cbcl
+	predictDFp$poverty=0
+	predictDFint$poverty=0
+	predictDFext$poverty=0
+	predictDFsom$poverty=0
+	predictDFanx$poverty=0
+	predictDFtho$poverty=0
+	predictDFwit$poverty=0
+	predictDFatt$poverty=0
+	predictDFrul$poverty=0
+	predictDFagg$poverty=0
+	# asr
 	predictDFasrp$poverty=0
 	predictDFasrint$poverty=0
 	predictDFasrext$poverty=0
@@ -559,6 +740,18 @@ for (b in 1:10){
 	predictDFasrrul$poverty=0
 	predictDFasragg$poverty=0
 	# get nonpoverty fits
+	# cbcl
+	forFitp=predict(pAge_povint,predictDFp)
+	forFitint=predict(pintgAge_povint,predictDFint)
+	forFitext=predict(pextgAge_povint,predictDFext)
+	forFitsom=predict(psomgAge_povint,predictDFsom)
+	forFitanx=predict(panxgAge_povint,predictDFanx)
+	forFittho=predict(pthogAge_povint,predictDFtho)
+	forFitwit=predict(pwitgAge_povint,predictDFwit)
+	forFitatt=predict(pattgAge_povint,predictDFatt)
+	forFitrul=predict(prulgAge_povint,predictDFrul)
+	forFitagg=predict(pagggAge_povint,predictDFagg)
+	# asr
 	forFitasrP=predict(asrpgAge_povint,predictDFasrp)
 	forFitasrInt=predict(asrintgAge_povint,predictDFasrint)
 	forFitasrExt=predict(asrextgAge_povint,predictDFasrext)
@@ -570,6 +763,18 @@ for (b in 1:10){
 	forFitasrRul=predict(asrrulgAge_povint,predictDFasrrul)
 	forFitasrAgg=predict(asragggAge_povint,predictDFasragg)
 	# print out fit
+	# cbcl
+	pFitNonPov[b,1:(bpmax+1)]=forFitp
+	pintFitNonPov[b,1:(bpintmax+1)]=forFitint
+	pextFitNonPov[b,1:(bpextmax+1)]=forFitext
+	psomFitNonPov[b,1:(bpsommax+1)]=forFitsom
+	panxFitNonPov[b,1:(bpanxmax+1)]=forFitanx
+	pthoFitNonPov[b,1:(bpthomax+1)]=forFittho
+	pwitFitNonPov[b,1:(bpwitmax+1)]=forFitwit
+	pattFitNonPov[b,1:(bpattmax+1)]=forFitatt
+	prulFitNonPov[b,1:(bprulmax+1)]=forFitrul
+	paggFitNonPov[b,1:(bpaggmax+1)]=forFitagg
+	# asr
 	asrPFitNonPov[b,1:(basrpmax+1)]=forFitasrP
 	asrintFitNonPov[b,1:(basrintmax+1)]=forFitasrInt
 	asrextFitNonPov[b,1:(basrextmax+1)]=forFitasrExt
