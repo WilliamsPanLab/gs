@@ -750,7 +750,7 @@ alph_order <- c("Asian", "Black", "Hispanic", "Missing", "Other", "White")
 my_colors <- c("red", "orange", "blue", "gray", "green","yellow")
 
 # preset x-axis names
-x_labs=c("CBCL", "CBCL (both timepoints)","Grades (both)","ACS","Cognitive data (both)","One sibling per family","Demographics")
+x_labs=c("CBCL", "CBCL (both timepoints)","Grades (both)","ASR","ACS","Cognitive data (both)","One sibling per family","Demographics")
 
 #
 ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
@@ -866,63 +866,4 @@ np2=subset(df2,poverty==0)
 t.test(p2$cbcl_scr_syn_totprob_r,np2$cbcl_scr_syn_totprob_r)
 ```
 
-```{r}
-# slightly more complex characterization: linear interactions with numpeeps, income, inr and cbcl scores on g
-# base models
 
-
-df1$cbcl_scr_syn_somatic_r<-as.numeric(df1$cbcl_scr_syn_somatic_r)
-df2$cbcl_scr_syn_somatic_r<-as.numeric(df2$cbcl_scr_syn_somatic_r)
-
-df1$Pov_v2<-as.factor(df1$Pov_v2)
-df2$Pov_v2<-as.factor(df2$Pov_v2)
-masterdf$Pov_v2<-as.factor(masterdf$Pov_v2)
-
-modelP_bv1<-gam(g~s(interview_age,k=4)+s(cbcl_scr_syn_internal_r,k=4)+s(ASRInt,k=4)+Pov_v2,data=masterdf)
-modelP_bv2<-gam(g~s(interview_age,k=4)+s(cbcl_scr_syn_internal_r,k=4)+s(ASRInt,k=4)+ti(cbcl_scr_syn_internal_r,ASRInt)+Pov_v2,data=masterdf)
-anova.gam(modelP_bv1,modelP_bv2,test = 'Chisq')
-modelP_bv2_2<-gam(g~s(interview_age,k=4)+s(cbcl_scr_syn_internal_r,k=4)+s(ASRInt,k=4)+ti(cbcl_scr_syn_internal_r,ASRInt,by=Pov_v2)+Pov_v2,data=masterdf)
-anova.gam(modelP_bv2,modelP_bv2_2,test = 'Chisq')
-# visualize version of the model
-modelP_bv2_2_povIntercept<-gam(g~te(cbcl_scr_syn_internal_r,ASRInt,by=Pov_v2)+s(interview_age,k=4)+Pov_v2,data=masterdf)
-modelP_bv2_2_NopovIntercept<-gam(g~te(cbcl_scr_syn_internal_r,ASRInt,by=Pov_v2)+s(interview_age,k=4),data=masterdf)
-
-gg_tensor(modelP_bv2_2)
-visreg(modelP_bv2_2)
-```
-
-```{r}
-summary(modelP_bv2_2)
-fvisgam(modelP_bv2_2_povIntercept,view=c("cbcl_scr_syn_internal_r","ASRInt"),cond=list(Pov_v2="0"),main="NonPov")
-fvisgam(modelP_bv2_2_povIntercept,view=c("cbcl_scr_syn_internal_r","ASRInt"),cond=list(Pov_v2="1"),main="Pov")
-gg_tensor(modelP_bv2_2_povIntercept)
-fvisgam(modelP_bv2_2_NopovIntercept,view=c("cbcl_scr_syn_internal_r","ASRInt"),cond=list(Pov_v2="0"),main="NonPov")
-fvisgam(modelP_bv2_2_NopovIntercept,view=c("cbcl_scr_syn_internal_r","ASRInt"),cond=list(Pov_v2="1"),main="Pov")
-gg_tensor(modelP_bv2_2_NopovIntercept)
-```
-
-```{r}
-# model in sep. dfs to see range afforded by subsample
-modelP_bv2_2_p<-gam(g~te(cbcl_scr_syn_internal_r,ASRInt,k=12)+s(interview_age,k=4),data=masterdf[masterdf$Pov_v2==1,])
-modelP_bv2_2_np<-gam(g~te(cbcl_scr_syn_internal_r,ASRInt,k=12)+s(interview_age,k=4),data=masterdf[masterdf$Pov_v2==0,])
-gg_tensor(modelP_bv2_2_p)
-gg_tensor(modelP_bv2_2_np)
-
-```
-
-
-
-
-
-
-
-
-modelI_bv<-gam(g~s(interview_age)+s(cbcl_scr_syn_internal_r,by=Pov_v2),data=df1)
-
-modelE_bv<-gam(g~s(interview_age)+s(cbcl_scr_syn_external_r,by=Pov_v2),data=df1)
-
-visreg(modelP_bv, "cbcl_scr_syn_totprob_r", by="Pov_v2",ylim=c(-3,3))
-visreg(modelI_bv, "cbcl_scr_syn_internal_r", by="Pov_v2",ylim=c(-3,3))
-visreg(modelE_bv, "cbcl_scr_syn_external_r", by="Pov_v2",ylim=c(-3,3))
-
-```

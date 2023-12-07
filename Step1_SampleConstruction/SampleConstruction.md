@@ -203,7 +203,44 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-####  Chunk 3   processes family ID   data  ####
+#### Chunk 3 processes adult mental health ####
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
+### LOAD in ASR data
+asr=read.delim('~/Downloads/Package_1210940/pasr01.txt',na.strings=c("","NA"))
+# merge
+masterdf<-merge(masterdf,asr,by=c('subjectkey','eventname','interview_age','sex'))
+# check for populated data at BOTH timepoints
+ColsOfInt=asr[,c(11:141)]
+ASRVarsOfInt=colnames(ColsOfInt)
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(ASRVarsOfInt)]))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# full losses counted after asr count chunk, but note one participant is probably lost here just from merge
+asrSubjs=length(unique(masterdf$subjectkey))
+dif=gradesSubjs-asrSubjs
+print(paste0(dif,' participants lost from needing ASR at both timepoints'))
+```
+
+    ## [1] "1 participants lost from needing ASR at both timepoints"
+
+``` r
+# included subjs df
+includedSubjects$ASR=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$ASR=1
+```
+
+``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+####  Chunk 4   processes family ID   data  ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # load in acs file for rel_family_ID
@@ -228,10 +265,10 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$acs=1
 print(acsSubjs)
 ```
 
-    ## [1] 7347
+    ## [1] 7346
 
 ``` r
-dif=gradesSubjs-acsSubjs
+dif=asrSubjs-acsSubjs
 print(paste0(dif,' participants lost from ACS merge for family ID'))
 ```
 
@@ -239,15 +276,22 @@ print(paste0(dif,' participants lost from ACS merge for family ID'))
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-####   Chunk 4 processes cognitive data    ####
+### This  (short)  chunk formats   cbcl data ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
+### CLEAN data
 # subjectkey as factor
 masterdf$subjectkey<-as.factor(masterdf$subjectkey)
 # convert cbcl scores to numeric
 masterdf$cbcl_scr_syn_totprob_r<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)
 masterdf$cbcl_scr_syn_internal_r<-as.numeric(masterdf$cbcl_scr_syn_internal_r)
 masterdf$cbcl_scr_syn_external_r<-as.numeric(masterdf$cbcl_scr_syn_external_r)
+```
+
+``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+####   Chunk 6 processes cognitive data    ####
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 #### LOAD in cognitive data
 nihCog=read.delim('~/Downloads/Package_1210940/abcd_tbss01.txt')
@@ -256,11 +300,19 @@ littleMan=read.delim('~/Downloads/Package_1210940/lmtp201.txt')
 
 # merge in
 masterdf<-merge(masterdf,nihCog,by=c('subjectkey','eventname','interview_age','sex'))
+```
+
+    ## Warning in merge.data.frame(masterdf, nihCog, by = c("subjectkey", "eventname",
+    ## : column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
+    ## 'collection_title.y' are duplicated in the result
+
+``` r
 newList=length(unique(masterdf$subjectkey))
 print(paste0(newList,' after merging nih toolbox, ',(acsSubjs- newList),' lost after merge'))
 ```
 
-    ## [1] "7347 after merging nih toolbox, 0 lost after merge"
+    ## [1] "7346 after merging nih toolbox, 0 lost after merge"
 
 ``` r
 masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age','sex'))
@@ -268,15 +320,16 @@ masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age','s
 
     ## Warning in merge.data.frame(masterdf, othCog, by = c("subjectkey", "eventname",
     ## : column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
-    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
-    ## 'collection_title.y' are duplicated in the result
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
+    ## 'interview_date.y', 'collection_title.y', 'src_subject_id.y' are duplicated in
+    ## the result
 
 ``` r
 newList2=length(unique(masterdf$subjectkey))
 print(paste0(newList2,' after merging other cognitive measures, ',(newList- newList2),' lost after merge'))
 ```
 
-    ## [1] "7347 after merging other cognitive measures, 0 lost after merge"
+    ## [1] "7346 after merging other cognitive measures, 0 lost after merge"
 
 ``` r
 masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age','sex'))
@@ -286,14 +339,16 @@ masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age'
     ## "eventname", : column names 'collection_id.x', 'dataset_id.x',
     ## 'interview_date.x', 'collection_title.x', 'collection_id.y', 'dataset_id.y',
     ## 'src_subject_id.x', 'interview_date.y', 'collection_title.y',
-    ## 'src_subject_id.y' are duplicated in the result
+    ## 'collection_id.x', 'dataset_id.x', 'src_subject_id.y', 'interview_date.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'interview_date.y',
+    ## 'collection_title.y' are duplicated in the result
 
 ``` r
 newList3=length(unique(masterdf$subjectkey))
 print(paste0(newList3,' after merging little man, ',(newList2 - newList3),' lost after merge'))
 ```
 
-    ## [1] "7347 after merging little man, 0 lost after merge"
+    ## [1] "7346 after merging little man, 0 lost after merge"
 
 ``` r
 # clean age
@@ -303,7 +358,7 @@ masterdf$interview_age<-as.numeric(masterdf$interview_age)/12
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Chunk 5 preps for cognition factorization ###
+## Chunk 7 preps for cognition factorization ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # use thompson 2019 recreation of non nih-tb measures
@@ -355,7 +410,7 @@ newList4=length(unique(masterdf$subjectkey))
 print(paste0(newList4,' after retaining only subjs with Cognitive vars of interest at BOTH timepoints, ',(newList3- newList4),' lost after removing'))
 ```
 
-    ## [1] "5994 after retaining only subjs with Cognitive vars of interest at BOTH timepoints, 1353 lost after removing"
+    ## [1] "5994 after retaining only subjs with Cognitive vars of interest at BOTH timepoints, 1352 lost after removing"
 
 ``` r
 # populated included subjs df
@@ -365,9 +420,9 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CogBot
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-###  Chunk 6 preps by selecting 1 per family ###
+###  Chunk 8 preps by selecting 1 per family ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-# one family member per family to facilitate random sample
+# finish cleaning data for sherlock runs: one family member per family to facilitate random sample
 masterdf$id_fam = NULL
 # default value of family size (# of children in abcd study)
 masterdf$fam_size = 1
@@ -424,7 +479,7 @@ pcaDf<-masterdf[,pcVars]
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-### Chunk 7:   cognition factorization       ###
+### Chunk 9: it runs cognition factorization ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # derive pcs
@@ -463,7 +518,7 @@ masterdf$g<-Yextended$g
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Chunk 8 subjects with data at both timepoints##
+## Chunk 10 subjects with data at both timepoints##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # exclude subjs without data for both timepoints
@@ -483,7 +538,96 @@ print(paste0(dif,' rows lost from only using subjs with both timepoints'))
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Chunk 9 Handles participants TSV          ##
+## Chunk 11 calculates adult mental health    ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+# make count version of adult P
+ASRdfNum<-as.data.frame(lapply(asr[-1,11:141],as.numeric))
+ASRtotal=rowSums(ASRdfNum)
+
+ASRAnxDepr=ASRdfNum$asr_q12_p+ASRdfNum$asr_q13_p+ASRdfNum$asr_q14_p+ASRdfNum$asr_q22_p+ASRdfNum$asr_q31_p+ASRdfNum$asr_q33_p+ASRdfNum$asr_q34_p+ASRdfNum$asr_q35_p+ASRdfNum$asr_q45_p+ASRdfNum$asr_q47_p+ASRdfNum$asr_q50_p+ASRdfNum$asr_q71_p+ASRdfNum$asr_q91_p+ASRdfNum$asr_q103_p+ASRdfNum$asr_q107_p+ASRdfNum$asr_q112_p+ASRdfNum$asr_q113_p
+
+ASRWithdrawn=ASRdfNum$asr_q25_p+ASRdfNum$asr_q30_p+ASRdfNum$asr_q42_p+ASRdfNum$asr_q48_p+ASRdfNum$asr_q60_p+ASRdfNum$asr_q65_p+ASRdfNum$asr_q67_p+ASRdfNum$asr_q69_p+ASRdfNum$asr_q111_p
+
+ASRSomatic=ASRdfNum$asr_q51_p+ASRdfNum$asr_q56a_p+ASRdfNum$asr_q56b_p+ASRdfNum$asr_q56c_p+ASRdfNum$asr_q56e_p+ASRdfNum$asr_q56f_p+ASRdfNum$asr_q56g_p+ASRdfNum$asr_q56h_p+ASRdfNum$asr_q56i_p+ASRdfNum$asr_q100_p
+
+ASRThought=ASRdfNum$asr_q09_p+ASRdfNum$asr_q18_p+ASRdfNum$asr_q36_p+ASRdfNum$asr_q40_p+ASRdfNum$asr_q46_p+ASRdfNum$asr_q63_p+ASRdfNum$asr_q66_p+ASRdfNum$asr_q70_p+ASRdfNum$asr_q80_p+ASRdfNum$asr_q84_p+ASRdfNum$asr_q85_p+ASRdfNum$asr_q91_p
+
+ASRAttn=ASRdfNum$asr_q01_p+ASRdfNum$asr_q08_p+ASRdfNum$asr_q11_p+ASRdfNum$asr_q13_p+ASRdfNum$asr_q17_p+ASRdfNum$asr_q53_p+ASRdfNum$asr_q59_p+ASRdfNum$asr_q61_p+ASRdfNum$asr_q64_p+ASRdfNum$asr_q78_p+ASRdfNum$asr_q96_p+ASRdfNum$asr_q101_p+ASRdfNum$asr_q102_p+ASRdfNum$asr_q105_p+ASRdfNum$asr_q108_p+ASRdfNum$asr_q119_p+ASRdfNum$asr_q121_p
+
+ASRRulB=ASRdfNum$asr_q06_p+ASRdfNum$asr_q20_p+ASRdfNum$asr_q23_p+ASRdfNum$asr_q26_p+ASRdfNum$asr_q39_p+ASRdfNum$asr_q41_p+ASRdfNum$asr_q43_p+ASRdfNum$asr_q76_p+ASRdfNum$asr_q82_p+ASRdfNum$asr_q90_p+ASRdfNum$asr_q92_p+ASRdfNum$asr_q114_p+ASRdfNum$asr_q117_p+ASRdfNum$asr_q122_p
+
+ASRAggr=ASRdfNum$asr_q03_p+ASRdfNum$asr_q05_p+ASRdfNum$asr_q16_p+ASRdfNum$asr_q28_p+ASRdfNum$asr_q37_p+ASRdfNum$asr_q55_p+ASRdfNum$asr_q57_p+ASRdfNum$asr_q68_p+ASRdfNum$asr_q81_p+ASRdfNum$asr_q86_p+ASRdfNum$asr_q87_p+ASRdfNum$asr_q95_p+ASRdfNum$asr_q97_p+ASRdfNum$asr_q113_p+ASRdfNum$asr_q116_p+ASRdfNum$asr_q118_p+ASRdfNum$asr_q06_p+ASRdfNum$asr_q20_p+ASRdfNum$asr_q23_p+ASRdfNum$asr_q26_p+ASRdfNum$asr_q39_p+ASRdfNum$asr_q41_p+ASRdfNum$asr_q43_p+ASRdfNum$asr_q76_p+ASRdfNum$asr_q82_p+ASRdfNum$asr_q90_p+ASRdfNum$asr_q92_p+ASRdfNum$asr_q114_p+ASRdfNum$asr_q117_p+ASRdfNum$asr_q122_p
+
+# now internalizing and externalizing, to be equivalent with children
+ASRInt=ASRWithdrawn+ASRSomatic
+
+ASRExt=ASRAggr+ASRRulB
+# and subtract reverse score items because they were included in sum above, and modeling "happiness" as symmetric to "symptoms" seems like a strong assumption
+# reverse scored = face validity AND loading in expected direction
+ASRtotal=ASRtotal-ASRdfNum$asr_q02_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q04_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q15_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q73_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q80_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q88_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q106_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q109_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q123_p
+
+# merge in (first row is colnames)
+asr$parentPcount=c(NA,ASRtotal)
+asr$ASRAnxDepr=c(NA,ASRAnxDepr)
+asr$ASRWithdrawn=c(NA,ASRWithdrawn)
+asr$ASRSomatic=c(NA,ASRSomatic)
+asr$ASRThought=c(NA,ASRThought)
+asr$ASRAttn=c(NA,ASRAttn)
+asr$ASRAggr=c(NA,ASRAggr)
+asr$ASRRulB=c(NA,ASRRulB)
+asr$ASRInt=c(NA,ASRInt)
+asr$ASRExt=c(NA,ASRExt)
+#
+
+# fix asr age for merge
+asr$interview_age=as.numeric(asr$interview_age)/12
+```
+
+    ## Warning: NAs introduced by coercion
+
+``` r
+# set subjectkey to factor for merge
+asr$subjectkey<-as.factor(asr$subjectkey)
+
+# ensure none are missing
+paste0(length(unique(masterdf$subjectkey)))
+```
+
+    ## [1] "5214"
+
+``` r
+# collapse to just variables of interest to prevent duplicate variables
+asr=asr[,c('parentPcount','subjectkey','eventname','interview_age','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRInt','ASRExt')]
+# merge
+masterdf=merge(masterdf,asr,by=c('subjectkey','eventname','interview_age'))
+```
+
+    ## Warning in merge.data.frame(masterdf, asr, by = c("subjectkey", "eventname", :
+    ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
+    ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
+    ## 'interview_date.y', 'collection_title.y', 'collection_id.x', 'dataset_id.x',
+    ## 'src_subject_id.y', 'interview_date.x', 'collection_title.x',
+    ## 'collection_id.y', 'dataset_id.y', 'interview_date.y', 'collection_title.y' are
+    ## duplicated in the result
+
+``` r
+# ensure none are missing
+paste0(length(unique(masterdf$subjectkey)))
+```
+
+    ## [1] "5214"
+
+``` r
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Chunk 12 Handles participants TSV          ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in ParticipantsTSV for parent income and edu background
@@ -532,15 +676,18 @@ participantsTSV=participantsTSV[participantsTSV$parental_education!=888,]
 participantsTSV=participantsTSV[participantsTSV$parental_education!=777,]
 participantsTSV$parental_education<-as.ordered(participantsTSV$parental_education)
 
-# new merge and count
+
+### merge in for fam income and parent edu
 masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
 ```
 
     ## Warning in merge.data.frame(masterdf, participantsTSV, by = c("subjectkey", :
     ## column names 'collection_id.x', 'dataset_id.x', 'interview_date.x',
     ## 'collection_title.x', 'collection_id.y', 'dataset_id.y', 'src_subject_id.x',
-    ## 'interview_date.y', 'collection_title.y', 'src_subject_id.y' are duplicated in
-    ## the result
+    ## 'interview_date.y', 'collection_title.y', 'collection_id.x', 'dataset_id.x',
+    ## 'src_subject_id.y', 'interview_date.x', 'collection_title.x',
+    ## 'collection_id.y', 'dataset_id.y', 'interview_date.y', 'collection_title.y' are
+    ## duplicated in the result
 
 ``` r
 participantsTSVSubjs=length(unique(masterdf$subjectkey))
@@ -743,7 +890,7 @@ saveRDS(SCO_df,'~/gp_SCOe_masterdf.rds')
 
     ## Using subj as id variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
@@ -774,7 +921,7 @@ ggplot(startingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph
         legend.text = element_text(size=30),legend.title = element_blank())+scale_fill_manual(values = my_colors)
 ```
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
 # plot df is both with race labels
@@ -790,13 +937,13 @@ ggplot(endingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_o
         legend.text = element_text(size=30),legend.title = element_blank())+scale_fill_manual(values = my_colors)
 ```
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
 #### Chunk 14 prepares data for analysis of temporal precedence ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','Grades','income','sex','race_ethnicity','matched_group','eventname')
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','Grades','income','sex','race_ethnicity','matched_group','eventname','INR','NumPeeps','income','Pov_v2','cbcl_scr_syn_somatic_r')
 # eliminate rows with NAs and ensure none without two-timepoint data
 # variables of interest redux
 masterdf=masterdf[,c(variablesOfInterest)]
@@ -805,7 +952,7 @@ masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ]
 print(dim(masterdf))
 ```
 
-    ## [1] 9450   12
+    ## [1] 9450   17
 
 ``` r
 # and two-timepoint check
@@ -823,7 +970,7 @@ OutDFTmpPrec<-merge(df1,df2,by='subjectkey')
 print(dim(OutDFTmpPrec))
 ```
 
-    ## [1] 4725   23
+    ## [1] 4725   33
 
 ``` r
 # save it out
