@@ -32,7 +32,7 @@ masterdf$poverty=0
 masterdf$income<-as.numeric(masterdf$income)
 # poverty now defined in sample construction
 masterdf$poverty[masterdf$Pov_v2==1]=1
-masterdf$poverty=as.ordered(masterdf$poverty)
+masterdf$poverty=as.factor(masterdf$poverty)
 ### initialize cross-boot vectors
 # predicted derivatives: set to maximum value for ncol +1, as 0-maxvalue is 1 longer than maxvalue
 pMaxVal=max(masterdf$cbcl_scr_syn_totprob_r)
