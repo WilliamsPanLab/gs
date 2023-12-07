@@ -174,7 +174,40 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-####  Chunk 3   processes family ID   data  ####
+#### Chunk 3 processes adult mental health ####
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+
+### LOAD in ASR data
+asr=read.delim('~/Downloads/Package_1210940/pasr01.txt',na.strings=c("","NA"))
+# merge
+masterdf<-merge(masterdf,asr,by=c('subjectkey','eventname','interview_age','sex'))
+# check for populated data at BOTH timepoints
+ColsOfInt=asr[,c(11:141)]
+ASRVarsOfInt=colnames(ColsOfInt)
+# only use subjects with both timepoints as complete cases
+subjs=unique(masterdf$subjectkey)
+for (s in subjs){
+  # if there are less than two complete cases of the variables of interest
+  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(ASRVarsOfInt)]))<2){
+    subjs=subjs[subjs!=s]
+  }
+}
+
+masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+
+# full losses counted after asr count chunk, but note one participant is probably lost here just from merge
+asrSubjs=length(unique(masterdf$subjectkey))
+dif=gradesSubjs-asrSubjs
+print(paste0(dif,' participants lost from needing ASR at both timepoints'))
+
+# included subjs df
+includedSubjects$ASR=0
+includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$ASR=1
+```
+
+```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+####  Chunk 4   processes family ID   data  ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # load in acs file for rel_family_ID
@@ -197,22 +230,29 @@ includedSubjects$acs=0
 includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$acs=1
 # print data volume
 print(acsSubjs)
-dif=gradesSubjs-acsSubjs
+dif=asrSubjs-acsSubjs
 print(paste0(dif,' participants lost from ACS merge for family ID'))
-
 ```
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-####   Chunk 4 processes cognitive data    ####
+### This  (short)  chunk formats   cbcl data ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
+### CLEAN data
 # subjectkey as factor
 masterdf$subjectkey<-as.factor(masterdf$subjectkey)
 # convert cbcl scores to numeric
 masterdf$cbcl_scr_syn_totprob_r<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)
 masterdf$cbcl_scr_syn_internal_r<-as.numeric(masterdf$cbcl_scr_syn_internal_r)
 masterdf$cbcl_scr_syn_external_r<-as.numeric(masterdf$cbcl_scr_syn_external_r)
+
+```
+
+```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+####   Chunk 6 processes cognitive data    ####
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 #### LOAD in cognitive data
 nihCog=read.delim('~/Downloads/Package_1210940/abcd_tbss01.txt')
@@ -237,7 +277,7 @@ masterdf$interview_age<-as.numeric(masterdf$interview_age)/12
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Chunk 5 preps for cognition factorization ###
+## Chunk 7 preps for cognition factorization ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # use thompson 2019 recreation of non nih-tb measures
@@ -289,9 +329,9 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CogBot
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-###  Chunk 6 preps by selecting 1 per family ###
+###  Chunk 8 preps by selecting 1 per family ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-# one family member per family to facilitate random sample
+# finish cleaning data for sherlock runs: one family member per family to facilitate random sample
 masterdf$id_fam = NULL
 # default value of family size (# of children in abcd study)
 masterdf$fam_size = 1
@@ -344,7 +384,7 @@ pcaDf<-masterdf[,pcVars]
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-### Chunk 7:   cognition factorization       ###
+### Chunk 9: it runs cognition factorization ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # derive pcs
@@ -364,7 +404,7 @@ masterdf$g<-Yextended$g
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Chunk 8 subjects with data at both timepoints##
+## Chunk 10 subjects with data at both timepoints##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # exclude subjs without data for both timepoints
@@ -382,8 +422,76 @@ print(paste0(dif,' rows lost from only using subjs with both timepoints'))
 ```
 
 ```{r}
+
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Chunk 9 Handles participants TSV          ##
+## Chunk 11 calculates adult mental health    ##
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+# make count version of adult P
+ASRdfNum<-as.data.frame(lapply(asr[-1,11:141],as.numeric))
+ASRtotal=rowSums(ASRdfNum)
+
+ASRAnxDepr=ASRdfNum$asr_q12_p+ASRdfNum$asr_q13_p+ASRdfNum$asr_q14_p+ASRdfNum$asr_q22_p+ASRdfNum$asr_q31_p+ASRdfNum$asr_q33_p+ASRdfNum$asr_q34_p+ASRdfNum$asr_q35_p+ASRdfNum$asr_q45_p+ASRdfNum$asr_q47_p+ASRdfNum$asr_q50_p+ASRdfNum$asr_q71_p+ASRdfNum$asr_q91_p+ASRdfNum$asr_q103_p+ASRdfNum$asr_q107_p+ASRdfNum$asr_q112_p+ASRdfNum$asr_q113_p
+
+ASRWithdrawn=ASRdfNum$asr_q25_p+ASRdfNum$asr_q30_p+ASRdfNum$asr_q42_p+ASRdfNum$asr_q48_p+ASRdfNum$asr_q60_p+ASRdfNum$asr_q65_p+ASRdfNum$asr_q67_p+ASRdfNum$asr_q69_p+ASRdfNum$asr_q111_p
+
+ASRSomatic=ASRdfNum$asr_q51_p+ASRdfNum$asr_q56a_p+ASRdfNum$asr_q56b_p+ASRdfNum$asr_q56c_p+ASRdfNum$asr_q56e_p+ASRdfNum$asr_q56f_p+ASRdfNum$asr_q56g_p+ASRdfNum$asr_q56h_p+ASRdfNum$asr_q56i_p+ASRdfNum$asr_q100_p
+
+ASRThought=ASRdfNum$asr_q09_p+ASRdfNum$asr_q18_p+ASRdfNum$asr_q36_p+ASRdfNum$asr_q40_p+ASRdfNum$asr_q46_p+ASRdfNum$asr_q63_p+ASRdfNum$asr_q66_p+ASRdfNum$asr_q70_p+ASRdfNum$asr_q80_p+ASRdfNum$asr_q84_p+ASRdfNum$asr_q85_p+ASRdfNum$asr_q91_p
+
+ASRAttn=ASRdfNum$asr_q01_p+ASRdfNum$asr_q08_p+ASRdfNum$asr_q11_p+ASRdfNum$asr_q13_p+ASRdfNum$asr_q17_p+ASRdfNum$asr_q53_p+ASRdfNum$asr_q59_p+ASRdfNum$asr_q61_p+ASRdfNum$asr_q64_p+ASRdfNum$asr_q78_p+ASRdfNum$asr_q96_p+ASRdfNum$asr_q101_p+ASRdfNum$asr_q102_p+ASRdfNum$asr_q105_p+ASRdfNum$asr_q108_p+ASRdfNum$asr_q119_p+ASRdfNum$asr_q121_p
+
+ASRRulB=ASRdfNum$asr_q06_p+ASRdfNum$asr_q20_p+ASRdfNum$asr_q23_p+ASRdfNum$asr_q26_p+ASRdfNum$asr_q39_p+ASRdfNum$asr_q41_p+ASRdfNum$asr_q43_p+ASRdfNum$asr_q76_p+ASRdfNum$asr_q82_p+ASRdfNum$asr_q90_p+ASRdfNum$asr_q92_p+ASRdfNum$asr_q114_p+ASRdfNum$asr_q117_p+ASRdfNum$asr_q122_p
+
+ASRAggr=ASRdfNum$asr_q03_p+ASRdfNum$asr_q05_p+ASRdfNum$asr_q16_p+ASRdfNum$asr_q28_p+ASRdfNum$asr_q37_p+ASRdfNum$asr_q55_p+ASRdfNum$asr_q57_p+ASRdfNum$asr_q68_p+ASRdfNum$asr_q81_p+ASRdfNum$asr_q86_p+ASRdfNum$asr_q87_p+ASRdfNum$asr_q95_p+ASRdfNum$asr_q97_p+ASRdfNum$asr_q113_p+ASRdfNum$asr_q116_p+ASRdfNum$asr_q118_p+ASRdfNum$asr_q06_p+ASRdfNum$asr_q20_p+ASRdfNum$asr_q23_p+ASRdfNum$asr_q26_p+ASRdfNum$asr_q39_p+ASRdfNum$asr_q41_p+ASRdfNum$asr_q43_p+ASRdfNum$asr_q76_p+ASRdfNum$asr_q82_p+ASRdfNum$asr_q90_p+ASRdfNum$asr_q92_p+ASRdfNum$asr_q114_p+ASRdfNum$asr_q117_p+ASRdfNum$asr_q122_p
+
+# now internalizing and externalizing, to be equivalent with children
+ASRInt=ASRWithdrawn+ASRSomatic
+
+ASRExt=ASRAggr+ASRRulB
+# and subtract reverse score items because they were included in sum above, and modeling "happiness" as symmetric to "symptoms" seems like a strong assumption
+# reverse scored = face validity AND loading in expected direction
+ASRtotal=ASRtotal-ASRdfNum$asr_q02_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q04_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q15_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q73_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q80_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q88_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q106_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q109_p
+ASRtotal=ASRtotal-ASRdfNum$asr_q123_p
+
+# merge in (first row is colnames)
+asr$parentPcount=c(NA,ASRtotal)
+asr$ASRAnxDepr=c(NA,ASRAnxDepr)
+asr$ASRWithdrawn=c(NA,ASRWithdrawn)
+asr$ASRSomatic=c(NA,ASRSomatic)
+asr$ASRThought=c(NA,ASRThought)
+asr$ASRAttn=c(NA,ASRAttn)
+asr$ASRAggr=c(NA,ASRAggr)
+asr$ASRRulB=c(NA,ASRRulB)
+asr$ASRInt=c(NA,ASRInt)
+asr$ASRExt=c(NA,ASRExt)
+#
+
+# fix asr age for merge
+asr$interview_age=as.numeric(asr$interview_age)/12
+# set subjectkey to factor for merge
+asr$subjectkey<-as.factor(asr$subjectkey)
+
+# ensure none are missing
+paste0(length(unique(masterdf$subjectkey)))
+# collapse to just variables of interest to prevent duplicate variables
+asr=asr[,c('parentPcount','subjectkey','eventname','interview_age','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRInt','ASRExt')]
+# merge
+masterdf=merge(masterdf,asr,by=c('subjectkey','eventname','interview_age'))
+# ensure none are missing
+paste0(length(unique(masterdf$subjectkey)))
+
+```
+
+```{r}
+###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+## Chunk 12 Handles participants TSV          ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in ParticipantsTSV for parent income and edu background
@@ -427,7 +535,8 @@ participantsTSV=participantsTSV[participantsTSV$parental_education!=888,]
 participantsTSV=participantsTSV[participantsTSV$parental_education!=777,]
 participantsTSV$parental_education<-as.ordered(participantsTSV$parental_education)
 
-# new merge and count
+
+### merge in for fam income and parent edu
 masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
 participantsTSVSubjs=length(unique(masterdf$subjectkey))
 # add to included subjs DF
@@ -702,7 +811,7 @@ ggplot(endingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_o
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
 #### Chunk 14 prepares data for analysis of temporal precedence ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','Grades','income','sex','race_ethnicity','matched_group','eventname')
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','Grades','income','sex','race_ethnicity','matched_group','eventname','INR','NumPeeps','income','Pov_v2','cbcl_scr_syn_somatic_r')
 # eliminate rows with NAs and ensure none without two-timepoint data
 # variables of interest redux
 masterdf=masterdf[,c(variablesOfInterest)]
@@ -755,4 +864,65 @@ t.test(pBV$cbcl_scr_syn_totprob_r,npBV$cbcl_scr_syn_totprob_r)
 p2=subset(df2,poverty==1)
 np2=subset(df2,poverty==0)
 t.test(p2$cbcl_scr_syn_totprob_r,np2$cbcl_scr_syn_totprob_r)
+```
+
+```{r}
+# slightly more complex characterization: linear interactions with numpeeps, income, inr and cbcl scores on g
+# base models
+
+
+df1$cbcl_scr_syn_somatic_r<-as.numeric(df1$cbcl_scr_syn_somatic_r)
+df2$cbcl_scr_syn_somatic_r<-as.numeric(df2$cbcl_scr_syn_somatic_r)
+
+df1$Pov_v2<-as.factor(df1$Pov_v2)
+df2$Pov_v2<-as.factor(df2$Pov_v2)
+masterdf$Pov_v2<-as.factor(masterdf$Pov_v2)
+
+modelP_bv1<-gam(g~s(interview_age,k=4)+s(cbcl_scr_syn_internal_r,k=4)+s(ASRInt,k=4)+Pov_v2,data=masterdf)
+modelP_bv2<-gam(g~s(interview_age,k=4)+s(cbcl_scr_syn_internal_r,k=4)+s(ASRInt,k=4)+ti(cbcl_scr_syn_internal_r,ASRInt)+Pov_v2,data=masterdf)
+anova.gam(modelP_bv1,modelP_bv2,test = 'Chisq')
+modelP_bv2_2<-gam(g~s(interview_age,k=4)+s(cbcl_scr_syn_internal_r,k=4)+s(ASRInt,k=4)+ti(cbcl_scr_syn_internal_r,ASRInt,by=Pov_v2)+Pov_v2,data=masterdf)
+anova.gam(modelP_bv2,modelP_bv2_2,test = 'Chisq')
+# visualize version of the model
+modelP_bv2_2_povIntercept<-gam(g~te(cbcl_scr_syn_internal_r,ASRInt,by=Pov_v2)+s(interview_age,k=4)+Pov_v2,data=masterdf)
+modelP_bv2_2_NopovIntercept<-gam(g~te(cbcl_scr_syn_internal_r,ASRInt,by=Pov_v2)+s(interview_age,k=4),data=masterdf)
+
+gg_tensor(modelP_bv2_2)
+visreg(modelP_bv2_2)
+```
+
+```{r}
+summary(modelP_bv2_2)
+fvisgam(modelP_bv2_2_povIntercept,view=c("cbcl_scr_syn_internal_r","ASRInt"),cond=list(Pov_v2="0"),main="NonPov")
+fvisgam(modelP_bv2_2_povIntercept,view=c("cbcl_scr_syn_internal_r","ASRInt"),cond=list(Pov_v2="1"),main="Pov")
+gg_tensor(modelP_bv2_2_povIntercept)
+fvisgam(modelP_bv2_2_NopovIntercept,view=c("cbcl_scr_syn_internal_r","ASRInt"),cond=list(Pov_v2="0"),main="NonPov")
+fvisgam(modelP_bv2_2_NopovIntercept,view=c("cbcl_scr_syn_internal_r","ASRInt"),cond=list(Pov_v2="1"),main="Pov")
+gg_tensor(modelP_bv2_2_NopovIntercept)
+```
+
+```{r}
+# model in sep. dfs to see range afforded by subsample
+modelP_bv2_2_p<-gam(g~te(cbcl_scr_syn_internal_r,ASRInt,k=12)+s(interview_age,k=4),data=masterdf[masterdf$Pov_v2==1,])
+modelP_bv2_2_np<-gam(g~te(cbcl_scr_syn_internal_r,ASRInt,k=12)+s(interview_age,k=4),data=masterdf[masterdf$Pov_v2==0,])
+gg_tensor(modelP_bv2_2_p)
+gg_tensor(modelP_bv2_2_np)
+
+```
+
+
+
+
+
+
+
+
+modelI_bv<-gam(g~s(interview_age)+s(cbcl_scr_syn_internal_r,by=Pov_v2),data=df1)
+
+modelE_bv<-gam(g~s(interview_age)+s(cbcl_scr_syn_external_r,by=Pov_v2),data=df1)
+
+visreg(modelP_bv, "cbcl_scr_syn_totprob_r", by="Pov_v2",ylim=c(-3,3))
+visreg(modelI_bv, "cbcl_scr_syn_internal_r", by="Pov_v2",ylim=c(-3,3))
+visreg(modelE_bv, "cbcl_scr_syn_external_r", by="Pov_v2",ylim=c(-3,3))
+
 ```
