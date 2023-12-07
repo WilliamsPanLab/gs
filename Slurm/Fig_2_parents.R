@@ -207,12 +207,11 @@ rulMax=rep(0,10000)
 aggMax=rep(0,10000)
 # finally, add pov classification (v2)
 masterdf$poverty=0
-masterdf$income<-as.numeric(masterdf$income)
 # poverty now defined in sample construction
 masterdf$poverty[masterdf$Pov_v2==1]=1
 masterdf$poverty=as.factor(masterdf$poverty)
 # loop over manual bootstrap
-for (b in 1:10000){
+for (b in 1:10){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -228,8 +227,8 @@ for (b in 1:10000){
         # get count poverty in this boot
         Povcount=length(which(bootSamp$poverty==1))
         # randomly assign Povcount people to pseudopoverty
-        bootSamp$psuedopoverty=0
-        bootSamp$psuedopoverty[sample(1:dim(bootSamp)[1],Povcount)]=1
+        bootSamp$pseudopoverty=0
+        bootSamp$pseudopoverty[sample(1:dim(bootSamp)[1],Povcount)]=1
         # make a df that is just the same number of kids in poverty, but actually from the non-poverty group. The point is to see if we can recover g~p slope in a an equivalent number of non-poverty kids
         bootSamp$pseudopoverty2=0
         bootSamp$pseudopoverty2[sample(which(bootSamp$poverty==0),Povcount)]=1
@@ -484,37 +483,37 @@ for (b in 1:10000){
 	asrattDiff[b]=AIC(asrattgAge_pov)-AIC(asrattgAge_povint)
 	asrrulDiff[b]=AIC(asrrulgAge_pov)-AIC(asrrulgAge_povint)
 	asraggDiff[b]=AIC(asragggAge_pov)-AIC(asragggAge_povint)
-	asrPDiff_psuedo[b]=AIC(asrpgAge_povpseudo)-AIC(asrpgAge_povpseudoint)
-	asrintDiff_psuedo[b]=AIC(asrintgAge_povpseudo)-AIC(asrintgAge_povpseudoint)
-	asrextDiff_psuedo[b]=AIC(asrextgAge_povpseudo)-AIC(asrextgAge_povpseudoint)
-	asrsomDiff_psuedo[b]=AIC(asrsomgAge_povpseudo)-AIC(asrsomgAge_povpseudoint)
-	asranxDiff_psuedo[b]=AIC(asranxgAge_povpseudo)-AIC(asranxgAge_povpseudoint)
-	asrthoDiff_psuedo[b]=AIC(asrthogAge_povpseudo)-AIC(asrthogAge_povpseudoint)
-	asrwitDiff_psuedo[b]=AIC(asrwitgAge_povpseudo)-AIC(asrwitgAge_povpseudoint)
-	asrattDiff_psuedo[b]=AIC(asrattgAge_povpseudo)-AIC(asrattgAge_povpseudoint)
-	asrrulDiff_psuedo[b]=AIC(asrrulgAge_povpseudo)-AIC(asrrulgAge_povpseudoint)
-	asraggDiff_psuedo[b]=AIC(asragggAge_povpseudo)-AIC(asragggAge_povpseudoint)
+	asrPDiffPseudo[b]=AIC(asrpgAge_povpseudo)-AIC(asrpgAge_povpseudoint)
+	asrintDiffPseudo[b]=AIC(asrintgAge_povpseudo)-AIC(asrintgAge_povpseudoint)
+	asrextDiffPseudo[b]=AIC(asrextgAge_povpseudo)-AIC(asrextgAge_povpseudoint)
+	asrsomDiffPseudo[b]=AIC(asrsomgAge_povpseudo)-AIC(asrsomgAge_povpseudoint)
+	asranxDiffPseudo[b]=AIC(asranxgAge_povpseudo)-AIC(asranxgAge_povpseudoint)
+	asrthoDiffPseudo[b]=AIC(asrthogAge_povpseudo)-AIC(asrthogAge_povpseudoint)
+	asrwitDiffPseudo[b]=AIC(asrwitgAge_povpseudo)-AIC(asrwitgAge_povpseudoint)
+	asrattDiffPseudo[b]=AIC(asrattgAge_povpseudo)-AIC(asrattgAge_povpseudoint)
+	asrrulDiffPseudo[b]=AIC(asrrulgAge_povpseudo)-AIC(asrrulgAge_povpseudoint)
+	asraggDiffPseudo[b]=AIC(asragggAge_povpseudo)-AIC(asragggAge_povpseudoint)
 	# get adjusted r^2 diffferences
-	asrPDiffAdj[b]=summary(asrpgAge_povint)$adj.r.squared-summary(asrpgAge_pov)$adj.r.squared
-	asrintDiffAdj[b]=summary(asrintgAge_povint)$adj.r.squared-summary(asrintgAge_pov)$adj.r.squared
-	asrextDiffAdj[b]=summary(asrextgAge_povint)$adj.r.squared-summary(asrextgAge_pov)$adj.r.squared
-	asrsomDiffAdj[b]=summary(asrsomgAge_povint)$adj.r.squared-summary(asrsomgAge_pov)$adj.r.squared
-	asranxDiffAdj[b]=summary(asranxgAge_povint)$adj.r.squared-summary(asranxgAge_pov)$adj.r.squared
-	asrthoDiffAdj[b]=summary(asrthogAge_povint)$adj.r.squared-summary(asrthogAge_pov)$adj.r.squared
-	asrwitDiffAdj[b]=summary(asrwitgAge_povint)$adj.r.squared-summary(asrwitgAge_pov)$adj.r.squared
-	asrattDiffAdj[b]=summary(asrattgAge_povint)$adj.r.squared-summary(asrattgAge_pov)$adj.r.squared
-	asrrulDiffAdj[b]=summary(asrrulgAge_povint)$adj.r.squared-summary(asrrulgAge_pov)$adj.r.squared
-	asraggDiffAdj[b]=summary(asragggAge_povint)$adj.r.squared-summary(asragggAge_pov)$adj.r.squared
-	asrPDiffAdj_psuedo[b]=summary(asrpgAge_povpseudoint)$adj.r.squared-summary(asrpgAge_povpseudo)$adj.r.squared
-	asrintDiffAdj_psuedo[b]=summary(asrintgAge_povpseudoint)$adj.r.squared-summary(asrintgAge_povpseudo)$adj.r.squared
-	asrextDiffAdj_psuedo[b]=summary(asrextgAge_povpseudoint)$adj.r.squared-summary(asrextgAge_povpseudo)$adj.r.squared
-	asrsomDiffAdj_psuedo[b]=summary(asrsomgAge_povpseudoint)$adj.r.squared-summary(asrsomgAge_povpseudo)$adj.r.squared
-	asranxDiffAdj_psuedo[b]=summary(asranxgAge_povpseudoint)$adj.r.squared-summary(asranxgAge_povpseudo)$adj.r.squared
-	asrthoDiffAdj_psuedo[b]=summary(asrthogAge_povpseudoint)$adj.r.squared-summary(asrthogAge_povpseudo)$adj.r.squared
-	asrwitDiffAdj_psuedo[b]=summary(asrwitgAge_povpseudoint)$adj.r.squared-summary(asrwitgAge_povpseudo)$adj.r.squared
-	asrattDiffAdj_psuedo[b]=summary(asrattgAge_povpseudoint)$adj.r.squared-summary(asrattgAge_povpseudo)$adj.r.squared
-	asrrulDiffAdj_psuedo[b]=summary(asrrulgAge_povpseudoint)$adj.r.squared-summary(asrrulgAge_povpseudo)$adj.r.squared
-	asraggDiffAdj_psuedo[b]=summary(asragggAge_povpseudoint)$adj.r.squared-summary(asragggAge_povpseudo)$adj.r.squared
+	asrPDiffAdj[b]=summary(asrpgAge_povint)$r.sq-summary(asrpgAge_pov)$r.sq
+	asrintDiffAdj[b]=summary(asrintgAge_povint)$r.sq-summary(asrintgAge_pov)$r.sq
+	asrextDiffAdj[b]=summary(asrextgAge_povint)$r.sq-summary(asrextgAge_pov)$r.sq
+	asrsomDiffAdj[b]=summary(asrsomgAge_povint)$r.sq-summary(asrsomgAge_pov)$r.sq
+	asranxDiffAdj[b]=summary(asranxgAge_povint)$r.sq-summary(asranxgAge_pov)$r.sq
+	asrthoDiffAdj[b]=summary(asrthogAge_povint)$r.sq-summary(asrthogAge_pov)$r.sq
+	asrwitDiffAdj[b]=summary(asrwitgAge_povint)$r.sq-summary(asrwitgAge_pov)$r.sq
+	asrattDiffAdj[b]=summary(asrattgAge_povint)$r.sq-summary(asrattgAge_pov)$r.sq
+	asrrulDiffAdj[b]=summary(asrrulgAge_povint)$r.sq-summary(asrrulgAge_pov)$r.sq
+	asraggDiffAdj[b]=summary(asragggAge_povint)$r.sq-summary(asragggAge_pov)$r.sq
+	asrPDiffAdjPseudo[b]=summary(asrpgAge_povpseudoint)$r.sq-summary(asrpgAge_povpseudo)$r.sq
+	asrintDiffAdjPseudo[b]=summary(asrintgAge_povpseudoint)$r.sq-summary(asrintgAge_povpseudo)$r.sq
+	asrextDiffAdjPseudo[b]=summary(asrextgAge_povpseudoint)$r.sq-summary(asrextgAge_povpseudo)$r.sq
+	asrsomDiffAdjPseudo[b]=summary(asrsomgAge_povpseudoint)$r.sq-summary(asrsomgAge_povpseudo)$r.sq
+	asranxDiffAdjPseudo[b]=summary(asranxgAge_povpseudoint)$r.sq-summary(asranxgAge_povpseudo)$r.sq
+	asrthoDiffAdjPseudo[b]=summary(asrthogAge_povpseudoint)$r.sq-summary(asrthogAge_povpseudo)$r.sq
+	asrwitDiffAdjPseudo[b]=summary(asrwitgAge_povpseudoint)$r.sq-summary(asrwitgAge_povpseudo)$r.sq
+	asrattDiffAdjPseudo[b]=summary(asrattgAge_povpseudoint)$r.sq-summary(asrattgAge_povpseudo)$r.sq
+	asrrulDiffAdjPseudo[b]=summary(asrrulgAge_povpseudoint)$r.sq-summary(asrrulgAge_povpseudo)$r.sq
+	asraggDiffAdjPseudo[b]=summary(asragggAge_povpseudoint)$r.sq-summary(asragggAge_povpseudo)$r.sq
 	# make new predict dataframes with poverty variable
 	predictDFasrp$poverty=1
 	predictDFasrint$poverty=1
@@ -587,8 +586,8 @@ for (b in 1:10000){
 outdf=data.frame(asrPDiff,asrintDiff,asrextDiff,asrsomDiff,asranxDiff,asrthoDiff,asrwitDiff,asrattDiff,asrrulDiff,asraggDiff,asrPDiffAdj,asrintDiffAdj,asrextDiffAdj,asrsomDiffAdj,asranxDiffAdj,asrthoDiffAdj,asrwitDiffAdj,asrattDiffAdj,asrrulDiffAdj,asraggDiffAdj)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_asr.rds')
 # save out pseudo versions for comparison if needed
-outdf=data.frame(asrPDiff_psuedo,asrintDiff_psuedo,asrextDiff_psuedo,asrsomDiff_psuedo,asranxDiff_psuedo,asrthoDiff_psuedo,asrwitDiff_psuedo,asrattDiff_psuedo,asrrulDiff_psuedo,asraggDiff_psuedo,asrPDiffAdj_psuedo,asrintDiffAdj_psuedo,asrextDiffAdj_psuedo,asrsomDiffAdj_psuedo,asranxDiffAdj_psuedo,asrthoDiffAdj_psuedo,asrwitDiffAdj_psuedo,asrattDiffAdj_psuedo,asrrulDiffAdj_psuedo,asraggDiffAdj_psuedo)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_asr_psuedo.rds')
+outdf=data.frame(asrPDiffPseudo,asrintDiffPseudo,asrextDiffPseudo,asrsomDiffPseudo,asranxDiffPseudo,asrthoDiffPseudo,asrwitDiffPseudo,asrattDiffPseudo,asrrulDiffPseudo,asraggDiffPseudo,asrPDiffAdjPseudo,asrintDiffAdjPseudo,asrextDiffAdjPseudo,asrsomDiffAdjPseudo,asranxDiffAdjPseudo,asrthoDiffAdjPseudo,asrwitDiffAdjPseudo,asrattDiffAdjPseudo,asrrulDiffAdjPseudo,asraggDiffAdjPseudo)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_asrPseudo.rds')
 # save out poverty and nonpoverty fits
 outdf=data.frame(asrPFitPov,asrPFitNonPov,asrintFitPov,asrintFitNonPov,asrextFitPov,asrextFitNonPov,asrsomFitPov,asrsomFitNonPov,asranxFitPov,asranxFitNonPov,asrthoFitPov,asrthoFitNonPov,asrwitFitPov,asrwitFitNonPov,asrattFitPov,asrattFitNonPov,asrrulFitPov,asrrulFitNonPov,asraggFitPov,asraggFitNonPov)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_asr_pNp.rds')

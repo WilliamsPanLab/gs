@@ -26,10 +26,8 @@ lenDF=dim(masterdf)[1]
 # interactions to be tested: p*sex, p*poverty, p*sex*poverty
 # convert all cbcl scores to numeric
 masterdf$cbcl_scr_syn_totprob_r=as.numeric(masterdf$cbcl_scr_syn_totprob_r)
-# sex (g in for x to get co-pilot around its NSFW filter) and poverty to factors
-masterdf$seg<-as.ordered(masterdf$sex)
+# set poverty variable
 masterdf$poverty=0
-masterdf$income<-as.numeric(masterdf$income)
 # poverty now defined in sample construction
 masterdf$poverty[masterdf$Pov_v2==1]=1
 masterdf$poverty=as.factor(masterdf$poverty)
