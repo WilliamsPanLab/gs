@@ -747,7 +747,7 @@ saveRDS(data.frame(Pbc,Pc,Ibc,Ic,Ebc,Ec,AnxBc,AnxC,ThoBc,ThoC,WitBc,WitC,SomBc,S
 
 ```{r, echo=FALSE, fig.dim = c(25, 7)}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-#### Chunk 11 plots data missingness       #####
+#### Chunk 11 plots data missingness      ######
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # melt the plot df to get in proper format
