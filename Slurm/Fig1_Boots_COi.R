@@ -21,9 +21,9 @@ lenDF=dim(masterdf)[1]
 # convert all cbcl scores to numeric
 masterdf$cbcl_scr_syn_internal_r=as.numeric(masterdf$cbcl_scr_syn_internal_r)
 # initialize output betas
-pBeta=rep(0,1000)
+pBeta=rep(0,10000)
 # loop over manual bootstrap
-for (b in 1:1000){
+for (b in 1:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
