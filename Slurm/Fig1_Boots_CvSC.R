@@ -6,7 +6,7 @@ library(stringr)
 library(ggplot2)
 
 # load in data
-masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/gp_COe_masterdf.rds')
+masterdf=readRDS('/oak/stanford/groups/leanew1/users/apines/data/gp/gp_masterdf.rds')
 # FYI
 print('dimensions of dataframe')
 dim(masterdf)
@@ -162,8 +162,8 @@ for (b in 1:10000){
 	anxBelowBeta=lm(g~cbcl_scr_syn_anxdep_r+interview_age,data=anxBelowDF)$coefficients[2]
 	thoAboveBeta=lm(g~cbcl_scr_syn_thought_r+interview_age,data=thoAboveDF)$coefficients[2]
 	thoBelowBeta=lm(g~cbcl_scr_syn_thought_r+interview_age,data=thoBelowDF)$coefficients[2]
-	witAboveBeta=lm(g~cbcl_scr_syn_withdrawn_r+interview_age,data=witAboveDF)$coefficients[2]
-	witBelowBeta=lm(g~cbcl_scr_syn_withdrawn_r+interview_age,data=witBelowDF)$coefficients[2]
+	witAboveBeta=lm(g~cbcl_scr_syn_withdep_r+interview_age,data=witAboveDF)$coefficients[2]
+	witBelowBeta=lm(g~cbcl_scr_syn_withdep_r+interview_age,data=witBelowDF)$coefficients[2]
 	socAboveBeta=lm(g~cbcl_scr_syn_social_r+interview_age,data=socAboveDF)$coefficients[2]
 	socBelowBeta=lm(g~cbcl_scr_syn_social_r+interview_age,data=socBelowDF)$coefficients[2]
 	attAboveBeta=lm(g~cbcl_scr_syn_attention_r+interview_age,data=attAboveDF)$coefficients[2]
@@ -186,17 +186,17 @@ for (b in 1:10000){
 	aggBetaDiff[b]=aggBelowBeta-aggAboveBeta
 }
 # add real differences as 10,001th value
-pBetaDiff[10001]=pDiff
-intBetaDiff[10001]=intDiff
-extBetaDiff[10001]=extDiff
-somBetaDiff[10001]=somDiff
-anxBetaDiff[10001]=anxDiff
-thoBetaDiff[10001]=thoDiff
-witBetaDiff[10001]=witDiff
-socBetaDiff[10001]=socDiff
-attBetaDiff[10001]=attDiff
-rulBetaDiff[10001]=rulDiff
-aggBetaDiff[10001]=aggDiff
+pBetaDiff[10001]=Pdiff
+intBetaDiff[10001]=Intdiff
+extBetaDiff[10001]=Extdiff
+somBetaDiff[10001]=Somdiff
+anxBetaDiff[10001]=Anxdiff
+thoBetaDiff[10001]=Thodiff
+witBetaDiff[10001]=Witdiff
+socBetaDiff[10001]=Socdiff
+attBetaDiff[10001]=Attdiff
+rulBetaDiff[10001]=Ruldiff
+aggBetaDiff[10001]=Aggdiff
 # save out all difference vectors in one dataframe
 outdf=data.frame(pBetaDiff,intBetaDiff,extBetaDiff,somBetaDiff,anxBetaDiff,thoBetaDiff,witBetaDiff,socBetaDiff,attBetaDiff,rulBetaDiff,aggBetaDiff)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_diffs.rds')
