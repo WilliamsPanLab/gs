@@ -126,6 +126,15 @@ Aggdiff=AggsubBeta-AggClinBeta
 # for each permutation
 for (b in 1:10000){
 	print(b)
+	# get subjects to include in this bootstrap
+        BootSubjs=sample(subjs,numSubjs,replace=T)
+        ### inefficient but interpretable loop
+        # Create an empty dataframe to store the resampled observations
+        bootSamp <- data.frame()
+        for (j in 1:length(BootSubjs)){
+                subject_obs <- masterdf[masterdf$subjectkey == BootSubjs[j], ]
+                bootSamp <- rbind(bootSamp, subject_obs)
+        }
 	# make a random clin vs. subclin split based on real number of rows beneath and above thresholds
 	pAboveDF=masterdf[sample(1:nrow(masterdf),pAbove),]
 	pBelowDF=masterdf[sample(1:nrow(masterdf),pBelow),]
@@ -184,6 +193,7 @@ for (b in 1:10000){
 	attBetaDiff[b]=attBelowBeta-attAboveBeta
 	rulBetaDiff[b]=rulBelowBeta-rulAboveBeta
 	aggBetaDiff[b]=aggBelowBeta-aggAboveBeta
+	# now use bootstrap sample to record clin beta and subclin betas for this iteration
 }
 # add real differences as 10,001th value
 pBetaDiff[10001]=Pdiff
