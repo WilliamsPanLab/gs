@@ -833,7 +833,7 @@ ggplot(endingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_o
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
 #### Chunk 14 prepares data for analysis of temporal precedence ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','Grades','income','sex','race_ethnicity','matched_group','eventname','INR','NumPeeps','income','Pov_v2','cbcl_scr_syn_somatic_r')
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','Grades','income','sex','race_ethnicity','matched_group','eventname','INR','NumPeeps','income','Pov_v2','cbcl_scr_syn_somatic_r','parentPcount')
 # eliminate rows with NAs and ensure none without two-timepoint data
 # variables of interest redux
 masterdf=masterdf[,c(variablesOfInterest)]
