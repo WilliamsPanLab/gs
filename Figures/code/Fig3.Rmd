@@ -68,6 +68,113 @@ my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1
 
 ```
 
+```{r}
+# check out bootstrapped poverty evidence through difference in AIC (in this instance will be quanitied as diff AIC >0, more accurate might be actual difference in AIC vs. 10,000 null derivations)
+diff1=readRDS('~/Downloads/gpDiffBoots_asrPseudo1.rds')
+diff2=readRDS('~/Downloads/gpDiffBoots_asrPseudo2.rds')
+diff3=readRDS('~/Downloads/gpDiffBoots_asrPseudo3.rds')
+diff4=readRDS('~/Downloads/gpDiffBoots_asrPseudo4.rds')
+diff5=readRDS('~/Downloads/gpDiffBoots_asrPseudo5.rds')
+# combine
+diff1[2001:4000,]=diff2[2001:4000,]
+diff1[4001:6000,]=diff3[4001:6000,]
+diff1[6001:8000,]=diff4[6001:8000,]
+diff1[8001:10000,]=diff5[8001:10000,]
+# looks good, compare to full data AIC
+
+##### lil' section to mirror slurm calculations ##### §§§§§§§§§§§
+masterdf<-readRDS('~/gp_masterdf.rds')
+masterdf$poverty=0
+# poverty now defined in sample construction
+masterdf$poverty[masterdf$Pov_v2==1]=1
+masterdf$poverty=as.factor(masterdf$poverty)
+masterdf$ASR_anxdep=as.numeric(masterdf$ASRAnxDepr)
+masterdf$ASR_withdep=as.numeric(masterdf$ASRWithdrawn)
+masterdf$ASR_somatic=as.numeric(masterdf$ASRSomatic)
+masterdf$ASR_thought=as.numeric(masterdf$ASRThought)
+masterdf$ASR_attention=as.numeric(masterdf$ASRAttn)
+masterdf$ASR_aggressive=as.numeric(masterdf$ASRAggr)
+masterdf$ASR_rulebreak=as.numeric(masterdf$ASRRulB)
+masterdf$ASRInt=as.numeric(masterdf$ASRInt)
+masterdf$ASRExt=as.numeric(masterdf$ASRExt)
+#######            ----------------              ##### §§§§§§§§§§§
+
+# plot asr p versus null
+asrpgAge_pov=bam(g~s(parentPcount,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+asrpgAge_povint=bam(g~s(parentPcount,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(asrpgAge_pov)-AIC(asrpgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=asrPDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+
+# asr int vs. null
+asrintgAge_pov=bam(g~s(ASRInt,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+asrintgAge_povint=bam(g~s(ASRInt,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(asrintgAge_pov)-AIC(asrintgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=asrintDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+
+# asr ext vs. null
+asrextgAge_pov=bam(g~s(ASRExt,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+asrextgAge_povint=bam(g~s(ASRExt,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(asrextgAge_pov)-AIC(asrextgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=asrextDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+
+# asr som vs. null
+asrsomgAge_pov=bam(g~s(ASR_somatic,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+asrsomgAge_povint=bam(g~s(ASR_somatic,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(asrsomgAge_pov)-AIC(asrsomgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=asrsomDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+
+# asr anxdep vs. null
+asranxgAge_pov=bam(g~s(ASR_anxdep,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+asranxgAge_povint=bam(g~s(ASR_anxdep,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(asranxgAge_pov)-AIC(asranxgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=asranxDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+
+# asr tho vs. null
+asrthogAge_pov=bam(g~s(ASR_thought,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+asrthogAge_povint=bam(g~s(ASR_thought,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(asrthogAge_pov)-AIC(asrthogAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=asrthoDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+
+# asr withdep vs. null
+asrwithgAge_pov=bam(g~s(ASR_withdep,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+asrwithgAge_povint=bam(g~s(ASR_withdep,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(asrwithgAge_pov)-AIC(asrwithgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=asrwitDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+
+# asr attention vs. null
+asrattgAge_pov=bam(g~s(ASR_attention,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+asrattgAge_povint=bam(g~s(ASR_attention,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(asrattgAge_pov)-AIC(asrattgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=asrattDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+
+# asr rulebreak vs. null
+asrrulegAge_pov=bam(g~s(ASR_rulebreak,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+asrrulegAge_povint=bam(g~s(ASR_rulebreak,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(asrrulegAge_pov)-AIC(asrrulegAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=asrrulDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+
+# asr aggr vs. null
+asraggrgAge_pov=bam(g~s(ASR_aggressive,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+asraggrgAge_povint=bam(g~s(ASR_aggressive,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(asraggrgAge_pov)-AIC(asraggrgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=asraggDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+
+```
+
+```{r}
+# load in model fits
+
+```
 
 ```{r}
 # load in fits: ordered as follows:
