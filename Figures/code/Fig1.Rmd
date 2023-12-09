@@ -108,6 +108,35 @@ my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1
 ```
 
 ```{r}
+library(ggridges)
+# make plots of linear model comparison 
+df=readRDS('~/Downloads/gp_CvSC_diffs.rds')
+
+# Create a new data frame with the first 10,000 rows
+df_subset <- df[1:10000, ]
+
+# Melt the data frame for easier plotting
+df_melted <- reshape2::melt(df_subset)
+
+# Create a data frame with the 10,001st row for annotation
+df_10001 <- data.frame(variable = names(df), value = as.numeric(df[10001, ]))
+
+# Plot the distribution for each column with the 10,001st value marked distinctly
+ggplot(df_melted, aes(x = value, y = variable)) +
+  geom_density_ridges(rel_min_height=0.01) +
+  geom_point(data = df_10001, aes(x = value, y = variable), color = "red", size = 3) +
+  labs(title = "Distribution of Values with 10,001st Value Marked",
+       x = "Density",
+       y = "Columns")
+# manually derive p-values
+ps=NULL
+for (i in 1:11){
+  ps[i]=sum(abs(df_subset[,i])>abs(df_10001[i,2]))/10000
+}
+```
+
+
+```{r}
 # load in masterdf (saved out from sample construction)
 masterdf=readRDS('~/gp_masterdf.rds')
 # convert all cbcl scores to numeric

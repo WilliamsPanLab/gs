@@ -42,6 +42,29 @@ socBetaDiff=rep(0,10000)
 attBetaDiff=rep(0,10000)
 rulBetaDiff=rep(0,10000)
 aggBetaDiff=rep(0,10000)
+# and output distributions of clin and subclin betas
+pClinBeta=rep(0,10000)
+intClinBeta=rep(0,10000)
+extClinBeta=rep(0,10000)
+somClinBeta=rep(0,10000)
+anxClinBeta=rep(0,10000)
+thoClinBeta=rep(0,10000)
+witClinBeta=rep(0,10000)
+socClinBeta=rep(0,10000)
+attClinBeta=rep(0,10000)
+rulClinBeta=rep(0,10000)
+aggClinBeta=rep(0,10000)
+pSubclinBeta=rep(0,10000)
+intSubclinBeta=rep(0,10000)
+extSubclinBeta=rep(0,10000)
+somSubclinBeta=rep(0,10000)
+anxSubclinBeta=rep(0,10000)
+thoSubclinBeta=rep(0,10000)
+witSubclinBeta=rep(0,10000)
+socSubclinBeta=rep(0,10000)
+attSubclinBeta=rep(0,10000)
+rulSubclinBeta=rep(0,10000)
+aggSubclinBeta=rep(0,10000)
 # get number of subjects below and above cutoff for each cbcl factor
 pAbove=sum(masterdf$cbcl_scr_syn_totprob_r>CvSC$Pc)
 pBelow=sum(masterdf$cbcl_scr_syn_totprob_r<CvSC$Pbc)
@@ -194,6 +217,52 @@ for (b in 1:10000){
 	rulBetaDiff[b]=rulBelowBeta-rulAboveBeta
 	aggBetaDiff[b]=aggBelowBeta-aggAboveBeta
 	# now use bootstrap sample to record clin beta and subclin betas for this iteration
+	# make real clin vs. subclin split based on thresholds
+	pClinDF=bootSamp[bootSamp$cbcl_scr_syn_totprob_r>CvSC$Pc,]
+	pSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_totprob_r<CvSC$Pbc,]
+	intClinDF=bootSamp[bootSamp$cbcl_scr_syn_internal_r>CvSC$Ic,]
+	intSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_internal_r<CvSC$Ibc,]
+	extClinDF=bootSamp[bootSamp$cbcl_scr_syn_external_r>CvSC$Ec,]
+	extSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_external_r<CvSC$Ebc,]
+	somClinDF=bootSamp[bootSamp$cbcl_scr_syn_somatic_r>CvSC$SomC,]
+	somSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_somatic_r<CvSC$SomBc,]
+	anxClinDF=bootSamp[bootSamp$cbcl_scr_syn_anxdep_r>CvSC$AnxC,]
+	anxSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_anxdep_r<CvSC$AnxBc,]
+	thoClinDF=bootSamp[bootSamp$cbcl_scr_syn_thought_r>CvSC$ThC,]
+	thoSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_thought_r<CvSC$ThBc,]
+	witClinDF=bootSamp[bootSamp$cbcl_scr_syn_withdep_r>CvSC$WitC,]
+	witSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_withdep_r<CvSC$WitBc,]
+	socClinDF=bootSamp[bootSamp$cbcl_scr_syn_social_r>CvSC$SocC,]
+	socSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_social_r<CvSC$SocBc,]
+	attClinDF=bootSamp[bootSamp$cbcl_scr_syn_attention_r>CvSC$AttC,]
+	attSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_attention_r<CvSC$AttBc,]
+	rulClinDF=bootSamp[bootSamp$cbcl_scr_syn_rulebreak_r>CvSC$RulC,]
+	rulSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_rulebreak_r<CvSC$RulBc,]
+	aggClinDF=bootSamp[bootSamp$cbcl_scr_syn_aggressive_r>CvSC$AggC,]
+	aggSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_aggressive_r<CvSC$AggBc,]
+	# get clin and subclin betas
+	pClinBeta[b]=lm(g~cbcl_scr_syn_totprob_r+interview_age,data=pClinDF)$coefficients[2]
+	pSubclinBeta[b]=lm(g~cbcl_scr_syn_totprob_r+interview_age,data=pSubclinDF)$coefficients[2]
+	intClinBeta[b]=lm(g~cbcl_scr_syn_internal_r+interview_age,data=intClinDF)$coefficients[2]
+	intSubclinBeta[b]=lm(g~cbcl_scr_syn_internal_r+interview_age,data=intSubclinDF)$coefficients[2]
+	extClinBeta[b]=lm(g~cbcl_scr_syn_external_r+interview_age,data=extClinDF)$coefficients[2]
+	extSubclinBeta[b]=lm(g~cbcl_scr_syn_external_r+interview_age,data=extSubclinDF)$coefficients[2]
+	somClinBeta[b]=lm(g~cbcl_scr_syn_somatic_r+interview_age,data=somClinDF)$coefficients[2]
+	somSubclinBeta[b]=lm(g~cbcl_scr_syn_somatic_r+interview_age,data=somSubclinDF)$coefficients[2]
+	anxClinBeta[b]=lm(g~cbcl_scr_syn_anxdep_r+interview_age,data=anxClinDF)$coefficients[2]
+	anxSubclinBeta[b]=lm(g~cbcl_scr_syn_anxdep_r+interview_age,data=anxSubclinDF)$coefficients[2]
+	thoClinBeta[b]=lm(g~cbcl_scr_syn_thought_r+interview_age,data=thoClinDF)$coefficients[2]
+	thoSubclinBeta[b]=lm(g~cbcl_scr_syn_thought_r+interview_age,data=thoSubclinDF)$coefficients[2]
+	witClinBeta[b]=lm(g~cbcl_scr_syn_withdep_r+interview_age,data=witClinDF)$coefficients[2]
+	witSubclinBeta[b]=lm(g~cbcl_scr_syn_withdep_r+interview_age,data=witSubclinDF)$coefficients[2]
+	socClinBeta[b]=lm(g~cbcl_scr_syn_social_r+interview_age,data=socClinDF)$coefficients[2]
+	socSubclinBeta[b]=lm(g~cbcl_scr_syn_social_r+interview_age,data=socSubclinDF)$coefficients[2]
+	attClinBeta[b]=lm(g~cbcl_scr_syn_attention_r+interview_age,data=attClinDF)$coefficients[2]
+	attSubclinBeta[b]=lm(g~cbcl_scr_syn_attention_r+interview_age,data=attSubclinDF)$coefficients[2]
+	rulClinBeta[b]=lm(g~cbcl_scr_syn_rulebreak_r+interview_age,data=rulClinDF)$coefficients[2]
+	rulSubclinBeta[b]=lm(g~cbcl_scr_syn_rulebreak_r+interview_age,data=rulSubclinDF)$coefficients[2]
+	aggClinBeta[b]=lm(g~cbcl_scr_syn_aggressive_r+interview_age,data=aggClinDF)$coefficients[2]
+	aggSubclinBeta[b]=lm(g~cbcl_scr_syn_aggressive_r+interview_age,data=aggSubclinDF)$coefficients[2]
 }
 # add real differences as 10,001th value
 pBetaDiff[10001]=Pdiff
@@ -210,6 +279,8 @@ aggBetaDiff[10001]=Aggdiff
 # save out all difference vectors in one dataframe
 outdf=data.frame(pBetaDiff,intBetaDiff,extBetaDiff,somBetaDiff,anxBetaDiff,thoBetaDiff,witBetaDiff,socBetaDiff,attBetaDiff,rulBetaDiff,aggBetaDiff)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_diffs.rds')
-
+# save out all bootstrapped betas in one dataframe
+outdf=data.frame(pClinBeta,pSubclinBeta,intClinBeta,intSubclinBeta,extClinBeta,extSubclinBeta,somClinBeta,somSubclinBeta,anxClinBeta,anxSubclinBeta,thoClinBeta,thoSubclinBeta,witClinBeta,witSubclinBeta,socClinBeta,socSubclinBeta,attClinBeta,attSubclinBeta,rulClinBeta,rulSubclinBeta,aggClinBeta,aggSubclinBeta)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_bootBetas.rds')
 print('done with g~p fit bootstrapping!')
 
