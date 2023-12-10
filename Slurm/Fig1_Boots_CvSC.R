@@ -158,29 +158,93 @@ for (b in 1:10000){
                 subject_obs <- masterdf[masterdf$subjectkey == BootSubjs[j], ]
                 bootSamp <- rbind(bootSamp, subject_obs)
         }
-	# make a random clin vs. subclin split based on real number of rows beneath and above thresholds
-	pAboveDF=masterdf[sample(1:nrow(masterdf),pAbove),]
-	pBelowDF=masterdf[sample(1:nrow(masterdf),pBelow),]
-	intAboveDF=masterdf[sample(1:nrow(masterdf),intAbove),]
-	intBelowDF=masterdf[sample(1:nrow(masterdf),intBelow),]
-	extAboveDF=masterdf[sample(1:nrow(masterdf),extAbove),]
-	extBelowDF=masterdf[sample(1:nrow(masterdf),extBelow),]
-	somAboveDF=masterdf[sample(1:nrow(masterdf),somAbove),]
-	somBelowDF=masterdf[sample(1:nrow(masterdf),somBelow),]
-	anxAboveDF=masterdf[sample(1:nrow(masterdf),anxAbove),]
-	anxBelowDF=masterdf[sample(1:nrow(masterdf),anxBelow),]
-	thoAboveDF=masterdf[sample(1:nrow(masterdf),thoAbove),]
-	thoBelowDF=masterdf[sample(1:nrow(masterdf),thoBelow),]
-	witAboveDF=masterdf[sample(1:nrow(masterdf),witAbove),]
-	witBelowDF=masterdf[sample(1:nrow(masterdf),witBelow),]
-	socAboveDF=masterdf[sample(1:nrow(masterdf),socAbove),]
-	socBelowDF=masterdf[sample(1:nrow(masterdf),socBelow),]
-	attAboveDF=masterdf[sample(1:nrow(masterdf),attAbove),]
-	attBelowDF=masterdf[sample(1:nrow(masterdf),attBelow),]
-	rulAboveDF=masterdf[sample(1:nrow(masterdf),rulAbove),]
-	rulBelowDF=masterdf[sample(1:nrow(masterdf),rulBelow),]
-	aggAboveDF=masterdf[sample(1:nrow(masterdf),aggAbove),]
-	aggBelowDF=masterdf[sample(1:nrow(masterdf),aggBelow),]
+	# ############ ######## sample split based on randomly sampling subjects, not rows
+	unqSubjs=bootSamp[duplicated(bootSamp$subjectkey),]
+        # get counts of # in clinical threshold for this boot
+	subjects_pAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_totprob_r > CvSC$Pc]
+	subjects_intAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_internal_r > CvSC$Ic]
+	subjects_extAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_external_r > CvSC$Ec]
+	subjects_somAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_somatic_r > CvSC$SomC]
+	subjects_anxAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_anxdisord_r > CvSC$AnxC]
+	subjects_thoAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_thought_r > CvSC$ThoC]
+	subjects_witAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_withdep_r > CvSC$WitC]
+	subjects_socAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_sociavoid_r > CvSC$SocC]
+	subjects_attAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_attent_r > CvSC$AttC]
+	subjects_rulAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_rulebreak_r > CvSC$RulC]
+	subjects_aggAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_aggressive_r > CvSC$AggC]
+	# get counts of # in clinical threshold for this boot
+	nsubjects_pAbove = length(subjects_pAbove)
+	nsubjects_intAbove = length(subjects_intAbove)
+	nsubjects_extAbove = length(subjects_extAbove)
+	nsubjects_somAbove = length(subjects_somAbove)
+	nsubjects_anxAbove = length(subjects_anxAbove)
+	nsubjects_thoAbove = length(subjects_thoAbove)
+	nsubjects_witAbove = length(subjects_witAbove)
+	nsubjects_socAbove = length(subjects_socAbove)
+	nsubjects_attAbove = length(subjects_attAbove)
+	nsubjects_rulAbove = length(subjects_rulAbove)
+	nsubjects_aggAbove = length(subjects_aggAbove)
+	# sample subjects from this boot n_clinical times for pseudo-clinical group
+	subjects_ppAbove = sample(unqSubjs$subjectkey, nsubjects_pAbove)
+	subjects_pintAbove = sample(unqSubjs$subjectkey, nsubjects_intAbove)
+	subjects_pextAbove = sample(unqSubjs$subjectkey, nsubjects_extAbove)
+	subjects_psomAbove = sample(unqSubjs$subjectkey, nsubjects_somAbove)
+	subjects_panxAbove = sample(unqSubjs$subjectkey, nsubjects_anxAbove)
+	subjects_pthoAbove = sample(unqSubjs$subjectkey, nsubjects_thoAbove)
+	subjects_pwitAbove = sample(unqSubjs$subjectkey, nsubjects_witAbove)
+	subjects_psocAbove = sample(unqSubjs$subjectkey, nsubjects_socAbove)
+	subjects_pattAbove = sample(unqSubjs$subjectkey, nsubjects_attAbove)
+	subjects_prulAbove = sample(unqSubjs$subjectkey, nsubjects_rulAbove)
+	subjects_paggAbove = sample(unqSubjs$subjectkey, nsubjects_aggAbove)
+	# create a vector to assign pseudoclinical to entire subjects
+	bootSamp$ppAbove = 0
+	bootSamp$pintAbove = 0
+	bootSamp$pextAbove = 0
+	bootSamp$psomAbove = 0
+	bootSamp$panxAbove = 0
+	bootSamp$pthoAbove = 0
+	bootSamp$pwitAbove = 0
+	bootSamp$psocAbove = 0
+	bootSamp$pattAbove = 0
+	bootSamp$prulAbove = 0
+	bootSamp$paggAbove = 0
+	#randomly assign n_clinical people to pseudoclinical
+	bootSamp$ppAbove[bootSamp$subjectkey %in% subjects_ppAbove] = 1
+	bootSamp$pintAbove[bootSamp$subjectkey %in% subjects_pintAbove] = 1
+	bootSamp$pextAbove[bootSamp$subjectkey %in% subjects_pextAbove] = 1
+	bootSamp$psomAbove[bootSamp$subjectkey %in% subjects_psomAbove] = 1
+	bootSamp$panxAbove[bootSamp$subjectkey %in% subjects_panxAbove] = 1
+	bootSamp$pthoAbove[bootSamp$subjectkey %in% subjects_pthoAbove] = 1
+	bootSamp$pwitAbove[bootSamp$subjectkey %in% subjects_pwitAbove] = 1
+	bootSamp$psocAbove[bootSamp$subjectkey %in% subjects_psocAbove] = 1
+	bootSamp$pattAbove[bootSamp$subjectkey %in% subjects_pattAbove] = 1
+	bootSamp$prulAbove[bootSamp$subjectkey %in% subjects_prulAbove] = 1
+	bootSamp$paggAbove[bootSamp$subjectkey %in% subjects_paggAbove] = 1
+	# turn into pAboveDf and pBelowDf
+	pAboveDF = bootSamp[bootSamp$ppAbove == 1,]
+	pBelowDF = bootSamp[bootSamp$ppAbove == 0,]
+	intAboveDF = bootSamp[bootSamp$pintAbove == 1,]
+	intBelowDF = bootSamp[bootSamp$pintAbove == 0,]
+	extAboveDF = bootSamp[bootSamp$pextAbove == 1,]
+	extBelowDF = bootSamp[bootSamp$pextAbove == 0,]
+	somAboveDF = bootSamp[bootSamp$psomAbove == 1,]
+	somBelowDF = bootSamp[bootSamp$psomAbove == 0,]
+	anxAboveDF = bootSamp[bootSamp$panxAbove == 1,]
+	anxBelowDF = bootSamp[bootSamp$panxAbove == 0,]
+	thoAboveDF = bootSamp[bootSamp$pthoAbove == 1,]
+	thoBelowDF = bootSamp[bootSamp$pthoAbove == 0,]
+	witAboveDF = bootSamp[bootSamp$pwitAbove == 1,]
+	witBelowDF = bootSamp[bootSamp$pwitAbove == 0,]
+	socAboveDF = bootSamp[bootSamp$psocAbove == 1,]
+	socBelowDF = bootSamp[bootSamp$psocAbove == 0,]
+	attAboveDF = bootSamp[bootSamp$pattAbove == 1,]
+	attBelowDF = bootSamp[bootSamp$pattAbove == 0,]
+	rulAboveDF = bootSamp[bootSamp$prulAbove == 1,]
+	rulBelowDF = bootSamp[bootSamp$prulAbove == 0,]
+	aggAboveDF = bootSamp[bootSamp$paggAbove == 1,]
+	aggBelowDF = bootSamp[bootSamp$paggAbove == 0,]
+	########## ########## ############### ##########
+
 	# get betas for each permuted split
 	pAboveBeta=lm(g~cbcl_scr_syn_totprob_r+interview_age,data=pAboveDF)$coefficients[2]
 	pBelowBeta=lm(g~cbcl_scr_syn_totprob_r+interview_age,data=pBelowDF)$coefficients[2]
