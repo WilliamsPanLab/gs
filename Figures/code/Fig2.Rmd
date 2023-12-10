@@ -274,7 +274,17 @@ print(cor.test(masterdf$parentPcount,masterdf$cbcl_scr_syn_totprob_r))
 ```
 
 ```{r}
-### P boots plot 
+### P boots plot
+
+### re-merge the 5, update indices to pull values from
+gpFitBoots_cbclasr1.rds
+### ∆∆∆∆∆∆∆∆
+### ∆∆∆∆∆∆∆∆
+### ∆∆∆∆∆∆∆∆
+### ∆∆∆∆∆∆∆∆
+### ∆∆∆∆∆∆∆∆
+### ∆∆∆∆∆∆∆∆
+
 # load in data
 Fits=readRDS('~/Desktop/g_p/gpFitBoots_asr.rds')
 # find mean shape and plot it: p
