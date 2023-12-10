@@ -147,7 +147,7 @@ Attdiff=AttsubBeta-AttClinBeta
 Ruldiff=RulsubBeta-RulClinBeta
 Aggdiff=AggsubBeta-AggClinBeta
 # for each permutation
-for (b in 1:10000){
+for (b in 8001:10000){
 	print(b)
 	# get subjects to include in this bootstrap
         BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -165,11 +165,11 @@ for (b in 1:10000){
 	subjects_intAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_internal_r > CvSC$Ic]
 	subjects_extAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_external_r > CvSC$Ec]
 	subjects_somAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_somatic_r > CvSC$SomC]
-	subjects_anxAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_anxdisord_r > CvSC$AnxC]
+	subjects_anxAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_anxdep_r > CvSC$AnxC]
 	subjects_thoAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_thought_r > CvSC$ThoC]
 	subjects_witAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_withdep_r > CvSC$WitC]
-	subjects_socAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_sociavoid_r > CvSC$SocC]
-	subjects_attAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_attent_r > CvSC$AttC]
+	subjects_socAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_social_r > CvSC$SocC]
+	subjects_attAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_attention_r > CvSC$AttC]
 	subjects_rulAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_rulebreak_r > CvSC$RulC]
 	subjects_aggAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_aggressive_r > CvSC$AggC]
 	# get counts of # in clinical threshold for this boot
@@ -292,8 +292,8 @@ for (b in 1:10000){
 	somSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_somatic_r<CvSC$SomBc,]
 	anxClinDF=bootSamp[bootSamp$cbcl_scr_syn_anxdep_r>CvSC$AnxC,]
 	anxSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_anxdep_r<CvSC$AnxBc,]
-	thoClinDF=bootSamp[bootSamp$cbcl_scr_syn_thought_r>CvSC$ThC,]
-	thoSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_thought_r<CvSC$ThBc,]
+	thoClinDF=bootSamp[bootSamp$cbcl_scr_syn_thought_r>CvSC$ThoC,]
+	thoSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_thought_r<CvSC$ThoBc,]
 	witClinDF=bootSamp[bootSamp$cbcl_scr_syn_withdep_r>CvSC$WitC,]
 	witSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_withdep_r<CvSC$WitBc,]
 	socClinDF=bootSamp[bootSamp$cbcl_scr_syn_social_r>CvSC$SocC,]
@@ -342,9 +342,9 @@ rulBetaDiff[10001]=Ruldiff
 aggBetaDiff[10001]=Aggdiff
 # save out all difference vectors in one dataframe
 outdf=data.frame(pBetaDiff,intBetaDiff,extBetaDiff,somBetaDiff,anxBetaDiff,thoBetaDiff,witBetaDiff,socBetaDiff,attBetaDiff,rulBetaDiff,aggBetaDiff)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_diffs.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_diffs5.rds')
 # save out all bootstrapped betas in one dataframe
 outdf=data.frame(pClinBeta,pSubclinBeta,intClinBeta,intSubclinBeta,extClinBeta,extSubclinBeta,somClinBeta,somSubclinBeta,anxClinBeta,anxSubclinBeta,thoClinBeta,thoSubclinBeta,witClinBeta,witSubclinBeta,socClinBeta,socSubclinBeta,attClinBeta,attSubclinBeta,rulClinBeta,rulSubclinBeta,aggClinBeta,aggSubclinBeta)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_bootBetas.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_bootBetas5.rds')
 print('done with g~p fit bootstrapping!')
 
