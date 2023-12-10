@@ -277,14 +277,70 @@ print(cor.test(masterdf$parentPcount,masterdf$cbcl_scr_syn_totprob_r))
 ### P boots plot
 
 ### re-merge the 5, update indices to pull values from
-gpFitBoots_cbclasr1.rds
+pNpFits1=readRDS('~/Desktop/g_p/gpFitBoots_asr_pNp1.rds')
+pNpFits2=readRDS('~/Desktop/g_p/gpFitBoots_asr_pNp2.rds')
+pNpFits3=readRDS('~/Desktop/g_p/gpFitBoots_asr_pNp3.rds')
+pNpFits4=readRDS('~/Desktop/g_p/gpFitBoots_asr_pNp4.rds')
+pNpFits5=readRDS('~/Desktop/g_p/gpFitBoots_asr_pNp5.rds')
+
+# sub in values created in other iteration
+pNpFits1[2001:4000,]=pNpFits2[2001:4000,]
+pNpFits1[4001:6000,]=pNpFits3[4001:6000,]
+pNpFits1[6001:8000,]=pNpFits4[6001:8000,]
+pNpFits1[8001:10000,]=pNpFits5[8001:10000,]
 ### ∆∆∆∆∆∆∆∆
+# poverty parental p
+# p is 1:160, pov then nopov
+pov_p=pNpFits1[,1:161]
+MaxP=find_furthest_nonzero(pov_p)
+plot_bootstraps_par(pov_p,160,'Pov. Parental P',MaxP)
+# nonpoverty parental p
+npov_p=pNpFits1[,162:322]
+MaxP=find_furthest_nonzero(npov_p)
+plot_bootstraps_par(npov_p,160,'Npov. Parental P',MaxP)
+
+# poverty parental int
+# p is 1:160, pov then nopov
+pov_Int=pNpFits1[,323:353]
+MaxInt=find_furthest_nonzero(pov_Int)
+plot_bootstraps_par(pov_Int,30,'Pov. Parental Int',MaxInt)
+# nonpoverty parental int
+npov_Int=pNpFits1[,354:384]
+MaxInt=find_furthest_nonzero(npov_Int)
+plot_bootstraps_par(npov_Int,30,'Npov. Parental Int',MaxInt)
+
+# poverty parental ext
+# p is 1:160, pov then nopov
+pov_Ext=pNpFits1[,385:448]
+MaxExt=find_furthest_nonzero(pov_Ext)
+plot_bootstraps_par(pov_Ext,63,'Pov. Parental Ext',MaxExt)
+# nonpoverty parental p
+npov_Ext=pNpFits1[,449:512]
+MaxExt=find_furthest_nonzero(npov_Ext)
+plot_bootstraps_par(npov_Ext,63,'Npov. Parental Ext',MaxExt)
+
 ### ∆∆∆∆∆∆∆∆
+# poverty parental somatic
+# p is 1:160, pov then nopov
+pov_Som=pNpFits1[,513:533]
+MaxSom=find_furthest_nonzero(pov_Som)
+plot_bootstraps_par(pov_Som,20,'Pov. Parental Somatic',MaxSom)
+
+# nonpoverty parental p
+npov_Som=pNpFits1[,534:554]
+MaxSom=find_furthest_nonzero(npov_Som)
+plot_bootstraps_par(npov_Som,20,'Npov. Parental Somatic',MaxSom)
+
 ### ∆∆∆∆∆∆∆∆
 ### ∆∆∆∆∆∆∆∆
 ### ∆∆∆∆∆∆∆∆
 ### ∆∆∆∆∆∆∆∆
 
+
+```
+
+
+```{r}
 # load in data
 Fits=readRDS('~/Desktop/g_p/gpFitBoots_asr.rds')
 # find mean shape and plot it: p
