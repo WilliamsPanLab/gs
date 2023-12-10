@@ -234,7 +234,7 @@ masterdf$poverty=0
 masterdf$poverty[masterdf$Pov_v2==1]=1
 masterdf$poverty=as.factor(masterdf$poverty)
 # loop over manual bootstrap
-for (b in 8001:10000){
+for (b in 1:2000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -247,14 +247,19 @@ for (b in 8001:10000){
 	}
 	bpmax=max(bootSamp$cbcl_scr_syn_totprob_r)
         # last pre-step: need to create NULL variables. Use count of Poverty as count of membership to psuedo-groups, but randomly distribute membership
+	# get unique instances of subjects, note duplcated and !duplicated are same because 2x instances of each subj
+	unqSubjs=bootSamp[duplicated(bootSamp$subjectkey),]
         # get count poverty in this boot
-        Povcount=length(which(bootSamp$poverty==1))
+	subjects_with_poverty = unqSubjs$subjectkey[unqSubjs$poverty == 1]
+	subjects_with_pseudopoverty = sample(unqSubjs$subjectkey, length(subjects_with_poverty))
+	# create a vector to assign pseudopoverty to entire subjects
+	bootSamp$pseudopoverty = 0
         # randomly assign Povcount people to pseudopoverty
-        bootSamp$pseudopoverty=0
-        bootSamp$pseudopoverty[sample(1:dim(bootSamp)[1],Povcount)]=1
+	bootSamp$pseudopoverty[bootSamp$subjectkey %in% subjects_with_pseudopoverty] = 1
+	bootSamp$pseudopoverty=as.factor(bootSamp$pseudopoverty)
         # make a df that is just the same number of kids in poverty, but actually from the non-poverty group. The point is to see if we can recover g~p slope in a an equivalent number of non-poverty kids
-        bootSamp$pseudopoverty2=0
-        bootSamp$pseudopoverty2[sample(which(bootSamp$poverty==0),Povcount)]=1
+        #bootSamp$pseudopoverty2=0
+        #bootSamp$pseudopoverty2[sample(which(bootSamp$poverty==0),Povcount)]=1
 	##############################
 	# get max for this iteration
 	bpmax=max(bootSamp$cbcl_scr_syn_totprob_r)
@@ -722,23 +727,31 @@ for (b in 8001:10000){
 	asraggFitNonPov[b,1:(basraggmax+1)]=forFitasrAgg
 }
 # SAVEOUT
+
 # save out all difference in AIC vectors, differences in adjusted R^2 vectors
 # cbcl
 outdf=data.frame(pDiff,intDiff,extDiff,somDiff,anxDiff,thoDiff,witDiff,attDiff,rulDiff,aggDiff,pDiffAdj,intDiffAdj,extDiffAdj,somDiffAdj,anxDiffAdj,thoDiffAdj,witDiffAdj,attDiffAdj,rulDiffAdj,aggDiffAdj)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots5.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbcl1.rds')
 # asr
 outdf=data.frame(asrPDiff,asrintDiff,asrextDiff,asrsomDiff,asranxDiff,asrthoDiff,asrwitDiff,asrattDiff,asrrulDiff,asraggDiff,asrPDiffAdj,asrintDiffAdj,asrextDiffAdj,asrsomDiffAdj,asranxDiffAdj,asrthoDiffAdj,asrwitDiffAdj,asrattDiffAdj,asrrulDiffAdj,asraggDiffAdj)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_asr5.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_asr1.rds')
+
 # save out pseudo versions for comparison if needed
+# cbcl
+outdf=data.frame(pDiffPseudo,intDiffPseudo,extDiffPseudo,somDiffPseudo,anxDiffPseudo,thoDiffPseudo,witDiffPseudo,attDiffPseudo,rulDiffPseudo,aggDiffPseudo,pDiffAdjPseudo,intDiffAdjPseudo,extDiffAdjPseudo,somDiffAdjPseudo,anxDiffAdjPseudo,thoDiffAdjPseudo,witDiffAdjPseudo,attDiffAdjPseudo,rulDiffAdjPseudo,aggDiffAdjPseudo)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbclPseudo1.rds')
+# asr
 outdf=data.frame(asrPDiffPseudo,asrintDiffPseudo,asrextDiffPseudo,asrsomDiffPseudo,asranxDiffPseudo,asrthoDiffPseudo,asrwitDiffPseudo,asrattDiffPseudo,asrrulDiffPseudo,asraggDiffPseudo,asrPDiffAdjPseudo,asrintDiffAdjPseudo,asrextDiffAdjPseudo,asrsomDiffAdjPseudo,asranxDiffAdjPseudo,asrthoDiffAdjPseudo,asrwitDiffAdjPseudo,asrattDiffAdjPseudo,asrrulDiffAdjPseudo,asraggDiffAdjPseudo)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_asrPseudo5.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_asrPseudo1.rds')
+
 # save out poverty and nonpoverty fits - cbcl
 outdf=data.frame(pFitPov,pFitNonPov,intFitPov,intFitNonPov,extFitPov,extFitNonPov,somFitPov,somFitNonPov,anxFitPov,anxFitNonPov,thoFitPov,thoFitNonPov,witFitPov,witFitNonPov,attFitPov,attFitNonPov,rulFitPov,rulFitNonPov,aggFitPov,aggFitNonPov)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots5.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_cbcl_pNp1.rds')
 # save out poverty and nonpoverty fits - asr
 outdf=data.frame(asrPFitPov,asrPFitNonPov,asrintFitPov,asrintFitNonPov,asrextFitPov,asrextFitNonPov,asrsomFitPov,asrsomFitNonPov,asranxFitPov,asranxFitNonPov,asrthoFitPov,asrthoFitNonPov,asrwitFitPov,asrwitFitNonPov,asrattFitPov,asrattFitNonPov,asrrulFitPov,asrrulFitNonPov,asraggFitPov,asraggFitNonPov)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_asr_pNp5.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_asr_pNp1.rds')
+
 # save out version with all cbcl and asr fits
 outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,attFit,rulFit,aggFit,asrPFit,asrintFit,asrextFit,asrsomFit,asranxFit,asrthoFit,asrwitFit,asrattFit,asrrulFit,asraggFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_asr5.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_cbclasr1.rds')
 print('done with g~p fit bootstrapping!')
