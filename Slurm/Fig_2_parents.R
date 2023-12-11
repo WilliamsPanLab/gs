@@ -118,6 +118,7 @@ somFitNonPov=matrix(0,nrow=10000,ncol=(somMaxVal)+1)
 anxFitNonPov=matrix(0,nrow=10000,ncol=(anxMaxVal)+1)
 thoFitNonPov=matrix(0,nrow=10000,ncol=(thoMaxVal)+1)
 witFitNonPov=matrix(0,nrow=10000,ncol=(witMaxVal)+1)
+socFitNonPov=matrix(0,nrows=10000,ncol(socMaxVal)+1)
 attFitNonPov=matrix(0,nrow=10000,ncol=(attMaxVal)+1)
 rulFitNonPov=matrix(0,nrow=10000,ncol=(rulMaxVal)+1)
 aggFitNonPov=matrix(0,nrow=10000,ncol=(aggMaxVal)+1)
@@ -139,6 +140,7 @@ somDiff=rep(0,10000)
 anxDiff=rep(0,10000)
 thoDiff=rep(0,10000)
 witDiff=rep(0,10000)
+socDiff=rep(0,10000)
 attDiff=rep(0,10000)
 rulDiff=rep(0,10000)
 aggDiff=rep(0,10000)
@@ -150,6 +152,7 @@ somDiffPseudo=rep(0,10000)
 anxDiffPseudo=rep(0,10000)
 thoDiffPseudo=rep(0,10000)
 witDiffPseudo=rep(0,10000)
+socDiffPseudo=rep(0,10000)
 attDiffPseudo=rep(0,10000)
 rulDiffPseudo=rep(0,10000)
 aggDiffPseudo=rep(0,10000)
@@ -183,6 +186,7 @@ somDiffAdj=rep(0,10000)
 anxDiffAdj=rep(0,10000)
 thoDiffAdj=rep(0,10000)
 witDiffAdj=rep(0,10000)
+socDiffAdj=rep(0,10000)
 attDiffAdj=rep(0,10000)
 rulDiffAdj=rep(0,10000)
 aggDiffAdj=rep(0,10000)
@@ -194,6 +198,7 @@ somDiffAdjPseudo=rep(0,10000)
 anxDiffAdjPseudo=rep(0,10000)
 thoDiffAdjPseudo=rep(0,10000)
 witDiffAdjPseudo=rep(0,10000)
+socDiffAdjPseudo=rep(0,10000)
 attDiffAdjPseudo=rep(0,10000)
 rulDiffAdjPseudo=rep(0,10000)
 aggDiffAdjPseudo=rep(0,10000)
@@ -227,6 +232,7 @@ somMax=rep(0,10000)
 anxMax=rep(0,10000)
 thoMax=rep(0,10000)
 witMax=rep(0,10000)
+socMax=rep(0,10000)
 attMax=rep(0,10000)
 rulMax=rep(0,10000)
 aggMax=rep(0,10000)
@@ -271,6 +277,7 @@ for (b in 1:2000){
 	banxmax=max(bootSamp$cbcl_scr_syn_anxdep_r)
 	bthomax=max(bootSamp$cbcl_scr_syn_thought_r)
 	bwitmax=max(bootSamp$cbcl_scr_syn_withdep_r)
+	bsocmax=max(bootSamp$cbcl_scr_syn_social_r)
 	battmax=max(bootSamp$cbcl_scr_syn_attention_r)
 	brulmax=max(bootSamp$cbcl_scr_syn_rulebreak_r)
 	baggmax=max(bootSamp$cbcl_scr_syn_aggressive_r)
@@ -293,6 +300,7 @@ for (b in 1:2000){
 	anxgAge<-bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4),data=bootSamp)
 	thogAge<-bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4),data=bootSamp)
 	witgAge<-bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4),data=bootSamp)
+	socgAge<-bam(g~s(cbcl_scr_syn_social_r,k=4)+s(interview_age,k=4),data=bootSamp)
 	attgAge<-bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4),data=bootSamp)
 	rulgAge<-bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4),data=bootSamp)
 	agggAge<-bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4),data=bootSamp)
@@ -315,6 +323,7 @@ for (b in 1:2000){
 	eachAnxcount=seq(0:banxmax)
 	eachThocount=seq(0:bthomax)
 	eachWitcount=seq(0:bwitmax)
+	eachSoccount=seq(0:bsocmax)
 	eachAttcount=seq(0:battmax)
 	eachRulcount=seq(0:brulmax)
 	eachAggcount=seq(0:baggmax)
@@ -337,6 +346,7 @@ for (b in 1:2000){
 	predictDFanx=data.frame(eachAnxcount,rep(median(masterdf$interview_age),(banxmax+1)))
 	predictDFtho=data.frame(eachThocount,rep(median(masterdf$interview_age),(bthomax+1)))
 	predictDFwit=data.frame(eachWitcount,rep(median(masterdf$interview_age),(bwitmax+1)))
+	predictDFsoc=data.frame(eachSoccount,rep(median(masterdf$interview_age),(bsocmax+1)))
 	predictDFatt=data.frame(eachAttcount,rep(median(masterdf$interview_age),(battmax+1)))
 	predictDFrul=data.frame(eachRulcount,rep(median(masterdf$interview_age),(brulmax+1)))
 	predictDFagg=data.frame(eachAggcount,rep(median(masterdf$interview_age),(baggmax+1)))
@@ -358,6 +368,7 @@ for (b in 1:2000){
 	colnames(predictDFanx)=c('cbcl_scr_syn_anxdep_r','interview_age')
 	colnames(predictDFtho)=c('cbcl_scr_syn_thought_r','interview_age')
 	colnames(predictDFwit)=c('cbcl_scr_syn_withdep_r','interview_age')
+	colnames(predictDFsoc)=c('cbcl_scr_syn_social_r','interview_age')
 	colnames(predictDFatt)=c('cbcl_scr_syn_attention_r','interview_age')
 	colnames(predictDFrul)=c('cbcl_scr_syn_rulebreak_r','interview_age')
 	colnames(predictDFagg)=c('cbcl_scr_syn_aggressive_r','interview_age')
@@ -379,6 +390,7 @@ for (b in 1:2000){
 	forFitAnx=predict(anxgAge,predictDFanx)
 	forFitTho=predict(thogAge,predictDFtho)
 	forFitWit=predict(witgAge,predictDFwit)
+	forFitSoc=predict(socgAge,predictDFsoc)
 	forFitAtt=predict(attgAge,predictDFatt)
 	forFitRul=predict(rulgAge,predictDFrul)
 	forFitAgg=predict(agggAge,predictDFagg)
@@ -400,6 +412,7 @@ for (b in 1:2000){
 	anxFit[b,1:(banxmax+1)]=forFitAnx
 	thoFit[b,1:(bthomax+1)]=forFitTho
 	witFit[b,1:(bwitmax+1)]=forFitWit
+	socFit[b,1:(bsocmax+1)]=forFitSoc
 	attFit[b,1:(battmax+1)]=forFitAtt
 	rulFit[b,1:(brulmax+1)]=forFitRul
 	aggFit[b,1:(baggmax+1)]=forFitAgg
@@ -423,6 +436,7 @@ for (b in 1:2000){
 	anxgAge_pov=bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	thogAge_pov=bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	witgAge_pov=bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	socgAge_pov=bam(g~s(cbcl_scr_syn_social_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	attgAge_pov=bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	rulgAge_pov=bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	agggAge_pov=bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
@@ -434,6 +448,7 @@ for (b in 1:2000){
 	anxgAge_povint=bam(g~s(cbcl_scr_syn_anxdep_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	thogAge_povint=bam(g~s(cbcl_scr_syn_thought_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	witgAge_povint=bam(g~s(cbcl_scr_syn_withdep_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
+	socgAge_povint=bam(g~s(cbcl_scr_syn_social_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	attgAge_povint=bam(g~s(cbcl_scr_syn_attention_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	rulgAge_povint=bam(g~s(cbcl_scr_syn_rulebreak_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
 	agggAge_povint=bam(g~s(cbcl_scr_syn_aggressive_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=bootSamp)
@@ -445,6 +460,7 @@ for (b in 1:2000){
 	anxgAge_povpseudo=bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	thogAge_povpseudo=bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	witgAge_povpseudo=bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	socgAge_povpseudo=bam(g~s(cbcl_scr_syn_social_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	attgAge_povpseudo=bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	rulgAge_povpseudo=bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	agggAge_povpseudo=bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
@@ -456,6 +472,7 @@ for (b in 1:2000){
 	anxgAge_povpseudoint=bam(g~s(cbcl_scr_syn_anxdep_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	thogAge_povpseudoint=bam(g~s(cbcl_scr_syn_thought_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	witgAge_povpseudoint=bam(g~s(cbcl_scr_syn_withdep_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
+	socgAge_povpseudoint=bam(g~s(cbcl_scr_syn_social_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	attgAge_povpseudoint=bam(g~s(cbcl_scr_syn_attention_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	rulgAge_povpseudoint=bam(g~s(cbcl_scr_syn_rulebreak_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
 	agggAge_povpseudoint=bam(g~s(cbcl_scr_syn_aggressive_r,by=pseudopoverty,k=4)+s(interview_age,k=4)+pseudopoverty,data=bootSamp)
@@ -512,6 +529,7 @@ for (b in 1:2000){
 	anxDiff[b]=AIC(anxgAge_pov)-AIC(anxgAge_povint)
 	thoDiff[b]=AIC(thogAge_pov)-AIC(thogAge_povint)
 	witDiff[b]=AIC(witgAge_pov)-AIC(witgAge_povint)
+	socDiff[b]=AIC(socgAge_pov)-AIC(socgAge_povint)
 	attDiff[b]=AIC(attgAge_pov)-AIC(attgAge_povint)
 	rulDiff[b]=AIC(rulgAge_pov)-AIC(rulgAge_povint)
 	aggDiff[b]=AIC(agggAge_pov)-AIC(agggAge_povint)
@@ -522,6 +540,7 @@ for (b in 1:2000){
 	anxDiffPseudo[b]=AIC(anxgAge_povpseudo)-AIC(anxgAge_povpseudoint)
 	thoDiffPseudo[b]=AIC(thogAge_povpseudo)-AIC(thogAge_povpseudoint)
 	witDiffPseudo[b]=AIC(witgAge_povpseudo)-AIC(witgAge_povpseudoint)
+	socDiffPseudo[b]=AIC(socgAge_povpseudo)-AIC(socgAge_povpseudoint)
 	attDiffPseudo[b]=AIC(attgAge_povpseudo)-AIC(attgAge_povpseudoint)
 	rulDiffPseudo[b]=AIC(rulgAge_povpseudo)-AIC(rulgAge_povpseudoint)
 	aggDiffPseudo[b]=AIC(agggAge_povpseudo)-AIC(agggAge_povpseudoint)
@@ -555,6 +574,7 @@ for (b in 1:2000){
 	anxDiffAdj[b]=summary(anxgAge_povint)$r.sq-summary(anxgAge_pov)$r.sq
 	thoDiffAdj[b]=summary(thogAge_povint)$r.sq-summary(thogAge_pov)$r.sq
 	witDiffAdj[b]=summary(witgAge_povint)$r.sq-summary(witgAge_pov)$r.sq
+	socDiffAdj[b]=summary(socgAge_povint)$r.sq-summary(socgAge_pov)$r.sq
 	attDiffAdj[b]=summary(attgAge_povint)$r.sq-summary(attgAge_pov)$r.sq
 	rulDiffAdj[b]=summary(rulgAge_povint)$r.sq-summary(rulgAge_pov)$r.sq
 	aggDiffAdj[b]=summary(agggAge_povint)$r.sq-summary(agggAge_pov)$r.sq
@@ -566,6 +586,7 @@ for (b in 1:2000){
 	thoDiffAdjPseudo[b]=summary(thogAge_povpseudo)$r.sq-summary(thogAge_povpseudoint)$r.sq
 	witDiffAdjPseudo[b]=summary(witgAge_povpseudo)$r.sq-summary(witgAge_povpseudoint)$r.sq
 	attDiffAdjPseudo[b]=summary(attgAge_povpseudo)$r.sq-summary(attgAge_povpseudoint)$r.sq
+	socDiffAdjPseudo[b]=summary(socgAge_povpseudo)$r.sq-summary(socgAge_povpseudoint)$r.sq
 	rulDiffAdjPseudo[b]=summary(rulgAge_povpseudo)$r.sq-summary(rulgAge_povpseudoint)$r.sq
 	aggDiffAdjPseudo[b]=summary(agggAge_povpseudo)$r.sq-summary(agggAge_povpseudoint)$r.sq
 	# asr
@@ -598,6 +619,7 @@ for (b in 1:2000){
 	predictDFanx$poverty=1
 	predictDFtho$poverty=1	
 	predictDFwit$poverty=1
+	predictDFsoc$poverty=1
 	predictDFatt$poverty=1
 	predictDFrul$poverty=1
 	predictDFagg$poverty=1
@@ -621,6 +643,7 @@ for (b in 1:2000){
 	forFitanx=predict(anxgAge_povint,predictDFanx)
 	forFittho=predict(thogAge_povint,predictDFtho)
 	forFitwit=predict(witgAge_povint,predictDFwit)
+	forFitsoc=predict(socgAge_povint,predictDFsoc)
 	forFitatt=predict(attgAge_povint,predictDFatt)
 	forFitrul=predict(rulgAge_povint,predictDFrul)
 	forFitagg=predict(agggAge_povint,predictDFagg)
@@ -644,6 +667,7 @@ for (b in 1:2000){
 	anxFitPov[b,1:(banxmax+1)]=forFitanx
 	thoFitPov[b,1:(bthomax+1)]=forFittho
 	witFitPov[b,1:(bwitmax+1)]=forFitwit
+	socFitPov[b,1:(bsocmax+1)]=forFitsoc
 	attFitPov[b,1:(battmax+1)]=forFitatt
 	rulFitPov[b,1:(brulmax+1)]=forFitrul
 	aggFitPov[b,1:(baggmax+1)]=forFitagg
@@ -667,6 +691,7 @@ for (b in 1:2000){
 	predictDFanx$poverty=0
 	predictDFtho$poverty=0
 	predictDFwit$poverty=0
+	predictDFsoc$poverty=0
 	predictDFatt$poverty=0
 	predictDFrul$poverty=0
 	predictDFagg$poverty=0
@@ -690,6 +715,7 @@ for (b in 1:2000){
 	forFitanx=predict(anxgAge_povint,predictDFanx)
 	forFittho=predict(thogAge_povint,predictDFtho)
 	forFitwit=predict(witgAge_povint,predictDFwit)
+	forFitsoc=predict(socgAge_povint,predictDFsoc)
 	forFitatt=predict(attgAge_povint,predictDFatt)
 	forFitrul=predict(rulgAge_povint,predictDFrul)
 	forFitagg=predict(agggAge_povint,predictDFagg)
@@ -713,6 +739,7 @@ for (b in 1:2000){
 	anxFitNonPov[b,1:(banxmax+1)]=forFitanx
 	thoFitNonPov[b,1:(bthomax+1)]=forFittho
 	witFitNonPov[b,1:(bwitmax+1)]=forFitwit
+	socFitNonPov[b,1:(bsocmax+1)]=forFitsoc
 	attFitNonPov[b,1:(battmax+1)]=forFitatt
 	rulFitNonPov[b,1:(brulmax+1)]=forFitrul
 	aggFitNonPov[b,1:(baggmax+1)]=forFitagg
@@ -732,7 +759,7 @@ for (b in 1:2000){
 
 # save out all difference in AIC vectors, differences in adjusted R^2 vectors
 # cbcl
-outdf=data.frame(pDiff,intDiff,extDiff,somDiff,anxDiff,thoDiff,witDiff,attDiff,rulDiff,aggDiff,pDiffAdj,intDiffAdj,extDiffAdj,somDiffAdj,anxDiffAdj,thoDiffAdj,witDiffAdj,attDiffAdj,rulDiffAdj,aggDiffAdj)
+outdf=data.frame(pDiff,intDiff,extDiff,somDiff,anxDiff,thoDiff,witDiff,socDiff,attDiff,rulDiff,aggDiff,pDiffAdj,intDiffAdj,extDiffAdj,somDiffAdj,anxDiffAdj,thoDiffAdj,witDiffAdj,attDiffAdj,rulDiffAdj,aggDiffAdj)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbcl1.rds')
 # asr
 outdf=data.frame(asrPDiff,asrintDiff,asrextDiff,asrsomDiff,asranxDiff,asrthoDiff,asrwitDiff,asrattDiff,asrrulDiff,asraggDiff,asrPDiffAdj,asrintDiffAdj,asrextDiffAdj,asrsomDiffAdj,asranxDiffAdj,asrthoDiffAdj,asrwitDiffAdj,asrattDiffAdj,asrrulDiffAdj,asraggDiffAdj)
@@ -740,20 +767,20 @@ saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_asr
 
 # save out pseudo versions for comparison if needed
 # cbcl
-outdf=data.frame(pDiffPseudo,intDiffPseudo,extDiffPseudo,somDiffPseudo,anxDiffPseudo,thoDiffPseudo,witDiffPseudo,attDiffPseudo,rulDiffPseudo,aggDiffPseudo,pDiffAdjPseudo,intDiffAdjPseudo,extDiffAdjPseudo,somDiffAdjPseudo,anxDiffAdjPseudo,thoDiffAdjPseudo,witDiffAdjPseudo,attDiffAdjPseudo,rulDiffAdjPseudo,aggDiffAdjPseudo)
+outdf=data.frame(pDiffPseudo,intDiffPseudo,extDiffPseudo,somDiffPseudo,anxDiffPseudo,thoDiffPseudo,witDiffPseudo,socDiffPseudo,attDiffPseudo,rulDiffPseudo,aggDiffPseudo,pDiffAdjPseudo,intDiffAdjPseudo,extDiffAdjPseudo,somDiffAdjPseudo,anxDiffAdjPseudo,thoDiffAdjPseudo,witDiffAdjPseudo,attDiffAdjPseudo,rulDiffAdjPseudo,aggDiffAdjPseudo)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbclPseudo1.rds')
 # asr
 outdf=data.frame(asrPDiffPseudo,asrintDiffPseudo,asrextDiffPseudo,asrsomDiffPseudo,asranxDiffPseudo,asrthoDiffPseudo,asrwitDiffPseudo,asrattDiffPseudo,asrrulDiffPseudo,asraggDiffPseudo,asrPDiffAdjPseudo,asrintDiffAdjPseudo,asrextDiffAdjPseudo,asrsomDiffAdjPseudo,asranxDiffAdjPseudo,asrthoDiffAdjPseudo,asrwitDiffAdjPseudo,asrattDiffAdjPseudo,asrrulDiffAdjPseudo,asraggDiffAdjPseudo)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_asrPseudo1.rds')
 
 # save out poverty and nonpoverty fits - cbcl
-outdf=data.frame(pFitPov,pFitNonPov,intFitPov,intFitNonPov,extFitPov,extFitNonPov,somFitPov,somFitNonPov,anxFitPov,anxFitNonPov,thoFitPov,thoFitNonPov,witFitPov,witFitNonPov,attFitPov,attFitNonPov,rulFitPov,rulFitNonPov,aggFitPov,aggFitNonPov)
+outdf=data.frame(pFitPov,pFitNonPov,intFitPov,intFitNonPov,extFitPov,extFitNonPov,somFitPov,somFitNonPov,anxFitPov,anxFitNonPov,thoFitPov,thoFitNonPov,witFitPov,witFitNonPov,socFitPov,socFitNonPov,attFitPov,attFitNonPov,rulFitPov,rulFitNonPov,aggFitPov,aggFitNonPov)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_cbcl_pNp1.rds')
 # save out poverty and nonpoverty fits - asr
 outdf=data.frame(asrPFitPov,asrPFitNonPov,asrintFitPov,asrintFitNonPov,asrextFitPov,asrextFitNonPov,asrsomFitPov,asrsomFitNonPov,asranxFitPov,asranxFitNonPov,asrthoFitPov,asrthoFitNonPov,asrwitFitPov,asrwitFitNonPov,asrattFitPov,asrattFitNonPov,asrrulFitPov,asrrulFitNonPov,asraggFitPov,asraggFitNonPov)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_asr_pNp1.rds')
 
 # save out version with all cbcl and asr fits
-outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,attFit,rulFit,aggFit,asrPFit,asrintFit,asrextFit,asrsomFit,asranxFit,asrthoFit,asrwitFit,asrattFit,asrrulFit,asraggFit)
+outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,socFit,attFit,rulFit,aggFit,asrPFit,asrintFit,asrextFit,asrsomFit,asranxFit,asrthoFit,asrwitFit,asrattFit,asrrulFit,asraggFit)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_cbclasr1.rds')
 print('done with g~p fit bootstrapping!')
