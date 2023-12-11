@@ -107,33 +107,6 @@ my_palette <- colorRampPalette(colors = c("#051099", "#1d5cb7", "white", "#e41a1
 
 ```
 
-```{r}
-library(ggridges)
-# make plots of linear model comparison 
-df=readRDS('~/Downloads/gp_CvSC_diffs.rds')
-
-# Create a new data frame with the first 10,000 rows
-df_subset <- df[1:10000, ]
-
-# Melt the data frame for easier plotting
-df_melted <- reshape2::melt(df_subset)
-
-# Create a data frame with the 10,001st row for annotation
-df_10001 <- data.frame(variable = names(df), value = as.numeric(df[10001, ]))
-
-# Plot the distribution for each column with the 10,001st value marked distinctly
-ggplot(df_melted, aes(x = value, y = variable)) +
-  geom_density_ridges(rel_min_height=0.01) +
-  geom_point(data = df_10001, aes(x = value, y = variable), color = "red", size = 3) +
-  labs(title = "Distribution of Values with 10,001st Value Marked",
-       x = "Density",
-       y = "Columns")
-# manually derive p-values
-ps=NULL
-for (i in 1:11){
-  ps[i]=sum(abs(df_subset[,i])>abs(df_10001[i,2]))/10000
-}
-```
 
 
 ```{r}
@@ -394,19 +367,161 @@ anim_save(
 ```{r}
 # insert subclinical vs. clincal bootstrapped betas as horizontal box-and-whiskers,consider adding permuted vs. median observed difference
 ### ∆∆∆∆∆∆∆∆
-### ∆∆∆∆∆∆∆∆
-### ∆∆∆∆∆∆∆∆
-### ∆∆∆∆∆∆∆∆
-# load in sherlock outputs
+# actual beta fits are under gp_CvSC_bootBetas
+Fits1=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas1.rds')
+Fits2=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas2.rds')
+Fits3=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas3.rds')
+Fits4=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas4.rds')
+Fits5=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas5.rds')
+Fits1[2001:4000,]=Fits2[2001:4000,]
+Fits1[4001:6000,]=Fits3[4001:6000,]
+Fits1[6001:8000,]=Fits4[6001:8000,]
+Fits1[8001:10000,]=Fits5[8001:10000,]
+
+# get differences in betas between real and permuted clinical groups
+Diffs1=readRDS('~/Desktop/g_p/gp_CvSC_diffs1.rds')
+Diffs2=readRDS('~/Desktop/g_p/gp_CvSC_diffs2.rds')
+Diffs3=readRDS('~/Desktop/g_p/gp_CvSC_diffs3.rds')
+Diffs4=readRDS('~/Desktop/g_p/gp_CvSC_diffs4.rds')
+Diffs5=readRDS('~/Desktop/g_p/gp_CvSC_diffs5.rds')
+Diffs1[2001:4000,]=Diffs2[2001:4000,]
+Diffs1[4001:6000,]=Diffs3[4001:6000,]
+Diffs1[6001:8000,]=Diffs4[6001:8000,]
+Diffs1[8001:10000,]=Diffs5[8001:10000,]
+
+```
+
+```{r}
+# make horizontal box and whiskers for betas from clinical and subclincal for each scale
+# denote significance using observed beta difference vs. permutations
+
+# P
+FitsP_long <- Fits1 %>%
+  select(pSubclinBeta,pClinBeta) %>%
+  tidyr::gather(key = "Variable", value = "Value")
+# create cleaner labels for plot
+FitsP_long <- FitsP_long %>%
+  mutate(Labels = factor(ifelse(Variable == 'pSubclinBeta', 'Subclinical', 'Clinical')))
+# re order for plot
+FitsP_long$Labels <- factor(FitsP_long$Labels, levels = c("Subclinical", "Clinical"))
+# get median values
+medianClin=median(FitsP_long$Value[FitsP_long$Labels=='Clinical'])
+medianSClin=median(FitsP_long$Value[FitsP_long$Labels=='Subclinical'])
+FitsP_long$Median=NULL
+FitsP_long$Median[FitsP_long$Labels=='Clinical']=medianClin
+FitsP_long$Median[FitsP_long$Labels=='Subclinical']=medianSClin
+# Plotting both pClinBeta and pSubclinBeta in the same horizontal boxplot
+ggplot(FitsP_long, aes(x = Labels, y = Value, fill = Median)) +
+  geom_boxplot() +
+  coord_flip() +
+  scale_fill_gradient2(
+    low = "blue", mid = "white", high = "red",
+    midpoint = 0, limits = c(-0.1, 0.1)
+  )+
+  labs(title = expression(paste("\u03B2 for ", italic("p")))) +
+  theme_minimal(base_size = 26)+theme(axis.title.y = element_blank())
+
+# saved at 700 width 300 height
+
+# INT
+# Plotting both intClinBeta and intSubclinBeta in the same horizontal boxplot
+FitsInt_long <- Fits1 %>%
+  select(intSubclinBeta,intClinBeta) %>%
+  tidyr::gather(key = "Variable", value = "Value")
+# create cleaner labels for plot
+FitsInt_long <- FitsInt_long %>%
+  mutate(Labels = factor(ifelse(Variable == 'intSubclinBeta', 'Subclinical', 'Clinical')))
+# re order for plot
+FitsInt_long$Labels <- factor(FitsInt_long$Labels, levels = c("Subclinical", "Clinical"))
+# get median values
+medianClin=median(FitsInt_long$Value[FitsInt_long$Labels=='Clinical'])
+medianSClin=median(FitsInt_long$Value[FitsInt_long$Labels=='Subclinical'])
+FitsInt_long$Median=NULL
+FitsInt_long$Median[FitsInt_long$Labels=='Clinical']=medianClin
+FitsInt_long$Median[FitsInt_long$Labels=='Subclinical']=medianSClin
+# Plotting both pClinBeta and pSubclinBeta in the same horizontal boxplot
+ggplot(FitsInt_long, aes(x = Labels, y = Value, fill = Median)) +
+  geom_boxplot() +
+  coord_flip() +
+  scale_fill_gradient2(
+    low = "blue", mid = "white", high = "red",
+    midpoint = 0, limits = c(-0.1, 0.1)
+  )+
+  labs(title = expression(paste("\u03B2 for Int."))) +
+  theme_minimal(base_size = 26)+theme(axis.title.y = element_blank())
+
+
+# Ext
+# Plotting both intClinBeta and intSubclinBeta in the same horizontal boxplot
+FitsExt_long <- Fits1 %>%
+  select(extSubclinBeta,extClinBeta) %>%
+  tidyr::gather(key = "Variable", value = "Value")
+# create cleaner labels for plot
+FitsExt_long <- FitsExt_long %>%
+  mutate(Labels = factor(ifelse(Variable == 'extSubclinBeta', 'Subclinical', 'Clinical')))
+# re order for plot
+FitsExt_long$Labels <- factor(FitsExt_long$Labels, levels = c("Subclinical", "Clinical"))
+# get median values
+medianClin=median(FitsExt_long$Value[FitsExt_long$Labels=='Clinical'])
+medianSClin=median(FitsExt_long$Value[FitsExt_long$Labels=='Subclinical'])
+FitsExt_long$Median=NULL
+FitsExt_long$Median[FitsExt_long$Labels=='Clinical']=medianClin
+FitsExt_long$Median[FitsExt_long$Labels=='Subclinical']=medianSClin
+# Plotting both pClinBeta and pSubclinBeta in the same horizontal boxplot
+ggplot(FitsExt_long, aes(x = Labels, y = Value, fill = Median)) +
+  geom_boxplot() +
+  coord_flip() +
+    scale_fill_gradient2(
+    low = "blue", mid = "white", high = "red",
+    midpoint = 0, limits = c(-0.1, 0.1)
+  )+
+  labs(title = expression(paste("\u03B2 for Ext."))) +
+  theme_minimal(base_size = 26)+theme(axis.title.y = element_blank())
+
+
+library(ggridges)
+# make plots of linear model comparison 
+
+# Create a new data frame with the first 10,000 rows
+df_subset <- Diffs1[1:10000, ]
+
+# Melt the data frame for easier plotting
+df_melted <- reshape2::melt(df_subset)
+
+# Create a data frame with the 10,001st row for annotation
+df_10001 <- data.frame(variable = names(Diffs1), value = as.numeric(Diffs1[10001, ]))
+
+# Plot the distribution for each column with the 10,001st value marked distinctly
+ggplot(df_melted, aes(x = value, y = variable)) +
+  geom_density_ridges(rel_min_height=0.01) +
+  geom_point(data = df_10001, aes(x = value, y = variable), color = "red", size = 3) +
+  labs(title = "Distribution of Values with 10,001st Value Marked",
+       x = "Density",
+       y = "Columns")
+# manually derive p-values
+ps=NULL
+for (i in 1:11){
+  ps[i]=sum((df_subset[,i])>df_10001[i,2])/10000
+}
+
 ```
 
 
 ```{r}
 ### P boots plot with overlaid linear fit
 # load in data
-Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
+Fits1=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr1.rds')
+Fits2=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr2.rds')
+Fits3=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr3.rds')
+Fits4=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr4.rds')
+Fits5=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr5.rds')
+Fits1[2001:4000,]=Fits2[2001:4000,]
+Fits1[4001:6000,]=Fits3[4001:6000,]
+Fits1[6001:8000,]=Fits4[6001:8000,]
+Fits1[8001:10000,]=Fits5[8001:10000,]
+
 # extract p factor
-PFits=Fits[,1:128]
+PFits=Fits1[,1:128]
 MaxP=find_furthest_nonzero(PFits)
 # melt data for plotting each line
 data_melt <- melt(t(PFits))
@@ -453,8 +568,8 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 
 
 ```{r}
-# load in data
-Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
+# set Fits1 to Fits for simplicity
+Fits=Fits1
 # find mean shape and plot it: p
 PFits=Fits[,1:128]
 IFits=Fits[,129:180]
@@ -535,34 +650,42 @@ AggC=mean(as.numeric(masterdfAgg_c$cbcl_scr_syn_aggressive_r))
 plot_bootstraps(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
 plot_bootstraps(IFits,51,'Internalizing',MaxI,Ibc,Ic)
 plot_bootstraps(EFits,47,'Externalizing',MaxE,Ebc,Ec)
-
+# for supplemental figure
+plot_bootstraps(SomFits,13,"Somatic",MaxSom,SomBc,SomC)
+plot_bootstraps(AnxFits,25,'Anxious Depression',MaxAnx,AnxBc,AnxC)
+plot_bootstraps(ThoFits,18,'Thought',MaxTho,ThoBc,ThoC)
+plot_bootstraps(WitFits,16,"Withdrawn Depression",MaxWit,WitBc,WitC)
+plot_bootstraps(SocFits,17,'Social',MaxSoc,SocBc,SocC)
+plot_bootstraps(AttFits,19,'Attention',MaxAtt,AttBc,AttC)
+plot_bootstraps(RulFits,18,'Rule Breaking',MaxRul,RulBc,RulC)
+plot_bootstraps(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
 ```
 
 ```{r}
-# load in data
-Fits=readRDS('~/Desktop/g_p/gpDerivBoots.rds')
-# find mean shape and plot it: p
-PFits=Fits[,1:128]
-IFits=Fits[,129:180]
-EFits=Fits[,181:228]
-SomFits=Fits[,229:242]
-AnxFits=Fits[,243:268]
-ThoFits=Fits[,269:287]
-WitFits=Fits[,288:304]
-SocFits=Fits[,305:322]
-AttFits=Fits[,323:342]
-RulFits=Fits[,343:361]
-AggFits=Fits[,362:394]
+# calculate derivatives
 
-# for p - saved out at 600x200, 300x200 for minor scales
+# p-factor
+P_derivative_matrix <- matrix(0, nrow = nrow(PFits), ncol = ncol(PFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(PFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- PFits[, i + 1] - PFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
 # get straightfoward of segment where 99% is over 0 or under
-positive_counts <- colSums(PFits > 0, na.rm = TRUE)
-negative_counts <- colSums(PFits < 0, na.rm = TRUE)
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
 positive_countsSig=positive_counts>9900
 negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
-data <- apply(PFits, 2, function(x) quantile(x, probs = 0.5))
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 # if either is sig at 99% plot
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -573,29 +696,34 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab(expression(italic(p)))+
+    xlim(c(0,MaxP))+xlab(expression(italic('p')))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
-# and a version with colorbar - for p only (same color mapping using throughout)
-dervPlotDf$Slope=dervPlotDf$sig_deriv
-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
-    theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab(expression(italic(p)))+
-    theme(legend.key.width=unit(3,"cm"),axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-    scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))+
-    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
-    scale_x_continuous(limits = c(0,113),expand = expansion(mult = c(0, 0)))+labs(fill = "")
-# for int
+########################
+
+# Internalizing
+Int_derivative_matrix <- matrix(0, nrow = nrow(IFits), ncol = ncol(IFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(IFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- IFits[, i + 1] - IFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  Int_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
 # get straightfoward of segment where 99% is over 0 or under
-positive_counts <- colSums(IFits > 0, na.rm = TRUE)
-negative_counts <- colSums(IFits < 0, na.rm = TRUE)
+positive_counts <- colSums(Int_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(Int_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
 positive_countsSig=positive_counts>9900
 negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
-data <- apply(IFits, 2, function(x) quantile(x, probs = 0.5))
+data <- apply(Int_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 # if either is sig at 99% plot
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -606,20 +734,34 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlab('Internalizing')+
+    xlim(c(0,MaxI))+xlab('Internalizing')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxI),expand = expansion(mult = c(0, 0)))
+########################
 
-# for ext
+# Externalizing
+Ext_derivative_matrix <- matrix(0, nrow = nrow(EFits), ncol = ncol(EFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(EFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- EFits[, i + 1] - EFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  Ext_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
 # get straightfoward of segment where 99% is over 0 or under
-positive_counts <- colSums(EFits > 0, na.rm = TRUE)
-negative_counts <- colSums(EFits < 0, na.rm = TRUE)
+positive_counts <- colSums(Ext_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(Ext_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
 positive_countsSig=positive_counts>9900
 negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
-data <- apply(EFits, 2, function(x) quantile(x, probs = 0.5))
+data <- apply(Ext_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 # if either is sig at 99% plot
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -634,16 +776,30 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxE),expand = expansion(mult = c(0, 0)))
+########################
 
-# for som
+# Somatic
+Som_derivative_matrix <- matrix(0, nrow = nrow(SomFits), ncol = ncol(SomFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(SomFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- SomFits[, i + 1] - SomFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  Som_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
 # get straightfoward of segment where 99% is over 0 or under
-positive_counts <- colSums(SomFits > 0, na.rm = TRUE)
-negative_counts <- colSums(SomFits < 0, na.rm = TRUE)
+positive_counts <- colSums(Som_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(Som_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
 positive_countsSig=positive_counts>9900
 negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
-data <- apply(SomFits, 2, function(x) quantile(x, probs = 0.5))
+data <- apply(Som_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 # if either is sig at 99% plot
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -658,15 +814,34 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxSom),expand = expansion(mult = c(0, 0)))
+########################
 
-# for anx
-positive_counts <- colSums(AnxFits > 0, na.rm = TRUE)
-negative_counts <- colSums(AnxFits < 0, na.rm = TRUE)
+# AnxDep
+AnxDep_derivative_matrix <- matrix(0, nrow = nrow(AnxFits), ncol = ncol(AnxFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(AnxFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- AnxFits[, i + 1] - AnxFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  AnxDep_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(AnxDep_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(AnxDep_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
 positive_countsSig=positive_counts>9900
 negative_countsSig=negative_counts>9900
-data <- apply(AnxFits, 2, function(x) quantile(x, probs = 0.5))
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(AnxDep_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
 dervPlotDf$sig_deriv=0
 dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
@@ -677,14 +852,34 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxAnx),expand = expansion(mult = c(0, 0)))
-# for Tho
-positive_counts <- colSums(ThoFits > 0, na.rm = TRUE)
-negative_counts <- colSums(ThoFits < 0, na.rm = TRUE)
+########################
+
+# Thought
+Thought_derivative_matrix <- matrix(0, nrow = nrow(ThoFits), ncol = ncol(ThoFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(ThoFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- ThoFits[, i + 1] - ThoFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  Thought_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(Thought_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(Thought_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
 positive_countsSig=positive_counts>9900
 negative_countsSig=negative_counts>9900
-data <- apply(ThoFits, 2, function(x) quantile(x, probs = 0.5))
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(Thought_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
 dervPlotDf$sig_deriv=0
 dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
 dervPlotDf$seq=1:(dim(dervPlotDf)[1])
@@ -695,13 +890,30 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxTho),expand = expansion(mult = c(0, 0)))
+########################
 
-# for Wit
-positive_counts <- colSums(WitFits > 0, na.rm = TRUE)
-negative_counts <- colSums(WitFits < 0, na.rm = TRUE)
+# Withdrawn depression
+WithDep_derivative_matrix <- matrix(0, nrow = nrow(WitFits), ncol = ncol(WitFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(WitFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- WitFits[, i + 1] - WitFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  WithDep_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(WithDep_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(WithDep_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
 positive_countsSig=positive_counts>9900
 negative_countsSig=negative_counts>9900
-data <- apply(WitFits, 2, function(x) quantile(x, probs = 0.5))
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(WithDep_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
 dervPlotDf$sig_deriv=0
@@ -713,13 +925,29 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)),breaks = seq(0, MaxWit, by = 2))
-
-# for Soc
-positive_counts <- colSums(SocFits > 0, na.rm = TRUE)
-negative_counts <- colSums(SocFits < 0, na.rm = TRUE)
+########################
+# Social
+Soc_derivative_matrix <- matrix(0, nrow = nrow(SocFits), ncol = ncol(SocFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(SocFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- SocFits[, i + 1] - SocFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  Soc_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(Soc_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(Soc_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
 positive_countsSig=positive_counts>9900
 negative_countsSig=negative_counts>9900
-data <- apply(SocFits, 2, function(x) quantile(x, probs = 0.5))
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(Soc_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
 dervPlotDf$sig_deriv=0
@@ -938,12 +1166,5 @@ AttFits=Fits[,323:342]
 RulFits=Fits[,343:361]
 AggFits=Fits[,362:394]
 # actually plot em
-plot_bootstraps(SomFits,13,"Somatic",MaxSom,SomBc,SomC)
-plot_bootstraps(AnxFits,25,'Anxious Depression',MaxAnx,AnxBc,AnxC)
-plot_bootstraps(ThoFits,18,'Thought',MaxTho,ThoBc,ThoC)
-plot_bootstraps(WitFits,16,"Withdrawn Depression",MaxWit,WitBc,WitC)
-plot_bootstraps(SocFits,17,'Social',MaxSoc,SocBc,SocC)
-plot_bootstraps(AttFits,19,'Attention',MaxAtt,AttBc,AttC)
-plot_bootstraps(RulFits,18,'Rule Breaking',MaxRul,RulBc,RulC)
-plot_bootstraps(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
+
 ```
