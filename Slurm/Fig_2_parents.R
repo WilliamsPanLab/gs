@@ -224,6 +224,29 @@ asrwitDiffAdjPseudo=rep(0,10000)
 asrattDiffAdjPseudo=rep(0,10000)
 asrrulDiffAdjPseudo=rep(0,10000)
 asraggDiffAdjPseudo=rep(0,10000)
+# interaction vs. no interaction difference in MAE: cbcl
+pDiffMAE=rep(0,10000)
+intDiffMAE=rep(0,10000)
+extDiffMAE=rep(0,10000)
+somDiffMAE=rep(0,10000)
+anxDiffMAE=rep(0,10000)
+thoDiffMAE=rep(0,10000)
+witDiffMAE=rep(0,10000)
+socDiffMAE=rep(0,10000)
+attDiffMAE=rep(0,10000)
+rulDiffMAE=rep(0,10000)
+aggDiffMAE=rep(0,10000)
+# interaction vs. no interaction difference in MAE: asr
+asrPDiffMAE=rep(0,10000)
+asrintDiffMAE=rep(0,10000)
+asrextDiffMAE=rep(0,10000)
+asrsomDiffMAE=rep(0,10000)
+asranxDiffMAE=rep(0,10000)
+asrthoDiffMAE=rep(0,10000)
+asrwitDiffMAE=rep(0,10000)
+asrattDiffMAE=rep(0,10000)
+asrrulDiffMAE=rep(0,10000)
+asraggDiffMAE=rep(0,10000)
 # maximum value in each iteration
 pMax=rep(0,10000)
 intMax=rep(0,10000)
@@ -754,8 +777,145 @@ for (b in 8001:10000){
 	asrattFitNonPov[b,1:(basrattmax+1)]=forFitasrAtt
 	asrrulFitNonPov[b,1:(basrrulmax+1)]=forFitasrRul
 	asraggFitNonPov[b,1:(basraggmax+1)]=forFitasrAgg
+	# get poverty-group MAE for no-poverty interaction (just intercept) based off of cbcl
+	# get subjects in masterdf but not this bootSamp
+	outOfBoot=masterdf[!(masterdf$subjectkey %in% bootSamp$subjectkey),]
+	# isolate poverty group variables of interest
+	povDF=outOfBoot[outOfBoot$poverty==1,]
+	# predict g of poverty group - no interaction
+	predG=predict(pgAge_pov,povDF)
+	# get MAE
+	mae=median(abs(predG-povDF$g))
+	# predict g of poverty group - interaction
+	predG=predict(pgAge_povint,povDF)
+	# get MAE
+	mae_intrxn=median(abs(predG-povDF$g))
+	# get difference in MAE
+	pDiffMAE[b]=mae-mae_intrxn
+	# same thing for internalizing
+	predG=predict(intgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(intgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	intDiffMAE[b]=mae-mae_intrxn
+	# same thing for externalizing
+	predG=predict(extgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(extgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	extDiffMAE[b]=mae-mae_intrxn
+	# same thing for som
+	predG=predict(somgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(somgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	somDiffMAE[b]=mae-mae_intrxn
+	# same thing for anx
+	predG=predict(anxgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(anxgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	anxDiffMAE[b]=mae-mae_intrxn
+	# same thing for tho
+	predG=predict(thogAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(thogAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	thoDiffMAE[b]=mae-mae_intrxn
+	# same thing for wit
+	predG=predict(witgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(witgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	witDiffMAE[b]=mae-mae_intrxn
+	# same thing for att
+	predG=predict(attgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(attgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	attDiffMAE[b]=mae-mae_intrxn
+	# same thing for rul
+	predG=predict(rulgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(rulgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	rulDiffMAE[b]=mae-mae_intrxn
+	# same thing for agg
+	predG=predict(agggAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(agggAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	aggDiffMAE[b]=mae-mae_intrxn
+	# get poverty-group MAE for no-poverty interaction (just intercept) based off of asr
+	predG=predict(asrpgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(asrpgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	asrPDiffMAE[b]=mae-mae_intrxn
+	# same thing for internalizing
+	predG=predict(asrintgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(asrintgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	asrintDiffMAE[b]=mae-mae_intrxn
+	# same thing for externalizing
+	predG=predict(asrextgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(asrextgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	asrextDiffMAE[b]=mae-mae_intrxn
+	# same thing for som
+	predG=predict(asrsomgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(asrsomgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	asrsomDiffMAE[b]=mae-mae_intrxn
+	# same thing for anx
+	predG=predict(asranxgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(asranxgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	asranxDiffMAE[b]=mae-mae_intrxn
+	# same thing for tho
+	predG=predict(asrthogAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(asrthogAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	asrthoDiffMAE[b]=mae-mae_intrxn
+	# same thing for wit
+	predG=predict(asrwitgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(asrwitgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	asrwitDiffMAE[b]=mae-mae_intrxn
+	# same thing for soc
+	predG=predict(asrsocgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(asrsocgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	asrsocDiffMAE[b]=mae-mae_intrxn
+	# same thing for att
+	predG=predict(asrattgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(asrattgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	asrattDiffMAE[b]=mae-mae_intrxn
+	# same thing for rul
+	predG=predict(asrrulgAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(asrrulgAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	asrrulDiffMAE[b]=mae-mae_intrxn
+	# same thing for agg
+	predG=predict(asragggAge_pov,povDF)
+	mae=median(abs(predG-povDF$g))
+	predG=predict(asragggAge_povint,povDF)
+	mae_intrxn=median(abs(predG-povDF$g))
+	asraggDiffMAE[b]=mae-mae_intrxn
 }
 # SAVEOUT
+# median absolute error differences
+outdf=data.frame(pDiffMAE,intDiffMAE,extDiffMAE,somDiffMAE,anxDiffMAE,thoDiffMAE,witDiffMAE,socDiffMAE,attDiffMAE,rulDiffMAE,aggDiffMAE,asrPDiffMAE,asrintDiffMAE,asrextDiffMAE,asrsomDiffMAE,asranxDiffMAE,asrthoDiffMAE,asrwitDiffMAE,asrsocDiffMAE,asrattDiffMAE,asrrulDiffMAE,asraggDiffMAE)
 
 # save out all difference in AIC vectors, differences in adjusted R^2 vectors
 # cbcl
