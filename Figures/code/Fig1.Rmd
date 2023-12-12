@@ -925,7 +925,14 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)),breaks = seq(0, MaxWit, by = 2))
+
+
+
 ########################
+###### RESTART HERE WITH NEW BOOTS
+####### ∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆
+
+
 # Social
 Soc_derivative_matrix <- matrix(0, nrow = nrow(SocFits), ncol = ncol(SocFits) - 1)
 # Calculate the derivative for each column
@@ -959,13 +966,29 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(breaks=c(0,3,6,9,12),limits = c(0,MaxSoc),expand = expansion(mult = c(0, 0)))
+########################
 
-# for Att
-positive_counts <- colSums(AttFits > 0, na.rm = TRUE)
-negative_counts <- colSums(AttFits < 0, na.rm = TRUE)
+# Attention
+Att_derivative_matrix <- matrix(0, nrow = nrow(AttFits), ncol = ncol(AttFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(AttFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- AttFits[, i + 1] - AttFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  Att_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(Att_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(Att_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
 positive_countsSig=positive_counts>9900
 negative_countsSig=negative_counts>9900
-data <- apply(AttFits, 2, function(x) quantile(x, probs = 0.5))
+data <- apply(Att_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
 dervPlotDf$sig_deriv=0
@@ -977,13 +1000,29 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxAtt),expand = expansion(mult = c(0, 0)))
+########################
 
 # for Rul
-positive_counts <- colSums(RulFits > 0, na.rm = TRUE)
-negative_counts <- colSums(RulFits < 0, na.rm = TRUE)
+Soc_derivative_matrix <- matrix(0, nrow = nrow(SocFits), ncol = ncol(SocFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(SocFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- SocFits[, i + 1] - SocFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  Soc_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(Soc_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(Soc_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
 positive_countsSig=positive_counts>9900
 negative_countsSig=negative_counts>9900
-data <- apply(RulFits, 2, function(x) quantile(x, probs = 0.5))
+data <- apply(Att_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
 dervPlotDf$sig_deriv=0
@@ -995,13 +1034,30 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(breaks=c(0,3,6,9,12),limits = c(0,MaxRul),expand = expansion(mult = c(0, 0)))
+########################
 
-# for Agg
-positive_counts <- colSums(AggFits > 0, na.rm = TRUE)
-negative_counts <- colSums(AggFits < 0, na.rm = TRUE)
+# Aggression
+Soc_derivative_matrix <- matrix(0, nrow = nrow(SocFits), ncol = ncol(SocFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(SocFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- SocFits[, i + 1] - SocFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  Soc_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(Soc_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(Soc_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
 positive_countsSig=positive_counts>9900
 negative_countsSig=negative_counts>9900
-data <- apply(AggFits, 2, function(x) quantile(x, probs = 0.5))
+data <- apply(Att_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
 dervPlotDf$sig_deriv=0

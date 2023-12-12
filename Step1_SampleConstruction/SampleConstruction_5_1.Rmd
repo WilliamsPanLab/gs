@@ -28,20 +28,14 @@ library(ggalluvial)
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in cbcl data
-cbcl=read.delim('~/Downloads/Package_1210940/abcd_cbcl01.txt')
-cbcls=read.delim('~/Downloads/Package_1210940/abcd_cbcls01.txt')
-# subset timepoints
-cbclsBV=subset(cbcls,eventname=='baseline_year_1_arm_1')
-cbcls2=subset(cbcls,eventname=='2_year_follow_up_y_arm_1')
+cbcl=read.csv('~/Downloads/abcd-data-release-5.1/core/mental-health/mh_p_cbcl.csv')
 # subset timepoints
 cbclBV=subset(cbcl,eventname=='baseline_year_1_arm_1')
 cbcl2=subset(cbcl,eventname=='2_year_follow_up_y_arm_1')
-# merge with other cbcl
-cbclsBV=merge(cbclsBV,cbclBV,by=c('subjectkey','eventname'))
-cbcls2=merge(cbcls2,cbcl2,by=c('subjectkey','eventname'))
 
 # initialize master df
-masterdf<-merge(cbcls,cbcl,by=c('subjectkey','eventname','interview_age','src_subject_id','sex'))
+masterdf<-cbcl
+
 # omit nans and empties for variables of interest (totprobs,int,ext)
 masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_totprob_r),]
 masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_totprob_r),]
@@ -51,7 +45,7 @@ masterdf=masterdf[!is.empty(masterdf$cbcl_scr_syn_external_r),]
 masterdf=masterdf[!is.na(masterdf$cbcl_scr_syn_external_r),]
 
 # initialize included subjects df
-includedSubjects=data.frame(unique(masterdf$subjectkey))
+includedSubjects=data.frame(unique(masterdf$src_subject_id))
 colnames(includedSubjects)<-'subj'
 includedSubjects$cbclInclude=1
 
@@ -59,30 +53,30 @@ includedSubjects$cbclInclude=1
 masterdf=masterdf[masterdf$eventname!='1_year_follow_up_y_arm_1',]
 masterdf=masterdf[masterdf$eventname!='3_year_follow_up_y_arm_1',]
 # calculate remaining subjs
-cbclSubjs=length(unique(masterdf$subjectkey))
-length(unique(masterdf$subjectkey))
+cbclSubjs=length(unique(masterdf$src_subject_id))
+length(unique(masterdf$src_subject_id))
 
 # get other vars of interest to check for complete cases
 KidVarsOfInt=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r')
 
 # only use subjects with both timepoints as complete cases
-subjs=unique(masterdf$subjectkey)
+subjs=unique(masterdf$src_subject_id)
 for (s in subjs){
   # if there are less than two complete cases of the variables of interest
-  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(KidVarsOfInt)]))<2){
+  if (sum(complete.cases(masterdf[masterdf$src_subject_id==s,c(KidVarsOfInt)]))<2){
     subjs=subjs[subjs!=s]
   }
 }
 
 # exclude participants without data at both timepoints
-cbclSubjs=length(unique(masterdf$subjectkey))
-masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+cbclSubjs=length(unique(masterdf$src_subject_id))
+masterdf=masterdf[masterdf$src_subject_id %in% subjs,]
 
 # included subjs df
 includedSubjects$CBCLBoth=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CBCLBoth=1
+includedSubjects[includedSubjects$subj %in% unique(masterdf$src_subject_id),]$CBCLBoth=1
 
-cbclSubjsBoth=length(unique(masterdf$subjectkey))
+cbclSubjsBoth=length(unique(masterdf$src_subject_id))
 print(paste0(cbclSubjs-cbclSubjsBoth,' lost due to single-timepoint CBCL completeness'))
 ```
 ```{r}
@@ -91,7 +85,7 @@ print(paste0(cbclSubjs-cbclSubjsBoth,' lost due to single-timepoint CBCL complet
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in grades, ∆∆∆ will need to correct for incongruency between tp1 measure (decent granularity) and tp2 measure (high granularity) ∆∆∆
-gradesInfoBV=read.delim('~/Downloads/Package_1210940/dibf01.txt')
+gradesInfoBV=read.csv('~/Downloads/abcd-data-release-5.1/core/mental-health/mh_p_ksads_bg.csv')
 # extract baseline
 gradesInfoBV=subset(gradesInfoBV,eventname=='baseline_year_1_arm_1')
 gradesInfoBV$Grades<-as.numeric(gradesInfoBV$kbi_p_grades_in_school)
@@ -101,7 +95,7 @@ gradesInfoBV$Grades[gradesInfoBV$Grades==-1]=NA
 gradesInfoBV$Grades[gradesInfoBV$Grades==6]=NA
 # convert ndar colnames to other ndar colnames
 # for tp2, the key is 1 = A's, 2 = B's, 3 = C's, 4 = D's, 5 = F's, 6 = ungraded, -1 = NA
-gradesInfoY2=read.delim('~/Downloads/Package_1210940/abcd_saag01.txt')
+gradesInfoY2=read.csv('~/Downloads/abcd-data-release-5.1/core/culture-environment/ce_p_sag.csv')
 gradesInfoY2=subset(gradesInfoY2,eventname=='2_year_follow_up_y_arm_1')
 gradesInfoY2$sag_grade_type<-as.numeric(gradesInfoY2$sag_grade_type)
 # key: 1=100-97,2=96-93,3=92-90,4=89-87,5=86-83,6=82-80,7=79-77,8=76-73,9=72-70,10=69-67,11=66-65,12=0-65,-1=NA,777= no answer
@@ -141,33 +135,33 @@ gradesInfoY2$sag_grade_type[ind3]=1
 gradesInfoY2$Grades<-gradesInfoY2$sag_grade_type
 
 ###### ∆∆∆∆∆∆∆ create grades info from both of em
-NeededColNames=c('subjectkey','eventname','Grades')
+NeededColNames=c('src_subject_id','eventname','Grades')
 gradesInfo<-rbind(gradesInfoBV[,NeededColNames],gradesInfoY2[,NeededColNames])
 gradesInfo$Grades<-as.ordered(gradesInfo$Grades)
 
 # merge and count losses
-masterdf<-merge(masterdf,gradesInfo,by=c('subjectkey','eventname'))
+masterdf<-merge(masterdf,gradesInfo,by=c('src_subject_id','eventname'))
 
 # subjects with this measure at both timepoints
 # only use subjects with both timepoints as complete cases
-subjs=unique(masterdf$subjectkey)
+subjs=unique(masterdf$src_subject_id)
 for (s in subjs){
   # if there are less than two complete cases of the variables of interest
-  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,'Grades']))<2){
+  if (sum(complete.cases(masterdf[masterdf$src_subject_id==s,'Grades']))<2){
     subjs=subjs[subjs!=s]
   }
 }
 
 # exclude participants without data at both timepoints
-masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+masterdf=masterdf[masterdf$src_subject_id %in% subjs,]
 
 # omit nans and empties for variables of interest (totprobs,int,ext)
 masterdf=masterdf[!is.empty(masterdf$Grades),]
 masterdf=masterdf[!is.na(masterdf$Grades),]
-gradesSubjs=length(unique(masterdf$subjectkey))
+gradesSubjs=length(unique(masterdf$src_subject_id))
 # add to included subjs DF
 includedSubjects$Grades=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
+includedSubjects[includedSubjects$subj %in% unique(masterdf$src_subject_id),]$Grades=1
 # print data volume
 print(gradesSubjs)
 dif=cbclSubjsBoth-gradesSubjs
@@ -175,7 +169,7 @@ print(paste0(dif,' participants lost from grades merge'))
 
 # included subjs df
 includedSubjects$Grades=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades=1
+includedSubjects[includedSubjects$subj %in% unique(masterdf$src_subject_id),]$Grades=1
 
 ```
 
@@ -187,29 +181,29 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$Grades
 ### LOAD in ASR data
 asr=read.delim('~/Downloads/Package_1210940/pasr01.txt',na.strings=c("","NA"))
 # merge
-masterdf<-merge(masterdf,asr,by=c('subjectkey','eventname','interview_age','sex'))
+masterdf<-merge(masterdf,asr,by=c('src_subject_id','eventname','interview_age','sex'))
 # check for populated data at BOTH timepoints
 ColsOfInt=asr[,c(11:141)]
 ASRVarsOfInt=colnames(ColsOfInt)
 # only use subjects with both timepoints as complete cases
-subjs=unique(masterdf$subjectkey)
+subjs=unique(masterdf$src_subject_id)
 for (s in subjs){
   # if there are less than two complete cases of the variables of interest
-  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(ASRVarsOfInt)]))<2){
+  if (sum(complete.cases(masterdf[masterdf$src_subject_id==s,c(ASRVarsOfInt)]))<2){
     subjs=subjs[subjs!=s]
   }
 }
 
-masterdf=masterdf[masterdf$subjectkey %in% subjs,]
+masterdf=masterdf[masterdf$src_subject_id %in% subjs,]
 
 # full losses counted after asr count chunk, but note one participant is probably lost here just from merge
-asrSubjs=length(unique(masterdf$subjectkey))
+asrSubjs=length(unique(masterdf$src_subject_id))
 dif=gradesSubjs-asrSubjs
 print(paste0(dif,' participants lost from needing ASR at both timepoints'))
 
 # included subjs df
 includedSubjects$ASR=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$ASR=1
+includedSubjects[includedSubjects$subj %in% unique(masterdf$src_subject_id),]$ASR=1
 ```
 
 ```{r}
@@ -220,21 +214,21 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$ASR=1
 # load in acs file for rel_family_ID
 # get family ID from acs
 acs=read.delim('~/Downloads/Package_1210940/acspsw03.txt')
-acs$subjectkey<-acs$src_subject_id
-acs=acs[,c('rel_family_id','subjectkey','eventname')]
+acs$src_subject_id<-acs$src_subject_id
+acs=acs[,c('rel_family_id','src_subject_id','eventname')]
 # looks like all family IDs are missing from timepoint 1, so exclude for ease
 acs=acs[acs$eventname=='baseline_year_1_arm_1',]
 # and isolate family ID for ease
-acs=data.frame(acs$subjectkey,acs$rel_family_id)
-colnames(acs)=c('subjectkey','rel_family_id')
-masterdf<-merge(masterdf,acs,by=c('subjectkey'))
+acs=data.frame(acs$src_subject_id,acs$rel_family_id)
+colnames(acs)=c('src_subject_id','rel_family_id')
+masterdf<-merge(masterdf,acs,by=c('src_subject_id'))
 # na omitted version
 masterdf=masterdf[!is.na(masterdf$rel_family_id),] 
 masterdf=masterdf[!is.empty(masterdf$rel_family_id),] 
-acsSubjs=length(unique(masterdf$subjectkey))
+acsSubjs=length(unique(masterdf$src_subject_id))
 # add to included subjs DF
 includedSubjects$acs=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$acs=1
+includedSubjects[includedSubjects$subj %in% unique(masterdf$src_subject_id),]$acs=1
 # print data volume
 print(acsSubjs)
 dif=asrSubjs-acsSubjs
@@ -247,8 +241,8 @@ print(paste0(dif,' participants lost from ACS merge for family ID'))
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### CLEAN data
-# subjectkey as factor
-masterdf$subjectkey<-as.factor(masterdf$subjectkey)
+# src_subject_id as factor
+masterdf$src_subject_id<-as.factor(masterdf$src_subject_id)
 # convert cbcl scores to numeric
 masterdf$cbcl_scr_syn_totprob_r<-as.numeric(masterdf$cbcl_scr_syn_totprob_r)
 masterdf$cbcl_scr_syn_internal_r<-as.numeric(masterdf$cbcl_scr_syn_internal_r)
@@ -267,14 +261,14 @@ othCog=read.delim('~/Downloads/Package_1210940/abcd_ps01.txt')
 littleMan=read.delim('~/Downloads/Package_1210940/lmtp201.txt')
 
 # merge in
-masterdf<-merge(masterdf,nihCog,by=c('subjectkey','eventname','interview_age','sex'))
-newList=length(unique(masterdf$subjectkey))
+masterdf<-merge(masterdf,nihCog,by=c('src_subject_id','eventname','interview_age','sex'))
+newList=length(unique(masterdf$src_subject_id))
 print(paste0(newList,' after merging nih toolbox, ',(acsSubjs- newList),' lost after merge'))
-masterdf<-merge(masterdf,othCog,by=c('subjectkey','eventname','interview_age','sex'))
-newList2=length(unique(masterdf$subjectkey))
+masterdf<-merge(masterdf,othCog,by=c('src_subject_id','eventname','interview_age','sex'))
+newList2=length(unique(masterdf$src_subject_id))
 print(paste0(newList2,' after merging other cognitive measures, ',(newList- newList2),' lost after merge'))
-masterdf<-merge(masterdf,littleMan,by=c('subjectkey','eventname','interview_age','sex'))
-newList3=length(unique(masterdf$subjectkey))
+masterdf<-merge(masterdf,littleMan,by=c('src_subject_id','eventname','interview_age','sex'))
+newList3=length(unique(masterdf$src_subject_id))
 print(paste0(newList3,' after merging little man, ',(newList2 - newList3),' lost after merge'))
 
 # clean age
@@ -317,21 +311,21 @@ masterdf$lmt_scr_perc_correct<-as.numeric(masterdf$lmt_scr_perc_correct)
 pcVars=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct")
 
 # only use subjects with both timepoints as complete cases
-subjs=unique(masterdf$subjectkey)
+subjs=unique(masterdf$src_subject_id)
 for (s in subjs){
   # if there are less than two complete cases of the variables of interest
-  if (sum(complete.cases(masterdf[masterdf$subjectkey==s,c(pcVars)]))<2){
+  if (sum(complete.cases(masterdf[masterdf$src_subject_id==s,c(pcVars)]))<2){
     subjs=subjs[subjs!=s]
   }
 }
 # convert masterdf to df with complete observations for cognition
-masterdf=masterdf[masterdf$subjectkey %in% subjs,]
-newList4=length(unique(masterdf$subjectkey))
+masterdf=masterdf[masterdf$src_subject_id %in% subjs,]
+newList4=length(unique(masterdf$src_subject_id))
 print(paste0(newList4,' after retaining only subjs with Cognitive vars of interest at BOTH timepoints, ',(newList3- newList4),' lost after removing'))
 
 # populated included subjs df
 includedSubjects$CogBoth=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CogBoth=1
+includedSubjects[includedSubjects$subj %in% unique(masterdf$src_subject_id),]$CogBoth=1
 ```
 
 ```{r}
@@ -362,12 +356,12 @@ for(f in 1:length(unique(masterdf$rel_family_id))){
     kept=sample(seq(1,famsize),1)
     #print(paste0('kept ',kept))
     # use to select one subject id
-    famIDs=unique(masterdf$subjectkey[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]])
+    famIDs=unique(masterdf$src_subject_id[masterdf$rel_family_id == unique(masterdf$rel_family_id)[f]])
     # chosen sib
     keeper=famIDs[kept]
     left=famIDs[-c(kept)]
     # leave rest
-    masterdf=masterdf[!masterdf$subjectkey %in% left,] 
+    masterdf=masterdf[!masterdf$src_subject_id %in% left,] 
     # calc index of family
     ind=ind+1	
     # set index of family
@@ -378,12 +372,12 @@ for(f in 1:length(unique(masterdf$rel_family_id))){
 # make family ID for those with families represented in ABCD
 masterdf$rel_family_id=masterdf$id_fam
 
-newList5=length(unique(masterdf$subjectkey))
+newList5=length(unique(masterdf$src_subject_id))
 print(paste0(newList5,' after retaining only one subjs per family, ',(newList4- newList5),' lost after removing'))
 
 # included subjects DF to track subj loss
 includedSubjects$OnePerFamily=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$OnePerFamily=1
+includedSubjects[includedSubjects$subj %in% unique(masterdf$src_subject_id),]$OnePerFamily=1
 
 # pea_wiscv_tss, nihtbx_list_uncorrected, and nihtbx_cardsort_uncorrected taken out for lack of longitudinal coverage
 pcaDf<-masterdf[,pcVars]
@@ -397,7 +391,7 @@ pcaDf<-masterdf[,pcVars]
 # derive pcs
 Y = as.matrix(scale(pcaDf[complete.cases(pcaDf[,pcVars]),pcVars]))
 # equiv for binding scores to IDs and eventnames
-pcVarsAndIDs=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","subjectkey","eventname")
+pcVarsAndIDs=c("nihtbx_picvocab_uncorrected","nihtbx_flanker_uncorrected","nihtbx_pattern_uncorrected","nihtbx_picture_uncorrected","nihtbx_reading_uncorrected","pea_ravlt_ld","lmt_scr_perc_correct","src_subject_id","eventname")
 Yextended=masterdf[complete.cases(masterdf[,pcVarsAndIDs]),pcVarsAndIDs]
 ncomp = 3
 y.pca = psych::principal(Y, rotate="varimax", nfactors=ncomp, scores=TRUE)
@@ -415,12 +409,12 @@ masterdf$g<-Yextended$g
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # exclude subjs without data for both timepoints
-OutDFsubjects=length(unique(masterdf$subjectkey))
+OutDFsubjects=length(unique(masterdf$src_subject_id))
 OutDFBV=subset(masterdf,eventname=='baseline_year_1_arm_1')
 OutDF2Y=subset(masterdf,eventname=='2_year_follow_up_y_arm_1')
 # intersection of subjs in both
-BothTPsubjs=intersect(OutDFBV$subjectkey,OutDF2Y$subjectkey)
-Different=setdiff(unique(masterdf$subjectkey),BothTPsubjs)
+BothTPsubjs=intersect(OutDFBV$src_subject_id,OutDF2Y$src_subject_id)
+Different=setdiff(unique(masterdf$src_subject_id),BothTPsubjs)
 # print sanity check subjs lost to another check of both tps populated
 newList6=length(unique(BothTPsubjs))
 dif=newList5-newList6
@@ -482,17 +476,17 @@ asr$ASRExt=c(NA,ASRExt)
 
 # fix asr age for merge
 asr$interview_age=as.numeric(asr$interview_age)/12
-# set subjectkey to factor for merge
-asr$subjectkey<-as.factor(asr$subjectkey)
+# set src_subject_id to factor for merge
+asr$src_subject_id<-as.factor(asr$src_subject_id)
 
 # ensure none are missing
-paste0(length(unique(masterdf$subjectkey)))
+paste0(length(unique(masterdf$src_subject_id)))
 # collapse to just variables of interest to prevent duplicate variables
-asr=asr[,c('parentPcount','subjectkey','eventname','interview_age','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRInt','ASRExt')]
+asr=asr[,c('parentPcount','src_subject_id','eventname','interview_age','ASRAnxDepr','ASRWithdrawn','ASRSomatic','ASRThought','ASRAttn','ASRAggr','ASRRulB','ASRInt','ASRExt')]
 # merge
-masterdf=merge(masterdf,asr,by=c('subjectkey','eventname','interview_age'))
+masterdf=merge(masterdf,asr,by=c('src_subject_id','eventname','interview_age'))
 # ensure none are missing
-paste0(length(unique(masterdf$subjectkey)))
+paste0(length(unique(masterdf$src_subject_id)))
 
 ```
 
@@ -504,10 +498,10 @@ paste0(length(unique(masterdf$subjectkey)))
 ### LOAD in ParticipantsTSV for parent income and edu background
 # ordained sample split
 participantsTSV=read.delim('~/Downloads/participants.tsv',sep="\t")
-participantsTSV$subjectkey<-participantsTSV$participant_id
+participantsTSV$src_subject_id<-participantsTSV$participant_id
 # reformat participant IDs so they match everything else
-participantsTSV$subjectkey<-gsub('sub-','',participantsTSV$subjectkey)
-participantsTSV$subjectkey<-as.factor(gsub('NDARINV','NDAR_INV',participantsTSV$subjectkey))
+participantsTSV$src_subject_id<-gsub('sub-','',participantsTSV$src_subject_id)
+participantsTSV$src_subject_id<-as.factor(gsub('NDARINV','NDAR_INV',participantsTSV$src_subject_id))
 participantsTSV$eventname=participantsTSV$session_id
 ### issue where subjects are repeated. Rows are not identical either.
 # query. get table of subject ids
@@ -548,7 +542,7 @@ participantsTSV$parental_education<-as.ordered(participantsTSV$parental_educatio
 #########################
 #########################
 ### merge in for fam income and parent edu
-masterdf=merge(masterdf,participantsTSV,by=c('subjectkey','sex'))
+masterdf=merge(masterdf,participantsTSV,by=c('src_subject_id','sex'))
 # this dataframe is now your working data frame for all figure RMDs
 saveRDS(masterdf,'~/gp_masterdf.rds')
 ####################
@@ -557,10 +551,10 @@ saveRDS(masterdf,'~/gp_masterdf.rds')
 #########################
 
 # new merge and count
-participantsTSVSubjs=length(unique(masterdf$subjectkey))
+participantsTSVSubjs=length(unique(masterdf$src_subject_id))
 # add to included subjs DF
 includedSubjects$pTSV=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$pTSV=1
+includedSubjects[includedSubjects$subj %in% unique(masterdf$src_subject_id),]$pTSV=1
 
 print(paste0(newList6-participantsTSVSubjs,' participants lost after needing complete data in participantstsv'))
 paste0(participantsTSVSubjs,' remain')
@@ -685,15 +679,15 @@ fg_demo=fg_demo[fg_demo$eventname!='1_year_follow_up_y_arm_1',]
 # retain only those with actual INR data
 fg_demo=fg_demo[!is.na(fg_demo$INR),]
 # merge back in
-masterdf2=merge(masterdf,fg_demo,by=c('subjectkey','sex','interview_age','eventname'))
+masterdf2=merge(masterdf,fg_demo,by=c('src_subject_id','sex','interview_age','eventname'))
 
 # NEED cleaner version of fg_demo to not lose 80% of sample on merge
 
 # new merge and count
-parentDemo_TSVSubjs=length(unique(masterdf$subjectkey))
+parentDemo_TSVSubjs=length(unique(masterdf$src_subject_id))
 # add to included subjs DF
 includedSubjects$PD=0
-includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$PD=1
+includedSubjects[includedSubjects$subj %in% unique(masterdf$src_subject_id),]$PD=1
 
 print(paste0(participantsTSVSubjs-parentDemo_TSVSubjs,' participants lost after needing complete data in Parent demographics'))
 paste0(parentDemo_TSVSubjs,' remain')
@@ -1137,7 +1131,7 @@ youthReport$ksads_scr_syn_external_r=rowSums(youthReport[,SymptomPresentColumns[
 youthReport$interview_age=as.numeric(youthReport$interview_age)/12
 # remove folks with missing time stamp
 youthReport=youthReport[youthReport$ksads_duration_t!='',]
-masterdf2=merge(masterdf,youthReport,by=c('subjectkey','sex','interview_age','eventname'))
+masterdf2=merge(masterdf,youthReport,by=c('src_subject_id','sex','interview_age','eventname'))
 
 # get difference measure: 
 # z-score of child on parent report cbcl_scr_syn_totprob_r
@@ -1184,15 +1178,15 @@ SCO_df=masterdf[masterdf$cbcl_scr_syn_external_r<Pbc,]
 saveRDS(SCO_df,'~/gp_SCOe_masterdf.rds')
 
 # randomize splits
-SubjsFull=unique(masterdf$subjectkey)
+SubjsFull=unique(masterdf$src_subject_id)
 set.seed(1)
 SH1_subjs=sample(SubjsFull,length(SubjsFull)/2,replace = F)
 SH2_subjs=setdiff(SubjsFull,SH1_subjs)
 # Save out split-half 1 df
-SH1=masterdf[masterdf$subjectkey %in% SH1_subjs,]
+SH1=masterdf[masterdf$src_subject_id %in% SH1_subjs,]
 saveRDS(SCO_df,'~/gp_SH1_masterdf.rds')
 # save out split-half 2 df
-SH2=masterdf[masterdf$subjectkey %in% SH2_subjs,]
+SH2=masterdf[masterdf$src_subject_id %in% SH2_subjs,]
 saveRDS(SH2,'~/gp_SH2_masterdf.rds')
 
 ```
@@ -1208,7 +1202,7 @@ plotdf$value<-as.factor(plotdf$value)
 plotdf$subj<-as.factor(plotdf$subj)
 # merge in raceEth of each subj
 raceEth=participantsTSV$race_ethnicity
-subjectsInPtsv=participantsTSV$subjectkey
+subjectsInPtsv=participantsTSV$src_subject_id
 infoDf=data.frame(raceEth,subjectsInPtsv)
 colnames(infoDf)<-c('RaceEthn','subj')
 plotdf2=merge(plotdf,infoDf,by='subj')
@@ -1285,7 +1279,7 @@ ggplot(endingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_o
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
 #### Chunk 15 prepares data for analysis of temporal precedence ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','parentPcount','Grades','income','sex','race_ethnicity','matched_group','eventname')
+variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','src_subject_id','interview_age','parentPcount','Grades','income','sex','race_ethnicity','matched_group','eventname')
 # eliminate rows with NAs and ensure none without two-timepoint data
 # variables of interest redux
 masterdf=masterdf[,c(variablesOfInterest)]
@@ -1293,17 +1287,17 @@ masterdf=masterdf[,c(variablesOfInterest)]
 masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ] 
 print(dim(masterdf))
 # and two-timepoint check
-twoTPsubjs=names(table(masterdf$subjectkey)[table(masterdf$subjectkey)>1])
+twoTPsubjs=names(table(masterdf$src_subject_id)[table(masterdf$src_subject_id)>1])
 masterdf=masterdf[masterdf$subj %in% twoTPsubjs,]
 
 # now set subsets to use for temporal precedence analyses 
 df1=masterdf[masterdf$eventname=='baseline_year_1_arm_1',]
 df2=masterdf[masterdf$eventname=='2_year_follow_up_y_arm_1',]
-subsetOfBoth=merge(df1,df2,by='subjectkey')
-subsetOfBoth=subsetOfBoth$subjectkey
+subsetOfBoth=merge(df1,df2,by='src_subject_id')
+subsetOfBoth=subsetOfBoth$src_subject_id
 
 # convert to one row per subj for temporal precedence analyses
-OutDFTmpPrec<-merge(df1,df2,by='subjectkey')
+OutDFTmpPrec<-merge(df1,df2,by='src_subject_id')
 print(dim(OutDFTmpPrec))
 
 # save it out
