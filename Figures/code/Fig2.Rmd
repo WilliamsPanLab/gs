@@ -1447,19 +1447,30 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 
 ```{r}
 # load in data
-Fits=readRDS('~/Desktop/g_p/gpFitBoots_asr.rds')
-PFits=Fits[,448:608]
+# load in data
+Fits1=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr1.rds')
+Fits2=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr2.rds')
+Fits3=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr3.rds')
+Fits4=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr4.rds')
+Fits5=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr5.rds')
+Fits=Fits1
+Fits[2001:4000,]=Fits2[2001:4000,]
+Fits[4001:6000,]=Fits3[4001:6000,]
+Fits[6001:8000,]=Fits4[6001:8000,]
+Fits[8001:10000,]=Fits5[8001:10000,]
+
+PFits=Fits1[,395:555]
 MaxP=find_furthest_nonzero(PFits)
 
-IFits = Fits[,(161:191)+448]
-EFits = Fits[,(192:255)+448]
-SomFits = Fits[,(256:276)+448]
-AnxFits = Fits[,(277:308)+448]
-ThoFits = Fits[,(309:327)+448]
-WitFits = Fits[,(328:346)+448]
-AttFits = Fits[,(347:378)+448]
-RulFits = Fits[,(379:400)+448]
-AggFits = Fits[,(401:446)+448]
+IFits = Fits[,(161:191)+395]
+EFits = Fits[,(192:255)+395]
+SomFits = Fits[,(256:276)+395]
+AnxFits = Fits[,(277:308)+395]
+ThoFits = Fits[,(309:327)+395]
+WitFits = Fits[,(328:346)+395]
+AttFits = Fits[,(347:378)+395]
+RulFits = Fits[,(379:400)+395]
+AggFits = Fits[,(401:446)+395]
 
 MaxI=find_furthest_nonzero(IFits)
 MaxE=find_furthest_nonzero(EFits)
@@ -1487,29 +1498,41 @@ plot_bootstraps_par(SomFits,20,'Somatic',MaxSom)
 ```
 
 ```{r}
-# load in data
-Fits=readRDS('~/Desktop/g_p/gpDerivBoots_asr.rds')
-# find mean shape and plot it: p
-PFits=Fits[,448:608]
-IFits = Fits[,(161:191)+448]
-EFits = Fits[,(192:255)+448]
-SomFits = Fits[,(256:276)+448]
-AnxFits = Fits[,(277:308)+448]
-ThoFits = Fits[,(309:327)+448]
-WitFits = Fits[,(328:346)+448]
-AttFits = Fits[,(347:378)+448]
-RulFits = Fits[,(379:400)+448]
-AggFits = Fits[,(401:446)+448]
+## load in data
+#Fits=readRDS('~/Desktop/g_p/gpDerivBoots_asr.rds')
+## find mean shape and plot it: p
+#PFits=Fits[,448:608]
+#IFits = Fits[,(161:191)+448]
+#EFits = Fits[,(192:255)+448]
+#SomFits = Fits[,(256:276)+448]
+#AnxFits = Fits[,(277:308)+448]
+#ThoFits = Fits[,(309:327)+448]
+#WitFits = Fits[,(328:346)+448]
+#AttFits = Fits[,(347:378)+448]
+#RulFits = Fits[,(379:400)+448]
+#AggFits = Fits[,(401:446)+448]
 
+p_derivative_matrix <- matrix(0, nrow = nrow(PFits), ncol = ncol(PFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(PFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- PFits[, i + 1] - PFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  p_derivative_matrix[, i] <- derivatives
+}
 # for p - saved out at 600x200, 300x200 for minor scales
 # get straightfoward of segment where 99% is over 0 or under
-positive_counts <- colSums(PFits > 0, na.rm = TRUE)
-negative_counts <- colSums(PFits < 0, na.rm = TRUE)
+positive_counts <- colSums(p_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(p_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
-data <- apply(PFits, 2, function(x) quantile(x, probs = 0.5))
+data <- apply(p_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 # if either is sig at 99% plot
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -1525,16 +1548,6 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
 
-# and a version with colorbar - for p only (same color mapping using throughout)
-dervPlotDf$Slope=dervPlotDf$sig_deriv
-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = Slope))+
-    theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab(expression(italic(p)))+
-    theme(legend.key.width=unit(3,"cm"),axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-    scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))+
-    theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
-    scale_x_continuous(limits = c(0,113),expand = expansion(mult = c(0, 0)))
 # for int
 # get straightfoward of segment where 99% is over 0 or under
 positive_counts <- colSums(IFits > 0, na.rm = TRUE)
@@ -1760,54 +1773,39 @@ ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
 ```
 
 ```{r}
-# and now a clinical risk group
-# only in clinical range
-df <- data.frame(
-  p = apply(PFits[, (MaxP/1.5):MaxP], 1, median),
-  Internal = apply(IFits[, (MaxI/1.5):MaxI], 1, median),
-  External = apply(EFits[, (MaxE/1.5):MaxE], 1, median),
-  Somatic = apply(SomFits[, (MaxSom/1.5):MaxSom], 1, median),
-  AnxDepr = apply(AnxFits[, (MaxAnx/1.5):MaxAnx], 1, median),
-  Thought = apply(ThoFits[, (MaxTho/1.5):MaxTho], 1, median),
-  WithDepr = apply(WitFits[, (MaxWit/1.5):MaxWit], 1, median),
-  # to replace with intrusive
-  #Social = apply(SocFits[, (MaxSoc/1.5):MaxSoc], 1, median),
-  Attn = apply(AttFits[, (MaxAtt/1.5):MaxAtt], 1, median),
-  Rules = apply(RulFits[, (MaxRul/1.5):MaxRul], 1, median),
-  Aggr = apply(AggFits[, (MaxAgg/1.5):MaxAgg], 1, median)
+# deviance explained plots
+DevExpl=readRDS('~/Desktop/g_p/F3-5DevExpl.rds')
+DevExpl_L=readRDS('~/Desktop/g_p/F3-5DevExpl_longit.rds')
+
+# extract deviance explained above-any-beyond dev expl py timepoint 1 p
+DevExpl_L_Relative=DevExpl_L-DevExpl_L[,1]
+
+df_long <- reshape2::melt(DevExpl)
+
+custom_labels <- c(
+  expression(italic(g)),
+  "Grades",
+  expression(italic(g) ~ "+ Parental" ~ italic(p)),
+  expression("Grades + Parental" ~ italic(p))
 )
+# Create the boxplot - 1350 x 800 dimensions
+ggplot(df_long, aes(x = variable, y = value)) +
+  geom_boxplot(outlier.alpha = 0.1) +
+  xlab("Variables") +
+  scale_x_discrete(labels = custom_labels) +
+  ylab("Cross-sectional Dev. Expl.") + theme_minimal(base_size=30)
 
-# Convert the data frame to a tidy format
-df_tidy2 <- df %>%
-  gather(key = "Subscale", value = "MedianValue")
-
-# Calculate the median for each subscale iteration
-df_median <- df_tidy2 %>%
-  group_by(Subscale) %>%
-  summarize(MedianIteration = median(MedianValue))
-
-# Join the MedianIteration column to df_tidy based on Subscale
-df_tidy2 <- left_join(df_tidy2, df_median, by = "Subscale")
-
-# note we are sorting by plot one's order
-df_tidy2$Subscale <- reorder(df_tidy2$Subscale, -df_tidy$MedianValue, median)
-
-# combine
-df_tidy$third<-'First'
-df_tidy2$third<-'Last'
-
-df_tidy_merged<-rbind(df_tidy,df_tidy2)
+# now for longitudinal variables
+#custom_labels <- c(expression(italic(g)), "Grades")
+df_long <- reshape2::melt(DevExpl_L_Relative[,2:5])
 
 # Create the boxplot
-# 1300x750
-ggplot(df_tidy_merged, aes(x = Subscale, y = MedianValue,fill=MedianIteration,outlier.shape=third)) +
-    geom_boxplot(position = position_dodge(0.6),outlier.alpha = .1) +
-    labs(title = "Cognitive association in low (left) and high (right) ranges",
-         x = "Subscale",
-         y = "Median Slope") +
-    theme_minimal(base_size=30)+scale_fill_gradientn(
-        colors = my_palette(100),
-        limits = c(-.1,.1))+guides(fill=F)+theme(axis.text.x = element_text(angle = 35, hjust = 1),plot.title = element_text(size = 26),panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.225,.18))
+ggplot(df_long, aes(x = variable, y = value)) +
+  geom_boxplot(outlier.alpha = 0.1) +
+  xlab("Variables") +
+  scale_x_discrete(labels = custom_labels) +
+  ylab("Longitudinal Dev. Expl.") + theme_minimal(base_size=30)
+```
 ```
 
 ```{r}
