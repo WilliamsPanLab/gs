@@ -62,7 +62,7 @@ ext_permutedTstats_CvD=rep(0,10000)
 masterdf$Grades[masterdf$Grades==5]=4
 
 set.seed(1)
-for (b in 1:10000){
+for (b in 8001:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -124,10 +124,10 @@ for (b in 1:10000){
 	devExplBoots_GradesparentP[b]=summary(GradesparentPMod)$dev.expl
 	#### get AIC differences between models
 	AICdiff_g_v_grades[b]=AIC(gmod)-AIC(GradesMod)
-	AICdiff_g_v_gparentP[b]=AIC(gmod)-AIC(gparentPMod)
-	AICdiff_g_v_gradesparentP[b]=AIC(gmod)-AIC(GradesparentPMod)
-	AICdiff_grades_v_gparentP[b]=AIC(GradesMod)-AIC(gparentPMod)
-	AICdiff_grades_v_gradesparentP[b]=AIC(GradesMod)-AIC(GradesparentPMod)
+	AICdiff_g_v_gParentP[b]=AIC(gmod)-AIC(gparentPMod)
+	AICdiff_g_v_gradesParentP[b]=AIC(gmod)-AIC(GradesparentPMod)
+	AICdiff_grades_v_gParentP[b]=AIC(GradesMod)-AIC(gparentPMod)
+	AICdiff_grades_v_gradesParentP[b]=AIC(GradesMod)-AIC(GradesparentPMod)
 
 
 }
@@ -151,12 +151,12 @@ ext_permuted_Tstats_BvD[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_
 
 # saveout all deviance explained vectors in one dataframe
 outdf=data.frame(devExplBoots_g,devExplBoots_Grades,devExplBoots_gparentP,devExplBoots_GradesparentP)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5DevExpl.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5DevExpl5.rds')
 
 # saveout all AIC differences in one dataframe
-outdf=data.frame(AICdiff_g_v_grades,AICdiff_g_v_gparentP,AICdiff_g_v_gradesparentP,AICdiff_grades_v_gparentP,AICdiff_grades_v_gradesparentP)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5AICdiff.rds')
+outdf=data.frame(AICdiff_g_v_grades,AICdiff_g_v_gParentP,AICdiff_g_v_gradesParentP,AICdiff_grades_v_gParentP,AICdiff_grades_v_gradesParentP)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5AICdiff5.rds')
 
 # saveout all t-statistics in one dataframe
 outdf=data.frame(p_permuted_Tstats_AvB,int_permuted_Tstats_AvB,ext_permuted_Tstats_AvB,p_permuted_Tstats_AvC,int_permuted_Tstats_AvC,ext_permuted_Tstats_AvC,p_permuted_Tstats_AvD,int_permuted_Tstats_AvD,ext_permuted_Tstats_AvD,p_permuted_Tstats_BvC,int_permuted_Tstats_BvC,ext_permuted_Tstats_BvC,p_permuted_Tstats_BvD,int_permuted_Tstats_BvD,ext_permuted_Tstats_BvD)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5Tstats.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5Tstats5.rds')

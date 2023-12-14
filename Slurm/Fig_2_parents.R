@@ -781,7 +781,8 @@ for (b in 8001:10000){
 	# get subjects in masterdf but not this bootSamp
 	outOfBoot=masterdf[!(masterdf$subjectkey %in% bootSamp$subjectkey),]
 	# isolate poverty group variables of interest
-	povDF=outOfBoot[outOfBoot$poverty==1,]
+	#povDF=outOfBoot[outOfBoot$poverty==1,]
+	povDF=outOfBoot
 	# predict g of poverty group - no interaction
 	predG=predict(pgAge_pov,povDF)
 	# get MAE
@@ -888,12 +889,6 @@ for (b in 8001:10000){
 	predG=predict(asrwitgAge_povint,povDF)
 	mae_intrxn=median(abs(predG-povDF$g))
 	asrwitDiffMAE[b]=mae-mae_intrxn
-	# same thing for soc
-	predG=predict(asrsocgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(asrsocgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	asrsocDiffMAE[b]=mae-mae_intrxn
 	# same thing for att
 	predG=predict(asrattgAge_pov,povDF)
 	mae=median(abs(predG-povDF$g))
@@ -915,8 +910,8 @@ for (b in 8001:10000){
 }
 # SAVEOUT
 # median absolute error differences
-outdf=data.frame(pDiffMAE,intDiffMAE,extDiffMAE,somDiffMAE,anxDiffMAE,thoDiffMAE,witDiffMAE,socDiffMAE,attDiffMAE,rulDiffMAE,aggDiffMAE,asrPDiffMAE,asrintDiffMAE,asrextDiffMAE,asrsomDiffMAE,asranxDiffMAE,asrthoDiffMAE,asrwitDiffMAE,asrsocDiffMAE,asrattDiffMAE,asrrulDiffMAE,asraggDiffMAE)
-
+outdf=data.frame(pDiffMAE,intDiffMAE,extDiffMAE,somDiffMAE,anxDiffMAE,thoDiffMAE,witDiffMAE,socDiffMAE,attDiffMAE,rulDiffMAE,aggDiffMAE,asrPDiffMAE,asrintDiffMAE,asrextDiffMAE,asrsomDiffMAE,asranxDiffMAE,asrthoDiffMAE,asrwitDiffMAE,asrattDiffMAE,asrrulDiffMAE,asraggDiffMAE)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_poverty_MA5.rds')
 # save out all difference in AIC vectors, differences in adjusted R^2 vectors
 # cbcl
 outdf=data.frame(pDiff,intDiff,extDiff,somDiff,anxDiff,thoDiff,witDiff,socDiff,attDiff,rulDiff,aggDiff,pDiffAdj,intDiffAdj,extDiffAdj,somDiffAdj,anxDiffAdj,thoDiffAdj,witDiffAdj,attDiffAdj,rulDiffAdj,aggDiffAdj)

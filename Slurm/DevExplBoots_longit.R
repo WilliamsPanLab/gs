@@ -35,8 +35,15 @@ devExplBoots_g=rep(0,10000)
 devExplBoots_Grades=rep(0,10000)
 devExplBoots_gparentP=rep(0,10000)
 devExplBoots_GradesparentP=rep(0,10000)
+# aic differences
+AICdiff_g_v_grades=rep(0,10000)
+AICdiff_g_v_gParentP=rep(0,10000)
+AICdiff_g_v_gradesParentP=rep(0,10000)
+AICdiff_grades_v_gParentP=rep(0,10000)
+AICdiff_grades_v_gradesParentP=rep(0,10000)
+AICdiff_gParentP_v_gradesParentP=rep(0,10000)
 set.seed(1)
-for (b in 1:10000){
+for (b in 8001:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -62,8 +69,18 @@ for (b in 1:10000){
 	# deviance explained by timepoint 1 p and parentPcount and Grades
 	GradesparentPMod=bam(cbcl_scr_syn_totprob_r.y~s(cbcl_scr_syn_totprob_r.x,k=4)+s(parentPcount.x,k=4)+Grades.x,data=bootSamp,family=nb())
 	devExplBoots_GradesparentP[b]=summary(GradesparentPMod)$dev.expl
+	#### get AIC differences between models
+        AICdiff_g_v_grades[b]=AIC(gmod)-AIC(GradesMod)
+        AICdiff_g_v_gParentP[b]=AIC(gmod)-AIC(gparentPMod)
+        AICdiff_g_v_gradesParentP[b]=AIC(gmod)-AIC(GradesparentPMod)
+        AICdiff_grades_v_gParentP[b]=AIC(GradesMod)-AIC(gparentPMod)
+        AICdiff_grades_v_gradesParentP[b]=AIC(GradesMod)-AIC(GradesparentPMod)
 }
 # SAVEOUT
 # saveout all deviance explained vectors in one dataframe
 outdf=data.frame(devExplBoots_tp1p,devExplBoots_g,devExplBoots_Grades,devExplBoots_gparentP,devExplBoots_GradesparentP)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5DevExpl_longit.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5DevExpl_longit5.rds')
+
+# saveout all AIC differences in one dataframe
+outdf=data.frame(AICdiff_g_v_grades,AICdiff_g_v_gParentP,AICdiff_g_v_gradesParentP,AICdiff_grades_v_gParentP,AICdiff_grades_v_gradesParentP)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5AICdiff_longit5.rds')
