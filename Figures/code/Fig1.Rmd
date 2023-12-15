@@ -305,7 +305,19 @@ ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bin
 lmforBeta<-lm(resids~cbcl_scr_syn_totprob_r,data=plotdf)
 lmforBeta
 ```
-
+```{r}
+library(lme4)
+# for plot significance testing
+masterdf$subjectkey<-as.factor(masterdf$subjectkey)
+modelAll<-lme(g~interview_age+cbcl_scr_syn_totprob_r,random=~1|subjectkey,data=masterdf)
+summary(modelAll)
+# model just clinical
+modelClin<-lme(g~interview_age+cbcl_scr_syn_totprob_r,random=~1|subjectkey,data=clindf)
+summary(modelClin)
+# model just subclinical
+modelSClin<-lme(g~interview_age+cbcl_scr_syn_totprob_r,random=~1|subjectkey,data=sclindf)
+summary(modelSClin)
+```
 ```{r}
 library(ggplot2)
 library(gganimate)
@@ -498,6 +510,7 @@ ggplot(df_melted, aes(x = value, y = variable)) +
   labs(title = "Distribution of Values with 10,001st Value Marked",
        x = "Density",
        y = "Columns")
+
 # manually derive p-values
 ps=NULL
 for (i in 1:3){

@@ -2023,24 +2023,24 @@ plotdf<-masterdf[,c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr
 ggplot(plotdf, aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
   geom_boxplot(fill="gray",alpha=.4) +
   labs(title = expression(italic(p)),
-       x="",y = "Grades")+theme_minimal(base_size=25)+xlim(0,113)+
+       x="",y = "Grades")+theme_minimal(base_size=25)+xlim(0,quantile(masterdf$cbcl_scr_syn_totprob_r,.999))+
       geom_vline(xintercept = Pbc, linetype = "dashed")+
       geom_vline(xintercept = Pc, linetype = "dashed")
 
 # int
-ggplot(masterdf, aes(x = cbcl_scr_syn_internal_r, y = plotGrades)) +
+ggplot(plotdf, aes(x = cbcl_scr_syn_internal_r, y = plotGrades)) +
   geom_boxplot(fill="gray",alpha=.3) +
   labs(title = "Internalizing",
-       x="",y = "Grades")+theme_minimal(base_size=25)+xlim(0,113)+
-      geom_vline(xintercept = Pbc, linetype = "dashed")+
-      geom_vline(xintercept = Pc, linetype = "dashed")
+       x="",y = "Grades")+theme_minimal(base_size=25)+xlim(0,quantile(masterdf$cbcl_scr_syn_internal_r,.999))+
+      geom_vline(xintercept = Ibc, linetype = "dashed")+
+      geom_vline(xintercept = Ic, linetype = "dashed")
 
 # ext
-ggplot(masterdf, aes(x = cbcl_scr_syn_external_r, y = plotGrades)) +
+ggplot(plotdf, aes(x = cbcl_scr_syn_external_r, y = plotGrades)) +
   geom_boxplot(fill="gray",alpha=.3) +
   labs(title = "Externalizing",
-       x="",y = "Grades")+theme_minimal(base_size=25)+xlim(0,113)+
-      geom_vline(xintercept = Pbc, linetype = "dashed")+
-      geom_vline(xintercept = Pc, linetype = "dashed")
+       x="",y = "Grades")+theme_minimal(base_size=25)+xlim(0,quantile(masterdf$cbcl_scr_syn_external_r,.999))+
+      geom_vline(xintercept = Ebc, linetype = "dashed")+
+      geom_vline(xintercept = Ec, linetype = "dashed")
 # saved at 750x300
 ```
