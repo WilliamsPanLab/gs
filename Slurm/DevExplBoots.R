@@ -62,7 +62,7 @@ ext_permutedTstats_CvD=rep(0,10000)
 masterdf$Grades[masterdf$Grades==5]=4
 
 set.seed(1)
-for (b in 1:1250){
+for (b in 1:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -150,12 +150,12 @@ ext_permutedTstats_BvD[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_e
 
 # saveout all deviance explained vectors in one dataframe
 outdf=data.frame(devExplBoots_g,devExplBoots_Grades,devExplBoots_gparentP,devExplBoots_GradesparentP)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5DevExpl1.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5DevExpl.rds')
 
 # saveout all AIC differences in one dataframe
 outdf=data.frame(AICdiff_g_v_grades,AICdiff_g_v_gParentP,AICdiff_g_v_gradesParentP,AICdiff_grades_v_gParentP,AICdiff_grades_v_gradesParentP,AICdiff_gParentP_v_gradesParentP)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5AICdiff1.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5AICdiff.rds')
 
 # saveout all t-statistics in one dataframe
-outdf=data.frame(p_permutedTstats_AvB,int_permutedTstats_AvB,ext_permutedTstats_AvB,p_permutedTstats_AvC,int_permutedTstats_AvC,ext_permutedTstats_AvC,p_permutedTstats_AvD,int_permutedTstats_AvD,ext_permutedTstats_AvD,p_permutedTstats_BvC,int_permutedTstats_BvC,ext_permutedTstats_BvC,p_permutedTstats_BvD,int_permutedTstats_BvD,ext_permutedTstats_BvD)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5Tstats1.rds')
+outdf=data.frame(p_permutedTstats_AvB,int_permutedTstats_AvB,ext_permutedTstats_AvB,p_permutedTstats_AvC,int_permutedTstats_AvC,ext_permutedTstats_AvC,p_permutedTstats_AvD,int_permutedTstats_AvD,ext_permutedTstats_AvD,p_permutedTstats_BvC,int_permutedTstats_BvC,ext_permutedTstats_BvC,p_permutedTstats_BvD,int_permutedTstats_BvD,ext_permutedTstats_BvD,p_permutedTstats_CvD,int_permutedTstats_CvD,ext_permutedTstats_CvD)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5Tstats.rds')
