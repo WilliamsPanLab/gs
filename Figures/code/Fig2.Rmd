@@ -1887,8 +1887,20 @@ ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
 
 ```{r}
 # deviance explained plots
+# cross-sectional
 DevExpl=readRDS('~/Desktop/g_p/F3-5DevExpl.rds')
-DevExpl_L=readRDS('~/Desktop/g_p/F3-5DevExpl_longit.rds')
+# longitudinal
+DevExpl_L1=readRDS('~/Desktop/g_p/F3-5DevExpl_longit1.rds')
+DevExpl_L2=readRDS('~/Desktop/g_p/F3-5DevExpl_longit2.rds')
+DevExpl_L3=readRDS('~/Desktop/g_p/F3-5DevExpl_longit3.rds')
+DevExpl_L4=readRDS('~/Desktop/g_p/F3-5DevExpl_longit4.rds')
+DevExpl_L5=readRDS('~/Desktop/g_p/F3-5DevExpl_longit5.rds')
+DevExpl_L1_AIC=readRDS('~/Desktop/g_p/F3-5AICdiff_longit1.rds')
+DevExpl_L2_AIC=readRDS('~/Desktop/g_p/F3-5AICdiff_longit2.rds')
+DevExpl_L3_AIC=readRDS('~/Desktop/g_p/F3-5AICdiff_longit3.rds')
+DevExpl_L4_AIC=readRDS('~/Desktop/g_p/F3-5AICdiff_longit4.rds')
+DevExpl_L5_AIC=readRDS('~/Desktop/g_p/F3-5AICdiff_longit5.rds')
+
 
 # extract deviance explained above-any-beyond dev expl py timepoint 1 p
 DevExpl_L_Relative=DevExpl_L-DevExpl_L[,1]

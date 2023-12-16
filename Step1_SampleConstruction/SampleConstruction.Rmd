@@ -772,7 +772,7 @@ alph_order <- c("Asian", "Black", "Hispanic", "Missing", "Other", "White")
 my_colors <- c("red", "orange", "blue", "gray", "green","yellow")
 
 # preset x-axis names
-x_labs=c("CBCL", "CBCL (both timepoints)","Grades (both)","ASR","ACS","Cognitive data (both)","One sibling per family","Demographics")
+x_labs=c("CBCL", "CBCL (2x)","Grades (2x)","ASR","ACS","Cognitive data (2x)","One sibling","Demographics")
 
 #
 ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
@@ -783,7 +783,7 @@ ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
   labs(y = "Children", fill = "Race/Ethnicity", title = "Alluvial Consort Chart") +
   scale_x_discrete(labels = x_labs) +
   theme(axis.title.x = element_blank())
-
+# saved at 2400x1000
 
 ```
 
