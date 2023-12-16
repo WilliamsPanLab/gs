@@ -1299,7 +1299,122 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
 ```{r}
 ############### ∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆ Now get poverty interaction fits vs. null
-# check out bootstrapped poverty evidence through difference in AIC (in this instance will be quanitied as diff AIC >0, more accurate might be actual difference in AIC vs. 10,000 null derivations)
+# first for children
+# check out bootstrapped poverty evidence through difference in AIC (actual difference in AIC vs. 10,000 null derivations)
+diff1=readRDS('~/Desktop/g_p/gpDiffBoots_cbclPseudo1.rds')
+diff2=readRDS('~/Desktop/g_p/gpDiffBoots_cbclPseudo2.rds')
+diff3=readRDS('~/Desktop/g_p/gpDiffBoots_cbclPseudo3.rds')
+diff4=readRDS('~/Desktop/g_p/gpDiffBoots_cbclPseudo4.rds')
+diff5=readRDS('~/Desktop/g_p/gpDiffBoots_cbclPseudo5.rds')
+# combine
+diff1[2001:4000,]=diff2[2001:4000,]
+diff1[4001:6000,]=diff3[4001:6000,]
+diff1[6001:8000,]=diff4[6001:8000,]
+diff1[8001:10000,]=diff5[8001:10000,]
+# looks good, compare to full data AIC
+
+##### lil' section to mirror slurm calculations ##### §§§§§§§§§§§
+masterdf<-readRDS('~/gp_masterdf.rds')
+masterdf$poverty=0
+# poverty now defined in sample construction
+masterdf$poverty[masterdf$Pov_v2==1]=1
+masterdf$poverty=as.factor(masterdf$poverty)
+masterdf$cbcl_scr_syn_totprob_r=as.numeric(masterdf$cbcl_scr_syn_totprob_r)
+masterdf$cbcl_scr_syn_internal_r=as.numeric(masterdf$cbcl_scr_syn_internal_r)
+masterdf$cbcl_scr_syn_external_r=as.numeric(masterdf$cbcl_scr_syn_external_r)
+masterdf$cbcl_scr_syn_somatic_r=as.numeric(masterdf$cbcl_scr_syn_somatic_r)
+masterdf$cbcl_scr_syn_thought_r=as.numeric(masterdf$cbcl_scr_syn_thought_r)
+masterdf$cbcl_scr_syn_anxdep_r=as.numeric(masterdf$cbcl_scr_syn_anxdep_r)
+masterdf$cbcl_scr_syn_withdep_r=as.numeric(masterdf$cbcl_scr_syn_withdep_r)
+masterdf$cbcl_scr_syn_rulebreak_r=as.numeric(masterdf$cbcl_scr_syn_rulebreak_r)
+masterdf$cbcl_scr_syn_social_r=as.numeric(masterdf$cbcl_scr_syn_social_r)
+masterdf$cbcl_scr_syn_attention_r=as.numeric(masterdf$cbcl_scr_syn_attention_r)
+masterdf$cbcl_scr_syn_aggressive_r=as.numeric(masterdf$cbcl_scr_syn_aggressive_r)
+#######            ----------------              ##### §§§§§§§§§§§
+
+# plot cbcl p versus null
+cbclpgAge_pov=bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+cbclpgAge_povint=bam(g~s(cbcl_scr_syn_totprob_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(cbclpgAge_pov)-AIC(cbclpgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=pDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+print(sum(diff1$pDiffPseudo>PovInt_AICDiff)/10000)
+# cbcl int vs. null
+cbclintgAge_pov=bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+cbclintgAge_povint=bam(g~s(cbcl_scr_syn_internal_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(cbclintgAge_pov)-AIC(cbclintgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=intDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+print(sum(diff1$intDiffPseudo>PovInt_AICDiff)/10000)
+# cbcl ext vs. null
+cbclextgAge_pov=bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+cbclextgAge_povint=bam(g~s(cbcl_scr_syn_external_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(cbclextgAge_pov)-AIC(cbclextgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=extDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+print(sum(diff1$extDiffPseudo>PovInt_AICDiff)/10000)
+# cbcl som vs. null
+cbclsomgAge_pov=bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+cbclsomgAge_povint=bam(g~s(cbcl_scr_syn_somatic_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(cbclsomgAge_pov)-AIC(cbclsomgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=somDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+print(sum(diff1$somDiffPseudo>PovInt_AICDiff)/10000)
+# cbcl anxdep vs. null
+cbclanxgAge_pov=bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+cbclanxgAge_povint=bam(g~s(cbcl_scr_syn_anxdep_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(cbclanxgAge_pov)-AIC(cbclanxgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=anxDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+print(sum(diff1$anxDiffPseudo>PovInt_AICDiff)/10000)
+# cbcl tho vs. null
+cbclthogAge_pov=bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+cbclthogAge_povint=bam(g~s(cbcl_scr_syn_thought_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(cbclthogAge_pov)-AIC(cbclthogAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=thoDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+print(sum(diff1$thoDiffPseudo>PovInt_AICDiff)/10000)
+# cbcl withdep vs. null
+cbclwithgAge_pov=bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+cbclwithgAge_povint=bam(g~s(cbcl_scr_syn_withdep_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(cbclwithgAge_pov)-AIC(cbclwithgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=witDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+print(sum(diff1$witDiffPseudo>PovInt_AICDiff)/10000)
+# cbcl attention vs. null
+cbclattgAge_pov=bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+cbclattgAge_povint=bam(g~s(cbcl_scr_syn_attention_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(cbclattgAge_pov)-AIC(cbclattgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=attDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+print(sum(diff1$attDiffPseudo>PovInt_AICDiff)/10000)
+# cbcl rulebreak vs. null
+cbclrulegAge_pov=bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+cbclrulegAge_povint=bam(g~s(cbcl_scr_syn_rulebreak_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(cbclrulegAge_pov)-AIC(cbclrulegAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=rulDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+print(sum(diff1$rulDiffPseudo>PovInt_AICDiff)/10000)
+# cbcl aggr vs. null
+cbclaggrgAge_pov=bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+cbclaggrgAge_povint=bam(g~s(cbcl_scr_syn_aggressive_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(cbclaggrgAge_pov)-AIC(cbclaggrgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=aggDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+print(sum(diff1$aggDiffPseudo>PovInt_AICDiff)/10000)
+# cbcl social vs. null
+cbclsocgAge_pov=bam(g~s(cbcl_scr_syn_social_r,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+cbclsocgAge_povint=bam(g~s(cbcl_scr_syn_social_r,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
+PovInt_AICDiff=AIC(cbclsocgAge_pov)-AIC(cbclsocgAge_povint)
+# plot it relative to null distribution
+ggplot(diff1,aes(x=socDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
+print(sum(diff1$aggDiffPseudo>PovInt_AICDiff)/10000)
+
+```
+
+```{r}
+# now for ASR
+# check out bootstrapped poverty evidence through difference in AIC (actual difference in AIC vs. 10,000 null derivations)
 diff1=readRDS('~/Desktop/g_p/gpDiffBoots_asrPseudo1.rds')
 diff2=readRDS('~/Desktop/g_p/gpDiffBoots_asrPseudo2.rds')
 diff3=readRDS('~/Desktop/g_p/gpDiffBoots_asrPseudo3.rds')
@@ -1329,80 +1444,76 @@ masterdf$ASRInt=as.numeric(masterdf$ASRInt)
 masterdf$ASRExt=as.numeric(masterdf$ASRExt)
 #######            ----------------              ##### §§§§§§§§§§§
 
-
-
-# temp.
-diff1=diff1[2001:10000,]
 # plot asr p versus null
 asrpgAge_pov=bam(g~s(parentPcount,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 asrpgAge_povint=bam(g~s(parentPcount,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 PovInt_AICDiff=AIC(asrpgAge_pov)-AIC(asrpgAge_povint)
 # plot it relative to null distribution
 ggplot(diff1,aes(x=asrPDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
-print(sum(diff1$asrPDiffPseudo>PovInt_AICDiff))
+print(sum(diff1$asrPDiffPseudo>PovInt_AICDiff)/10000)
 # asr int vs. null
 asrintgAge_pov=bam(g~s(ASRInt,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 asrintgAge_povint=bam(g~s(ASRInt,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 PovInt_AICDiff=AIC(asrintgAge_pov)-AIC(asrintgAge_povint)
 # plot it relative to null distribution
 ggplot(diff1,aes(x=asrintDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
-print(sum(diff1$asrintDiffPseudo>PovInt_AICDiff))
+print(sum(diff1$asrintDiffPseudo>PovInt_AICDiff)/10000)
 # asr ext vs. null
 asrextgAge_pov=bam(g~s(ASRExt,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 asrextgAge_povint=bam(g~s(ASRExt,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 PovInt_AICDiff=AIC(asrextgAge_pov)-AIC(asrextgAge_povint)
 # plot it relative to null distribution
 ggplot(diff1,aes(x=asrextDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
-print(sum(diff1$asrextDiffPseudo>PovInt_AICDiff))
+print(sum(diff1$asrextDiffPseudo>PovInt_AICDiff)/10000)
 # asr som vs. null
 asrsomgAge_pov=bam(g~s(ASR_somatic,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 asrsomgAge_povint=bam(g~s(ASR_somatic,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 PovInt_AICDiff=AIC(asrsomgAge_pov)-AIC(asrsomgAge_povint)
 # plot it relative to null distribution
 ggplot(diff1,aes(x=asrsomDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
-print(sum(diff1$asrsomDiffPseudo>PovInt_AICDiff))
+print(sum(diff1$asrsomDiffPseudo>PovInt_AICDiff)/10000)
 # asr anxdep vs. null
 asranxgAge_pov=bam(g~s(ASR_anxdep,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 asranxgAge_povint=bam(g~s(ASR_anxdep,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 PovInt_AICDiff=AIC(asranxgAge_pov)-AIC(asranxgAge_povint)
 # plot it relative to null distribution
 ggplot(diff1,aes(x=asranxDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
-print(sum(diff1$asranxDiffPseudo>PovInt_AICDiff))
+print(sum(diff1$asranxDiffPseudo>PovInt_AICDiff)/10000)
 # asr tho vs. null
 asrthogAge_pov=bam(g~s(ASR_thought,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 asrthogAge_povint=bam(g~s(ASR_thought,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 PovInt_AICDiff=AIC(asrthogAge_pov)-AIC(asrthogAge_povint)
 # plot it relative to null distribution
 ggplot(diff1,aes(x=asrthoDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
-print(sum(diff1$asrthoDiffPseudo>PovInt_AICDiff))
+print(sum(diff1$asrthoDiffPseudo>PovInt_AICDiff)/10000)
 # asr withdep vs. null
 asrwithgAge_pov=bam(g~s(ASR_withdep,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 asrwithgAge_povint=bam(g~s(ASR_withdep,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 PovInt_AICDiff=AIC(asrwithgAge_pov)-AIC(asrwithgAge_povint)
 # plot it relative to null distribution
 ggplot(diff1,aes(x=asrwitDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
-print(sum(diff1$asrwitDiffPseudo>PovInt_AICDiff))
+print(sum(diff1$asrwitDiffPseudo>PovInt_AICDiff)/10000)
 # asr attention vs. null
 asrattgAge_pov=bam(g~s(ASR_attention,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 asrattgAge_povint=bam(g~s(ASR_attention,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 PovInt_AICDiff=AIC(asrattgAge_pov)-AIC(asrattgAge_povint)
 # plot it relative to null distribution
 ggplot(diff1,aes(x=asrattDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
-print(sum(diff1$asrattDiffPseudo>PovInt_AICDiff))
+print(sum(diff1$asrattDiffPseudo>PovInt_AICDiff)/10000)
 # asr rulebreak vs. null
 asrrulegAge_pov=bam(g~s(ASR_rulebreak,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 asrrulegAge_povint=bam(g~s(ASR_rulebreak,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 PovInt_AICDiff=AIC(asrrulegAge_pov)-AIC(asrrulegAge_povint)
 # plot it relative to null distribution
 ggplot(diff1,aes(x=asrrulDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
-print(sum(diff1$asrrulDiffPseudo>PovInt_AICDiff))
+print(sum(diff1$asrrulDiffPseudo>PovInt_AICDiff)/10000)
 # asr aggr vs. null
 asraggrgAge_pov=bam(g~s(ASR_aggressive,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 asraggrgAge_povint=bam(g~s(ASR_aggressive,by=poverty,k=4)+s(interview_age,k=4)+poverty,data=masterdf)
 PovInt_AICDiff=AIC(asraggrgAge_pov)-AIC(asraggrgAge_povint)
 # plot it relative to null distribution
 ggplot(diff1,aes(x=asraggDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
-print(sum(diff1$asraggDiffPseudo>PovInt_AICDiff))
+print(sum(diff1$asraggDiffPseudo>PovInt_AICDiff)/10000)
 ```   
 
 ```{r}
@@ -1888,22 +1999,25 @@ ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
 ```{r}
 # deviance explained plots
 # cross-sectional
-DevExpl=readRDS('~/Desktop/g_p/F3-5DevExpl.rds')
-# longitudinal
-DevExpl_L1=readRDS('~/Desktop/g_p/F3-5DevExpl_longit1.rds')
-DevExpl_L2=readRDS('~/Desktop/g_p/F3-5DevExpl_longit2.rds')
-DevExpl_L3=readRDS('~/Desktop/g_p/F3-5DevExpl_longit3.rds')
-DevExpl_L4=readRDS('~/Desktop/g_p/F3-5DevExpl_longit4.rds')
-DevExpl_L5=readRDS('~/Desktop/g_p/F3-5DevExpl_longit5.rds')
-DevExpl_L1_AIC=readRDS('~/Desktop/g_p/F3-5AICdiff_longit1.rds')
-DevExpl_L2_AIC=readRDS('~/Desktop/g_p/F3-5AICdiff_longit2.rds')
-DevExpl_L3_AIC=readRDS('~/Desktop/g_p/F3-5AICdiff_longit3.rds')
-DevExpl_L4_AIC=readRDS('~/Desktop/g_p/F3-5AICdiff_longit4.rds')
-DevExpl_L5_AIC=readRDS('~/Desktop/g_p/F3-5AICdiff_longit5.rds')
-
-
-# extract deviance explained above-any-beyond dev expl py timepoint 1 p
-DevExpl_L_Relative=DevExpl_L-DevExpl_L[,1]
+DevExpl1=readRDS('~/Desktop/g_p/F3-5DevExpl1.rds')
+DevExpl2=readRDS('~/Desktop/g_p/F3-5DevExpl2.rds')
+#DevExpl3=readRDS('~/Desktop/g_p/F3-5DevExpl3.rds')
+DevExpl4=readRDS('~/Desktop/g_p/F3-5DevExpl4.rds')
+DevExpl5=readRDS('~/Desktop/g_p/F3-5DevExpl5.rds')
+#DevExpl6=readRDS('~/Desktop/g_p/F3-5DevExpl6.rds')
+DevExpl7=readRDS('~/Desktop/g_p/F3-5DevExpl7.rds')
+DevExpl8=readRDS('~/Desktop/g_p/F3-5DevExpl8.rds')
+DevExpl=DevExpl1
+DevExpl[1251:2500,]=DevExpl2[1251:2500,]
+#DevExpl[2501:3750,]=DevExpl3[2501:3750,]
+DevExpl[3751:5000,]=DevExpl4[3751:5000,]
+DevExpl[5001:6250,]=DevExpl5[5001:6250,]
+#DevExpl1[6251:7500,]=DevExpl6
+DevExpl[7501:8750,]=DevExpl7[7501:8750,]
+DevExpl[8751:10000,]=DevExpl8[8751:10000,]
+# temp ###
+DevExpl=DevExpl[-c(2501:3750), ]
+DevExpl=DevExpl[-c(5001:6250), ]
 
 df_long <- reshape2::melt(DevExpl)
 
@@ -1920,16 +2034,138 @@ ggplot(df_long, aes(x = variable, y = value)) +
   scale_y_continuous(labels = function(x) sprintf("%.3f", x)) +
   ylab("Cross-sectional Dev. Expl.") + theme_minimal(base_size=28)
 
-# now for longitudinal variables
-#custom_labels <- c(expression(italic(g)), "Grades")
-df_long <- reshape2::melt(DevExpl_L_Relative[,2:5])
+# now evaluate AIC differences
+AIC1=readRDS('~/Desktop/g_p/F3-5AICdiff1.rds')
+AIC2=readRDS('~/Desktop/g_p/F3-5AICdiff2.rds')
+#AIC3=readRDS('~/Desktop/g_p/F3-5DevExpl3.rds')
+AIC4=readRDS('~/Desktop/g_p/F3-5AICdiff4.rds')
+AIC5=readRDS('~/Desktop/g_p/F3-5AICdiff5.rds')
+#AICpl6=readRDS('~/Desktop/g_p/F3-5DevExpl6.rds')
+AIC7=readRDS('~/Desktop/g_p/F3-5AICdiff7.rds')
+AIC8=readRDS('~/Desktop/g_p/F3-5AICdiff8.rds')
+AIC=AIC1
+AIC[1251:2500,]=AIC2[1251:2500,]
+#AIC[2501:3750,]=DevExpl3[2501:3750,]
+AIC[3751:5000,]=AIC4[3751:5000,]
+AIC[5001:6250,]=AIC5[5001:6250,]
+#AIC[6251:7500,]=DevExpl6
+AIC[7501:8750,]=AIC7[7501:8750,]
+AIC[8751:10000,]=AIC8[8751:10000,]
+# temp ###
+AIC=AIC[-c(2501:3750), ]
+AIC=AIC[-c(5001:6250), ]
 
-# Create the boxplot
+df_long <- reshape2::melt(AIC)
+
+column_names <- c(
+  "AICdiff_g_v_grades",
+  "AICdiff_g_v_gParentP",
+  "AICdiff_g_v_gradesParentP",
+  "AICdiff_grades_v_gParentP",
+  "AICdiff_grades_v_gradesParentP",
+  "AICdiff_gParentP_v_gradesParentP"
+)
+
+# Create the boxplot - 1300 x 550 dimensions
 ggplot(df_long, aes(x = variable, y = value)) +
   geom_boxplot(outlier.alpha = 0.1) +
-  xlab("Variables") +
-  scale_x_discrete(labels = custom_labels) +
-  ylab("Longitudinal Dev. Expl.") + theme_minimal(base_size=28)
+  scale_x_discrete(labels = column_names) +
+  scale_y_continuous(labels = function(x) sprintf("%.3f", x)) +
+  ylab("Cross-sectional Dev. Expl.") + theme_minimal(base_size=28)
+
+# note there are no negative values: the first term has higher AIC across every single bootstrap
+```
+
+```{r}
+# check out the grades differences
+# now evaluate AIC differences
+Grades1=readRDS('~/Desktop/g_p/F3-5Tstats1.rds')
+Grades2=readRDS('~/Desktop/g_p/F3-5Tstats2.rds')
+#AIC3=readRDS('~/Desktop/g_p/F3-5DevExpl3.rds')
+Grades4=readRDS('~/Desktop/g_p/F3-5Tstats4.rds')
+Grades5=readRDS('~/Desktop/g_p/F3-5Tstats5.rds')
+#AICpl6=readRDS('~/Desktop/g_p/F3-5DevExpl6.rds')
+Grades7=readRDS('~/Desktop/g_p/F3-5Tstats7.rds')
+Grades8=readRDS('~/Desktop/g_p/F3-5Tstats8.rds')
+Grades=Grades1
+Grades[1251:2500,]=Grades2[1251:2500,]
+#AIC[2501:3750,]=DevExpl3[2501:3750,]
+Grades[3751:5000,]=Grades4[3751:5000,]
+Grades[5001:6250,]=Grades5[5001:6250,]
+#AIC[6251:7500,]=DevExpl6
+Grades[7501:8750,]=Grades7[7501:8750,]
+Grades[8751:10000,]=Grades8[8751:10000,]
+# temp ###
+Grades=Grades[-c(2501:3750), ]
+Grades=Grades[-c(5001:6250), ]
+
+# plot observed vs expected - p factor
+ggplot(Grades[1:7500,],aes(x=p_permutedTstats_AvB))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_AvB[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor a vs. b')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$p_permutedTstats_AvB[1:7500]>abs(Grades$p_permutedTstats_AvB[7501]))))/7500
+
+ggplot(Grades[1:7500,],aes(x=p_permutedTstats_AvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_AvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor a vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$p_permutedTstats_AvC[1:7500]>abs(Grades$p_permutedTstats_AvC[7501]))))/7500
+
+
+ggplot(Grades[1:7500,],aes(x=p_permutedTstats_AvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_AvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor a vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$p_permutedTstats_AvD[1:7500]>abs(Grades$p_permutedTstats_AvD[7501]))))/7500
+
+
+ggplot(Grades[1:7500,],aes(x=p_permutedTstats_BvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_BvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor b vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$p_permutedTstats_BvC[1:7500]>abs(Grades$p_permutedTstats_BvC[7501]))))/7500
+
+
+ggplot(Grades[1:7500,],aes(x=p_permutedTstats_BvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_BvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor b vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$p_permutedTstats_BvD[1:7500]>abs(Grades$p_permutedTstats_BvD[7501]))))/7500
+
+
+#ggplot(Grades[1:7500,],aes(x=p_permutedTstats_CvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_CvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor c vs. failing')+guides(y="none")+scale_x_continuous()
+
+# plot observed vs expected - internalizing
+ggplot(Grades[1:7500,],aes(x=int_permutedTstats_AvB))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_AvB[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing a vs. b')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$int_permutedTstats_AvB[1:7500]>abs(Grades$int_permutedTstats_AvB[7501]))))/7500
+
+
+ggplot(Grades[1:7500,],aes(x=int_permutedTstats_AvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_AvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing a vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$int_permutedTstats_AvC[1:7500]>abs(Grades$int_permutedTstats_AvC[7501]))))/7500
+
+
+ggplot(Grades[1:7500,],aes(x=int_permutedTstats_AvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_AvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing a vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$int_permutedTstats_AvD[1:7500]>abs(Grades$int_permutedTstats_AvD[7501]))))/7500
+
+
+ggplot(Grades[1:7500,],aes(x=int_permutedTstats_BvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_BvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing b vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$int_permutedTstats_BvC[1:7500]>abs(Grades$int_permutedTstats_BvC[7501]))))/7500
+
+
+ggplot(Grades[1:7500,],aes(x=int_permutedTstats_BvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_BvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing b vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$int_permutedTstats_BvD[1:7500]>abs(Grades$int_permutedTstats_BvD[7501]))))/7500
+
+
+#ggplot(Grades[1:7500,],aes(x=int_permutedTstats_CvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_CvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing c vs. failing')+guides(y="none")+scale_x_continuous()
+
+# plot observed vs expected - externalizing
+ggplot(Grades[1:7500,],aes(x=ext_permutedTstats_AvB))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_AvB[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing a vs. b')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$ext_permutedTstats_AvB[1:7500]>abs(Grades$ext_permutedTstats_AvB[7501]))))/7500
+
+
+ggplot(Grades[1:7500,],aes(x=ext_permutedTstats_AvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_AvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing a vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$ext_permutedTstats_AvC[1:7500]>abs(Grades$ext_permutedTstats_AvC[7501]))))/7500
+
+
+ggplot(Grades[1:7500,],aes(x=ext_permutedTstats_AvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_AvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing a vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$ext_permutedTstats_AvD[1:7500]>abs(Grades$ext_permutedTstats_AvD[7501]))))/7500
+
+
+ggplot(Grades[1:7500,],aes(x=ext_permutedTstats_BvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_BvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing b vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$ext_permutedTstats_BvC[1:7500]>abs(Grades$ext_permutedTstats_BvC[7501]))))/7500
+
+
+ggplot(Grades[1:7500,],aes(x=ext_permutedTstats_BvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_BvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing b vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$ext_permutedTstats_BvD[1:7500]>abs(Grades$ext_permutedTstats_BvD[7501]))))/7500
+
+
+#ggplot(Grades[1:7500,],aes(x=int_permutedTstats_CvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_CvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing c vs. failing')+guides(y="none")+scale_x_continuous()
 ```
 
 ```{r}
