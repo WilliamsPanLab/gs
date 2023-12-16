@@ -62,7 +62,7 @@ ext_permutedTstats_CvD=rep(0,10000)
 masterdf$Grades[masterdf$Grades==5]=4
 
 set.seed(1)
-for (b in 8001:10000){
+for (b in 1:1250){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -128,35 +128,34 @@ for (b in 8001:10000){
 	AICdiff_g_v_gradesParentP[b]=AIC(gmod)-AIC(GradesparentPMod)
 	AICdiff_grades_v_gParentP[b]=AIC(GradesMod)-AIC(gparentPMod)
 	AICdiff_grades_v_gradesParentP[b]=AIC(GradesMod)-AIC(GradesparentPMod)
-
-
+	AICdiff_gParentP_v_gradesParentP[b]=AIC(gparentPMod)-AIC(GradesparentPMod)
 }
 #### get true difference-of-grades t-stat
-p_permuted_Tstats_AvB[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_totprob_r'],masterdf[masterdf$Grades==2,'cbcl_scr_syn_totprob_r'])$statistic
-int_permuted_Tstats_AvB[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_internal_r'],masterdf[masterdf$Grades==2,'cbcl_scr_syn_internal_r'])$statistic
-ext_permuted_Tstats_AvB[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_external_r'],masterdf[masterdf$Grades==2,'cbcl_scr_syn_external_r'])$statistic
-p_permuted_Tstats_AvC[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_totprob_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_totprob_r'])$statistic
-int_permuted_Tstats_AvC[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_internal_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_internal_r'])$statistic
-ext_permuted_Tstats_AvC[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_external_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_external_r'])$statistic
-p_permuted_Tstats_AvD[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_totprob_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_totprob_r'])$statistic
-int_permuted_Tstats_AvD[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_internal_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_internal_r'])$statistic
-ext_permuted_Tstats_AvD[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_external_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_external_r'])$statistic
-p_permuted_Tstats_BvC[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_totprob_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_totprob_r'])$statistic
-int_permuted_Tstats_BvC[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_internal_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_internal_r'])$statistic
-ext_permuted_Tstats_BvC[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_external_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_external_r'])$statistic
-p_permuted_Tstats_BvD[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_totprob_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_totprob_r'])$statistic
-int_permuted_Tstats_BvD[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_internal_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_internal_r'])$statistic
-ext_permuted_Tstats_BvD[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_external_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_external_r'])$statistic
+p_permutedTstats_AvB[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_totprob_r'],masterdf[masterdf$Grades==2,'cbcl_scr_syn_totprob_r'])$statistic
+int_permutedTstats_AvB[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_internal_r'],masterdf[masterdf$Grades==2,'cbcl_scr_syn_internal_r'])$statistic
+ext_permutedTstats_AvB[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_external_r'],masterdf[masterdf$Grades==2,'cbcl_scr_syn_external_r'])$statistic
+p_permutedTstats_AvC[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_totprob_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_totprob_r'])$statistic
+int_permutedTstats_AvC[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_internal_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_internal_r'])$statistic
+ext_permutedTstats_AvC[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_external_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_external_r'])$statistic
+p_permutedTstats_AvD[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_totprob_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_totprob_r'])$statistic
+int_permutedTstats_AvD[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_internal_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_internal_r'])$statistic
+ext_permutedTstats_AvD[10001]=t.test(masterdf[masterdf$Grades==1,'cbcl_scr_syn_external_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_external_r'])$statistic
+p_permutedTstats_BvC[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_totprob_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_totprob_r'])$statistic
+int_permutedTstats_BvC[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_internal_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_internal_r'])$statistic
+ext_permutedTstats_BvC[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_external_r'],masterdf[masterdf$Grades==3,'cbcl_scr_syn_external_r'])$statistic
+p_permutedTstats_BvD[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_totprob_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_totprob_r'])$statistic
+int_permutedTstats_BvD[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_internal_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_internal_r'])$statistic
+ext_permutedTstats_BvD[10001]=t.test(masterdf[masterdf$Grades==2,'cbcl_scr_syn_external_r'],masterdf[masterdf$Grades==4,'cbcl_scr_syn_external_r'])$statistic
 # SAVEOUT
 
 # saveout all deviance explained vectors in one dataframe
 outdf=data.frame(devExplBoots_g,devExplBoots_Grades,devExplBoots_gparentP,devExplBoots_GradesparentP)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5DevExpl5.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5DevExpl1.rds')
 
 # saveout all AIC differences in one dataframe
-outdf=data.frame(AICdiff_g_v_grades,AICdiff_g_v_gParentP,AICdiff_g_v_gradesParentP,AICdiff_grades_v_gParentP,AICdiff_grades_v_gradesParentP)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5AICdiff5.rds')
+outdf=data.frame(AICdiff_g_v_grades,AICdiff_g_v_gParentP,AICdiff_g_v_gradesParentP,AICdiff_grades_v_gParentP,AICdiff_grades_v_gradesParentP,AICdiff_gParentP_v_gradesParentP)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5AICdiff1.rds')
 
 # saveout all t-statistics in one dataframe
-outdf=data.frame(p_permuted_Tstats_AvB,int_permuted_Tstats_AvB,ext_permuted_Tstats_AvB,p_permuted_Tstats_AvC,int_permuted_Tstats_AvC,ext_permuted_Tstats_AvC,p_permuted_Tstats_AvD,int_permuted_Tstats_AvD,ext_permuted_Tstats_AvD,p_permuted_Tstats_BvC,int_permuted_Tstats_BvC,ext_permuted_Tstats_BvC,p_permuted_Tstats_BvD,int_permuted_Tstats_BvD,ext_permuted_Tstats_BvD)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5Tstats5.rds')
+outdf=data.frame(p_permutedTstats_AvB,int_permutedTstats_AvB,ext_permutedTstats_AvB,p_permutedTstats_AvC,int_permutedTstats_AvC,ext_permutedTstats_AvC,p_permutedTstats_AvD,int_permutedTstats_AvD,ext_permutedTstats_AvD,p_permutedTstats_BvC,int_permutedTstats_BvC,ext_permutedTstats_BvC,p_permutedTstats_BvD,int_permutedTstats_BvD,ext_permutedTstats_BvD)
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/F3-5Tstats1.rds')
