@@ -382,9 +382,1007 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
 
 ```
+```{r}
+### poverty versus nonpoverty boots plot - CBCL
+
+### re-merge the 5, update indices to pull values from
+pNpFits1=readRDS('~/Desktop/g_p/gpFitBoots_cbcl_pNp1.rds')
+pNpFits2=readRDS('~/Desktop/g_p/gpFitBoots_cbcl_pNp2.rds')
+pNpFits3=readRDS('~/Desktop/g_p/gpFitBoots_cbcl_pNp3.rds')
+pNpFits4=readRDS('~/Desktop/g_p/gpFitBoots_cbcl_pNp4.rds')
+pNpFits5=readRDS('~/Desktop/g_p/gpFitBoots_cbcl_pNp5.rds')
+
+# sub in values created in other iteration
+pNpFits1[2001:4000,]=pNpFits2[2001:4000,]
+pNpFits1[4001:6000,]=pNpFits3[4001:6000,]
+pNpFits1[6001:8000,]=pNpFits4[6001:8000,]
+pNpFits1[8001:10000,]=pNpFits5[8001:10000,]
+
+# poverty child p
+pov_p=pNpFits1[,1:128]
+# nonpov
+npov_p=pNpFits1[,129:256]
+# using 99th percentile as cutoff - sparser coverage in poverty bootstraps
+MaxP=quantile(masterdf$parentPcount, probs = 0.99)
+plot<-plot_bootstraps_pnp(pov_p,npov_p,127,'P',MaxP)
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+# derivatives
+# poverty
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_p), ncol = ncol(pov_p) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(pov_p) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- pov_p[, i + 1] - pov_p[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab(x_title)+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# nonpoverty
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_p), ncol = ncol(npov_p) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(npov_p) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- npov_p[, i + 1] - npov_p[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxP))+xlab(x_title)+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+```
 
 ```{r}
-### P boots plot
+# poverty child int
+pov_Int=pNpFits1[,257:308]
+MaxInt=quantile(masterdf$cbcl_scr_syn_internal_r, probs = 0.99)
+plot_bootstraps_par(pov_Int,51,'Pov. child Int',MaxInt)
+# nonpoverty child int
+npov_Int=pNpFits1[,309:360]
+plot_bootstraps_par(npov_Int,51,'Npov. child Int',MaxInt)
+# both merged
+plot<-plot_bootstraps_pnp(pov_Int,npov_Int,51,'child Int.',MaxInt)
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+# derivatives
+# poverty
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_Int), ncol = ncol(pov_Int) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(pov_Int) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- pov_Int[, i + 1] - pov_Int[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxInt))+xlab('child Int.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxInt),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# nonpoverty
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_Int), ncol = ncol(npov_Int) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(npov_Int) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- npov_Int[, i + 1] - npov_Int[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxInt))+xlab('child Int.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxInt),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+```
+
+```{r}
+# poverty child ext
+pov_Ext=pNpFits1[,361:408]
+MaxExt=quantile(masterdf$cbcl_scr_syn_external_r, probs = 0.99)
+plot_bootstraps_par(pov_Ext,47,'Pov. child Ext',MaxExt)
+# nonpoverty child p
+npov_Ext=pNpFits1[,409:456]
+plot_bootstraps_par(npov_Ext,47,'Npov. child Ext',MaxExt)
+# both merged
+plot<-plot_bootstraps_pnp(pov_Ext,npov_Ext,47,'child Ext.',MaxExt)
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# poverty
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_Ext), ncol = ncol(pov_Ext) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(pov_Ext) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- pov_Ext[, i + 1] - pov_Ext[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxInt))+xlab('child Ext.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxExt),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# nonpoverty
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_Ext), ncol = ncol(npov_Ext) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(npov_Ext) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- npov_Ext[, i + 1] - npov_Ext[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxInt))+xlab('child Ext.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxExt),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+```
+
+```{r}
+# poverty child somatic
+pov_Som=pNpFits1[,457:470]
+MaxSom=quantile(masterdf$cbcl_scr_syn_somatic_r, probs = 0.99)
+plot_bootstraps_par(pov_Som,20,'Pov. child Somatic',MaxSom)
+# nonpoverty child p
+npov_Som=pNpFits1[,471:484]
+plot_bootstraps_par(npov_Som,20,'Npov. child Somatic',MaxSom)
+# both merged
+plot<-plot_bootstraps_pnp(pov_Som,npov_Som,20,'child Somatic',MaxSom)
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# poverty
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_Som), ncol = ncol(pov_Som) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(pov_Som) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- pov_Som[, i + 1] - pov_Som[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxSom))+xlab('child Somatic')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxSom),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# nonpoverty
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_Som), ncol = ncol(npov_Som) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(npov_Som) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- npov_Som[, i + 1] - npov_Som[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxSom))+xlab('child Somatic')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxSom),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+```
+
+
+```{r}
+# Anxious Depression
+pov_Anx=pNpFits1[,485:510]
+MaxAnx=quantile(as.numeric(masterdf$cbcl_scr_syn_anxdep_r), probs = 0.99)
+plot_bootstraps_par(pov_Anx,25,'Pov. child Anx. Dep.',MaxAnx)
+# nonpoverty child p
+npov_Anx=pNpFits1[,511:536]
+plot_bootstraps_par(npov_Anx,25,'Npov. child Anx. Dep.',MaxAnx)
+# both merged
+plot<-plot_bootstraps_pnp(pov_Anx,npov_Anx,25,'child Anx. Dep.',MaxAnx)
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# poverty
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_Anx), ncol = ncol(pov_Anx) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(pov_Anx) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- pov_Anx[, i + 1] - pov_Anx[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxAnx))+xlab('child Anx. Dep.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxAnx),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# nonpoverty
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_Anx), ncol = ncol(npov_Anx) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(npov_Anx) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- npov_Anx[, i + 1] - npov_Anx[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxAnx))+xlab('child Anx. Dep.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxAnx),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+```
+
+```{r}
+# Thought
+pov_Tho=pNpFits1[,537:555]
+MaxTho=quantile(as.numeric(masterdf$cbcl_scr_syn_thought_r), probs = 0.99)
+plot_bootstraps_par(pov_Tho,18,'Pov. child Thought',MaxTho)
+# nonpoverty child p
+npov_Tho=pNpFits1[,556:574]
+plot_bootstraps_par(npov_Tho,18,'Npov. child Thought',MaxTho)
+# both merged
+plot<-plot_bootstraps_pnp(pov_Tho,npov_Tho,18,'child Thought',MaxTho)
+plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
+
+# poverty
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_Tho), ncol = ncol(pov_Tho) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(pov_Tho) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- pov_Tho[, i + 1] - pov_Tho[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxTho))+xlab('child Thought')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxTho),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
+
+# nonpoverty
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_Tho), ncol = ncol(npov_Tho) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(npov_Tho) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- npov_Tho[, i + 1] - npov_Tho[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxTho))+xlab('child Thought')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxTho),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
+```
+
+```{r}
+# Withdrawn Depression
+pov_Wit=pNpFits1[,575:591]
+MaxWit=quantile(as.numeric(masterdf$cbcl_scr_syn_withdep_r), probs = 0.99)
+plot_bootstraps_par(pov_Wit,16,'Pov. With. Depr.',MaxWit)
+# nonpoverty child p
+npov_Wit=pNpFits1[,592:608]
+plot_bootstraps_par(npov_Wit,16,'Npov. child With. Depr.',MaxWit)
+# both merged
+plot<-plot_bootstraps_pnp(pov_Wit,npov_Wit,16,'child With. Depr.',MaxWit)
+plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
+
+# poverty
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_Wit), ncol = ncol(pov_Wit) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(pov_Wit) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- pov_Wit[, i + 1] - pov_Wit[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxWit))+xlab('child Wit. Depr.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
+
+# nonpoverty
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_Wit), ncol = ncol(npov_Wit) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(npov_Wit) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- npov_Wit[, i + 1] - npov_Wit[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxWit))+xlab('child Wit. Dep.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
+```
+```{r}
+# Social
+pov_Soc=pNpFits1[,609:628]
+MaxSoc=quantile(as.numeric(masterdf$cbcl_scr_syn_social_r), probs = 0.99)
+plot_bootstraps_par(pov_Soc,19,'Pov. Social',MaxSoc)
+# nonpoverty child p
+npov_Soc=pNpFits1[,629:648]
+plot_bootstraps_par(npov_Soc,19,'Npov. Social',MaxSoc)
+# both merged
+plot<-plot_bootstraps_pnp(pov_Soc,npov_Soc,19,'child Social',MaxSoc)
+plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
+
+# poverty
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_Wit), ncol = ncol(pov_Wit) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(pov_Wit) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- pov_Wit[, i + 1] - pov_Wit[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxWit))+xlab('child Wit. Depr.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
+
+# nonpoverty
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_Wit), ncol = ncol(npov_Wit) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(npov_Wit) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- npov_Wit[, i + 1] - npov_Wit[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxWit))+xlab('child Wit. Dep.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
+```
+
+```{r}
+# attention
+# and also note increased y-axis
+pov_Att=pNpFits1[,649:667]
+MaxAtt=quantile(as.numeric(masterdf$cbcl_scr_syn_attention_r), probs = 0.99)
+plot_bootstraps_par(pov_Att,18,'Pov. Attn.',MaxAtt)
+# nonpoverty child p
+npov_Att=pNpFits1[,668:686]
+plot_bootstraps_par(npov_Att,18,'Npov. Attn.',MaxAtt)
+# both merged
+plot<-plot_bootstraps_pnp(pov_Att,npov_Att,18,'child Attention',MaxAtt)
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# poverty
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_Att), ncol = ncol(pov_Att) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(pov_Att) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- pov_Att[, i + 1] - pov_Att[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxAtt))+xlab('child Attn.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxAtt),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# nonpoverty
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_Att), ncol = ncol(npov_Att) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(npov_Att) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- npov_Att[, i + 1] - npov_Att[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxAtt))+xlab('child Attn.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxAtt),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+```
+
+```{r}
+# Rule breaking
+pov_RB=pNpFits1[,687:719]
+MaxRB=quantile(as.numeric(masterdf$cbcl_scr_syn_rulebreak_r), probs = 0.99)
+plot_bootstraps_par(pov_RB,32,'Pov. Rules',MaxRB)
+# nonpoverty child p
+npov_RB=pNpFits1[,720:752]
+plot_bootstraps_par(npov_RB,32,'Npov. child Rules',MaxRB)
+# both merged
+plot<-plot_bootstraps_pnp(pov_RB,npov_RB,32,'child Rules',MaxRB)
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# poverty
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_RB), ncol = ncol(pov_RB) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(pov_RB) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- pov_RB[, i + 1] - pov_RB[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxRB))+xlab('child Rules')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxRB),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# nonpoverty
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_RB), ncol = ncol(npov_RB) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(npov_RB) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- npov_RB[, i + 1] - npov_RB[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxRB))+xlab('child Rules')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxRB),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+```
+
+
+```{r}
+# aggression
+pov_Agg=pNpFits1[,753:848]
+MaxAgg=quantile(as.numeric(masterdf$cbcl_scr_syn_attention_r), probs = 0.99)
+plot_bootstraps_par(pov_Agg,45,'Pov. Aggr.',MaxAgg)
+# nonpoverty child p
+npov_Agg=pNpFits1[,849:894]
+plot_bootstraps_par(npov_Agg,45,'Npov. Aggr.',MaxAgg)
+# both merged
+plot<-plot_bootstraps_pnp(pov_Agg,npov_Agg,45,'child Aggression',MaxAgg)
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# poverty
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_Int), ncol = ncol(pov_Int) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(pov_Int) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- pov_Int[, i + 1] - pov_Int[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxAgg))+xlab('child Aggr.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxAgg),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+
+# nonpoverty
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_Agg), ncol = ncol(npov_Agg) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(npov_Agg) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- npov_Agg[, i + 1] - npov_Agg[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  P_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+# if either is sig at 99% plot
+dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+# use it to mask calculated derivs
+dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+    theme(panel.spacing = unit(-.01,"cm")) +
+    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
+    xlim(c(0,MaxAgg))+xlab('child Aggr.')+
+    guides(fill=FALSE)+
+    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+    scale_x_continuous(limits = c(0,MaxAgg),expand = expansion(mult = c(0, 0)))
+plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
+```
+
+```{r}
+# end of child poverty plots
+```
+
+```{r}
+### poverty versus nonpoverty boots plot - ASR
 
 ### re-merge the 5, update indices to pull values from
 pNpFits1=readRDS('~/Desktop/g_p/gpFitBoots_asr_pNp1.rds')
@@ -1594,8 +2592,8 @@ MaxAgg=quantile(masterdf$ASR_aggressive,.99)
 
 # actually plot em: some in main text as fig 2, some as fig s5
 plot_bootstraps_par(PFits,160,x_title,MaxP)
-plot_bootstraps_par(IFits,30,'Parental Internalizing',MaxI)
-plot_bootstraps_par(EFits,63,'Parental Externalizing',MaxE)
+plot_bootstraps_par(IFits,30,'Caregiver Internalizing',MaxI)
+plot_bootstraps_par(EFits,63,'Externalizing',MaxE)
 plot_bootstraps_par(AnxFits,31,'Anxious Depression',MaxAnx)
 plot_bootstraps_par(WitFits,18,'Withdrawn Depression',MaxWit)
 plot_bootstraps_par(AttFits,31,'Attention',MaxAtt)
@@ -2171,10 +3169,7 @@ print(sum(abs(Grades$ext_permutedTstats_BvD[1:7500]>abs(Grades$ext_permutedTstat
 ```{r}
 library(dplyr)
 # supplemental figure 2
-PvC_de=readRDS('~/Desktop/g_p/PvC_gdevExplBoots1k.rds')
-
-# for 1k version
-PvC_de=PvC_de[1:1000,]
+PvC_de=readRDS('~/Desktop/g_p/PvC_gdevExplBoots.rds')
 
 # rename columns for plotting
 new_colnames <- c("child p", "child int.", "child ext.", "child somatic", "child anxdep.", "child thought", "child withdep.", 
@@ -2291,4 +3286,29 @@ ggplot(plotdf, aes(x = cbcl_scr_syn_external_r, y = plotGrades)) +
       geom_vline(xintercept = Ebc, linetype = "dashed")+
       geom_vline(xintercept = Ec, linetype = "dashed")
 # saved at 750x300
+```
+
+```{r}
+# poverty plots from master df
+pov_labels <- c("Above Poverty Line", "Below")
+masterdf$Pov_v2<-factor(masterdf$poverty, labels = pov_labels)
+# for cats probably not needed
+library(forcats)
+masterdf$poverty <- fct_relevel(masterdf$poverty, "Below")
+plotdf=masterdf[,c('Pov_v2','cbcl_scr_syn_totprob_r')]
+### supplementary grades fig
+ggplot(plotdf, aes(x = cbcl_scr_syn_totprob_r, y = Pov_v2)) +
+  geom_boxplot(alpha=.2) +
+  labs(title = "Total symptoms across the poverty line",
+       x = expression(italic(p)),
+       y = "")+theme_minimal(base_size=23)
+# get stats
+bv=masterdf[masterdf$eventname=='baseline_year_1_arm_1',]
+y2=masterdf[masterdf$eventname=='2_year_follow_up_y_arm_1',]
+median(bv$cbcl_scr_syn_totprob_r[bv$Pov_v2=="Above Poverty Line"])
+median(bv$cbcl_scr_syn_totprob_r[bv$Pov_v2=="Below"])
+t.test(bv$cbcl_scr_syn_totprob_r[bv$Pov_v2=="Below"],bv$cbcl_scr_syn_totprob_r[bv$Pov_v2=="Above Poverty Line"])
+median(y2$cbcl_scr_syn_totprob_r[y2$Pov_v2=="Above Poverty Line"])
+median(y2$cbcl_scr_syn_totprob_r[y2$Pov_v2=="Below"])
+t.test(y2$cbcl_scr_syn_totprob_r[y2$Pov_v2=="Below"],y2$cbcl_scr_syn_totprob_r[y2$Pov_v2=="Above Poverty Line"])
 ```
