@@ -425,8 +425,8 @@ for (i in 1:(ncol(pov_p) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -463,8 +463,8 @@ for (i in 1:(ncol(npov_p) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -514,8 +514,8 @@ for (i in 1:(ncol(pov_Int) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -552,8 +552,8 @@ for (i in 1:(ncol(npov_Int) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -604,8 +604,8 @@ for (i in 1:(ncol(pov_Ext) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -642,8 +642,8 @@ for (i in 1:(ncol(npov_Ext) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -693,8 +693,8 @@ for (i in 1:(ncol(pov_Som) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -731,8 +731,8 @@ for (i in 1:(ncol(npov_Som) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -783,8 +783,8 @@ for (i in 1:(ncol(pov_Anx) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -821,8 +821,8 @@ for (i in 1:(ncol(npov_Anx) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -872,8 +872,8 @@ for (i in 1:(ncol(pov_Tho) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -910,8 +910,8 @@ for (i in 1:(ncol(npov_Tho) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -961,8 +961,8 @@ for (i in 1:(ncol(pov_Wit) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -999,8 +999,8 @@ for (i in 1:(ncol(npov_Wit) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1050,8 +1050,8 @@ for (i in 1:(ncol(pov_Soc) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1088,8 +1088,8 @@ for (i in 1:(ncol(npov_Soc) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1140,8 +1140,8 @@ for (i in 1:(ncol(pov_Att) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1178,8 +1178,8 @@ for (i in 1:(ncol(npov_Att) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1229,8 +1229,8 @@ for (i in 1:(ncol(pov_RB) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1267,8 +1267,8 @@ for (i in 1:(ncol(npov_RB) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1319,8 +1319,8 @@ for (i in 1:(ncol(pov_Int) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1357,8 +1357,8 @@ for (i in 1:(ncol(npov_Agg) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1430,8 +1430,8 @@ for (i in 1:(ncol(pov_p) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1468,8 +1468,8 @@ for (i in 1:(ncol(npov_p) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1519,8 +1519,8 @@ for (i in 1:(ncol(pov_Int) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1557,8 +1557,8 @@ for (i in 1:(ncol(npov_Int) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1609,8 +1609,8 @@ for (i in 1:(ncol(pov_Ext) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1647,8 +1647,8 @@ for (i in 1:(ncol(npov_Ext) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1698,8 +1698,8 @@ for (i in 1:(ncol(pov_Som) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1736,8 +1736,8 @@ for (i in 1:(ncol(npov_Som) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1760,7 +1760,6 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
 ```{r}
 # Anxious Depression
-# poverty parental somatic
 pov_Anx=pNpFits1[,555:586]
 MaxAnx=quantile(masterdf$ASRAnxDepr, probs = 0.99)
 plot_bootstraps_par(pov_Anx,31,'Pov. Parental Anx. Dep.',MaxAnx)
@@ -1789,8 +1788,8 @@ for (i in 1:(ncol(pov_Anx) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1827,8 +1826,8 @@ for (i in 1:(ncol(npov_Anx) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1878,8 +1877,8 @@ for (i in 1:(ncol(pov_Tho) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1916,8 +1915,8 @@ for (i in 1:(ncol(npov_Tho) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1967,8 +1966,8 @@ for (i in 1:(ncol(pov_Wit) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -2005,8 +2004,8 @@ for (i in 1:(ncol(npov_Wit) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -2056,8 +2055,8 @@ for (i in 1:(ncol(pov_RB) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -2094,8 +2093,8 @@ for (i in 1:(ncol(npov_RB) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -2148,8 +2147,8 @@ for (i in 1:(ncol(pov_Att) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -2186,8 +2185,8 @@ for (i in 1:(ncol(npov_Att) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -2237,8 +2236,8 @@ for (i in 1:(ncol(pov_Int) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -2275,8 +2274,8 @@ for (i in 1:(ncol(npov_Agg) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -2997,26 +2996,23 @@ ggplot(df_tidy, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
 
 ```{r}
 # deviance explained plots
-# cross-sectional
 DevExpl1=readRDS('~/Desktop/g_p/F3-5DevExpl1.rds')
 DevExpl2=readRDS('~/Desktop/g_p/F3-5DevExpl2.rds')
-#DevExpl3=readRDS('~/Desktop/g_p/F3-5DevExpl3.rds')
+DevExpl3=readRDS('~/Desktop/g_p/F3-5DevExpl3.rds')
 DevExpl4=readRDS('~/Desktop/g_p/F3-5DevExpl4.rds')
 DevExpl5=readRDS('~/Desktop/g_p/F3-5DevExpl5.rds')
-#DevExpl6=readRDS('~/Desktop/g_p/F3-5DevExpl6.rds')
+DevExpl6=readRDS('~/Desktop/g_p/F3-5DevExpl6.rds')
 DevExpl7=readRDS('~/Desktop/g_p/F3-5DevExpl7.rds')
 DevExpl8=readRDS('~/Desktop/g_p/F3-5DevExpl8.rds')
 DevExpl=DevExpl1
 DevExpl[1251:2500,]=DevExpl2[1251:2500,]
-#DevExpl[2501:3750,]=DevExpl3[2501:3750,]
+DevExpl[2501:3750,]=DevExpl3[2501:3750,]
 DevExpl[3751:5000,]=DevExpl4[3751:5000,]
 DevExpl[5001:6250,]=DevExpl5[5001:6250,]
-#DevExpl1[6251:7500,]=DevExpl6
+# misalignment of indices for dev6 intentional
+DevExpl[6251:7500,]=DevExpl6[7501:8750,]
 DevExpl[7501:8750,]=DevExpl7[7501:8750,]
 DevExpl[8751:10000,]=DevExpl8[8751:10000,]
-# temp ###
-DevExpl=DevExpl[-c(2501:3750), ]
-DevExpl=DevExpl[-c(5001:6250), ]
 
 df_long <- reshape2::melt(DevExpl)
 
@@ -3031,28 +3027,26 @@ ggplot(df_long, aes(x = variable, y = value)) +
   geom_boxplot(outlier.alpha = 0.1) +
   scale_x_discrete(labels = custom_labels) +
   scale_y_continuous(labels = function(x) sprintf("%.3f", x)) +
-  ylab("Cross-sectional Dev. Expl.") + theme_minimal(base_size=28)
+  ylab("Deviance Explained") + theme_minimal(base_size=28)
 
 # now evaluate AIC differences
 AIC1=readRDS('~/Desktop/g_p/F3-5AICdiff1.rds')
 AIC2=readRDS('~/Desktop/g_p/F3-5AICdiff2.rds')
-#AIC3=readRDS('~/Desktop/g_p/F3-5DevExpl3.rds')
+AIC3=readRDS('~/Desktop/g_p/F3-5AICdiff3.rds')
 AIC4=readRDS('~/Desktop/g_p/F3-5AICdiff4.rds')
 AIC5=readRDS('~/Desktop/g_p/F3-5AICdiff5.rds')
-#AICpl6=readRDS('~/Desktop/g_p/F3-5DevExpl6.rds')
+AIC6=readRDS('~/Desktop/g_p/F3-5AICdiff6.rds')
 AIC7=readRDS('~/Desktop/g_p/F3-5AICdiff7.rds')
 AIC8=readRDS('~/Desktop/g_p/F3-5AICdiff8.rds')
 AIC=AIC1
 AIC[1251:2500,]=AIC2[1251:2500,]
-#AIC[2501:3750,]=DevExpl3[2501:3750,]
+AIC[2501:3750,]=AIC3[2501:3750,]
 AIC[3751:5000,]=AIC4[3751:5000,]
 AIC[5001:6250,]=AIC5[5001:6250,]
-#AIC[6251:7500,]=DevExpl6
+# misalignment of indices for dev6 intentional
+AIC[6251:7500,]=AIC6[7501:8750,]
 AIC[7501:8750,]=AIC7[7501:8750,]
 AIC[8751:10000,]=AIC8[8751:10000,]
-# temp ###
-AIC=AIC[-c(2501:3750), ]
-AIC=AIC[-c(5001:6250), ]
 
 df_long <- reshape2::melt(AIC)
 
@@ -3080,91 +3074,88 @@ ggplot(df_long, aes(x = variable, y = value)) +
 # now evaluate AIC differences
 Grades1=readRDS('~/Desktop/g_p/F3-5Tstats1.rds')
 Grades2=readRDS('~/Desktop/g_p/F3-5Tstats2.rds')
-#AIC3=readRDS('~/Desktop/g_p/F3-5DevExpl3.rds')
+Grades3=readRDS('~/Desktop/g_p/F3-5Tstats3.rds')
 Grades4=readRDS('~/Desktop/g_p/F3-5Tstats4.rds')
 Grades5=readRDS('~/Desktop/g_p/F3-5Tstats5.rds')
-#AICpl6=readRDS('~/Desktop/g_p/F3-5DevExpl6.rds')
+Grades6=readRDS('~/Desktop/g_p/F3-5Tstats6.rds')
 Grades7=readRDS('~/Desktop/g_p/F3-5Tstats7.rds')
 Grades8=readRDS('~/Desktop/g_p/F3-5Tstats8.rds')
 Grades=Grades1
 Grades[1251:2500,]=Grades2[1251:2500,]
-#AIC[2501:3750,]=DevExpl3[2501:3750,]
+Grades[2501:3750,]=Grades3[2501:3750,]
 Grades[3751:5000,]=Grades4[3751:5000,]
 Grades[5001:6250,]=Grades5[5001:6250,]
-#AIC[6251:7500,]=DevExpl6
+Grades[6251:7500,]=Grades6[7501:8750,]
 Grades[7501:8750,]=Grades7[7501:8750,]
 Grades[8751:10000,]=Grades8[8751:10000,]
-# temp ###
-Grades=Grades[-c(2501:3750), ]
-Grades=Grades[-c(5001:6250), ]
 
 # plot observed vs expected - p factor
-ggplot(Grades[1:7500,],aes(x=p_permutedTstats_AvB))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_AvB[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor a vs. b')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$p_permutedTstats_AvB[1:7500]>abs(Grades$p_permutedTstats_AvB[7501]))))/7500
+ggplot(Grades,aes(x=p_permutedTstats_AvB))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_AvB[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor a vs. b')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$p_permutedTstats_AvB[1:10000]>abs(Grades$p_permutedTstats_AvB[10001]))))/10000
 
-ggplot(Grades[1:7500,],aes(x=p_permutedTstats_AvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_AvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor a vs. c')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$p_permutedTstats_AvC[1:7500]>abs(Grades$p_permutedTstats_AvC[7501]))))/7500
-
-
-ggplot(Grades[1:7500,],aes(x=p_permutedTstats_AvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_AvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor a vs. failing')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$p_permutedTstats_AvD[1:7500]>abs(Grades$p_permutedTstats_AvD[7501]))))/7500
+ggplot(Grades,aes(x=p_permutedTstats_AvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_AvC[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor a vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$p_permutedTstats_AvC[1:10000]>abs(Grades$p_permutedTstats_AvC[10001]))))/10000
 
 
-ggplot(Grades[1:7500,],aes(x=p_permutedTstats_BvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_BvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor b vs. c')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$p_permutedTstats_BvC[1:7500]>abs(Grades$p_permutedTstats_BvC[7501]))))/7500
+ggplot(Grades,aes(x=p_permutedTstats_AvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_AvD[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor a vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$p_permutedTstats_AvD[1:10000]>abs(Grades$p_permutedTstats_AvD[10001]))))/10000
 
 
-ggplot(Grades[1:7500,],aes(x=p_permutedTstats_BvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_BvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor b vs. failing')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$p_permutedTstats_BvD[1:7500]>abs(Grades$p_permutedTstats_BvD[7501]))))/7500
+ggplot(Grades,aes(x=p_permutedTstats_BvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_BvC[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor b vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$p_permutedTstats_BvC[1:10000]>abs(Grades$p_permutedTstats_BvC[10001]))))/10000
 
 
-#ggplot(Grades[1:7500,],aes(x=p_permutedTstats_CvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_CvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor c vs. failing')+guides(y="none")+scale_x_continuous()
+ggplot(Grades,aes(x=p_permutedTstats_BvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_BvD[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor b vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$p_permutedTstats_BvD[1:10000]>abs(Grades$p_permutedTstats_BvD[10001]))))/10000
+
+
+#ggplot(Grades,aes(x=p_permutedTstats_CvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$p_permutedTstats_CvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('p-factor c vs. failing')+guides(y="none")+scale_x_continuous()
 
 # plot observed vs expected - internalizing
-ggplot(Grades[1:7500,],aes(x=int_permutedTstats_AvB))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_AvB[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing a vs. b')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$int_permutedTstats_AvB[1:7500]>abs(Grades$int_permutedTstats_AvB[7501]))))/7500
+ggplot(Grades,aes(x=int_permutedTstats_AvB))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_AvB[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing a vs. b')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$int_permutedTstats_AvB[1:10000]>abs(Grades$int_permutedTstats_AvB[10001]))))/10000
 
 
-ggplot(Grades[1:7500,],aes(x=int_permutedTstats_AvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_AvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing a vs. c')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$int_permutedTstats_AvC[1:7500]>abs(Grades$int_permutedTstats_AvC[7501]))))/7500
+ggplot(Grades,aes(x=int_permutedTstats_AvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_AvC[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing a vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$int_permutedTstats_AvC[1:10000]>abs(Grades$int_permutedTstats_AvC[10001]))))/10000
 
 
-ggplot(Grades[1:7500,],aes(x=int_permutedTstats_AvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_AvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing a vs. failing')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$int_permutedTstats_AvD[1:7500]>abs(Grades$int_permutedTstats_AvD[7501]))))/7500
+ggplot(Grades,aes(x=int_permutedTstats_AvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_AvD[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing a vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$int_permutedTstats_AvD[1:10000]>abs(Grades$int_permutedTstats_AvD[10001]))))/10000
 
 
-ggplot(Grades[1:7500,],aes(x=int_permutedTstats_BvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_BvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing b vs. c')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$int_permutedTstats_BvC[1:7500]>abs(Grades$int_permutedTstats_BvC[7501]))))/7500
+ggplot(Grades,aes(x=int_permutedTstats_BvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_BvC[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing b vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$int_permutedTstats_BvC[1:10000]>abs(Grades$int_permutedTstats_BvC[10001]))))/10000
 
 
-ggplot(Grades[1:7500,],aes(x=int_permutedTstats_BvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_BvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing b vs. failing')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$int_permutedTstats_BvD[1:7500]>abs(Grades$int_permutedTstats_BvD[7501]))))/7500
+ggplot(Grades,aes(x=int_permutedTstats_BvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_BvD[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing b vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$int_permutedTstats_BvD[1:10000]>abs(Grades$int_permutedTstats_BvD[10001]))))/10000
 
 
-#ggplot(Grades[1:7500,],aes(x=int_permutedTstats_CvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_CvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing c vs. failing')+guides(y="none")+scale_x_continuous()
+#ggplot(Grades,aes(x=int_permutedTstats_CvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_CvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing c vs. failing')+guides(y="none")+scale_x_continuous()
 
 # plot observed vs expected - externalizing
-ggplot(Grades[1:7500,],aes(x=ext_permutedTstats_AvB))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_AvB[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing a vs. b')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$ext_permutedTstats_AvB[1:7500]>abs(Grades$ext_permutedTstats_AvB[7501]))))/7500
+ggplot(Grades,aes(x=ext_permutedTstats_AvB))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_AvB[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing a vs. b')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$ext_permutedTstats_AvB[1:10000]>abs(Grades$ext_permutedTstats_AvB[10001]))))/10000
 
 
-ggplot(Grades[1:7500,],aes(x=ext_permutedTstats_AvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_AvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing a vs. c')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$ext_permutedTstats_AvC[1:7500]>abs(Grades$ext_permutedTstats_AvC[7501]))))/7500
+ggplot(Grades,aes(x=ext_permutedTstats_AvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_AvC[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing a vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$ext_permutedTstats_AvC[1:10000]>abs(Grades$ext_permutedTstats_AvC[10001]))))/10000
 
 
-ggplot(Grades[1:7500,],aes(x=ext_permutedTstats_AvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_AvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing a vs. failing')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$ext_permutedTstats_AvD[1:7500]>abs(Grades$ext_permutedTstats_AvD[7501]))))/7500
+ggplot(Grades,aes(x=ext_permutedTstats_AvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_AvD[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing a vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$ext_permutedTstats_AvD[1:10000]>abs(Grades$ext_permutedTstats_AvD[10001]))))/10000
 
 
-ggplot(Grades[1:7500,],aes(x=ext_permutedTstats_BvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_BvC[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing b vs. c')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$ext_permutedTstats_BvC[1:7500]>abs(Grades$ext_permutedTstats_BvC[7501]))))/7500
+ggplot(Grades,aes(x=ext_permutedTstats_BvC))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_BvC[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing b vs. c')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$ext_permutedTstats_BvC[1:10000]>abs(Grades$ext_permutedTstats_BvC[10001]))))/10000
 
 
-ggplot(Grades[1:7500,],aes(x=ext_permutedTstats_BvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_BvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing b vs. failing')+guides(y="none")+scale_x_continuous()
-print(sum(abs(Grades$ext_permutedTstats_BvD[1:7500]>abs(Grades$ext_permutedTstats_BvD[7501]))))/7500
+ggplot(Grades,aes(x=ext_permutedTstats_BvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$ext_permutedTstats_BvD[10001],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('externalizing b vs. failing')+guides(y="none")+scale_x_continuous()
+print(sum(abs(Grades$ext_permutedTstats_BvD[1:10000]>abs(Grades$ext_permutedTstats_BvD[10001]))))/10000
 
 
-#ggplot(Grades[1:7500,],aes(x=int_permutedTstats_CvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_CvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing c vs. failing')+guides(y="none")+scale_x_continuous()
+#ggplot(Grades,aes(x=int_permutedTstats_CvD))+geom_density(size=1.5)+geom_vline(xintercept = Grades$int_permutedTstats_CvD[7501],size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('internalizing c vs. failing')+guides(y="none")+scale_x_continuous()
 ```
 
 ```{r}
@@ -3286,16 +3277,32 @@ ggplot(plotdf, aes(x = cbcl_scr_syn_external_r, y = plotGrades)) +
        x="",y = "Grades")+theme_minimal(base_size=25)+xlim(0,quantile(masterdf$cbcl_scr_syn_external_r,.999))+
       geom_vline(xintercept = Ebc, linetype = "dashed")+
       geom_vline(xintercept = Ec, linetype = "dashed")
-# saved at 750x300
+# saved at 500x500
+
+# for g factor
+grade_levels <- c(5, 4, 3, 2, 1)
+grade_labels <- c("F", "Failing", "C", "B", "A")
+masterdf$plotGrades<-factor(masterdf$Grades, levels = grade_levels, labels = grade_labels)
+masterdf$plotGrades[masterdf$plotGrades=="F"]="Failing"
+plotdf=masterdf[,c('plotGrades','g')]
+### supplementary grades fig
+ggplot(plotdf, aes(x = g, y = plotGrades)) +
+  geom_boxplot(alpha=.3) +
+  labs(title = "All Children",
+       x = expression(italic(g)),
+       y = "Grades")+theme_minimal(base_size=25)+xlim(-4,4.6)
+
 ```
+
+
 
 ```{r}
 # poverty plots from master df
 pov_labels <- c("Above Poverty Line", "Below")
-masterdf$Pov_v2<-factor(masterdf$poverty, labels = pov_labels)
+masterdf$Pov_v2<-factor(masterdf$Pov_v2, labels = pov_labels)
 # for cats probably not needed
 library(forcats)
-masterdf$poverty <- fct_relevel(masterdf$poverty, "Below")
+masterdf$Pov_v2 <- fct_relevel(masterdf$Pov_v2, "Below")
 plotdf=masterdf[,c('Pov_v2','cbcl_scr_syn_totprob_r')]
 ### supplementary grades fig
 ggplot(plotdf, aes(x = cbcl_scr_syn_totprob_r, y = Pov_v2)) +
@@ -3312,4 +3319,40 @@ t.test(bv$cbcl_scr_syn_totprob_r[bv$Pov_v2=="Below"],bv$cbcl_scr_syn_totprob_r[b
 median(y2$cbcl_scr_syn_totprob_r[y2$Pov_v2=="Above Poverty Line"])
 median(y2$cbcl_scr_syn_totprob_r[y2$Pov_v2=="Below"])
 t.test(y2$cbcl_scr_syn_totprob_r[y2$Pov_v2=="Below"],y2$cbcl_scr_syn_totprob_r[y2$Pov_v2=="Above Poverty Line"])
+
+# poverty vs. no poverty grades
+povdfBV=povdf[bv$Pov_v2=="Below",]
+npovdfBV=povdf[bv$Pov_v2=="Above Poverty Line",]
+
+povdfy2=povdf[y2$Pov_v2=="Below",]
+npovdfy2=povdf[y2$Pov_v2=="Above Poverty Line",]
+
+# models
+grades_p_bv=gam(cbcl_scr_syn_totprob_r~Grades+s(interview_age),data=povdfBV)
+summary(grades_p_bv)
+grades_np_bv=gam(cbcl_scr_syn_totprob_r~Grades+s(interview_age),data=npovdfBV)
+summary(grades_np_bv)
+grades_p_y2=gam(cbcl_scr_syn_totprob_r~Grades+s(interview_age),data=povdfy2)
+summary(grades_p_y2)
+grades_np_y2=gam(cbcl_scr_syn_totprob_r~Grades+s(interview_age),data=npovdfy2)
+summary(grades_np_y2)
+
+# plots
+plotdf<-masterdf[,c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_scr_syn_external_r','plotGrades','Pov_v2')]
+# p
+ggplot(plotdf[plotdf$Pov_v2=="Below",], aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
+  geom_boxplot(fill="gray",alpha=.4) +
+  labs(title = expression(italic(p)),
+       x="Below Poverty Line",y = "Grades")+theme_minimal(base_size=25)+xlim(0,quantile(masterdf$cbcl_scr_syn_totprob_r,.999))+
+      geom_vline(xintercept = Pbc, linetype = "dashed")+
+      geom_vline(xintercept = Pc, linetype = "dashed")
+
+ggplot(plotdf[plotdf$Pov_v2=="Above Poverty Line",], aes(x = cbcl_scr_syn_totprob_r, y = plotGrades)) +
+  geom_boxplot(fill="gray",alpha=.4) +
+  labs(title = expression(italic(p)),
+       x="Above Poverty Line",y = "Grades")+theme_minimal(base_size=25)+xlim(0,quantile(masterdf$cbcl_scr_syn_totprob_r,.999))+
+      geom_vline(xintercept = Pbc, linetype = "dashed")+
+      geom_vline(xintercept = Pc, linetype = "dashed")
+
+```
 ```
