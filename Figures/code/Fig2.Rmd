@@ -403,7 +403,7 @@ pov_p=pNpFits1[,1:128]
 # nonpov
 npov_p=pNpFits1[,129:256]
 # using 99th percentile as cutoff - sparser coverage in poverty bootstraps
-MaxP=quantile(masterdf$parentPcount, probs = 0.99)
+MaxP=quantile(masterdf$cbcl_scr_syn_totprob_r, probs = 0.99)
 plot<-plot_bootstraps_pnp(pov_p,npov_p,127,'P',MaxP)
 plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 # derivatives
@@ -439,7 +439,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab(x_title)+
+    xlim(c(0,MaxP))+xlab('Child p')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -477,7 +477,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab(x_title)+
+    xlim(c(0,MaxP))+xlab('Child p')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -667,12 +667,12 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 # poverty child somatic
 pov_Som=pNpFits1[,457:470]
 MaxSom=quantile(masterdf$cbcl_scr_syn_somatic_r, probs = 0.99)
-plot_bootstraps_par(pov_Som,20,'Pov. child Somatic',MaxSom)
+plot_bootstraps_par(pov_Som,13,'Pov. child Somatic',MaxSom)
 # nonpoverty child p
 npov_Som=pNpFits1[,471:484]
-plot_bootstraps_par(npov_Som,20,'Npov. child Somatic',MaxSom)
+plot_bootstraps_par(npov_Som,13,'Npov. child Somatic',MaxSom)
 # both merged
-plot<-plot_bootstraps_pnp(pov_Som,npov_Som,20,'child Somatic',MaxSom)
+plot<-plot_bootstraps_pnp(pov_Som,npov_Som,13,'child Somatic',MaxSom)
 plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
 # poverty
@@ -1019,26 +1019,27 @@ plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deri
     scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
 plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 ```
+
 ```{r}
 # Social
-pov_Soc=pNpFits1[,609:628]
+pov_Soc=pNpFits1[,609:626]
 MaxSoc=quantile(as.numeric(masterdf$cbcl_scr_syn_social_r), probs = 0.99)
-plot_bootstraps_par(pov_Soc,19,'Pov. Social',MaxSoc)
+plot_bootstraps_par(pov_Soc,17,'Pov. Social',MaxSoc)
 # nonpoverty child p
-npov_Soc=pNpFits1[,629:648]
-plot_bootstraps_par(npov_Soc,19,'Npov. Social',MaxSoc)
+npov_Soc=pNpFits1[,627:644]
+plot_bootstraps_par(npov_Soc,17,'Npov. Social',MaxSoc)
 # both merged
-plot<-plot_bootstraps_pnp(pov_Soc,npov_Soc,19,'child Social',MaxSoc)
+plot<-plot_bootstraps_pnp(pov_Soc,npov_Soc,17,'child Social',MaxSoc)
 plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
 # poverty
-P_derivative_matrix <- matrix(0, nrow = nrow(pov_Wit), ncol = ncol(pov_Wit) - 1)
+P_derivative_matrix <- matrix(0, nrow = nrow(pov_Soc), ncol = ncol(pov_Soc) - 1)
 # Calculate the derivative for each column
-for (i in 1:(ncol(pov_Wit) - 1)) {
+for (i in 1:(ncol(pov_Soc) - 1)) {
   # Calculate the differences in x (assuming a constant difference)
   dx <- 1
   # Calculate the differences in y (predicted values)
-  dy <- pov_Wit[, i + 1] - pov_Wit[, i]
+  dy <- pov_Soc[, i + 1] - pov_Soc[, i]
   # Calculate the derivatives (slopes)
   derivatives <- dy / dx
   # Store the derivatives in the derivative matrix
@@ -1063,20 +1064,20 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxWit))+xlab('child Wit. Depr.')+
+    xlim(c(0,MaxSoc))+xlab('child Social')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-    scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
+    scale_x_continuous(limits = c(0,MaxSoc),expand = expansion(mult = c(0, 0)))
 plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
 # nonpoverty
-P_derivative_matrix <- matrix(0, nrow = nrow(npov_Wit), ncol = ncol(npov_Wit) - 1)
+P_derivative_matrix <- matrix(0, nrow = nrow(npov_Soc), ncol = ncol(npov_Soc) - 1)
 # Calculate the derivative for each column
-for (i in 1:(ncol(npov_Wit) - 1)) {
+for (i in 1:(ncol(npov_Soc) - 1)) {
   # Calculate the differences in x (assuming a constant difference)
   dx <- 1
   # Calculate the differences in y (predicted values)
-  dy <- npov_Wit[, i + 1] - npov_Wit[, i]
+  dy <- npov_Soc[, i + 1] - npov_Soc[, i]
   # Calculate the derivatives (slopes)
   derivatives <- dy / dx
   # Store the derivatives in the derivative matrix
@@ -1101,24 +1102,24 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 plot<-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxWit))+xlab('child Wit. Dep.')+
+    xlim(c(0,MaxSoc))+xlab('child Social')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-    scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)))
+    scale_x_continuous(limits = c(0,MaxSoc),expand = expansion(mult = c(0, 0)))
 plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 ```
 
 ```{r}
 # attention
 # and also note increased y-axis
-pov_Att=pNpFits1[,649:667]
+pov_Att=pNpFits1[,645:664]
 MaxAtt=quantile(as.numeric(masterdf$cbcl_scr_syn_attention_r), probs = 0.99)
-plot_bootstraps_par(pov_Att,18,'Pov. Attn.',MaxAtt)
+plot_bootstraps_par(pov_Att,19,'Pov. Attn.',MaxAtt)
 # nonpoverty child p
-npov_Att=pNpFits1[,668:686]
-plot_bootstraps_par(npov_Att,18,'Npov. Attn.',MaxAtt)
+npov_Att=pNpFits1[,665:684]
+plot_bootstraps_par(npov_Att,19,'Npov. Attn.',MaxAtt)
 # both merged
-plot<-plot_bootstraps_pnp(pov_Att,npov_Att,18,'child Attention',MaxAtt)
+plot<-plot_bootstraps_pnp(pov_Att,npov_Att,19,'child Attention',MaxAtt)
 plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
 # poverty
@@ -1200,14 +1201,14 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
 ```{r}
 # Rule breaking
-pov_RB=pNpFits1[,687:719]
+pov_RB=pNpFits1[,685:703]
 MaxRB=quantile(as.numeric(masterdf$cbcl_scr_syn_rulebreak_r), probs = 0.99)
-plot_bootstraps_par(pov_RB,32,'Pov. Rules',MaxRB)
+plot_bootstraps_par(pov_RB,18,'Pov. Rules',MaxRB)
 # nonpoverty child p
-npov_RB=pNpFits1[,720:752]
-plot_bootstraps_par(npov_RB,32,'Npov. child Rules',MaxRB)
+npov_RB=pNpFits1[,704:722]
+plot_bootstraps_par(npov_RB,18,'Npov. child Rules',MaxRB)
 # both merged
-plot<-plot_bootstraps_pnp(pov_RB,npov_RB,32,'child Rules',MaxRB)
+plot<-plot_bootstraps_pnp(pov_RB,npov_RB,18,'child Rules',MaxRB)
 plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
 # poverty
@@ -1290,14 +1291,14 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
 ```{r}
 # aggression
-pov_Agg=pNpFits1[,753:848]
+pov_Agg=pNpFits1[,723:755]
 MaxAgg=quantile(as.numeric(masterdf$cbcl_scr_syn_attention_r), probs = 0.99)
-plot_bootstraps_par(pov_Agg,45,'Pov. Aggr.',MaxAgg)
+plot_bootstraps_par(pov_Agg,32,'Pov. Aggr.',MaxAgg)
 # nonpoverty child p
-npov_Agg=pNpFits1[,849:894]
-plot_bootstraps_par(npov_Agg,45,'Npov. Aggr.',MaxAgg)
+npov_Agg=pNpFits1[,756:788]
+plot_bootstraps_par(npov_Agg,32,'Npov. Aggr.',MaxAgg)
 # both merged
-plot<-plot_bootstraps_pnp(pov_Agg,npov_Agg,45,'child Aggression',MaxAgg)
+plot<-plot_bootstraps_pnp(pov_Agg,npov_Agg,32,'child Aggression',MaxAgg)
 plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
 # poverty
