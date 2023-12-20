@@ -673,7 +673,7 @@ plot_bootstraps(SocFits,17,'Social',MaxSoc,SocBc,SocC)
 ###
 # re-run with MaxAtt instead
 ###
-plot_bootstraps(AttFits,19,'Attention',18,AttBc,AttC)
+plot_bootstraps(AttFits,19,'Attention',MaxAtt,AttBc,AttC)
 plot_bootstraps(RulFits,18,'Rule Breaking',MaxRul,RulBc,RulC)
 plot_bootstraps(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
 ```
