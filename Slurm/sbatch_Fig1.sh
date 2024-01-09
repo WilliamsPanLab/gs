@@ -11,4 +11,4 @@
 # ------------------------------------------
 module load R/4.1
 
-Rscript Fig1_Boots_CvSC.R 
+Rscript Fig1_Boots_Poly.R 
