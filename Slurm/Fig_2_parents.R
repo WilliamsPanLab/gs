@@ -178,75 +178,6 @@ asrwitDiffPseudo=rep(0,10000)
 asrattDiffPseudo=rep(0,10000)
 asrrulDiffPseudo=rep(0,10000)
 asraggDiffPseudo=rep(0,10000)
-# initialize difference in adjusted r^2 for each cbcl model with and without poverty interaction
-pDiffAdj=rep(0,10000)
-intDiffAdj=rep(0,10000)
-extDiffAdj=rep(0,10000)
-somDiffAdj=rep(0,10000)
-anxDiffAdj=rep(0,10000)
-thoDiffAdj=rep(0,10000)
-witDiffAdj=rep(0,10000)
-socDiffAdj=rep(0,10000)
-attDiffAdj=rep(0,10000)
-rulDiffAdj=rep(0,10000)
-aggDiffAdj=rep(0,10000)
-# initialize difference in adjusted r^2 for each cbcl model with psuedo poverty interaction
-pDiffAdjPseudo=rep(0,10000)
-intDiffAdjPseudo=rep(0,10000)
-extDiffAdjPseudo=rep(0,10000)
-somDiffAdjPseudo=rep(0,10000)
-anxDiffAdjPseudo=rep(0,10000)
-thoDiffAdjPseudo=rep(0,10000)
-witDiffAdjPseudo=rep(0,10000)
-socDiffAdjPseudo=rep(0,10000)
-attDiffAdjPseudo=rep(0,10000)
-rulDiffAdjPseudo=rep(0,10000)
-aggDiffAdjPseudo=rep(0,10000)
-# initialize difference in adjusted r^2 for each asr model with and without poverty interaction
-asrPDiffAdj=rep(0,10000)
-asrintDiffAdj=rep(0,10000)
-asrextDiffAdj=rep(0,10000)
-asrsomDiffAdj=rep(0,10000)
-asranxDiffAdj=rep(0,10000)
-asrthoDiffAdj=rep(0,10000)
-asrwitDiffAdj=rep(0,10000)
-asrattDiffAdj=rep(0,10000)
-asrrulDiffAdj=rep(0,10000)
-asraggDiffAdj=rep(0,10000)
-# initialize difference in adjusted r^2 for each asr model with psuedo poverty interaction
-asrPDiffAdjPseudo=rep(0,10000)
-asrintDiffAdjPseudo=rep(0,10000)
-asrextDiffAdjPseudo=rep(0,10000)
-asrsomDiffAdjPseudo=rep(0,10000)
-asranxDiffAdjPseudo=rep(0,10000)
-asrthoDiffAdjPseudo=rep(0,10000)
-asrwitDiffAdjPseudo=rep(0,10000)
-asrattDiffAdjPseudo=rep(0,10000)
-asrrulDiffAdjPseudo=rep(0,10000)
-asraggDiffAdjPseudo=rep(0,10000)
-# interaction vs. no interaction difference in MAE: cbcl
-pDiffMAE=rep(0,10000)
-intDiffMAE=rep(0,10000)
-extDiffMAE=rep(0,10000)
-somDiffMAE=rep(0,10000)
-anxDiffMAE=rep(0,10000)
-thoDiffMAE=rep(0,10000)
-witDiffMAE=rep(0,10000)
-socDiffMAE=rep(0,10000)
-attDiffMAE=rep(0,10000)
-rulDiffMAE=rep(0,10000)
-aggDiffMAE=rep(0,10000)
-# interaction vs. no interaction difference in MAE: asr
-asrPDiffMAE=rep(0,10000)
-asrintDiffMAE=rep(0,10000)
-asrextDiffMAE=rep(0,10000)
-asrsomDiffMAE=rep(0,10000)
-asranxDiffMAE=rep(0,10000)
-asrthoDiffMAE=rep(0,10000)
-asrwitDiffMAE=rep(0,10000)
-asrattDiffMAE=rep(0,10000)
-asrrulDiffMAE=rep(0,10000)
-asraggDiffMAE=rep(0,10000)
 # maximum value in each iteration
 pMax=rep(0,10000)
 intMax=rep(0,10000)
@@ -588,51 +519,6 @@ for (b in 8001:10000){
 	asrattDiffPseudo[b]=AIC(asrattgAge_povpseudo)-AIC(asrattgAge_povpseudoint)
 	asrrulDiffPseudo[b]=AIC(asrrulgAge_povpseudo)-AIC(asrrulgAge_povpseudoint)
 	asraggDiffPseudo[b]=AIC(asragggAge_povpseudo)-AIC(asragggAge_povpseudoint)
-	# get adjusted r^2 diffferences
-	# cbcl
-	pDiffAdj[b]=summary(pgAge_povint)$r.sq-summary(pgAge_pov)$r.sq
-	intDiffAdj[b]=summary(intgAge_povint)$r.sq-summary(intgAge_pov)$r.sq
-	extDiffAdj[b]=summary(extgAge_povint)$r.sq-summary(extgAge_pov)$r.sq
-	somDiffAdj[b]=summary(somgAge_povint)$r.sq-summary(somgAge_pov)$r.sq
-	anxDiffAdj[b]=summary(anxgAge_povint)$r.sq-summary(anxgAge_pov)$r.sq
-	thoDiffAdj[b]=summary(thogAge_povint)$r.sq-summary(thogAge_pov)$r.sq
-	witDiffAdj[b]=summary(witgAge_povint)$r.sq-summary(witgAge_pov)$r.sq
-	socDiffAdj[b]=summary(socgAge_povint)$r.sq-summary(socgAge_pov)$r.sq
-	attDiffAdj[b]=summary(attgAge_povint)$r.sq-summary(attgAge_pov)$r.sq
-	rulDiffAdj[b]=summary(rulgAge_povint)$r.sq-summary(rulgAge_pov)$r.sq
-	aggDiffAdj[b]=summary(agggAge_povint)$r.sq-summary(agggAge_pov)$r.sq
-	pDiffAdjPseudo[b]=summary(pgAge_povpseudo)$r.sq-summary(pgAge_povpseudoint)$r.sq
-	intDiffAdjPseudo[b]=summary(intgAge_povpseudo)$r.sq-summary(intgAge_povpseudoint)$r.sq
-	extDiffAdjPseudo[b]=summary(extgAge_povpseudo)$r.sq-summary(extgAge_povpseudoint)$r.sq
-	somDiffAdjPseudo[b]=summary(somgAge_povpseudo)$r.sq-summary(somgAge_povpseudoint)$r.sq
-	anxDiffAdjPseudo[b]=summary(anxgAge_povpseudo)$r.sq-summary(anxgAge_povpseudoint)$r.sq
-	thoDiffAdjPseudo[b]=summary(thogAge_povpseudo)$r.sq-summary(thogAge_povpseudoint)$r.sq
-	witDiffAdjPseudo[b]=summary(witgAge_povpseudo)$r.sq-summary(witgAge_povpseudoint)$r.sq
-	attDiffAdjPseudo[b]=summary(attgAge_povpseudo)$r.sq-summary(attgAge_povpseudoint)$r.sq
-	socDiffAdjPseudo[b]=summary(socgAge_povpseudo)$r.sq-summary(socgAge_povpseudoint)$r.sq
-	rulDiffAdjPseudo[b]=summary(rulgAge_povpseudo)$r.sq-summary(rulgAge_povpseudoint)$r.sq
-	aggDiffAdjPseudo[b]=summary(agggAge_povpseudo)$r.sq-summary(agggAge_povpseudoint)$r.sq
-	# asr
-	asrPDiffAdj[b]=summary(asrpgAge_povint)$r.sq-summary(asrpgAge_pov)$r.sq
-	asrintDiffAdj[b]=summary(asrintgAge_povint)$r.sq-summary(asrintgAge_pov)$r.sq
-	asrextDiffAdj[b]=summary(asrextgAge_povint)$r.sq-summary(asrextgAge_pov)$r.sq
-	asrsomDiffAdj[b]=summary(asrsomgAge_povint)$r.sq-summary(asrsomgAge_pov)$r.sq
-	asranxDiffAdj[b]=summary(asranxgAge_povint)$r.sq-summary(asranxgAge_pov)$r.sq
-	asrthoDiffAdj[b]=summary(asrthogAge_povint)$r.sq-summary(asrthogAge_pov)$r.sq
-	asrwitDiffAdj[b]=summary(asrwitgAge_povint)$r.sq-summary(asrwitgAge_pov)$r.sq
-	asrattDiffAdj[b]=summary(asrattgAge_povint)$r.sq-summary(asrattgAge_pov)$r.sq
-	asrrulDiffAdj[b]=summary(asrrulgAge_povint)$r.sq-summary(asrrulgAge_pov)$r.sq
-	asraggDiffAdj[b]=summary(asragggAge_povint)$r.sq-summary(asragggAge_pov)$r.sq
-	asrPDiffAdjPseudo[b]=summary(asrpgAge_povpseudoint)$r.sq-summary(asrpgAge_povpseudo)$r.sq
-	asrintDiffAdjPseudo[b]=summary(asrintgAge_povpseudoint)$r.sq-summary(asrintgAge_povpseudo)$r.sq
-	asrextDiffAdjPseudo[b]=summary(asrextgAge_povpseudoint)$r.sq-summary(asrextgAge_povpseudo)$r.sq
-	asrsomDiffAdjPseudo[b]=summary(asrsomgAge_povpseudoint)$r.sq-summary(asrsomgAge_povpseudo)$r.sq
-	asranxDiffAdjPseudo[b]=summary(asranxgAge_povpseudoint)$r.sq-summary(asranxgAge_povpseudo)$r.sq
-	asrthoDiffAdjPseudo[b]=summary(asrthogAge_povpseudoint)$r.sq-summary(asrthogAge_povpseudo)$r.sq
-	asrwitDiffAdjPseudo[b]=summary(asrwitgAge_povpseudoint)$r.sq-summary(asrwitgAge_povpseudo)$r.sq
-	asrattDiffAdjPseudo[b]=summary(asrattgAge_povpseudoint)$r.sq-summary(asrattgAge_povpseudo)$r.sq
-	asrrulDiffAdjPseudo[b]=summary(asrrulgAge_povpseudoint)$r.sq-summary(asrrulgAge_povpseudo)$r.sq
-	asraggDiffAdjPseudo[b]=summary(asragggAge_povpseudoint)$r.sq-summary(asragggAge_povpseudo)$r.sq
 	# make new predict dataframes with poverty variable
 	# cbcl
 	predictDFp$poverty=1
@@ -777,155 +663,22 @@ for (b in 8001:10000){
 	asrattFitNonPov[b,1:(basrattmax+1)]=forFitasrAtt
 	asrrulFitNonPov[b,1:(basrrulmax+1)]=forFitasrRul
 	asraggFitNonPov[b,1:(basraggmax+1)]=forFitasrAgg
-	# get poverty-group MAE for no-poverty interaction (just intercept) based off of cbcl
-	# get subjects in masterdf but not this bootSamp
-	outOfBoot=masterdf[!(masterdf$subjectkey %in% bootSamp$subjectkey),]
-	# isolate poverty group variables of interest
-	#povDF=outOfBoot[outOfBoot$poverty==1,]
-	povDF=outOfBoot
-	# predict g of poverty group - no interaction
-	predG=predict(pgAge_pov,povDF)
-	# get MAE
-	mae=median(abs(predG-povDF$g))
-	# predict g of poverty group - interaction
-	predG=predict(pgAge_povint,povDF)
-	# get MAE
-	mae_intrxn=median(abs(predG-povDF$g))
-	# get difference in MAE
-	pDiffMAE[b]=mae-mae_intrxn
-	# same thing for internalizing
-	predG=predict(intgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(intgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	intDiffMAE[b]=mae-mae_intrxn
-	# same thing for externalizing
-	predG=predict(extgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(extgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	extDiffMAE[b]=mae-mae_intrxn
-	# same thing for som
-	predG=predict(somgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(somgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	somDiffMAE[b]=mae-mae_intrxn
-	# same thing for anx
-	predG=predict(anxgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(anxgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	anxDiffMAE[b]=mae-mae_intrxn
-	# same thing for tho
-	predG=predict(thogAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(thogAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	thoDiffMAE[b]=mae-mae_intrxn
-	# same thing for wit
-	predG=predict(witgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(witgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	witDiffMAE[b]=mae-mae_intrxn
-	# same thing for att
-	predG=predict(attgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(attgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	attDiffMAE[b]=mae-mae_intrxn
-	# same thing for rul
-	predG=predict(rulgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(rulgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	rulDiffMAE[b]=mae-mae_intrxn
-	# same thing for agg
-	predG=predict(agggAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(agggAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	aggDiffMAE[b]=mae-mae_intrxn
-	# get poverty-group MAE for no-poverty interaction (just intercept) based off of asr
-	predG=predict(asrpgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(asrpgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	asrPDiffMAE[b]=mae-mae_intrxn
-	# same thing for internalizing
-	predG=predict(asrintgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(asrintgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	asrintDiffMAE[b]=mae-mae_intrxn
-	# same thing for externalizing
-	predG=predict(asrextgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(asrextgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	asrextDiffMAE[b]=mae-mae_intrxn
-	# same thing for som
-	predG=predict(asrsomgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(asrsomgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	asrsomDiffMAE[b]=mae-mae_intrxn
-	# same thing for anx
-	predG=predict(asranxgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(asranxgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	asranxDiffMAE[b]=mae-mae_intrxn
-	# same thing for tho
-	predG=predict(asrthogAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(asrthogAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	asrthoDiffMAE[b]=mae-mae_intrxn
-	# same thing for wit
-	predG=predict(asrwitgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(asrwitgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	asrwitDiffMAE[b]=mae-mae_intrxn
-	# same thing for att
-	predG=predict(asrattgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(asrattgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	asrattDiffMAE[b]=mae-mae_intrxn
-	# same thing for rul
-	predG=predict(asrrulgAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(asrrulgAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	asrrulDiffMAE[b]=mae-mae_intrxn
-	# same thing for agg
-	predG=predict(asragggAge_pov,povDF)
-	mae=median(abs(predG-povDF$g))
-	predG=predict(asragggAge_povint,povDF)
-	mae_intrxn=median(abs(predG-povDF$g))
-	asraggDiffMAE[b]=mae-mae_intrxn
 }
 # SAVEOUT
-# median absolute error differences
-outdf=data.frame(pDiffMAE,intDiffMAE,extDiffMAE,somDiffMAE,anxDiffMAE,thoDiffMAE,witDiffMAE,socDiffMAE,attDiffMAE,rulDiffMAE,aggDiffMAE,asrPDiffMAE,asrintDiffMAE,asrextDiffMAE,asrsomDiffMAE,asranxDiffMAE,asrthoDiffMAE,asrwitDiffMAE,asrattDiffMAE,asrrulDiffMAE,asraggDiffMAE)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_poverty_MA5.rds')
 # save out all difference in AIC vectors, differences in adjusted R^2 vectors
 # cbcl
-outdf=data.frame(pDiff,intDiff,extDiff,somDiff,anxDiff,thoDiff,witDiff,socDiff,attDiff,rulDiff,aggDiff,pDiffAdj,intDiffAdj,extDiffAdj,somDiffAdj,anxDiffAdj,thoDiffAdj,witDiffAdj,attDiffAdj,rulDiffAdj,aggDiffAdj)
+outdf=data.frame(pDiff,intDiff,extDiff,somDiff,anxDiff,thoDiff,witDiff,socDiff,attDiff,rulDiff,aggDiff)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbcl5.rds')
 # asr
-outdf=data.frame(asrPDiff,asrintDiff,asrextDiff,asrsomDiff,asranxDiff,asrthoDiff,asrwitDiff,asrattDiff,asrrulDiff,asraggDiff,asrPDiffAdj,asrintDiffAdj,asrextDiffAdj,asrsomDiffAdj,asranxDiffAdj,asrthoDiffAdj,asrwitDiffAdj,asrattDiffAdj,asrrulDiffAdj,asraggDiffAdj)
+outdf=data.frame(asrPDiff,asrintDiff,asrextDiff,asrsomDiff,asranxDiff,asrthoDiff,asrwitDiff,asrattDiff,asrrulDiff,asraggDiff)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_asr5.rds')
 
 # save out pseudo versions for comparison if needed
 # cbcl
-outdf=data.frame(pDiffPseudo,intDiffPseudo,extDiffPseudo,somDiffPseudo,anxDiffPseudo,thoDiffPseudo,witDiffPseudo,socDiffPseudo,attDiffPseudo,rulDiffPseudo,aggDiffPseudo,pDiffAdjPseudo,intDiffAdjPseudo,extDiffAdjPseudo,somDiffAdjPseudo,anxDiffAdjPseudo,thoDiffAdjPseudo,witDiffAdjPseudo,attDiffAdjPseudo,rulDiffAdjPseudo,aggDiffAdjPseudo)
+outdf=data.frame(pDiffPseudo,intDiffPseudo,extDiffPseudo,somDiffPseudo,anxDiffPseudo,thoDiffPseudo,witDiffPseudo,socDiffPseudo,attDiffPseudo,rulDiffPseudo,aggDiffPseudo)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbclPseudo5.rds')
 # asr
-outdf=data.frame(asrPDiffPseudo,asrintDiffPseudo,asrextDiffPseudo,asrsomDiffPseudo,asranxDiffPseudo,asrthoDiffPseudo,asrwitDiffPseudo,asrattDiffPseudo,asrrulDiffPseudo,asraggDiffPseudo,asrPDiffAdjPseudo,asrintDiffAdjPseudo,asrextDiffAdjPseudo,asrsomDiffAdjPseudo,asranxDiffAdjPseudo,asrthoDiffAdjPseudo,asrwitDiffAdjPseudo,asrattDiffAdjPseudo,asrrulDiffAdjPseudo,asraggDiffAdjPseudo)
+outdf=data.frame(asrPDiffPseudo,asrintDiffPseudo,asrextDiffPseudo,asrsomDiffPseudo,asranxDiffPseudo,asrthoDiffPseudo,asrwitDiffPseudo,asrattDiffPseudo,asrrulDiffPseudo,asraggDiffPseudo)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_asrPseudo5.rds')
 
 # save out poverty and nonpoverty fits - cbcl
