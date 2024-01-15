@@ -542,103 +542,6 @@ print(cor.test(masterdf$parentPcount,masterdf$cbcl_scr_syn_totprob_r))
     ## 0.5654092
 
 ``` r
-# ASR boots plots
-# load in data
-Fits1=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr1.rds')
-Fits2=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr2.rds')
-Fits3=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr3.rds')
-Fits4=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr4.rds')
-Fits5=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr5.rds')
-Fits1[2001:4000,]=Fits2[2001:4000,]
-Fits1[4001:6000,]=Fits3[4001:6000,]
-Fits1[6001:8000,]=Fits4[6001:8000,]
-Fits1[8001:10000,]=Fits5[8001:10000,]
-
-# may need updating after adding social cbcl scores to this df
-parentPfits=Fits1[,377:537]
-MaxP=find_furthest_nonzero(parentPfits)
-plot_bootstraps_par(parentPfits,160,x_title,MaxP)
-```
-
-    ## Warning: There was 1 warning in `summarise()`.
-    ## ℹ In argument: `across(everything(), quantile, probs = c(0.01, 0.99), na.rm =
-    ##   TRUE)`.
-    ## Caused by warning:
-    ## ! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
-    ## Supply arguments directly to `.fns` through an anonymous function instead.
-    ## 
-    ##   # Previously
-    ##   across(a:b, mean, na.rm = TRUE)
-    ## 
-    ##   # Now
-    ##   across(a:b, \(x) mean(x, na.rm = TRUE))
-
-    ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
-    ## dplyr 1.1.0.
-    ## ℹ Please use `reframe()` instead.
-    ## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
-    ##   always returns an ungrouped data frame and adjust accordingly.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-    ## Warning: Removed 110022 rows containing missing values (`geom_line()`).
-
-    ## Warning: The `guide` argument in `scale_*()` cannot be `FALSE`. This was deprecated in
-    ## ggplot2 3.3.4.
-    ## ℹ Please use "none" instead.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-![](Fig2_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
-
-``` r
-# p-factor
-P_derivative_matrix <- matrix(0, nrow = nrow(parentPfits), ncol = ncol(parentPfits) - 1)
-# Calculate the derivative for each column
-for (i in 1:(ncol(parentPfits) - 1)) {
-  # Calculate the differences in x (assuming a constant difference)
-  dx <- 1
-  # Calculate the differences in y (predicted values)
-  dy <- parentPfits[, i + 1] - parentPfits[, i]
-  # Calculate the derivatives (slopes)
-  derivatives <- dy / dx
-  # Store the derivatives in the derivative matrix
-  P_derivative_matrix[, i] <- derivatives
-}
-# calc sig dervs
-# get straightfoward of segment where 99% is over 0 or under
-positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
-negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
-# find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
-# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
-data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
-dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
-# if either is sig at 99% plot
-dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
-# use it to mask calculated derivs
-dervPlotDf$sig_deriv=0
-dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
-dervPlotDf$seq=1:(dim(dervPlotDf)[1])
-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
-    theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab(x_title)+
-    guides(fill=FALSE)+
-    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-    scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
-```
-
-    ## Scale for x is already present.
-    ## Adding another scale for x, which will replace the existing scale.
-
-    ## Warning: Removed 12 rows containing missing values (`geom_raster()`).
-
-![](Fig2_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
-
-``` r
 ### poverty versus nonpoverty boots plot - CBCL
 
 ### re-merge the 5, update indices to pull values from
@@ -662,6 +565,19 @@ npov_p=pNpFits1[,129:256]
 MaxP=quantile(masterdf$cbcl_scr_syn_totprob_r, probs = 0.99)
 plot<-plot_bootstraps_pnp(pov_p,npov_p,127,'P',MaxP)
 ```
+
+    ## Warning: There was 1 warning in `summarise()`.
+    ## ℹ In argument: `across(everything(), quantile, probs = c(0.01, 0.99), na.rm =
+    ##   TRUE)`.
+    ## Caused by warning:
+    ## ! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
+    ## Supply arguments directly to `.fns` through an anonymous function instead.
+    ## 
+    ##   # Previously
+    ##   across(a:b, mean, na.rm = TRUE)
+    ## 
+    ##   # Now
+    ##   across(a:b, \(x) mean(x, na.rm = TRUE))
 
     ## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
     ## dplyr 1.1.0.
@@ -692,7 +608,14 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 480096 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+    ## Warning: The `guide` argument in `scale_*()` cannot be `FALSE`. This was deprecated in
+    ## ggplot2 3.3.4.
+    ## ℹ Please use "none" instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+![](Fig2_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 # derivatives
@@ -743,7 +666,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 49 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -793,7 +716,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 49 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-6-3.png)<!-- -->
 
 ``` r
 # poverty child int
@@ -812,7 +735,7 @@ plot_bootstraps_par(pov_Int,51,'Pov. child Int',MaxInt)
 
     ## Warning: Removed 260052 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 # nonpoverty child int
@@ -829,7 +752,7 @@ plot_bootstraps_par(npov_Int,51,'Npov. child Int',MaxInt)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -865,7 +788,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 260052 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
 
 ``` r
 # derivatives
@@ -916,7 +839,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 27 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -966,7 +889,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 27 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-8-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
 
 ``` r
 # poverty child ext
@@ -985,7 +908,7 @@ plot_bootstraps_par(pov_Ext,47,'Pov. child Ext',MaxExt)
 
     ## Warning: Removed 220044 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -1002,7 +925,7 @@ plot_bootstraps_par(npov_Ext,47,'Npov. child Ext',MaxExt)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -1038,7 +961,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 220044 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -1088,7 +1011,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 23 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -1138,7 +1061,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 23 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-9-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-8-5.png)<!-- -->
 
 ``` r
 # poverty child somatic
@@ -1157,7 +1080,7 @@ plot_bootstraps_par(pov_Som,13,'Pov. child Somatic',MaxSom)
 
     ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -1174,7 +1097,7 @@ plot_bootstraps_par(npov_Som,13,'Npov. child Somatic',MaxSom)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -1210,7 +1133,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -1260,7 +1183,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-10-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -1310,7 +1233,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-10-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-9-5.png)<!-- -->
 
 ``` r
 # Anxious Depression
@@ -1329,7 +1252,7 @@ plot_bootstraps_par(pov_Anx,25,'Pov. child Anx. Dep.',MaxAnx)
 
     ## Warning: Removed 120024 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -1346,7 +1269,7 @@ plot_bootstraps_par(npov_Anx,25,'Npov. child Anx. Dep.',MaxAnx)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -1382,7 +1305,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 120024 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-11-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -1432,7 +1355,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-11-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-10-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -1482,7 +1405,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-11-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-10-5.png)<!-- -->
 
 ``` r
 # Thought
@@ -1501,7 +1424,7 @@ plot_bootstraps_par(pov_Tho,18,'Pov. child Thought',MaxTho)
 
     ## Warning: Removed 90018 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -1518,7 +1441,7 @@ plot_bootstraps_par(npov_Tho,18,'Npov. child Thought',MaxTho)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -1554,7 +1477,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 90018 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-12-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-11-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -1604,7 +1527,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-12-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-11-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -1654,7 +1577,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-12-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-11-5.png)<!-- -->
 
 ``` r
 # Withdrawn Depression
@@ -1673,7 +1596,7 @@ plot_bootstraps_par(pov_Wit,16,'Pov. With. Depr.',MaxWit)
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -1690,7 +1613,7 @@ plot_bootstraps_par(npov_Wit,16,'Npov. child With. Depr.',MaxWit)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -1726,7 +1649,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-13-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-12-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -1776,7 +1699,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-13-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-12-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -1826,7 +1749,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-13-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-12-5.png)<!-- -->
 
 ``` r
 # Social
@@ -1845,7 +1768,7 @@ plot_bootstraps_par(pov_Soc,17,'Pov. Social',MaxSoc)
 
     ## Warning: Removed 70014 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -1862,7 +1785,7 @@ plot_bootstraps_par(npov_Soc,17,'Npov. Social',MaxSoc)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -1898,7 +1821,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 70014 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-14-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-13-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -1948,7 +1871,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 8 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-14-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-13-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -1998,7 +1921,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 8 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-14-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-13-5.png)<!-- -->
 
 ``` r
 # attention
@@ -2018,7 +1941,7 @@ plot_bootstraps_par(pov_Att,19,'Pov. Attn.',MaxAtt)
 
     ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -2035,7 +1958,7 @@ plot_bootstraps_par(npov_Att,19,'Npov. Attn.',MaxAtt)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -2071,7 +1994,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-15-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-14-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -2121,7 +2044,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-15-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-14-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -2171,7 +2094,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-15-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-14-5.png)<!-- -->
 
 ``` r
 # Rule breaking
@@ -2190,7 +2113,7 @@ plot_bootstraps_par(pov_RB,18,'Pov. Rules',MaxRB)
 
     ## Warning: Removed 100020 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -2207,7 +2130,7 @@ plot_bootstraps_par(npov_RB,18,'Npov. child Rules',MaxRB)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -2243,7 +2166,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 100020 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-16-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-15-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -2293,7 +2216,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 11 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-16-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-15-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -2343,7 +2266,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 11 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-16-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-15-5.png)<!-- -->
 
 ``` r
 # aggression
@@ -2362,7 +2285,7 @@ plot_bootstraps_par(pov_Agg,32,'Pov. Aggr.',MaxAgg)
 
     ## Warning: Removed 180036 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -2379,7 +2302,7 @@ plot_bootstraps_par(npov_Agg,32,'Npov. Aggr.',MaxAgg)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -2415,7 +2338,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 180036 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-17-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-16-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -2465,7 +2388,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 38 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-17-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-16-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -2515,7 +2438,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 19 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-17-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-16-5.png)<!-- -->
 
 ``` r
 # end of child poverty plots
@@ -2556,7 +2479,7 @@ plot_bootstraps_par(pov_p,160,'Pov. Parental P',MaxP)
 
     ## Warning: Removed 600120 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -2573,7 +2496,7 @@ plot_bootstraps_par(npov_p,160,'Npov. Parental P',MaxP)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -2609,7 +2532,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 600120 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-19-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-18-3.png)<!-- -->
 
 ``` r
 # derivatives
@@ -2660,7 +2583,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 61 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-19-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-18-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -2710,7 +2633,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 61 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-19-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-18-5.png)<!-- -->
 
 ``` r
 # poverty parental int
@@ -2729,7 +2652,7 @@ plot_bootstraps_par(pov_Int,30,'Pov. Parental Int',MaxInt)
 
     ## Warning: Removed 120024 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental int
@@ -2746,7 +2669,7 @@ plot_bootstraps_par(npov_Int,30,'Npov. Parental Int',MaxInt)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -2782,7 +2705,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 120024 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-20-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-19-3.png)<!-- -->
 
 ``` r
 # derivatives
@@ -2833,7 +2756,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-20-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-19-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -2883,7 +2806,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-20-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-19-5.png)<!-- -->
 
 ``` r
 # poverty parental ext
@@ -2902,7 +2825,7 @@ plot_bootstraps_par(pov_Ext,63,'Pov. Parental Ext',MaxExt)
 
     ## Warning: Removed 350070 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -2919,7 +2842,7 @@ plot_bootstraps_par(npov_Ext,63,'Npov. Parental Ext',MaxExt)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -2955,7 +2878,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 350070 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-21-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-20-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -3005,7 +2928,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 36 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-21-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-20-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -3055,7 +2978,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 36 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-21-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-20-5.png)<!-- -->
 
 ``` r
 # poverty parental somatic
@@ -3074,7 +2997,7 @@ plot_bootstraps_par(pov_Som,20,'Pov. Parental Somatic',MaxSom)
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -3091,7 +3014,7 @@ plot_bootstraps_par(npov_Som,20,'Npov. Parental Somatic',MaxSom)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -3127,7 +3050,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-22-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-21-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -3177,7 +3100,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-22-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-21-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -3227,7 +3150,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-22-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-21-5.png)<!-- -->
 
 ``` r
 # Anxious Depression
@@ -3246,7 +3169,7 @@ plot_bootstraps_par(pov_Anx,31,'Pov. Parental Anx. Dep.',MaxAnx)
 
     ## Warning: Removed 110022 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -3263,7 +3186,7 @@ plot_bootstraps_par(npov_Anx,31,'Npov. Parental Anx. Dep.',MaxAnx)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -3299,7 +3222,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 110022 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-23-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-22-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -3349,7 +3272,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 12 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-23-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-22-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -3399,7 +3322,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 12 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-23-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-22-5.png)<!-- -->
 
 ``` r
 # Thought
@@ -3418,7 +3341,7 @@ plot_bootstraps_par(pov_Tho,18,'Pov. Parental Thought',MaxTho)
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -3435,7 +3358,7 @@ plot_bootstraps_par(npov_Tho,18,'Npov. Parental Thought',MaxTho)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -3471,7 +3394,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-24-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-23-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -3521,7 +3444,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-24-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-23-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -3571,7 +3494,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-24-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-23-5.png)<!-- -->
 
 ``` r
 # Withdrawn Depression
@@ -3590,7 +3513,7 @@ plot_bootstraps_par(pov_Wit,18,'Pov. With. Depr.',MaxWit)
 
     ## Warning: Removed 90018 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -3607,7 +3530,7 @@ plot_bootstraps_par(npov_Wit,18,'Npov. Parental With. Depr.',MaxWit)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-25-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -3643,7 +3566,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 90018 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-25-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-24-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -3693,7 +3616,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-25-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-24-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -3743,7 +3666,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-25-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-24-5.png)<!-- -->
 
 ``` r
 # Rule breaking
@@ -3762,7 +3685,7 @@ plot_bootstraps_par(pov_RB,31,'Pov. Rules',MaxRB)
 
     ## Warning: Removed 230046 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -3779,7 +3702,7 @@ plot_bootstraps_par(npov_RB,31,'Npov. Parental Rules',MaxRB)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-26-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-25-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -3815,7 +3738,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 230046 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-26-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-25-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -3865,7 +3788,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 24 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-26-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-25-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -3915,7 +3838,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 24 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-26-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-25-5.png)<!-- -->
 
 ``` r
 # attention
@@ -3937,7 +3860,7 @@ plot_bootstraps_par(pov_Att,21,'Pov. Attn.',MaxAtt)
 
     ## Warning: Removed 56265 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -3955,7 +3878,7 @@ plot_bootstraps_par(npov_Att,21,'Npov. Attn.',MaxAtt)
 
     ## Warning: Removed 50350 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-27-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-26-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -3991,7 +3914,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 50350 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-27-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-26-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -4041,7 +3964,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-27-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-26-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -4091,7 +4014,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-27-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-26-5.png)<!-- -->
 
 ``` r
 # aggression
@@ -4110,7 +4033,7 @@ plot_bootstraps_par(pov_Agg,45,'Pov. Aggr.',MaxAgg)
 
     ## Warning: Removed 240048 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -4127,7 +4050,7 @@ plot_bootstraps_par(npov_Agg,45,'Npov. Aggr.',MaxAgg)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-28-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-27-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -4163,7 +4086,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 240048 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-28-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-27-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -4213,7 +4136,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-28-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-27-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -4263,7 +4186,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 25 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-28-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-27-5.png)<!-- -->
 
 ``` r
 ############### ∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆ Now get poverty interaction fits vs. null
@@ -4314,7 +4237,7 @@ ggplot(diff1,aes(x=pDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = 
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
 ``` r
 print(sum(diff1$pDiffPseudo>PovInt_AICDiff)/10000)
@@ -4331,7 +4254,7 @@ PovInt_AICDiff=AIC(cbclintgAge_pov)-AIC(cbclintgAge_povint)
 ggplot(diff1,aes(x=intDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-29-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-28-2.png)<!-- -->
 
 ``` r
 print(sum(diff1$intDiffPseudo>PovInt_AICDiff)/10000)
@@ -4348,7 +4271,7 @@ PovInt_AICDiff=AIC(cbclextgAge_pov)-AIC(cbclextgAge_povint)
 ggplot(diff1,aes(x=extDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-29-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-28-3.png)<!-- -->
 
 ``` r
 print(sum(diff1$extDiffPseudo>PovInt_AICDiff)/10000)
@@ -4365,7 +4288,7 @@ PovInt_AICDiff=AIC(cbclsomgAge_pov)-AIC(cbclsomgAge_povint)
 ggplot(diff1,aes(x=somDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-29-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-28-4.png)<!-- -->
 
 ``` r
 print(sum(diff1$somDiffPseudo>PovInt_AICDiff)/10000)
@@ -4382,7 +4305,7 @@ PovInt_AICDiff=AIC(cbclanxgAge_pov)-AIC(cbclanxgAge_povint)
 ggplot(diff1,aes(x=anxDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-29-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-28-5.png)<!-- -->
 
 ``` r
 print(sum(diff1$anxDiffPseudo>PovInt_AICDiff)/10000)
@@ -4399,7 +4322,7 @@ PovInt_AICDiff=AIC(cbclthogAge_pov)-AIC(cbclthogAge_povint)
 ggplot(diff1,aes(x=thoDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-29-6.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-28-6.png)<!-- -->
 
 ``` r
 print(sum(diff1$thoDiffPseudo>PovInt_AICDiff)/10000)
@@ -4416,7 +4339,7 @@ PovInt_AICDiff=AIC(cbclwithgAge_pov)-AIC(cbclwithgAge_povint)
 ggplot(diff1,aes(x=witDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-29-7.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-28-7.png)<!-- -->
 
 ``` r
 print(sum(diff1$witDiffPseudo>PovInt_AICDiff)/10000)
@@ -4433,7 +4356,7 @@ PovInt_AICDiff=AIC(cbclattgAge_pov)-AIC(cbclattgAge_povint)
 ggplot(diff1,aes(x=attDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-29-8.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-28-8.png)<!-- -->
 
 ``` r
 print(sum(diff1$attDiffPseudo>PovInt_AICDiff)/10000)
@@ -4450,7 +4373,7 @@ PovInt_AICDiff=AIC(cbclrulegAge_pov)-AIC(cbclrulegAge_povint)
 ggplot(diff1,aes(x=rulDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-29-9.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-28-9.png)<!-- -->
 
 ``` r
 print(sum(diff1$rulDiffPseudo>PovInt_AICDiff)/10000)
@@ -4467,7 +4390,7 @@ PovInt_AICDiff=AIC(cbclaggrgAge_pov)-AIC(cbclaggrgAge_povint)
 ggplot(diff1,aes(x=aggDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-29-10.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-28-10.png)<!-- -->
 
 ``` r
 print(sum(diff1$aggDiffPseudo>PovInt_AICDiff)/10000)
@@ -4484,7 +4407,7 @@ PovInt_AICDiff=AIC(cbclsocgAge_pov)-AIC(cbclsocgAge_povint)
 ggplot(diff1,aes(x=socDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-29-11.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-28-11.png)<!-- -->
 
 ``` r
 print(sum(diff1$aggDiffPseudo>PovInt_AICDiff)/10000)
@@ -4532,7 +4455,7 @@ PovInt_AICDiff=AIC(asrpgAge_pov)-AIC(asrpgAge_povint)
 ggplot(diff1,aes(x=asrPDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
 ``` r
 print(sum(diff1$asrPDiffPseudo>PovInt_AICDiff)/10000)
@@ -4549,7 +4472,7 @@ PovInt_AICDiff=AIC(asrintgAge_pov)-AIC(asrintgAge_povint)
 ggplot(diff1,aes(x=asrintDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-30-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-29-2.png)<!-- -->
 
 ``` r
 print(sum(diff1$asrintDiffPseudo>PovInt_AICDiff)/10000)
@@ -4566,7 +4489,7 @@ PovInt_AICDiff=AIC(asrextgAge_pov)-AIC(asrextgAge_povint)
 ggplot(diff1,aes(x=asrextDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-30-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-29-3.png)<!-- -->
 
 ``` r
 print(sum(diff1$asrextDiffPseudo>PovInt_AICDiff)/10000)
@@ -4583,7 +4506,7 @@ PovInt_AICDiff=AIC(asrsomgAge_pov)-AIC(asrsomgAge_povint)
 ggplot(diff1,aes(x=asrsomDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-30-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-29-4.png)<!-- -->
 
 ``` r
 print(sum(diff1$asrsomDiffPseudo>PovInt_AICDiff)/10000)
@@ -4600,7 +4523,7 @@ PovInt_AICDiff=AIC(asranxgAge_pov)-AIC(asranxgAge_povint)
 ggplot(diff1,aes(x=asranxDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-30-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-29-5.png)<!-- -->
 
 ``` r
 print(sum(diff1$asranxDiffPseudo>PovInt_AICDiff)/10000)
@@ -4617,7 +4540,7 @@ PovInt_AICDiff=AIC(asrthogAge_pov)-AIC(asrthogAge_povint)
 ggplot(diff1,aes(x=asrthoDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-30-6.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-29-6.png)<!-- -->
 
 ``` r
 print(sum(diff1$asrthoDiffPseudo>PovInt_AICDiff)/10000)
@@ -4634,7 +4557,7 @@ PovInt_AICDiff=AIC(asrwithgAge_pov)-AIC(asrwithgAge_povint)
 ggplot(diff1,aes(x=asrwitDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-30-7.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-29-7.png)<!-- -->
 
 ``` r
 print(sum(diff1$asrwitDiffPseudo>PovInt_AICDiff)/10000)
@@ -4651,7 +4574,7 @@ PovInt_AICDiff=AIC(asrattgAge_pov)-AIC(asrattgAge_povint)
 ggplot(diff1,aes(x=asrattDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-30-8.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-29-8.png)<!-- -->
 
 ``` r
 print(sum(diff1$asrattDiffPseudo>PovInt_AICDiff)/10000)
@@ -4668,7 +4591,7 @@ PovInt_AICDiff=AIC(asrrulegAge_pov)-AIC(asrrulegAge_povint)
 ggplot(diff1,aes(x=asrrulDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-30-9.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-29-9.png)<!-- -->
 
 ``` r
 print(sum(diff1$asrrulDiffPseudo>PovInt_AICDiff)/10000)
@@ -4685,7 +4608,7 @@ PovInt_AICDiff=AIC(asraggrgAge_pov)-AIC(asraggrgAge_povint)
 ggplot(diff1,aes(x=asraggDiffPseudo))+geom_density(size=1.5)+geom_vline(xintercept = PovInt_AICDiff,size=2,color='#BC3754')+theme_classic(base_size=18)+ylab('')+xlab('')+guides(y="none")+scale_x_continuous()
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-30-10.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-29-10.png)<!-- -->
 
 ``` r
 print(sum(diff1$asraggDiffPseudo>PovInt_AICDiff)/10000)
@@ -4744,7 +4667,7 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 
     ## Warning: Removed 240048 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 ``` r
 # load in data
@@ -4796,7 +4719,7 @@ plot_bootstraps_par(PFits,160,x_title,MaxP)
 
     ## Warning: Removed 600120 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(IFits,30,'Caregiver Internalizing',MaxI)
@@ -4812,7 +4735,7 @@ plot_bootstraps_par(IFits,30,'Caregiver Internalizing',MaxI)
 
     ## Warning: Removed 120024 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-32-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-31-2.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(EFits,63,'Externalizing',MaxE)
@@ -4828,7 +4751,7 @@ plot_bootstraps_par(EFits,63,'Externalizing',MaxE)
 
     ## Warning: Removed 350070 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-32-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-31-3.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(AnxFits,31,'Anxious Depression',MaxAnx)
@@ -4844,7 +4767,7 @@ plot_bootstraps_par(AnxFits,31,'Anxious Depression',MaxAnx)
 
     ## Warning: Removed 110022 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-32-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-31-4.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(WitFits,18,'Withdrawn Depression',MaxWit)
@@ -4860,7 +4783,7 @@ plot_bootstraps_par(WitFits,18,'Withdrawn Depression',MaxWit)
 
     ## Warning: Removed 90018 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-32-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-31-5.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(AttFits,31,'Attention',MaxAtt)
@@ -4876,7 +4799,7 @@ plot_bootstraps_par(AttFits,31,'Attention',MaxAtt)
 
     ## Warning: Removed 120024 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-32-6.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-31-6.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(RulFits,21,'Rule Breaking',MaxRul)
@@ -4892,7 +4815,7 @@ plot_bootstraps_par(RulFits,21,'Rule Breaking',MaxRul)
 
     ## Warning: Removed 130026 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-32-7.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-31-7.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(AggFits,45,'Aggression',MaxAgg)
@@ -4908,7 +4831,7 @@ plot_bootstraps_par(AggFits,45,'Aggression',MaxAgg)
 
     ## Warning: Removed 240048 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-32-8.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-31-8.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(ThoFits,18,'Thought',MaxTho)
@@ -4924,7 +4847,7 @@ plot_bootstraps_par(ThoFits,18,'Thought',MaxTho)
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-32-9.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-31-9.png)<!-- -->
 
 ``` r
 plot_bootstraps_par(SomFits,20,'Somatic',MaxSom)
@@ -4939,7 +4862,7 @@ plot_bootstraps_par(SomFits,20,'Somatic',MaxSom)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-32-10.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-31-10.png)<!-- -->
 
 ``` r
 p_derivative_matrix <- matrix(0, nrow = nrow(PFits), ncol = ncol(PFits) - 1)
@@ -4988,7 +4911,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 61 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
 
 ``` r
 # for int
@@ -5030,7 +4953,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-33-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-32-2.png)<!-- -->
 
 ``` r
 # for ext
@@ -5075,7 +4998,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 36 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-33-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-32-3.png)<!-- -->
 
 ``` r
 # for som
@@ -5120,7 +5043,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-33-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-32-4.png)<!-- -->
 
 ``` r
 # for anx
@@ -5163,7 +5086,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 12 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-33-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-32-5.png)<!-- -->
 
 ``` r
 # for Tho
@@ -5210,7 +5133,7 @@ plot + theme(plot.margin = margin(r = 30,l=10,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-33-6.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-32-6.png)<!-- -->
 
 ``` r
 # for Wit
@@ -5252,7 +5175,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-33-7.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-32-7.png)<!-- -->
 
 ``` r
 # for Att
@@ -5294,7 +5217,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-33-8.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-32-8.png)<!-- -->
 
 ``` r
 # for Rul
@@ -5336,7 +5259,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 14 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-33-9.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-32-9.png)<!-- -->
 
 ``` r
 # for Agg
@@ -5378,7 +5301,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
     ## Warning: Removed 25 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-33-10.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-32-10.png)<!-- -->
 
 ``` r
 library(dplyr)
@@ -5423,7 +5346,7 @@ ggplot(PvC_long, aes(x = Subscale, y = value,fill=Group)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+scale_fill_manual(values = c("#F9665E", "#AFC7D0", "#799FCB"))
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
 ``` r
 # saved out at 3000x1000
@@ -5564,7 +5487,7 @@ ggplot(plotdf, aes(x = cbcl_scr_syn_totprob_r, y = Pov_v2)) +
        y = "")+theme_minimal(base_size=23)
 ```
 
-![](Fig2_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
 ``` r
 # get stats
@@ -5676,7 +5599,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 27 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
 
 ``` r
 # poverty child ext
@@ -5730,7 +5653,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 23 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -5780,7 +5703,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 39 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-38-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-37-2.png)<!-- -->
 
 ``` r
 # poverty child somatic
@@ -5799,7 +5722,7 @@ plot_bootstraps_par(pov_Som,13,'Pov. child Somatic',MaxSom)
 
     ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -5816,7 +5739,7 @@ plot_bootstraps_par(npov_Som,13,'Npov. child Somatic',MaxSom)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-39-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-38-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -5852,7 +5775,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-39-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-38-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -5902,7 +5825,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-39-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-38-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -5952,7 +5875,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-39-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-38-5.png)<!-- -->
 
 ``` r
 # Anxious Depression
@@ -5971,7 +5894,7 @@ plot_bootstraps_par(pov_Anx,25,'Pov. child Anx. Dep.',MaxAnx)
 
     ## Warning: Removed 120028 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -5989,7 +5912,7 @@ plot_bootstraps_par(npov_Anx,25,'Npov. child Anx. Dep.',MaxAnx)
 
     ## Warning: Removed 120274 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-40-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-39-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -6025,7 +5948,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 120274 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-40-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-39-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -6075,7 +5998,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-40-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-39-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -6125,7 +6048,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-40-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-39-5.png)<!-- -->
 
 ``` r
 # Thought
@@ -6144,7 +6067,7 @@ plot_bootstraps_par(pov_Tho,18,'Pov. child Thought',MaxTho)
 
     ## Warning: Removed 90018 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -6161,7 +6084,7 @@ plot_bootstraps_par(npov_Tho,18,'Npov. child Thought',MaxTho)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-41-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-40-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -6197,7 +6120,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 90018 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-41-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-40-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -6247,7 +6170,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-41-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-40-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -6297,7 +6220,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-41-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-40-5.png)<!-- -->
 
 ``` r
 # Withdrawn Depression
@@ -6316,7 +6239,7 @@ plot_bootstraps_par(pov_Wit,16,'Pov. With. Depr.',MaxWit)
 
     ## Warning: Removed 80065 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -6334,7 +6257,7 @@ plot_bootstraps_par(npov_Wit,16,'Npov. child With. Depr.',MaxWit)
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-42-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-41-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -6370,7 +6293,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-42-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-41-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -6420,7 +6343,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-42-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-41-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -6470,7 +6393,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-42-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-41-5.png)<!-- -->
 
 ``` r
 # Social
@@ -6489,7 +6412,7 @@ plot_bootstraps_par(pov_Soc,17,'Pov. Social',MaxSoc)
 
     ## Warning: Removed 70014 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-42-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -6507,7 +6430,7 @@ plot_bootstraps_par(npov_Soc,17,'Npov. Social',MaxSoc)
 
     ## Warning: Removed 70716 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-43-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-42-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -6543,7 +6466,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 70716 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-43-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-42-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -6593,7 +6516,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 8 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-43-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-42-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -6643,7 +6566,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 8 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-43-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-42-5.png)<!-- -->
 
 ``` r
 # attention
@@ -6663,7 +6586,7 @@ plot_bootstraps_par(pov_Att,19,'Pov. Attn.',MaxAtt)
 
     ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -6680,7 +6603,7 @@ plot_bootstraps_par(npov_Att,19,'Npov. Attn.',MaxAtt)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-44-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-43-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -6716,7 +6639,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 50010 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-44-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-43-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -6766,7 +6689,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-44-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-43-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -6816,7 +6739,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-44-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-43-5.png)<!-- -->
 
 ``` r
 # Rule breaking
@@ -6835,7 +6758,7 @@ plot_bootstraps_par(pov_RB,18,'Pov. Rules',MaxRB)
 
     ## Warning: Removed 100068 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-45-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -6853,7 +6776,7 @@ plot_bootstraps_par(npov_RB,18,'Npov. child Rules',MaxRB)
 
     ## Warning: Removed 100020 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-45-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-44-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -6889,7 +6812,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 100020 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-45-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-44-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -6939,7 +6862,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 11 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-45-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-44-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -6989,7 +6912,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 11 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-45-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-44-5.png)<!-- -->
 
 ``` r
 # aggression
@@ -7008,7 +6931,7 @@ plot_bootstraps_par(pov_Agg,32,'Pov. Aggr.',MaxAgg)
 
     ## Warning: Removed 189347 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-45-1.png)<!-- -->
 
 ``` r
 # nonpoverty child p
@@ -7026,7 +6949,7 @@ plot_bootstraps_par(npov_Agg,32,'Npov. Aggr.',MaxAgg)
 
     ## Warning: Removed 180051 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-46-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-45-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -7062,7 +6985,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 180051 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-46-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-45-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -7112,7 +7035,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 38 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-46-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-45-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -7162,7 +7085,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 19 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-46-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-45-5.png)<!-- -->
 
 ``` r
 # end of child poverty plots
@@ -7203,7 +7126,7 @@ plot_bootstraps_par(pov_p,160,'Pov. Parental P',MaxP)
 
     ## Warning: Removed 600120 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -7220,7 +7143,7 @@ plot_bootstraps_par(npov_p,160,'Npov. Parental P',MaxP)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-48-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-47-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -7256,7 +7179,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 600120 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-48-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-47-3.png)<!-- -->
 
 ``` r
 # derivatives
@@ -7307,7 +7230,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 61 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-48-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-47-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -7357,7 +7280,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 61 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-48-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-47-5.png)<!-- -->
 
 ``` r
 # poverty parental int
@@ -7376,7 +7299,7 @@ plot_bootstraps_par(pov_Int,30,'Pov. Parental Int',MaxInt)
 
     ## Warning: Removed 120024 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-49-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental int
@@ -7393,7 +7316,7 @@ plot_bootstraps_par(npov_Int,30,'Npov. Parental Int',MaxInt)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-49-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-48-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -7429,7 +7352,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 120024 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-49-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-48-3.png)<!-- -->
 
 ``` r
 # derivatives
@@ -7480,7 +7403,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-49-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-48-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -7530,7 +7453,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 13 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-49-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-48-5.png)<!-- -->
 
 ``` r
 # poverty parental ext
@@ -7549,7 +7472,7 @@ plot_bootstraps_par(pov_Ext,63,'Pov. Parental Ext',MaxExt)
 
     ## Warning: Removed 350070 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-49-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -7566,7 +7489,7 @@ plot_bootstraps_par(npov_Ext,63,'Npov. Parental Ext',MaxExt)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-50-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-49-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -7602,7 +7525,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 350070 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-50-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-49-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -7652,7 +7575,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 36 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-50-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-49-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -7702,7 +7625,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 36 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-50-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-49-5.png)<!-- -->
 
 ``` r
 # poverty parental somatic
@@ -7721,7 +7644,7 @@ plot_bootstraps_par(pov_Som,20,'Pov. Parental Somatic',MaxSom)
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -7738,7 +7661,7 @@ plot_bootstraps_par(npov_Som,20,'Npov. Parental Somatic',MaxSom)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-51-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-50-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -7774,7 +7697,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-51-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-50-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -7824,7 +7747,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-51-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-50-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -7874,7 +7797,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-51-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-50-5.png)<!-- -->
 
 ``` r
 # Anxious Depression
@@ -7893,7 +7816,7 @@ plot_bootstraps_par(pov_Anx,31,'Pov. Parental Anx. Dep.',MaxAnx)
 
     ## Warning: Removed 110022 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -7910,7 +7833,7 @@ plot_bootstraps_par(npov_Anx,31,'Npov. Parental Anx. Dep.',MaxAnx)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-52-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-51-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -7946,7 +7869,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 110022 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-52-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-51-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -7996,7 +7919,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 12 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-52-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-51-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -8046,7 +7969,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 12 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-52-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-51-5.png)<!-- -->
 
 ``` r
 # Thought
@@ -8065,7 +7988,7 @@ plot_bootstraps_par(pov_Tho,18,'Pov. Parental Thought',MaxTho)
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -8082,7 +8005,7 @@ plot_bootstraps_par(npov_Tho,18,'Npov. Parental Thought',MaxTho)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-53-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-52-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -8118,7 +8041,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 80016 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-53-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-52-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -8168,7 +8091,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-53-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-52-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -8218,7 +8141,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 9 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-53-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-52-5.png)<!-- -->
 
 ``` r
 # Withdrawn Depression
@@ -8237,7 +8160,7 @@ plot_bootstraps_par(pov_Wit,18,'Pov. With. Depr.',MaxWit)
 
     ## Warning: Removed 90018 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-54-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -8254,7 +8177,7 @@ plot_bootstraps_par(npov_Wit,18,'Npov. Parental With. Depr.',MaxWit)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-54-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-53-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -8290,7 +8213,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 90018 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-54-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-53-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -8340,7 +8263,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-54-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-53-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -8390,7 +8313,7 @@ plot + theme(plot.margin = margin(r = 30,l=15,t=5,b=5))
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-54-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-53-5.png)<!-- -->
 
 ``` r
 # Rule breaking
@@ -8409,7 +8332,7 @@ plot_bootstraps_par(pov_RB,31,'Pov. Rules',MaxRB)
 
     ## Warning: Removed 230046 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-55-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-54-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -8426,7 +8349,7 @@ plot_bootstraps_par(npov_RB,31,'Npov. Parental Rules',MaxRB)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-55-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-54-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -8462,7 +8385,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 230046 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-55-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-54-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -8512,7 +8435,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 24 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-55-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-54-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -8562,7 +8485,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 24 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-55-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-54-5.png)<!-- -->
 
 ``` r
 # attention
@@ -8584,7 +8507,7 @@ plot_bootstraps_par(pov_Att,21,'Pov. Attn.',MaxAtt)
 
     ## Warning: Removed 56265 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-56-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-55-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -8602,7 +8525,7 @@ plot_bootstraps_par(npov_Att,21,'Npov. Attn.',MaxAtt)
 
     ## Warning: Removed 50350 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-56-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-55-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -8638,7 +8561,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 50350 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-56-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-55-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -8688,7 +8611,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-56-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-55-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -8738,7 +8661,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 6 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-56-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-55-5.png)<!-- -->
 
 ``` r
 # aggression
@@ -8757,7 +8680,7 @@ plot_bootstraps_par(pov_Agg,45,'Pov. Aggr.',MaxAgg)
 
     ## Warning: Removed 240048 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-57-1.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-56-1.png)<!-- -->
 
 ``` r
 # nonpoverty parental p
@@ -8774,7 +8697,7 @@ plot_bootstraps_par(npov_Agg,45,'Npov. Aggr.',MaxAgg)
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](Fig2_files/figure-gfm/unnamed-chunk-57-2.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-56-2.png)<!-- -->
 
 ``` r
 # both merged
@@ -8810,7 +8733,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 240048 rows containing missing values (`geom_line()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-57-3.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-56-3.png)<!-- -->
 
 ``` r
 # poverty
@@ -8860,7 +8783,7 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 10 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-57-4.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-56-4.png)<!-- -->
 
 ``` r
 # nonpoverty
@@ -8910,4 +8833,4 @@ plot + theme(plot.margin = margin(r = 30,l=5,t=5,b=5))
 
     ## Warning: Removed 25 rows containing missing values (`geom_raster()`).
 
-![](Fig2_files/figure-gfm/unnamed-chunk-57-5.png)<!-- -->
+![](Fig2_files/figure-gfm/unnamed-chunk-56-5.png)<!-- -->

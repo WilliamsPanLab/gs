@@ -325,63 +325,6 @@ ggMarginal(basic,type="histogram",size=3,binwidth=4,fill="gray")
 print(cor.test(masterdf$parentPcount,masterdf$cbcl_scr_syn_totprob_r))
 ```
 
-
-```{r}
-# ASR boots plots
-# load in data
-Fits1=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr1.rds')
-Fits2=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr2.rds')
-Fits3=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr3.rds')
-Fits4=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr4.rds')
-Fits5=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr5.rds')
-Fits1[2001:4000,]=Fits2[2001:4000,]
-Fits1[4001:6000,]=Fits3[4001:6000,]
-Fits1[6001:8000,]=Fits4[6001:8000,]
-Fits1[8001:10000,]=Fits5[8001:10000,]
-
-# may need updating after adding social cbcl scores to this df
-parentPfits=Fits1[,377:537]
-MaxP=find_furthest_nonzero(parentPfits)
-plot_bootstraps_par(parentPfits,160,x_title,MaxP)
-
-# p-factor
-P_derivative_matrix <- matrix(0, nrow = nrow(parentPfits), ncol = ncol(parentPfits) - 1)
-# Calculate the derivative for each column
-for (i in 1:(ncol(parentPfits) - 1)) {
-  # Calculate the differences in x (assuming a constant difference)
-  dx <- 1
-  # Calculate the differences in y (predicted values)
-  dy <- parentPfits[, i + 1] - parentPfits[, i]
-  # Calculate the derivatives (slopes)
-  derivatives <- dy / dx
-  # Store the derivatives in the derivative matrix
-  P_derivative_matrix[, i] <- derivatives
-}
-# calc sig dervs
-# get straightfoward of segment where 99% is over 0 or under
-positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
-negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
-# find where each is 99% or greater
-positive_countsSig=positive_counts>9900
-negative_countsSig=negative_counts>9900
-# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
-data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
-dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
-# if either is sig at 99% plot
-dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
-# use it to mask calculated derivs
-dervPlotDf$sig_deriv=0
-dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
-dervPlotDf$seq=1:(dim(dervPlotDf)[1])
-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
-    theme(panel.spacing = unit(-.01,"cm")) +
-    scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab(x_title)+
-    guides(fill=FALSE)+
-    theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-    scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
-
-```
 ```{r}
 ### poverty versus nonpoverty boots plot - CBCL
 
