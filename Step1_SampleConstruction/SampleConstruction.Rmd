@@ -13,9 +13,7 @@ library(rapportools)
 library(reshape2)
 library(ggplot2)
 library(ggalluvial)
-```
 
-```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 ####  chunk 1 processes mental health data  ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
@@ -550,7 +548,7 @@ paste0(participantsTSVSubjs,' remain')
 ```{r,warning=FALSE}
 
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Chunk 9: higher-resolution demographics     ##
+## Chunk 13: higher-resolution demographics     ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 #### get more fine-grained demographics
@@ -687,7 +685,7 @@ saveRDS(masterdf,'~/gp_masterdf.rds')
 
 ```{r}
 ###################∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-##  Chunk 10 saves out clinical thresholds for boots  ##
+##  Chunk 14 saves out clinical thresholds for boots  ##
 ###################∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 # pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
 masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==65,]
@@ -747,7 +745,7 @@ saveRDS(data.frame(Pbc,Pc,Ibc,Ic,Ebc,Ec,AnxBc,AnxC,ThoBc,ThoC,WitBc,WitC,SomBc,S
 
 ```{r, echo=FALSE, fig.dim = c(25, 7)}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-#### Chunk 11 plots data missingness      ######
+#### Chunk 15 plots data missingness      ######
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # melt the plot df to get in proper format
@@ -789,7 +787,7 @@ ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-#### Chunk 13 plots  missingness as pie charts #
+#### Chunk 16 plots  missingness as pie charts #
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # can overlay two pie charts: starting raceEth Comp and Ending. Tuck into area that is pink now
@@ -829,63 +827,6 @@ ggplot(endingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_o
 ```
 
 
-```{r}
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-#### Chunk 14 prepares data for analysis of temporal precedence ##
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','Grades','income','sex','race_ethnicity','matched_group','eventname','INR','NumPeeps','income','Pov_v2','cbcl_scr_syn_somatic_r','parentPcount')
-# eliminate rows with NAs and ensure none without two-timepoint data
-# variables of interest redux
-masterdf=masterdf[,c(variablesOfInterest)]
-# na omitted version
-masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ] 
-print(dim(masterdf))
-# and two-timepoint check
-twoTPsubjs=names(table(masterdf$subjectkey)[table(masterdf$subjectkey)>1])
-masterdf=masterdf[masterdf$subj %in% twoTPsubjs,]
 
-# now set subsets to use for temporal precedence analyses 
-df1=masterdf[masterdf$eventname=='baseline_year_1_arm_1',]
-df2=masterdf[masterdf$eventname=='2_year_follow_up_y_arm_1',]
-subsetOfBoth=merge(df1,df2,by='subjectkey')
-subsetOfBoth=subsetOfBoth$subjectkey
-
-# convert to one row per subj for temporal precedence analyses
-OutDFTmpPrec<-merge(df1,df2,by='subjectkey')
-print(dim(OutDFTmpPrec))
-
-# save it out
-saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec.rds')
-```
-
-```{r}
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-#### Chunk 15: basic sample characterization                    ##
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-# basic t-test for boys vs. girls: baseline
-bBV=subset(df1,sex=="M")
-gBV=subset(df1,sex=="F")
-t.test(bBV$cbcl_scr_syn_totprob_r,gBV$cbcl_scr_syn_totprob_r)
-# basic t-test for boys vs. girls: 2-years
-b2=subset(df2,sex=="M")
-g2=subset(df2,sex=="F")
-t.test(b2$cbcl_scr_syn_totprob_r,g2$cbcl_scr_syn_totprob_r)
-# and by poverty status # new subsetting
-masterdf$poverty=0
-masterdf$income<-as.numeric(masterdf$income)
-# note that poverty is defined as income < 5: https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups
-masterdf$poverty[masterdf$income<5]=1
-masterdf$poverty=as.ordered(masterdf$poverty)
-df1=masterdf[masterdf$eventname=='baseline_year_1_arm_1',]
-df2=masterdf[masterdf$eventname=='2_year_follow_up_y_arm_1',]
-# now divide
-pBV=subset(df1,poverty==1)
-npBV=subset(df1,poverty==0)
-t.test(pBV$cbcl_scr_syn_totprob_r,npBV$cbcl_scr_syn_totprob_r)
-# basic t-test for boys vs. girls: 2-years
-p2=subset(df2,poverty==1)
-np2=subset(df2,poverty==0)
-t.test(p2$cbcl_scr_syn_totprob_r,np2$cbcl_scr_syn_totprob_r)
-```
 
 

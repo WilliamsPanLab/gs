@@ -27,9 +27,7 @@ library(rapportools)
 library(reshape2)
 library(ggplot2)
 library(ggalluvial)
-```
 
-``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 ####  chunk 1 processes mental health data  ####
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
@@ -708,7 +706,7 @@ paste0(participantsTSVSubjs,' remain')
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-## Chunk 9: higher-resolution demographics     ##
+## Chunk 13: higher-resolution demographics     ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 #### get more fine-grained demographics
@@ -853,7 +851,7 @@ saveRDS(masterdf,'~/gp_masterdf.rds')
 
 ``` r
 ###################∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-##  Chunk 10 saves out clinical thresholds for boots  ##
+##  Chunk 14 saves out clinical thresholds for boots  ##
 ###################∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 # pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
 masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==65,]
@@ -912,11 +910,11 @@ saveRDS(data.frame(Pbc,Pc,Ibc,Ic,Ebc,Ec,AnxBc,AnxC,ThoBc,ThoC,WitBc,WitC,SomBc,S
 
     ## Using subj as id variables
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-#### Chunk 13 plots  missingness as pie charts #
+#### Chunk 16 plots  missingness as pie charts #
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # can overlay two pie charts: starting raceEth Comp and Ending. Tuck into area that is pink now
@@ -943,7 +941,7 @@ ggplot(startingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph
         legend.text = element_text(size=30),legend.title = element_blank())+scale_fill_manual(values = my_colors)
 ```
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 # plot df is both with race labels
@@ -959,129 +957,4 @@ ggplot(endingdf, aes(x="", y=value, fill = factor(RaceEthnicity, levels = alph_o
         legend.text = element_text(size=30),legend.title = element_blank())+scale_fill_manual(values = my_colors)
 ```
 
-![](SampleConstruction_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
-
-``` r
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-#### Chunk 14 prepares data for analysis of temporal precedence ##
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-variablesOfInterest=c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_external_r','cbcl_scr_syn_internal_r','g','subjectkey','interview_age','Grades','income','sex','race_ethnicity','matched_group','eventname','INR','NumPeeps','income','Pov_v2','cbcl_scr_syn_somatic_r','parentPcount')
-# eliminate rows with NAs and ensure none without two-timepoint data
-# variables of interest redux
-masterdf=masterdf[,c(variablesOfInterest)]
-# na omitted version
-masterdf=masterdf[rowSums(is.na(masterdf)) == 0, ] 
-print(dim(masterdf))
-```
-
-    ## [1] 9450   18
-
-``` r
-# and two-timepoint check
-twoTPsubjs=names(table(masterdf$subjectkey)[table(masterdf$subjectkey)>1])
-masterdf=masterdf[masterdf$subj %in% twoTPsubjs,]
-
-# now set subsets to use for temporal precedence analyses 
-df1=masterdf[masterdf$eventname=='baseline_year_1_arm_1',]
-df2=masterdf[masterdf$eventname=='2_year_follow_up_y_arm_1',]
-subsetOfBoth=merge(df1,df2,by='subjectkey')
-subsetOfBoth=subsetOfBoth$subjectkey
-
-# convert to one row per subj for temporal precedence analyses
-OutDFTmpPrec<-merge(df1,df2,by='subjectkey')
-print(dim(OutDFTmpPrec))
-```
-
-    ## [1] 4725   35
-
-``` r
-# save it out
-saveRDS(OutDFTmpPrec,'~/OutDFTmpPrec.rds')
-```
-
-``` r
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-#### Chunk 15: basic sample characterization                    ##
-###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆################################
-# basic t-test for boys vs. girls: baseline
-bBV=subset(df1,sex=="M")
-gBV=subset(df1,sex=="F")
-t.test(bBV$cbcl_scr_syn_totprob_r,gBV$cbcl_scr_syn_totprob_r)
-```
-
-    ## 
-    ##  Welch Two Sample t-test
-    ## 
-    ## data:  bBV$cbcl_scr_syn_totprob_r and gBV$cbcl_scr_syn_totprob_r
-    ## t = 7.0712, df = 4708.7, p-value = 1.762e-12
-    ## alternative hypothesis: true difference in means is not equal to 0
-    ## 95 percent confidence interval:
-    ##  2.526702 4.465182
-    ## sample estimates:
-    ## mean of x mean of y 
-    ##  19.40885  15.91291
-
-``` r
-# basic t-test for boys vs. girls: 2-years
-b2=subset(df2,sex=="M")
-g2=subset(df2,sex=="F")
-t.test(b2$cbcl_scr_syn_totprob_r,g2$cbcl_scr_syn_totprob_r)
-```
-
-    ## 
-    ##  Welch Two Sample t-test
-    ## 
-    ## data:  b2$cbcl_scr_syn_totprob_r and g2$cbcl_scr_syn_totprob_r
-    ## t = 5.5242, df = 4721.4, p-value = 3.488e-08
-    ## alternative hypothesis: true difference in means is not equal to 0
-    ## 95 percent confidence interval:
-    ##  1.697554 3.565277
-    ## sample estimates:
-    ## mean of x mean of y 
-    ##  17.61064  14.97922
-
-``` r
-# and by poverty status # new subsetting
-masterdf$poverty=0
-masterdf$income<-as.numeric(masterdf$income)
-# note that poverty is defined as income < 5: https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups
-masterdf$poverty[masterdf$income<5]=1
-masterdf$poverty=as.ordered(masterdf$poverty)
-df1=masterdf[masterdf$eventname=='baseline_year_1_arm_1',]
-df2=masterdf[masterdf$eventname=='2_year_follow_up_y_arm_1',]
-# now divide
-pBV=subset(df1,poverty==1)
-npBV=subset(df1,poverty==0)
-t.test(pBV$cbcl_scr_syn_totprob_r,npBV$cbcl_scr_syn_totprob_r)
-```
-
-    ## 
-    ##  Welch Two Sample t-test
-    ## 
-    ## data:  pBV$cbcl_scr_syn_totprob_r and npBV$cbcl_scr_syn_totprob_r
-    ## t = 5.1765, df = 689.77, p-value = 2.969e-07
-    ## alternative hypothesis: true difference in means is not equal to 0
-    ## 95 percent confidence interval:
-    ##  2.994746 6.654753
-    ## sample estimates:
-    ## mean of x mean of y 
-    ##  21.95447  17.12972
-
-``` r
-# basic t-test for boys vs. girls: 2-years
-p2=subset(df2,poverty==1)
-np2=subset(df2,poverty==0)
-t.test(p2$cbcl_scr_syn_totprob_r,np2$cbcl_scr_syn_totprob_r)
-```
-
-    ## 
-    ##  Welch Two Sample t-test
-    ## 
-    ## data:  p2$cbcl_scr_syn_totprob_r and np2$cbcl_scr_syn_totprob_r
-    ## t = 4.3331, df = 687.07, p-value = 1.69e-05
-    ## alternative hypothesis: true difference in means is not equal to 0
-    ## 95 percent confidence interval:
-    ##  2.140705 5.688091
-    ## sample estimates:
-    ## mean of x mean of y 
-    ##  19.77403  15.85963
+![](SampleConstruction_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
