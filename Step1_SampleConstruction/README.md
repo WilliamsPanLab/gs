@@ -1,12 +1,12 @@
 # Sample Construction
 
-Sample construction is the most important step! Here, we will be parsing participants from timepoints 1 and 2 who have complete data on our variables of interest. 
+Sample construction is arguably the most important step. Here, we will be parsing participants from timepoints 1 and 2 who have complete data on our variables of interest. 
 
 It's important to note that these measurements, even from past timepoints, can change over time in NDAR. Different releases have different kinds of and extents of missing data. This is uncommon, but can induce minor month-to-month changes in exactly which subjects have missing data when it occurs. Further, some measures are available from multiple instruments, with variable missingness and variable missingness over time.
 
-You can download the .Rmd to follow the code on your local machine, and follow the .md file online. 
+The easiest way to follow this walkthrough might be to download the .Rmd to follow the code on your local machine, and follow the .md file online. 
 
-## The steps
+## The steps - organized by "chunks" in the Rmd
 
 1. After loading the libraries we'll need, load in our primary measures of interest: child mental health. Specifically, the [Child Behavioral Checklist](https://nda.nih.gov/data_structure.html?short_name=abcd_cbcls01). Some objects are initialized here, and children are checked for having missing data at either timepoint. For maximal interpretability of analyses, children without data at one timepoint are excluded.
 
@@ -18,7 +18,7 @@ You can download the .Rmd to follow the code on your local machine, and follow t
 
 5. Chunk 5 just converts data to numeric format.
 
-6. Chunk 6 loads in cognitive data. Note this and subsequent chunks are modeled after a [nice paper](https://pubmed.ncbi.nlm.nih.gov/30595399/), for which we explicitly demonstrate functional equivalence as a supplementary result. The basis of the derived cognitive score for each child (at each timepoint) is largely the NIH toolbox, but two additional tasks are included. In chunk 6 the cognitive data is merged in ([source 1](https://nda.nih.gov/data_structure.html?short_name=abcd_tbss01), [2](https://nda.nih.gov/data_structure.html?short_name=abcd_ps01), and [3](https://nda.nih.gov/data_structure.html?short_name=lmtp201))
+6. Chunk 6 loads in cognitive data. Note this and subsequent chunks are modeled after a [nice paper](https://pubmed.ncbi.nlm.nih.gov/30595399/), for which we explicitly demonstrate functional equivalence as a supplementary result. The basis of the derived cognitive score for each child (at each timepoint) is largely the NIH toolbox, but two additional tasks are included. In chunk 6 the cognitive data is merged in ([source 1](https://nda.nih.gov/data_structure.html?short_name=abcd_tbss01), [2](https://nda.nih.gov/data_structure.html?short_name=abcd_ps01), and [3](https://nda.nih.gov/data_structure.html?short_name=lmtp201)). Note not all tasks gathered at timepoint1 were repeated at timepoint2: we used data/tasks available at both timepoints.
 
 7. Chunk 7 preps cognitive data for factorization: converts data to numeric, calculates correct trials, and notes + excludes participants with missing data (unfortunately we do lose a lot of kids here)
 
@@ -32,12 +32,13 @@ You can download the .Rmd to follow the code on your local machine, and follow t
 
 12. Chunk 12 handles a participants tsv, which is [a useful file with centralized info](https://collection3165.readthedocs.io/en/stable/recommendations/#2-the-bids-participants-files-and-matched-groups). We use this one to derive sex and parent income, as child-endorsed gender identification is missing for every single observation for every single child (as of now, from KSADS). Same drill as prior: kids with missing data are excluded. We also save out the primary dataframe here (gp_masterdf.rds)
 
-13. Chunk 13 plots missing data. It's time to see where we lost participants. This makes an alluvial plot.
+13. Chunk 13 imports higher-resolution demographic data for determining poverty status, then saves out the master dataframe to be bootstrapped in subsequent steps.
 
-14. Chunk 14 plots missing data as pie charts (before and after)
+14. Chunk 14 calculates and saves out clinical thresholds from participant t-scores on the cbcl.
 
-15. Loads in [ksads data](https://nda.nih.gov/data_structure.html?short_name=abcd_ksad501) so we have a child-report version of their p factor score. Note the ksads is messy: branching logic, variably-expressed missing data, and big (~1,000 variables). These data are also saved out after merging with masterdf, and further missingness is plotted.
+15. Chunk 15 plots missing data. It's time to see where we lost participants. This makes an alluvial plot.
 
-17. This chunk prepares data for temporal precedence analysis: largely a replication of Romer & Pizzagalli [2021](https://pubmed.ncbi.nlm.nih.gov/34332330/). This uses a sep. dataframe because we are explicitly interested in temporal precedence from timepoint 1 to timepoint 2. This does not establish causality, but does add credence to the ways our models are constructed through the rest of the paper.
+16. Chunk 16 plots missing data as pie charts (before and after)
+
 
 ## Upon completion, we should have masterdf, masterdf2, and OutDFTmpPrec to bootstrap on our institution's computer cluster
