@@ -6,16 +6,17 @@ As prior, we'll take masterdf from the sample construction step and run 10,000 [
 ## Bootstrapping/computational steps using masterdf from sample construction
 
 1. Port masterdf over to Sherlock, or whatever your compute cluster name is, with scp. 
-2. module load R/4.1 on sherlock and open R (terminal). Subsequent steps in Fig_2_parents.R, which is called to be "sbatched" (slurm equivalent to qsub on SGE) by [this script](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/sbatch_Fig2_Parents.sh)
+2. module load R/4.1 on cluster and open R (terminal). Subsequent steps in Fig_2_parents.R, which is called to be "sbatched" (slurm equivalent to qsub on SGE) by [this script](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/sbatch_Fig2_Parents.sh)
 4. Load needed master dataframe
 5. Glean number of subjects for bootstrapping purposes later
-6. Convert all Child Behavioral Checklist scores of interest to numeric
+6. Convert all Child Behavioral Checklist and Adult Self Report scores to numeric
 7. Initialize output vectors: initializing the values will make it slightly faster. Initialize them as 0s for
    
   A) Maximum values of symptom scores for each iteration
   B) predictied derivatives, note we get an entire range of values for each iteration.
-  C) predicted fits for female (F), male (M), children below the poverty line (P) and above (R).
+  C) predicted fits children below the poverty line (P) and above (R).
   D) predicted fits for poverty vs. nonpoverty vs. nonpoverty size-matched (same n as poverty subsample to preclude possibility that n differences drive group differences)
+  E) difference-in-AIC between full and reduced models across bootstraps. Diff Pseudo is for permuted poverty labels, so we can see the true difference in AIC vs. a "null" difference in AIC for manual significance testing.
 
 9. Now we can actually begin bootstrap. We will run this 10k instead of 1k times, so that we can calculate significance to a greater degree of accuracy.
 10. Perform the bootstrap for each iteration. Recall that we need entire participants in/out for each iteration. We shouldn't be pulling one observation from one participant out and retaining the other inside of a bootstrap. We'll make a new dataframe by first randomly sampling participants, and then looping through each randomly sampled PTID and populating the bootstrap dataframe with that participant's data iteratively
