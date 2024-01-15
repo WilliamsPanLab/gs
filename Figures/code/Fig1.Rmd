@@ -1084,96 +1084,6 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
 ```
 
-```{r}
-# for each bootstrap, recover median slope from subclinical and clinical
-df <- data.frame(
-  p = apply(PFits[, 1:round(Pbc+1)], 1, median),
-  Internal = apply(IFits[, 1:round(Ibc+1)], 1, median),
-  External = apply(EFits[, 1:round(Ebc+1)], 1, median),
-  Somatic = apply(SomFits[, 1:round(SomBc+1)], 1, median),
-  AnxDepr = apply(AnxFits[, 1:round(AnxBc+1)], 1, median),
-  Thought = apply(ThoFits[, 1:round(ThoBc+1)], 1, median),
-  WithDepr = apply(WitFits[, 1:round(WitBc+1)], 1, median),
-  Social = apply(SocFits[, 1:round(SocBc+1)], 1, median),
-  Attn = apply(AttFits[, 1:round(AttBc+1)], 1, median),
-  Rules = apply(RulFits[, 1:round(RulBc+1)], 1, median),
-  Aggr = apply(AggFits[, 1:round(AggBc+1)], 1, median)
-)
-
-# Convert the data frame to a tidy format
-df_tidy <- df %>%
-  gather(key = "Subscale", value = "MedianValue")
-
-# Calculate the median for each subscale iteration
-df_median <- df_tidy %>%
-  group_by(Subscale) %>%
-  summarize(MedianIteration = median(MedianValue))
-
-# Join the MedianIteration column to df_tidy based on Subscale
-df_tidy_1st3rd <- left_join(df_tidy, df_median, by = "Subscale")
-
-df_tidy_1st3rd$Subscale <- reorder(df_tidy_1st3rd$Subscale, -df_tidy_1st3rd$MedianValue, median)
-
-# Create the boxplot - saved at 1300 x 860
-ggplot(df_tidy_1st3rd, aes(x = Subscale, y = MedianValue,fill=MedianIteration)) +
-  geom_boxplot() +
-  labs(title = "Median Association with Cognitive Score: Subclinical",
-       x = "Subscale",
-       y = "Median Slope") +
-  theme_minimal(base_size=23)+scale_fill_gradientn(
-    colors = my_palette(100),
-    limits = c(-.1,.1))+guides(fill=F)+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
-
-```
-
-```{r}
-# and now a clinical risk group
-# only in clinical range
-df <- data.frame(
-  p = apply(PFits[, (Pc+1):MaxP], 1, median),
-  Internal = apply(IFits[, (Ic+1):MaxI], 1, median),
-  External = apply(EFits[, (Ec+1):MaxE], 1, median),
-  Somatic = apply(SomFits[, (SomC+1):MaxSom], 1, median),
-  AnxDepr = apply(AnxFits[, (AnxC+1):MaxAnx], 1, median),
-  Thought = apply(ThoFits[, (ThoC+1):MaxTho], 1, median),
-  WithDepr = apply(WitFits[, (WitC+1):MaxWit], 1, median),
-  Social = apply(SocFits[, (SocC+1):MaxSoc], 1, median),
-  Attn = apply(AttFits[, (AttC+1):MaxAtt], 1, median),
-  Rules = apply(RulFits[, (RulC+1):MaxRul], 1, median),
-  Aggr = apply(AggFits[, (AggC+1):MaxAgg], 1, median)
-)
-
-# Convert the data frame to a tidy format
-df_tidy2 <- df %>%
-  gather(key = "Subscale", value = "MedianValue")
-
-# Calculate the median for each subscale iteration
-df_median <- df_tidy2 %>%
-  group_by(Subscale) %>%
-  summarize(MedianIteration = median(MedianValue))
-
-# Join the MedianIteration column to df_tidy based on Subscale
-df_tidy_3rd3rd <- left_join(df_tidy2, df_median, by = "Subscale")
-
-# note we are sorting by plot one's order
-df_tidy_3rd3rd$Subscale <- reorder(df_tidy_3rd3rd$Subscale, -df_tidy_3rd3rd$MedianValue, median)
-
-# merge for boxplot
-df_tidy_1st3rd$third<-'First'
-df_tidy_3rd3rd$third<-'Last'
-
-df_tidy_merged<-rbind(df_tidy_1st3rd,df_tidy_3rd3rd)
-# Create the boxplot - healthy and unhealthy third
-# 1300 x 750
-ggplot(df_tidy_merged, aes(x= Subscale, y = MedianValue,fill=MedianIteration,outlier.shape=third)) +
-    geom_boxplot(position = position_dodge(0.6),outlier.alpha = .1) +
-    labs(title = "Cognitive association in subclinical (left) and clinical (right) ranges",
-         x = "Subscale",
-         y = "Median Slope") +
-    theme_minimal(base_size=30)+scale_fill_gradientn(
-        colors = my_palette(100),
-        limits = c(-.1,.1))+guides(fill=F)+theme(axis.text.x = element_text(angle = 35, hjust = 1),plot.title = element_text(size = 27),panel.border = element_rect(color = "black", fill = NA, size = 1))+ylim(c(-.225,.18))
-```
 
 ```{r}
 # proof-of-concept g~p linear in healthy and clinical range
@@ -1212,25 +1122,5 @@ ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bin
     geom_vline(xintercept = Pbc, linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
     scale_x_continuous(limits = c(0,Pbc),expand = expansion(mult = c(0, 0)))
-
-```
-
-```{r}
-# each subscale for supplementary figures
-# load in data
-Fits=readRDS('~/Desktop/g_p/gpFitBoots.rds')
-# find mean shape and plot it: p
-PFits=Fits[,1:128]
-IFits=Fits[,129:180]
-EFits=Fits[,181:228]
-SomFits=Fits[,229:242]
-AnxFits=Fits[,243:268]
-ThoFits=Fits[,269:287]
-WitFits=Fits[,288:304]
-SocFits=Fits[,305:322]
-AttFits=Fits[,323:342]
-RulFits=Fits[,343:361]
-AggFits=Fits[,362:394]
-# actually plot em
 
 ```
