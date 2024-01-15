@@ -11,4 +11,4 @@
 # ------------------------------------------
 module load R/4.1
 
-Rscript Fig_2_parents_nmatched_pseudoPov.R 
+Rscript Fig_2_parents.R
