@@ -40,5 +40,4 @@ The easiest way to follow this walkthrough might be to download the .Rmd to foll
 
 16. Chunk 16 plots missing data as pie charts (before and after)
 
-
-## Upon completion, we should have masterdf, masterdf2, and OutDFTmpPrec to bootstrap on our institution's computer cluster
+## gp_masterdf.rds from step 12 is the starting point for subsequent steps
