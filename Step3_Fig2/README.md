@@ -1,13 +1,12 @@
 # Figure 2: Parental and demographic analyses
 
-Here, the goal is to submit 10k iteration of non-linear firts of g to p on sherlock for parental mental health. That script [is here](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/Fig3_Boots.R). We'll also run some bootstrap iterations on scholastic data to determine relative deviance explained (relative to g). The cross-sectional script for deviance explained is [here](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/DevExplBoots.R), and the longitudinal one measuring deviance epxlained in timepoint 2 is [here](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/DevExplBoots_longit.R). 
-
+Here, the goal is to submit 10k iteration of non-linear firts of g to p on sherlock for parental mental health. That script [is here](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/Fig_2_parents.R).
 As prior, we'll take masterdf from the sample construction step and run 10,000 [bootstraps](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)) to gauge model consistency over different permutations of participants. Because we have repeated measures (2x), we need to take care to remove entire participants for each bootstrap, not just observations.
 
 ## Bootstrapping/computational steps using masterdf from sample construction
 
-1. Port masterdf over to Sherlock with scp. 
-2. module load R/4.1 on sherlock and open R (terminal). Subsequent steps in Fig3_Boots.R, which is called to be "sbatched" (slurm equivalent to qsub on SGE) by [this script](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/sbatch_Fig3.sh)
+1. Port masterdf over to Sherlock, or whatever your compute cluster name is, with scp. 
+2. module load R/4.1 on sherlock and open R (terminal). Subsequent steps in Fig_2_parents.R, which is called to be "sbatched" (slurm equivalent to qsub on SGE) by [this script](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/sbatch_Fig2_Parents.sh)
 4. Load needed master dataframe
 5. Glean number of subjects for bootstrapping purposes later
 6. Convert all Child Behavioral Checklist scores of interest to numeric
