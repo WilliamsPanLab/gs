@@ -11,8 +11,4 @@
 # ------------------------------------------
 module load R/4.1
 
-<<<<<<< Updated upstream
 Rscript Fig_2_Parents.R
-=======
-Rscript Fig_2_parents.R 
->>>>>>> Stashed changes
