@@ -222,10 +222,6 @@ for (b in 1:10000){
 	forSplinerul=get_derivs(forFitRul)
 	forSplineagg=get_derivs(forFitAgg)
 	# print out fit derivatives
-	
-	####  NEED TO RESOLVE DISCREPENCY OF 0-128 BEING 129 LENGTH, GETTING -1 FOR EACH DERIV
-	
-	
 	pDeriv[b,1:(bpmax)]=forSplinep
 	intDeriv[b,1:(bimax)]=forSplineint
 	extDeriv[b,1:(bemax)]=forSplineext

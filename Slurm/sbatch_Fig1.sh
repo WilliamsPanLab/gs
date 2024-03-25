@@ -11,4 +11,8 @@
 # ------------------------------------------
 module load R/4.1
 
+<<<<<<< Updated upstream
 Rscript Fig1_Boots.R
+=======
+Rscript Fig1_Boots_Poly_sRE.R
+>>>>>>> Stashed changes
