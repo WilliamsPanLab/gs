@@ -578,6 +578,50 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 
 ```
 
+```{r}
+# withdrawn depression for k - note WitBC and WitC derived chunks below
+WFits=Fits1[,288:304]
+MaxW=find_furthest_nonzero(WFits)
+# melt data for plotting each line
+data_melt <- melt(t(WFits))
+data_melt$Var1 <- rep(seq(0, 16), nrow(WFits))
+# Calculate percentiles
+percentiles <- WFits %>%
+summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
+percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_to = "Percentile", values_to = "YValue")
+
+# Add CI column
+data_melt$CI <- 0
+  
+# Prepare CIs for insertion
+CIs <- data.frame(rep(seq(0, 16), 2), c(rep(10001, 17), rep(10002,17)), percentiles_long$YValue, rep(1, (17*2)))
+colnames(CIs) <- colnames(data_melt)
+  
+# Add CIs
+data_melt2 <- rbind(data_melt, CIs)
+  
+# Convert CI column to factor
+data_melt2$CI <- as.factor(data_melt2$CI)
+  
+
+# add in var2, only length of 80
+fit_data$Var2=rep(10003,16)
+
+# saved out at 600x600
+
+# Plotting the lines
+ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
+  geom_line(aes(alpha = CI, color = Var2), show.legend = FALSE) +
+  scale_color_viridis_c(option = "inferno", direction = -1) +
+  scale_alpha_manual(values = c(0.01, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
+  theme_minimal(base_size=35) + 
+  ylab(expression(italic(g)))+xlab('Withdrawn Depression')+
+  geom_vline(xintercept = WitBc, linetype = "dashed")+
+  geom_vline(xintercept = WitC, linetype = "dashed")+
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 1)) +
+  scale_x_continuous(limits = c(0,MaxW),expand = expansion(mult = c(0, 0)))
+```
+
 
 
 ```{r}
@@ -639,8 +683,8 @@ masterdfAgg_c<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==69,]
 # borderline clinical and clinical cutoffs
 Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
 Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
-Ibc=mean(masterdfP_bc$cbcl_scr_syn_internal_r)
-Ic=mean(masterdfP_c$cbcl_scr_syn_internal_r)
+Ibc=mean(masterdfI_bc$cbcl_scr_syn_internal_r)
+Ic=mean(masterdfI_c$cbcl_scr_syn_internal_r)
 Ebc=mean(masterdfE_bc$cbcl_scr_syn_external_r)
 Ec=mean(masterdfE_c$cbcl_scr_syn_external_r)
 AnxBc=mean(as.numeric(masterdfAnx_bc$cbcl_scr_syn_anxdep_r))
@@ -1081,6 +1125,44 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       scale_x_continuous(limits = c(0,MaxAgg),expand = expansion(mult = c(0, 0)))
 
 
+
+```
+
+```{r}
+# and extended withdep for k
+# Withdrawn depression
+WithDep_derivative_matrix <- matrix(0, nrow = nrow(WitFits), ncol = ncol(WitFits) - 1)
+# Calculate the derivative for each column
+for (i in 1:(ncol(WitFits) - 1)) {
+  # Calculate the differences in x (assuming a constant difference)
+  dx <- 1
+  # Calculate the differences in y (predicted values)
+  dy <- WitFits[, i + 1] - WitFits[, i]
+  # Calculate the derivatives (slopes)
+  derivatives <- dy / dx
+  # Store the derivatives in the derivative matrix
+  WithDep_derivative_matrix[, i] <- derivatives
+}
+# calc sig dervs
+# get straightfoward of segment where 99% is over 0 or under
+positive_counts <- colSums(WithDep_derivative_matrix > 0, na.rm = TRUE)
+negative_counts <- colSums(WithDep_derivative_matrix < 0, na.rm = TRUE)
+# find where each is 99% or greater
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
+# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
+data <- apply(WithDep_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
+dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
+#dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
+#dervPlotDf$sig_deriv=0
+dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
+dervPlotDf$seq=1:(dim(dervPlotDf)[1])
+ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
+      theme(panel.spacing = unit(-.01,"cm")) +
+      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+xlim(c(0,13))+xlab('Withdrawn Depression')+
+      guides(fill=FALSE)+
+      theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
+      scale_x_continuous(limits = c(0,13),expand = expansion(mult = c(0, 0)),breaks = seq(0, 13, by = 2))
 
 ```
 

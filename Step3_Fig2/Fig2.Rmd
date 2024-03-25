@@ -277,8 +277,8 @@ masterdfAgg_c<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==69,]
 # borderline clinical and clinical cutoffs
 Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
 Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
-Ibc=mean(masterdfP_bc$cbcl_scr_syn_internal_r)
-Ic=mean(masterdfP_c$cbcl_scr_syn_internal_r)
+Ibc=mean(masterdfI_bc$cbcl_scr_syn_internal_r)
+Ic=mean(masterdfI_c$cbcl_scr_syn_internal_r)
 Ebc=mean(masterdfE_bc$cbcl_scr_syn_external_r)
 Ec=mean(masterdfE_c$cbcl_scr_syn_external_r)
 AnxBc=mean(as.numeric(masterdfAnx_bc$cbcl_scr_syn_anxdep_r))
