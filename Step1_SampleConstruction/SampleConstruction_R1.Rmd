@@ -474,14 +474,17 @@ for (subject in unique(fg_demo_unique$subjectkey)) {
 # omit missing values
 masterdf=masterdf[!is.na(masterdf$INR),]
 
+# omit subject with g < -7
+kidWhoDidntTry=masterdf$subjectkey[masterdf$g < -7]
+masterdf=masterdf[masterdf$subjectkey!=kidWhoDidntTry,]
+
 # new merge and count
 parentDemo_TSVSubjs=length(unique(masterdf$subjectkey))
+print(paste0(participantsTSVSubjs-parentDemo_TSVSubjs,' participants lost after needing complete data in Parent demographics'))
+paste0(parentDemo_TSVSubjs,' remain')
 # add to included subjs DF
 includedSubjects$PD=0
 includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$PD=1
-
-print(paste0(participantsTSVSubjs-parentDemo_TSVSubjs,' participants lost after needing complete data in Parent demographics'))
-paste0(parentDemo_TSVSubjs,' remain')
 
 #########################
 #########################
@@ -582,23 +585,34 @@ masterdf_pub_filtered <- masterdf_pub[!(masterdf_pub$pds_p_ss_male_category == "
 masterdf_pub_filtered$stage <- ifelse(masterdf_pub_filtered$pds_p_ss_male_category != "", 
                                       masterdf_pub_filtered$pds_p_ss_male_category, 
                                       masterdf_pub_filtered$pds_p_ss_female_category)
-# extract for plot
-plot_data <- masterdf_pub_filtered[, c("pds_p_ss_male_category", "pds_p_ss_female_category","g")]
 
-# Plot using ggplot
-library(ggplot2)
-ggplot(data=plot_data, aes(x = pds_p_ss_female_category, y = g)) +
-  geom_boxplot()
 
-# model
-model<-gam(g~s(cbcl_scr_syn_internal_r)+stage,data=masterdf_pub_filtered)
+# It looks like we lose around half of all observations if we need this measure. 
+# Note that 5046/5812 of the remaining measures are baseline year 1 arm 1
+# Most sensible choice is to drop the puberty measure at visit 2, as visit 2 is heavily underrepresented and puberty at timepoint 2 might have a different relationship to variables of interest than at timepoint 1
+# proceed with single-observation per-subject modeling, i.e., no bootstraps
+masterdf_pub=masterdf_pub_filtered[masterdf_pub_filtered$eventname=='baseline_year_1_arm_1',]
 
-# girl model
-model<-gam(g~s(cbcl_scr_syn_internal_r)+pds_p_ss_female_category,data=masterdf_pub_filtered)
+# evaluate impact of including puberty measure on g ~ p + age
+fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage,data=masterdf_pub)
+reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4),data=masterdf_pub)
 
-# boy model
-model<-gam(g~s(cbcl_scr_syn_internal_r)+pds_p_ss_male_category,data=masterdf_pub_filtered)
+# evaluate impact of including puberty measure on g ~ p + age + income
+fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage+s(income,k=4),data=masterdf_pub)
+reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(income,k=4),data=masterdf_pub)
 
+fullMod=gam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+stage+s(income,k=4),data=masterdf_pub)
+reducedMod=gam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+s(income,k=4),data=masterdf_pub)
+
+fullMod=gam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+stage+s(income,k=4),data=masterdf_pub)
+reducedMod=gam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+s(income,k=4),data=masterdf_pub)
+
+# evaluate impact of including puberty measure on g ~ p + age + edu
+fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage+s(parental_education,k=4),data=masterdf_pub)
+reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(parental_education,k=4),data=masterdf_pub)
+# evaluate impact of including puberty measure on g ~ p + age + edu + income
+fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage+s(parental_education,k=4)+s(income,k=4),data=masterdf_pub)
+reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(parental_education,k=4)+s(income,k=4),data=masterdf_pub)
 ```
 
 ```{r}
