@@ -183,7 +183,7 @@ medEdu=median(as.numeric(masterdf$parental_education))
 masterdf$parental_education=as.numeric(masterdf$parental_education)
 
 # loop over manual bootstrap
-for (b in 1:2){
+for (b in 1:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -500,7 +500,7 @@ for (b in 1:2){
 }
 # SAVEOUT
 # save out INCOME versions
-outdf=data.frame(plinBoots,intlinBoots,extlinBoots,somLinBoots,anxLinBoots,thoLinBoots,witLinBoots,socLinBoots,attLinBoots,rulLinBoots,aggLinBoots,pMax,intMax,extMax,somMax,anxMax,thoMax,witMax,socMax,attMax,rulMax,aggMax)
+outdf=data.frame(pMax,intMax,extMax,somMax,anxMax,thoMax,witMax,socMax,attMax,rulMax,aggMax)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_sRE_inc.rds')
 outdf=data.frame(pDeriv,intDeriv,extDeriv,somDeriv,anxDeriv,thoDeriv,witDeriv,socDeriv,attDeriv,rulDeriv,aggDeriv)
 saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_sRE_inc.rds')
