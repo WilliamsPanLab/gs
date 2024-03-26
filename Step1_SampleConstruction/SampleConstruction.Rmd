@@ -422,7 +422,15 @@ print(paste0(dif,' rows lost from only using subjs with both timepoints'))
 ```{r}
 
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+<<<<<<< Updated upstream:Step1_SampleConstruction/SampleConstruction.Rmd
+<<<<<<< Updated upstream:Step1_SampleConstruction/SampleConstruction.Rmd
 ## Chunk 11 calculates adult mental health    ##
+=======
+## Chunk 11 handles adult p factor            ##
+>>>>>>> Stashed changes:SampleConstructions/SampleConstruction.Rmd
+=======
+## Chunk 11 handles adult p factor            ##
+>>>>>>> Stashed changes:SampleConstructions/SampleConstruction.Rmd
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 # make count version of adult P
 ASRdfNum<-as.data.frame(lapply(asr[-1,11:141],as.numeric))
@@ -747,6 +755,8 @@ saveRDS(data.frame(Pbc,Pc,Ibc,Ic,Ebc,Ec,AnxBc,AnxC,ThoBc,ThoC,WitBc,WitC,SomBc,S
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 #### Chunk 15 plots data missingness      ######
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
+=======
+```{r}
 
 # melt the plot df to get in proper format
 plotdf=melt(includedSubjects)
