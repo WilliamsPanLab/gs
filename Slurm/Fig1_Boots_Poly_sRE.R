@@ -40,7 +40,7 @@ masterdf=masterdf[,c('cbcl_scr_syn_totprob_r','cbcl_scr_syn_internal_r','cbcl_sc
 # get length of df for later
 lenDF=dim(masterdf)[1]
 # convert site to factor
-masterdf$site<-as.factor(mastersdf$site)
+masterdf$site<-as.factor(masterdf$site)
 # convert all cbcl scores to numeric
 masterdf$cbcl_scr_syn_totprob_r=as.numeric(masterdf$cbcl_scr_syn_totprob_r)
 masterdf$cbcl_scr_syn_internal_r=as.numeric(masterdf$cbcl_scr_syn_internal_r)
