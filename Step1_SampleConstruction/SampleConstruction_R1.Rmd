@@ -495,6 +495,27 @@ saveRDS(masterdf,'~/gp_masterdf.rds')
 #########################
 #########################
 #########################
+
+# split halves to retain subjects entirely in one df or the other
+unique_subjects <- unique(masterdf$subjectkey)
+
+# to get same split on re-runs
+set.seed(1)
+
+shuffled_subjects <- sample(unique_subjects)
+
+# Step 3: Split the unique subject keys into two groups
+half_index <- length(shuffled_subjects) %/% 2
+group1_subjects <- shuffled_subjects[1:half_index]
+group2_subjects <- shuffled_subjects[(half_index + 1):length(shuffled_subjects)]
+
+# Step 4: Split the original dataframe into two, based on the groups
+df_group1 <- masterdf[masterdf$subjectkey %in% group1_subjects, ]
+df_group2 <- masterdf[masterdf$subjectkey %in% group2_subjects, ]
+
+saveRDS(df_group1,'~/gp_SH1_masterdf.rds')
+saveRDS(df_group2,'~/gp_SH2_masterdf.rds')
+
 ```
 
 
