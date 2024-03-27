@@ -10,4 +10,4 @@
 #SBATCH --mail-type=ALL
 # ------------------------------------------
 module load R/4.1
-Rscript Fig_2_povNonPov_sRE.R
+Rscript Fig_2_povNonPov_sRE_fancy_poly.R

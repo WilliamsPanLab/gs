@@ -207,17 +207,17 @@ for (b in 1:10000){
 	####### II PREDICT POVERTY INTERACTIONS #######
 	# fit models with standalone poverty term
 	# cbcl
-	pgAge_pov=bam(g~s(cbcl_scr_syn_totprob_r,by=poverty,k=4)+s(interview_age,k=4)+poverty+s(site,bs="re"),data=bootSamp)
-	intgAge_pov=bam(g~s(cbcl_scr_syn_internal_r,by=poverty,k=4)+s(interview_age,k=4)+poverty+s(site,bs="re"),data=bootSamp)
-	extgAge_pov=bam(g~s(cbcl_scr_syn_external_r,by=poverty,k=4)+s(interview_age,k=4)+poverty+s(site,bs="re"),data=bootSamp)
-	somgAge_pov=bam(g~s(cbcl_scr_syn_somatic_r,by=poverty,k=4)+s(interview_age,k=4)+poverty+s(site,bs="re"),data=bootSamp)
-	anxgAge_pov=bam(g~s(cbcl_scr_syn_anxdep_r,by=poverty,k=4)+s(interview_age,k=4)+poverty+s(site,bs="re"),data=bootSamp)
-	thogAge_pov=bam(g~s(cbcl_scr_syn_thought_r,by=poverty,k=4)+s(interview_age,k=4)+poverty+s(site,bs="re"),data=bootSamp)
-	witgAge_pov=bam(g~s(cbcl_scr_syn_withdep_r,by=poverty,k=4)+s(interview_age,k=4)+poverty+s(site,bs="re"),data=bootSamp)
-	socgAge_pov=bam(g~s(cbcl_scr_syn_social_r,by=poverty,k=4)+s(interview_age,k=4)+poverty+s(site,bs="re"),data=bootSamp)
-	attgAge_pov=bam(g~s(cbcl_scr_syn_attention_r,by=poverty,k=4)+s(interview_age,k=4)+poverty+s(site,bs="re"),data=bootSamp)
-	rulgAge_pov=bam(g~s(cbcl_scr_syn_rulebreak_r,by=poverty,k=4)+s(interview_age,k=4)+poverty+s(site,bs="re"),data=bootSamp)
-	agggAge_pov=bam(g~s(cbcl_scr_syn_aggressive_r,by=poverty,k=4)+s(interview_age,k=4)+poverty+s(site,bs="re"),data=bootSamp)
+	pgAge_pov=bam(g~poly(cbcl_scr_syn_totprob_r,2)*poverty+s(interview_age,2)+poverty+s(site,bs="re"),data=bootSamp)
+	intgAge_pov=bam(g~poly(cbcl_scr_syn_internal_r,2)*poverty+poly(interview_age,2)+poverty+s(site,bs="re"),data=bootSamp)
+	extgAge_pov=bam(g~poly(cbcl_scr_syn_external_r,2)*poverty+poly(interview_age,2)+poverty+s(site,bs="re"),data=bootSamp)
+	somgAge_pov=bam(g~poly(cbcl_scr_syn_somatic_r,2)*poverty+poly(interview_age,2)+poverty+s(site,bs="re"),data=bootSamp)
+	anxgAge_pov=bam(g~poly(cbcl_scr_syn_anxdep_r,2)*poverty+poly(interview_age,2)+poverty+s(site,bs="re"),data=bootSamp)
+	thogAge_pov=bam(g~poly(cbcl_scr_syn_thought_r,2)*poverty+poly(interview_age,2)+poverty+s(site,bs="re"),data=bootSamp)
+	witgAge_pov=bam(g~poly(cbcl_scr_syn_withdep_r,2)*poverty+poly(interview_age,2)+poverty+s(site,bs="re"),data=bootSamp)
+	socgAge_pov=bam(g~poly(cbcl_scr_syn_social_r,2)*poverty+poly(interview_age,2)+poverty+s(site,bs="re"),data=bootSamp)
+	attgAge_pov=bam(g~poly(cbcl_scr_syn_attention_r,2)*poverty+poly(interview_age,2)+poverty+s(site,bs="re"),data=bootSamp)
+	rulgAge_pov=bam(g~poly(cbcl_scr_syn_rulebreak_r,2)*poverty+poly(interview_age,2)+poverty+s(site,bs="re"),data=bootSamp)
+	agggAge_pov=bam(g~poly(cbcl_scr_syn_aggressive_r,2)*poverty+poly(interview_age,2)+poverty+s(site,bs="re"),data=bootSamp)
 	# make new predict dataframes with poverty variable
 	# cbcl
 	predictDFp$poverty=0
@@ -401,14 +401,14 @@ for (b in 1:10000){
 	aggFitPov4[b,1:(baggmax+1)]=forFitagg
 }
 # SAVEOUT fits for pov 0
-saveRDS(pFitPov0,intFitPov0,extFitPov0,somFitPov0,anxFitPov0,thoFitPov0,witFitPov0,socFitPov0,attFitPov0,rulFitPov0,aggFitPov0,file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov0_fancy.rds')
+saveRDS(pFitPov0,intFitPov0,extFitPov0,somFitPov0,anxFitPov0,thoFitPov0,witFitPov0,socFitPov0,attFitPov0,rulFitPov0,aggFitPov0,file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov0_fancy_poly.rds')
 # SAVEOUT fits for pov 1
-saveRDS(pFitPov1,intFitPov1,extFitPov1,somFitPov1,anxFitPov1,thoFitPov1,witFitPov1,socFitPov1,attFitPov1,rulFitPov1,aggFitPov1,file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov1_fancy.rds')
+saveRDS(pFitPov1,intFitPov1,extFitPov1,somFitPov1,anxFitPov1,thoFitPov1,witFitPov1,socFitPov1,attFitPov1,rulFitPov1,aggFitPov1,file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov1_fancy_poly.rds')
 # SAVEOUT fits for pov 2
-saveRDS(pFitPov2,intFitPov2,extFitPov2,somFitPov2,anxFitPov2,thoFitPov2,witFitPov2,socFitPov2,attFitPov2,rulFitPov2,aggFitPov2,file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov2_fancy.rds')
+saveRDS(pFitPov2,intFitPov2,extFitPov2,somFitPov2,anxFitPov2,thoFitPov2,witFitPov2,socFitPov2,attFitPov2,rulFitPov2,aggFitPov2,file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov2_fancy_poly.rds')
 # SAVEOUT fits for pov 3
-saveRDS(pFitPov3,intFitPov3,extFitPov3,somFitPov3,anxFitPov3,thoFitPov3,witFitPov3,socFitPov3,attFitPov3,rulFitPov3,aggFitPov3,file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov3_fancy.rds')
+saveRDS(pFitPov3,intFitPov3,extFitPov3,somFitPov3,anxFitPov3,thoFitPov3,witFitPov3,socFitPov3,attFitPov3,rulFitPov3,aggFitPov3,file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov3_fancy_poly.rds')
 # SAVEOUT fits for pov 4
-saveRDS(pFitPov4,intFitPov4,extFitPov4,somFitPov4,anxFitPov4,thoFitPov4,witFitPov4,socFitPov4,attFitPov4,rulFitPov4,aggFitPov4,file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov4_fancy.rds')
+saveRDS(pFitPov4,intFitPov4,extFitPov4,somFitPov4,anxFitPov4,thoFitPov4,witFitPov4,socFitPov4,attFitPov4,rulFitPov4,aggFitPov4,file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov4_fancy_poly.rds')
 
 print('done with g~p fit bootstrapping!')
