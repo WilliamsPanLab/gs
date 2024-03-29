@@ -197,6 +197,9 @@ masterdf=masterdf[masterdf$subjectkey %in% subjs,]
 newList4=length(unique(masterdf$subjectkey))
 print(paste0(newList4,' after retaining only subjs with Cognitive vars of interest at BOTH timepoints, ',(newList3- newList4),' lost after removing'))
 
+# note one kid clearly didn't try at one of the visits: unfortunately this is only super visible after deriving g-factor scores (more than 7 z-scores below the mean)
+masterdf=masterdf[masterdf$subjectkey!=kidWhoDidntTry,]
+
 # populated included subjs df
 includedSubjects$CogBoth=0
 includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$CogBoth=1
@@ -474,9 +477,9 @@ for (subject in unique(fg_demo_unique$subjectkey)) {
 # omit missing values
 masterdf=masterdf[!is.na(masterdf$INR),]
 
-# omit subject with g < -7
-kidWhoDidntTry=masterdf$subjectkey[masterdf$g < -7]
-masterdf=masterdf[masterdf$subjectkey!=kidWhoDidntTry,]
+# omit subject with g < -7 - to be commented out on second run
+#kidWhoDidntTry=masterdf$subjectkey[masterdf$g < -7]
+#masterdf=masterdf[masterdf$subjectkey!=kidWhoDidntTry,]
 
 # new merge and count
 parentDemo_TSVSubjs=length(unique(masterdf$subjectkey))
@@ -686,9 +689,6 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf_BPM$subjectkey),]$BP
 ```
 
 ```{r}
-# evaluate site effects
-anova_result <- aov(g ~ site, data = masterdf)
-
 # Calculate the mean of g for each site
 mean_g_per_site <- aggregate(g ~ site, data = masterdf, FUN = mean, na.action = na.omit)
 
