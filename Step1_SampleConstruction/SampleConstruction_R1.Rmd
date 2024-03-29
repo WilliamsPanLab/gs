@@ -629,11 +629,11 @@ fullMod=gam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+stage+s(income
 reducedMod=gam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+s(income,k=4),data=masterdf_pub)
 
 # evaluate impact of including puberty measure on g ~ p + age + edu
-fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage+s(parental_education,k=4),data=masterdf_pub)
-reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(parental_education,k=4),data=masterdf_pub)
+#fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage+s(parental_education,k=4),data=masterdf_pub)
+#reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(parental_education,k=4),data=masterdf_pub)
 # evaluate impact of including puberty measure on g ~ p + age + edu + income
-fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage+s(parental_education,k=4)+s(income,k=4),data=masterdf_pub)
-reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(parental_education,k=4)+s(income,k=4),data=masterdf_pub)
+#fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage+s(parental_education,k=4)+s(income,k=4),data=masterdf_pub)
+#reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(parental_education,k=4)+s(income,k=4),data=masterdf_pub)
 ```
 
 ```{r}
@@ -684,6 +684,7 @@ print(paste0(dif,' participants lost from BPM merge'))
 includedSubjects$BPM=0
 includedSubjects[includedSubjects$subj %in% unique(masterdf_BPM$subjectkey),]$BPM=1
 ```
+
 ```{r}
 # evaluate site effects
 anova_result <- aov(g ~ site, data = masterdf)
