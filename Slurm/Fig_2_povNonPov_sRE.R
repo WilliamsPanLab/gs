@@ -174,7 +174,7 @@ masterdf$poverty=0
 masterdf$poverty[masterdf$Pov_v2==1]=1
 masterdf$poverty=as.factor(masterdf$poverty)
 # loop over manual bootstrap
-for (b in 1:10000){
+for (b in 1:1000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -501,18 +501,18 @@ for (b in 1:10000){
 # SAVEOUT
 # median absolute error differences
 outdf=data.frame(pDiffMAE,intDiffMAE,extDiffMAE,somDiffMAE,anxDiffMAE,thoDiffMAE,witDiffMAE,socDiffMAE,attDiffMAE,rulDiffMAE,aggDiffMAE)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_poverty_MAE_sRE.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_poverty_MAE_sRE_1k.rds')
 # save out all difference in AIC vectors, differences in adjusted R^2 vectors
 # cbcl
 outdf=data.frame(pDiff,intDiff,extDiff,somDiff,anxDiff,thoDiff,witDiff,socDiff,attDiff,rulDiff,aggDiff,pDiffAdj,intDiffAdj,extDiffAdj,somDiffAdj,anxDiffAdj,thoDiffAdj,witDiffAdj,attDiffAdj,rulDiffAdj,aggDiffAdj)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbcl_sRE.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbcl_sRE_1k.rds')
 
 # save out pseudo versions for comparison if needed
 # cbcl
 outdf=data.frame(pDiffPseudo,intDiffPseudo,extDiffPseudo,somDiffPseudo,anxDiffPseudo,thoDiffPseudo,witDiffPseudo,socDiffPseudo,attDiffPseudo,rulDiffPseudo,aggDiffPseudo,pDiffAdjPseudo,intDiffAdjPseudo,extDiffAdjPseudo,somDiffAdjPseudo,anxDiffAdjPseudo,thoDiffAdjPseudo,witDiffAdjPseudo,attDiffAdjPseudo,rulDiffAdjPseudo,aggDiffAdjPseudo)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbclPseudo_sRE.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbclPseudo_sRE_1k.rds')
 # save out poverty and nonpoverty fits - cbcl
 outdf=data.frame(pFitPov,pFitNonPov,intFitPov,intFitNonPov,extFitPov,extFitNonPov,somFitPov,somFitNonPov,anxFitPov,anxFitNonPov,thoFitPov,thoFitNonPov,witFitPov,witFitNonPov,socFitPov,socFitNonPov,attFitPov,attFitNonPov,rulFitPov,rulFitNonPov,aggFitPov,aggFitNonPov)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_cbcl_pNp_sRE.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_cbcl_pNp_sRE_1k.rds')
 
 print('done with g~p fit bootstrapping!')

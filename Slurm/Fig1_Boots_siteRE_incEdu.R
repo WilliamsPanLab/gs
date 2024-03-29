@@ -183,7 +183,7 @@ medEdu=median(as.numeric(masterdf$parental_education))
 masterdf$parental_education=as.numeric(masterdf$parental_education)
 
 # loop over manual bootstrap
-for (b in 1:10000){
+for (b in 1:1000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -501,24 +501,24 @@ for (b in 1:10000){
 # SAVEOUT
 # save out INCOME versions
 outdf=data.frame(pMax,intMax,extMax,somMax,anxMax,thoMax,witMax,socMax,attMax,rulMax,aggMax)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_sRE_inc.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_sRE_inc_1k.rds')
 outdf=data.frame(pDeriv,intDeriv,extDeriv,somDeriv,anxDeriv,thoDeriv,witDeriv,socDeriv,attDeriv,rulDeriv,aggDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_sRE_inc.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_sRE_inc_1k.rds')
 outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,socFit,attFit,rulFit,aggFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_sRE_inc.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_sRE_inc_1k.rds')
 # save out EDUCATION versions: derivatives
 outdf=data.frame(edu_pDeriv,edu_intDeriv,edu_extDeriv,edu_somDeriv,edu_anxDeriv,edu_thoDeriv,edu_witDeriv,edu_socDeriv,edu_attDeriv,edu_rulDeriv,edu_aggDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_sRE_edu.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_sRE_edu_1k.rds')
 # education versions: fit
 outdf=data.frame(edu_pFit,edu_intFit,edu_extFit,edu_somFit,edu_anxFit,edu_thoFit,edu_witFit,edu_socFit,edu_attFit,edu_rulFit,edu_aggFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_sRE_edu.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_sRE_edu_1k.rds')
 # save out BOTH versions: derivatives
 outdf=data.frame(both_pDeriv,both_intDeriv,both_extDeriv,both_somDeriv,both_anxDeriv,both_thoDeriv,both_witDeriv,both_socDeriv,both_attDeriv,both_rulDeriv,both_aggDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_sRE_incEdu.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_sRE_incEdu_1k.rds')
 # both versions: fit
 outdf=data.frame(both_pFit,both_intFit,both_extFit,both_somFit,both_anxFit,both_thoFit,both_witFit,both_socFit,both_attFit,both_rulFit,both_aggFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_sRE_incEdu.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_sRE_incEdu_1k.rds')
 # save out adjusted R^2s: income, education, and both
 outdf=data.frame(pAdjR2,intAdjR2,extAdjR2,somAdjR2,anxAdjR2,thoAdjR2,witAdjR2,socAdjR2,attAdjR2,rulAdjR2,aggAdjR2,edu_pAdjR2,edu_intAdjR2,edu_extAdjR2,edu_somAdjR2,edu_anxAdjR2,edu_thoAdjR2,edu_witAdjR2,edu_socAdjR2,edu_attAdjR2,edu_rulAdjR2,edu_aggAdjR2,both_pAdjR2,both_intAdjR2,both_extAdjR2,both_somAdjR2,both_anxAdjR2,both_thoAdjR2,both_witAdjR2,both_socAdjR2,both_attAdjR2,both_rulAdjR2,both_aggAdjR2)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpAdjR2Boots_sRE_incEdu.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpAdjR2Boots_sRE_incEdu_1k.rds')
 print('done with g~p fit bootstrapping!')

@@ -174,7 +174,7 @@ masterdf$poverty=0
 masterdf$poverty[masterdf$Pov_v2==1]=1
 masterdf$poverty=as.factor(masterdf$poverty)
 # loop over manual bootstrap
-for (b in 1:10000){
+for (b in 1:1000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -346,6 +346,6 @@ for (b in 1:10000){
 # SAVEOUT
 # save out poverty and nonpoverty fits - cbcl
 outdf=data.frame(pFitPov,pFitNonPov,intFitPov,intFitNonPov,extFitPov,extFitNonPov,somFitPov,somFitNonPov,anxFitPov,anxFitNonPov,thoFitPov,thoFitNonPov,witFitPov,witFitNonPov,socFitPov,socFitNonPov,attFitPov,attFitNonPov,rulFitPov,rulFitNonPov,aggFitPov,aggFitNonPov)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_cbcl_pNp_sRE_poly.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_cbcl_pNp_sRE_poly_1k.rds')
 
 print('done with g~p fit bootstrapping!')
