@@ -215,8 +215,8 @@ Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
 Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
 
 # reference linear model
-plotdf<-data.frame(masterdf$parentPcount,masterdf$g,masterdf$cbcl_scr_syn_totprob_r,masterdf$interview_age)
-colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
+plotdf<-data.frame(masterdf$g,masterdf$cbcl_scr_syn_totprob_r,masterdf$interview_age)
+colnames(plotdf)<-c('g','cbcl_scr_syn_totprob_r','interview_age')
 modelforresids<-gam(g~s(interview_age),data=plotdf)
 plotdf$resids<-modelforresids$residuals
 
@@ -264,8 +264,8 @@ cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)$estimate^2
 (cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)$estimate^2)/(cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)$estimate^2)
 
 # plot out clinical and subclinical with line of best fit, covarying for age
-plotdf<-data.frame(clindf$parentPcount,clindf$g,clindf$cbcl_scr_syn_totprob_r,clindf$interview_age)
-colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
+plotdf<-data.frame(clindf$g,clindf$cbcl_scr_syn_totprob_r,clindf$interview_age)
+colnames(plotdf)<-c('g','cbcl_scr_syn_totprob_r','interview_age')
 modelforresids<-gam(g~s(interview_age),data=plotdf)
 plotdf$resids<-modelforresids$residuals
 # clinical
@@ -286,8 +286,8 @@ lmforBeta
 
 
 # subclinical
-plotdf<-data.frame(sclindf$parentPcount,sclindf$g,sclindf$cbcl_scr_syn_totprob_r,sclindf$interview_age)
-colnames(plotdf)<-c('parentPcount','g','cbcl_scr_syn_totprob_r','interview_age')
+plotdf<-data.frame(sclindf$g,sclindf$cbcl_scr_syn_totprob_r,sclindf$interview_age)
+colnames(plotdf)<-c('g','cbcl_scr_syn_totprob_r','interview_age')
 modelforresids<-gam(g~s(interview_age),data=plotdf)
 plotdf$resids<-modelforresids$residuals
 ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=40)+
@@ -318,6 +318,7 @@ summary(modelClin)
 modelSClin<-lme(g~interview_age+cbcl_scr_syn_totprob_r,random=~1|subjectkey,data=sclindf)
 summary(modelSClin)
 ```
+
 ```{r}
 library(ggplot2)
 library(gganimate)
@@ -523,7 +524,7 @@ for (i in 1:3){
 ```{r}
 ### P boots plot with overlaid linear fit
 # load in data
-Fits1=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr1.rds')
+Fits1=readRDS('~/Downloads/gpFitBoots_1k.rds')
 Fits2=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr2.rds')
 Fits3=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr3.rds')
 Fits4=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr4.rds')
@@ -534,11 +535,11 @@ Fits1[6001:8000,]=Fits4[6001:8000,]
 Fits1[8001:10000,]=Fits5[8001:10000,]
 
 # extract p factor
-PFits=Fits1[,1:128]
+PFits=Fits1[1:1000,1:162]
 MaxP=find_furthest_nonzero(PFits)
 # melt data for plotting each line
 data_melt <- melt(t(PFits))
-data_melt$Var1 <- rep(seq(0, 127), nrow(PFits))
+data_melt$Var1 <- rep(seq(0, 161), nrow(PFits))
 # Calculate percentiles
 percentiles <- PFits %>%
 summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
@@ -548,7 +549,7 @@ percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_
 data_melt$CI <- 0
   
 # Prepare CIs for insertion
-CIs <- data.frame(rep(seq(0, 127), 2), c(rep(10001, 128), rep(10002, 128)), percentiles_long$YValue, rep(1, (128*2)))
+CIs <- data.frame(rep(seq(0, 161), 2), c(rep(1001, 162), rep(1002, 162)), percentiles_long$YValue, rep(1, (162*2)))
 colnames(CIs) <- colnames(data_melt)
   
 # Add CIs
@@ -559,7 +560,10 @@ data_melt2$CI <- as.factor(data_melt2$CI)
   
 
 # add in var2, only length of 80
-fit_data$Var2=rep(10003,80)
+fit_data$Var2=rep(1003,80)
+
+# get 99th percentile for plotting
+p99=quantile(masterdf$cbcl_scr_syn_totprob_r,.99)
 
 # saved out at 600x600
 
@@ -573,8 +577,7 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
   geom_vline(xintercept = Pbc, linetype = "dashed")+
   geom_vline(xintercept = Pc, linetype = "dashed")+
   theme(panel.border = element_rect(color = "black", fill = NA, size = 1)) +
-  scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0))) + 
-  geom_line(data = fit_data, aes(x = x, y = y), color = "gray",size=1.5)
+  scale_x_continuous(limits = c(0,p99),expand = expansion(mult = c(0, 0)))
 
 ```
 
@@ -628,8 +631,8 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 # set Fits1 to Fits for simplicity
 Fits=Fits1
 # find mean shape and plot it: p
-PFits=Fits[,1:128]
-IFits=Fits[,129:180]
+PFits=Fits[1:1000,1:162]
+IFits=Fits[1:1000,163:214]
 EFits=Fits[,181:228]
 SomFits=Fits[,229:242]
 AnxFits=Fits[,243:268]
@@ -705,7 +708,7 @@ AggBc=mean(as.numeric(masterdfAgg_bc$cbcl_scr_syn_aggressive_r))
 AggC=mean(as.numeric(masterdfAgg_c$cbcl_scr_syn_aggressive_r))
 
 # actually plot em
-plot_bootstraps(PFits,127,expression(italic(p)),MaxP,Pbc,Pc)
+plot_bootstraps(PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
 plot_bootstraps(IFits,51,'Internalizing',MaxI,Ibc,Ic)
 plot_bootstraps(EFits,47,'Externalizing',MaxE,Ebc,Ec)
 # for supplemental figure
@@ -781,8 +784,8 @@ for (i in 1:(ncol(IFits) - 1)) {
 positive_counts <- colSums(Int_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Int_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>990
+negative_countsSig=negative_counts>990
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(Int_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1164,5 +1167,28 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,13),expand = expansion(mult = c(0, 0)),breaks = seq(0, 13, by = 2))
 
+```
+
+```{r}
+# New data for prediction
+new_data <- with(bootSamp, expand.grid(
+  cbcl_scr_syn_internal_r = seq(min(cbcl_scr_syn_internal_r), max(cbcl_scr_syn_internal_r), length.out = 100),
+  income = unique(income),
+  interview_age = mean(interview_age), # Fixed average value for simplicity
+  site = 'site13', # Assuming a single level for simplicity
+  parental_education = 18 # Fixed average value
+))
+
+# Predictions
+new_data$predicted <- predict(both_intgAge, newdata = new_data, type = "response")
+
+# Plotting
+ggplot(new_data, aes(x = cbcl_scr_syn_internal_r, y = predicted, color = factor(income))) +
+  geom_line(size=5) +
+  labs(title = "Predicted values by cbcl_scr_syn_internal_r across income levels",
+       x = "CBCL Score",
+       y = "Predicted Value",
+       color = "Income Level") +
+  theme_minimal()
 ```
 
