@@ -10,4 +10,4 @@
 #SBATCH --mail-type=ALL
 # ------------------------------------------
 module load R/4.1
-Rscript Fig1_Boots_siteRE_SH2.R 
+Rscript Fig1_Boots_siteRE_incEdu.R
