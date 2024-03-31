@@ -524,61 +524,34 @@ saveRDS(df_group2,'~/gp_SH2_masterdf.rds')
 
 ```{r}
 ###################∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-##  Chunk 11 saves out clinical thresholds for boots  ##
+##  Chunk 11 saves out tertile thresholds for boots  ##
 ###################∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-# pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
-masterdfP_bc<-masterdf[masterdf$cbcl_scr_syn_totprob_t==65,]
-masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==69,]
-masterdfI_bc<-masterdf[masterdf$cbcl_scr_syn_internal_t==65,]
-masterdfI_c<-masterdf[masterdf$cbcl_scr_syn_internal_t==69,]
-masterdfE_bc<-masterdf[masterdf$cbcl_scr_syn_external_t==65,]
-masterdfE_c<-masterdf[masterdf$cbcl_scr_syn_external_t==69,]
-masterdfAnx_bc<-masterdf[masterdf$cbcl_scr_syn_anxdep_t==65,]
-masterdfAnx_c<-masterdf[masterdf$cbcl_scr_syn_anxdep_t==69,]
-# note no one has t==65 in this dataset for thought
-masterdfTho_bc<-masterdf[masterdf$cbcl_scr_syn_thought_t==66,]
-masterdfTho_c<-masterdf[masterdf$cbcl_scr_syn_thought_t==69,]
-# note no one has t==65 in this dataset for withdrawn depression
-masterdfWit_bc<-masterdf[masterdf$cbcl_scr_syn_withdep_t==66,]
-masterdfWit_c<-masterdf[masterdf$cbcl_scr_syn_withdep_t==69,]
-masterdfSom_bc<-masterdf[masterdf$cbcl_scr_syn_somatic_t==65,]
-# no one has t==69
-masterdfSom_c<-masterdf[masterdf$cbcl_scr_syn_somatic_t==70,]
-masterdfSoc_bc<-masterdf[masterdf$cbcl_scr_syn_social_t==65,]
-masterdfSoc_c<-masterdf[masterdf$cbcl_scr_syn_social_t==69,]
-masterdfAtt_bc<-masterdf[masterdf$cbcl_scr_syn_attention_t==65,]
-masterdfAtt_c<-masterdf[masterdf$cbcl_scr_syn_attention_t==69,]
-masterdfRul_bc<-masterdf[masterdf$cbcl_scr_syn_rulebreak_t==65,]
-masterdfRul_c<-masterdf[masterdf$cbcl_scr_syn_rulebreak_t==69,]
-masterdfAgg_bc<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==65,]
-masterdfAgg_c<-masterdf[masterdf$cbcl_scr_syn_aggressive_t==69,]
-
-# borderline clinical and clinical cutoffs
-Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
-Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
-Ibc=mean(masterdfP_bc$cbcl_scr_syn_internal_r)
-Ic=mean(masterdfP_c$cbcl_scr_syn_internal_r)
-Ebc=mean(masterdfE_bc$cbcl_scr_syn_external_r)
-Ec=mean(masterdfE_c$cbcl_scr_syn_external_r)
-AnxBc=mean(as.numeric(masterdfAnx_bc$cbcl_scr_syn_anxdep_r))
-AnxC=mean(as.numeric(masterdfAnx_c$cbcl_scr_syn_anxdep_r))
-ThoBc=mean(as.numeric(masterdfTho_bc$cbcl_scr_syn_thought_r))
-ThoC=mean(as.numeric(masterdfTho_c$cbcl_scr_syn_thought_r))
-WitBc=mean(as.numeric(masterdfWit_bc$cbcl_scr_syn_withdep_r))
-WitC=mean(as.numeric(masterdfWit_c$cbcl_scr_syn_withdep_r))
-SomBc=mean(as.numeric(masterdfSom_bc$cbcl_scr_syn_somatic_r))
-SomC=mean(as.numeric(masterdfSom_c$cbcl_scr_syn_somatic_r))
-SocBc=mean(as.numeric(masterdfSom_bc$cbcl_scr_syn_social_r))
-SocC=mean(as.numeric(masterdfSoc_c$cbcl_scr_syn_social_r))
-AttBc=mean(as.numeric(masterdfAtt_bc$cbcl_scr_syn_attention_r))
-AttC=mean(as.numeric(masterdfAtt_c$cbcl_scr_syn_attention_r))
-RulBc=mean(as.numeric(masterdfRul_bc$cbcl_scr_syn_rulebreak_r))
-RulC=mean(as.numeric(masterdfRul_c$cbcl_scr_syn_rulebreak_r))
-AggBc=mean(as.numeric(masterdfAgg_bc$cbcl_scr_syn_aggressive_r))
-AggC=mean(as.numeric(masterdfAgg_c$cbcl_scr_syn_aggressive_r))
+# pull out tertile thresholds from masterdf: bc is the cutoff for the 1st/2nd tertile, c is the cutoff for the 2nd/3rd tertile
+Pbc=quantile(masterdf$cbcl_scr_syn_totprob_r,0.33)
+Pc=quantile(masterdf$cbcl_scr_syn_totprob_r,0.67)
+Ibc=quantile(masterdf$cbcl_scr_syn_internal_r,0.33)
+Ic=quantile(masterdf$cbcl_scr_syn_internal_r,0.67)
+Ebc=quantile(masterdf$cbcl_scr_syn_external_r,0.33)
+Ec=quantile(masterdf$cbcl_scr_syn_external_r,0.67)
+AnxBc=quantile(as.numeric(masterdf$cbcl_scr_syn_anxdep_r),0.33)
+AnxC=quantile(as.numeric(masterdf$cbcl_scr_syn_anxdep_r),0.67)
+ThoBc=quantile(as.numeric(masterdf$cbcl_scr_syn_thought_r),0.33)
+ThoC=quantile(as.numeric(masterdf$cbcl_scr_syn_thought_r),0.67)
+WitBc=quantile(as.numeric(masterdf$cbcl_scr_syn_withdep_r),0.33)
+WitC=quantile(as.numeric(masterdf$cbcl_scr_syn_withdep_r),0.67)
+SomBc=quantile(as.numeric(masterdf$cbcl_scr_syn_somatic_r),0.33)
+SomC=quantile(as.numeric(masterdf$cbcl_scr_syn_somatic_r),0.67)
+SocBc=quantile(as.numeric(masterdf$cbcl_scr_syn_social_r),0.33)
+SocC=quantile(as.numeric(masterdf$cbcl_scr_syn_social_r),0.67)
+AttBc=quantile(as.numeric(masterdf$cbcl_scr_syn_attention_r),0.33)
+AttC=quantile(as.numeric(masterdf$cbcl_scr_syn_attention_r),0.67)
+RulBc=quantile(as.numeric(masterdf$cbcl_scr_syn_rulebreak_r),0.33)
+RulC=quantile(as.numeric(masterdf$cbcl_scr_syn_rulebreak_r),0.67)
+AggBc=quantile(as.numeric(masterdf$cbcl_scr_syn_aggressive_r),0.33)
+AggC=quantile(as.numeric(masterdf$cbcl_scr_syn_aggressive_r),0.67)
 
 # save out cuttoffs in RDS for sherlock bootstrapping
-saveRDS(data.frame(Pbc,Pc,Ibc,Ic,Ebc,Ec,AnxBc,AnxC,ThoBc,ThoC,WitBc,WitC,SomBc,SomC,SocBc,SocC,AttBc,AttC,RulBc,RulC,AggBc,AggC),'~/gp_ClinCutoffs.rds')
+saveRDS(data.frame(Pbc,Pc,Ibc,Ic,Ebc,Ec,AnxBc,AnxC,ThoBc,ThoC,WitBc,WitC,SomBc,SomC,SocBc,SocC,AttBc,AttC,RulBc,RulC,AggBc,AggC),'~/gp_TertCutoffs.rds')
 
 ```
 
