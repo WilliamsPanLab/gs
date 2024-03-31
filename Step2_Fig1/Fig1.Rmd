@@ -381,7 +381,7 @@ anim_save(
 # insert subclinical vs. clincal bootstrapped betas as horizontal box-and-whiskers,consider adding permuted vs. median observed difference
 ### ∆∆∆∆∆∆∆∆
 # actual beta fits are under gp_CvSC_bootBetas
-Fits1=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas1.rds')
+Fits1=readRDS('~/Downloads/gp_CvSC_bootBetas_1k.rds')
 Fits2=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas2.rds')
 Fits3=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas3.rds')
 Fits4=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas4.rds')
@@ -392,7 +392,7 @@ Fits1[6001:8000,]=Fits4[6001:8000,]
 Fits1[8001:10000,]=Fits5[8001:10000,]
 
 # get differences in betas between real and permuted clinical groups
-Diffs1=readRDS('~/Desktop/g_p/gp_CvSC_diffs1.rds')
+Diffs1=readRDS('~/Downloads/gp_CvSC_bootBetas_1k.rds')
 Diffs2=readRDS('~/Desktop/g_p/gp_CvSC_diffs2.rds')
 Diffs3=readRDS('~/Desktop/g_p/gp_CvSC_diffs3.rds')
 Diffs4=readRDS('~/Desktop/g_p/gp_CvSC_diffs4.rds')
