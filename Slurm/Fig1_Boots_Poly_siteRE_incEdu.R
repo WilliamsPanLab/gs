@@ -209,41 +209,41 @@ for (b in 1:10000){
 	baggmax=max(bootSamp$cbcl_scr_syn_aggressive_r)
 	######## I PREDICT VARIABLE OF INTEREST WITH FIT SPLINE
 	#### g as response variable, include income
-	pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4),data=bootSamp)
-	intgAge<-bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4),data=bootSamp)
-	extgAge<-bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4),data=bootSamp)
-	somgAge<-bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4),data=bootSamp)
-	anxgAge<-bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4),data=bootSamp)
-	thogAge<-bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4),data=bootSamp)
-	witgAge<-bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4),data=bootSamp)
-	socgAge<-bam(g~s(cbcl_scr_syn_social_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4),data=bootSamp)
-	attgAge<-bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4),data=bootSamp)
-	rulgAge<-bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4),data=bootSamp)
-	agggAge<-bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4),data=bootSamp)
+	pgAge<-bam(g~poly(cbcl_scr_syn_totprob_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2),data=bootSamp)
+	intgAge<-bam(g~poly(cbcl_scr_syn_internal_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2),data=bootSamp)
+	extgAge<-bam(g~poly(cbcl_scr_syn_external_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2),data=bootSamp)
+	somgAge<-bam(g~poly(cbcl_scr_syn_somatic_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2),data=bootSamp)
+	anxgAge<-bam(g~poly(cbcl_scr_syn_anxdep_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2),data=bootSamp)
+	thogAge<-bam(g~poly(cbcl_scr_syn_thought_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2),data=bootSamp)
+	witgAge<-bam(g~poly(cbcl_scr_syn_withdep_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2),data=bootSamp)
+	socgAge<-bam(g~poly(cbcl_scr_syn_social_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2),data=bootSamp)
+	attgAge<-bam(g~poly(cbcl_scr_syn_attention_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2),data=bootSamp)
+	rulgAge<-bam(g~poly(cbcl_scr_syn_rulebreak_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2),data=bootSamp)
+	agggAge<-bam(g~poly(cbcl_scr_syn_aggressive_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2),data=bootSamp)
 	## include edu ####
-	edu_pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(parental_education,k=4),data=bootSamp)
-	edu_intgAge<-bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(parental_education,k=4),data=bootSamp)
-	edu_extgAge<-bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(parental_education,k=4),data=bootSamp)
-	edu_somgAge<-bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(parental_education,k=4),data=bootSamp)
-	edu_anxgAge<-bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(parental_education,k=4),data=bootSamp)
-	edu_thogAge<-bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(parental_education,k=4),data=bootSamp)
-	edu_witgAge<-bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(parental_education,k=4),data=bootSamp)
-	edu_socgAge<-bam(g~s(cbcl_scr_syn_social_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(parental_education,k=4),data=bootSamp)
-	edu_attgAge<-bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(parental_education,k=4),data=bootSamp)
-	edu_rulgAge<-bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(parental_education,k=4),data=bootSamp)
-	edu_agggAge<-bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(parental_education,k=4),data=bootSamp)
+	edu_pgAge<-bam(g~poly(cbcl_scr_syn_totprob_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(parental_education,2),data=bootSamp)
+	edu_intgAge<-bam(g~poly(cbcl_scr_syn_internal_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(parental_education,2),data=bootSamp)
+	edu_extgAge<-bam(g~poly(cbcl_scr_syn_external_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(parental_education,2),data=bootSamp)
+	edu_somgAge<-bam(g~poly(cbcl_scr_syn_somatic_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(parental_education,2),data=bootSamp)
+	edu_anxgAge<-bam(g~poly(cbcl_scr_syn_anxdep_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(parental_education,2),data=bootSamp)
+	edu_thogAge<-bam(g~poly(cbcl_scr_syn_thought_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(parental_education,2),data=bootSamp)
+	edu_witgAge<-bam(g~poly(cbcl_scr_syn_withdep_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(parental_education,2),data=bootSamp)
+	edu_socgAge<-bam(g~poly(cbcl_scr_syn_social_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(parental_education,2),data=bootSamp)
+	edu_attgAge<-bam(g~poly(cbcl_scr_syn_attention_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(parental_education,2),data=bootSamp)
+	edu_rulgAge<-bam(g~poly(cbcl_scr_syn_rulebreak_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(parental_education,2),data=bootSamp)
+	edu_agggAge<-bam(g~poly(cbcl_scr_syn_aggressive_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(parental_education,2),data=bootSamp)
 	# include both income and edu
-	both_pgAge<-bam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4)+s(parental_education,k=4),data=bootSamp)
-	both_intgAge<-bam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4)+s(parental_education,k=4),data=bootSamp)
-	both_extgAge<-bam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4)+s(parental_education,k=4),data=bootSamp)
-	both_somgAge<-bam(g~s(cbcl_scr_syn_somatic_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4)+s(parental_education,k=4),data=bootSamp)
-	both_anxgAge<-bam(g~s(cbcl_scr_syn_anxdep_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4)+s(parental_education,k=4),data=bootSamp)
-	both_thogAge<-bam(g~s(cbcl_scr_syn_thought_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4)+s(parental_education,k=4),data=bootSamp)
-	both_witgAge<-bam(g~s(cbcl_scr_syn_withdep_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4)+s(parental_education,k=4),data=bootSamp)
-	both_socgAge<-bam(g~s(cbcl_scr_syn_social_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4)+s(parental_education,k=4),data=bootSamp)
-	both_attgAge<-bam(g~s(cbcl_scr_syn_attention_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4)+s(parental_education,k=4),data=bootSamp)
-	both_rulgAge<-bam(g~s(cbcl_scr_syn_rulebreak_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4)+s(parental_education,k=4),data=bootSamp)
-	both_agggAge<-bam(g~s(cbcl_scr_syn_aggressive_r,k=4)+s(interview_age,k=4)+s(site,bs="re")+s(income,k=4)+s(parental_education,k=4),data=bootSamp)
+	both_pgAge<-bam(g~poly(cbcl_scr_syn_totprob_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2)+poly(parental_education,2),data=bootSamp)
+	both_intgAge<-bam(g~poly(cbcl_scr_syn_internal_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2)+poly(parental_education,2),data=bootSamp)
+	both_extgAge<-bam(g~poly(cbcl_scr_syn_external_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2)+poly(parental_education,2),data=bootSamp)
+	both_somgAge<-bam(g~poly(cbcl_scr_syn_somatic_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2)+poly(parental_education,2),data=bootSamp)
+	both_anxgAge<-bam(g~poly(cbcl_scr_syn_anxdep_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2)+poly(parental_education,2),data=bootSamp)
+	both_thogAge<-bam(g~poly(cbcl_scr_syn_thought_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2)+poly(parental_education,2),data=bootSamp)
+	both_witgAge<-bam(g~poly(cbcl_scr_syn_withdep_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2)+poly(parental_education,2),data=bootSamp)
+	both_socgAge<-bam(g~poly(cbcl_scr_syn_social_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2)+poly(parental_education,2),data=bootSamp)
+	both_attgAge<-bam(g~poly(cbcl_scr_syn_attention_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2)+poly(parental_education,2),data=bootSamp)
+	both_rulgAge<-bam(g~poly(cbcl_scr_syn_rulebreak_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2)+poly(parental_education,2),data=bootSamp)
+	both_agggAge<-bam(g~poly(cbcl_scr_syn_aggressive_r,2)+poly(interview_age,2)+s(site,bs="re")+poly(income,2)+poly(parental_education,2),data=bootSamp)
 	# use PREDICTED VALUES of model fit for each symptom count for saving
 	eachPcount=seq(0:bpmax)
 	eachIntcount=seq(0:bimax)
@@ -377,78 +377,6 @@ for (b in 1:10000){
 	both_attFit[b,1:(battmax+1)]=forFitAtt
 	both_rulFit[b,1:(brulmax+1)]=forFitRul
 	both_aggFit[b,1:(baggmax+1)]=forFitAgg
-	# use DERIVATIVES of model fit for saving
-	forSplinep=derivatives(pgAge,term='s(cbcl_scr_syn_totprob_r)',partial_match = TRUE,n=bpmax+1)
-	forSplineint=derivatives(intgAge,term='s(cbcl_scr_syn_internal_r)',partial_match = TRUE,n=bimax+1)
-	forSplineext=derivatives(extgAge,term='s(cbcl_scr_syn_external_r)',partial_match = TRUE,n=bemax+1)
-	forSplinesom=derivatives(somgAge,term='s(cbcl_scr_syn_somatic_r)',partial_match = TRUE,n=bsommax+1)
-	forSplineanx=derivatives(anxgAge,term='s(cbcl_scr_syn_anxdep_r)',partial_match = TRUE,n=banxmax+1)
-	forSplinetho=derivatives(thogAge,term='s(cbcl_scr_syn_thought_r)',partial_match = TRUE,n=bthomax+1)
-	forSplinewit=derivatives(witgAge,term='s(cbcl_scr_syn_withdep_r)',partial_match = TRUE,n=bwitmax+1)
-	forSplinesoc=derivatives(socgAge,term='s(cbcl_scr_syn_social_r)',partial_match = TRUE,n=bsocmax+1)
-	forSplineatt=derivatives(attgAge,term='s(cbcl_scr_syn_attention_r)',partial_match = TRUE,n=battmax+1)
-	forSplinerul=derivatives(rulgAge,term='s(cbcl_scr_syn_rulebreak_r)',partial_match = TRUE,n=brulmax+1)
-	forSplineagg=derivatives(agggAge,term='s(cbcl_scr_syn_aggressive_r)',partial_match = TRUE,n=baggmax+1)
-	# print out fit derivatives
-	pDeriv[b,1:(bpmax+1)]=forSplinep$derivative
-	intDeriv[b,1:(bimax+1)]=forSplineint$derivative
-	extDeriv[b,1:(bemax+1)]=forSplineext$derivative
-	somDeriv[b,1:(bsommax+1)]=forSplinesom$derivative
-	anxDeriv[b,1:(banxmax+1)]=forSplineanx$derivative
-	thoDeriv[b,1:(bthomax+1)]=forSplinetho$derivative
-	witDeriv[b,1:(bwitmax+1)]=forSplinewit$derivative
-	socDeriv[b,1:(bsocmax+1)]=forSplinesoc$derivative
-	attDeriv[b,1:(battmax+1)]=forSplineatt$derivative
-	rulDeriv[b,1:(brulmax+1)]=forSplinerul$derivative
-	aggDeriv[b,1:(baggmax+1)]=forSplineagg$derivative
-	# education version of derivatives
-	forSplinep=derivatives(edu_pgAge,term='s(cbcl_scr_syn_totprob_r)',partial_match = TRUE,n=bpmax+1)
-	forSplineint=derivatives(edu_intgAge,term='s(cbcl_scr_syn_internal_r)',partial_match = TRUE,n=bimax+1)
-	forSplineext=derivatives(edu_extgAge,term='s(cbcl_scr_syn_external_r)',partial_match = TRUE,n=bemax+1)
-	forSplinesom=derivatives(edu_somgAge,term='s(cbcl_scr_syn_somatic_r)',partial_match = TRUE,n=bsommax+1)
-	forSplineanx=derivatives(edu_anxgAge,term='s(cbcl_scr_syn_anxdep_r)',partial_match = TRUE,n=banxmax+1)
-	forSplinetho=derivatives(edu_thogAge,term='s(cbcl_scr_syn_thought_r)',partial_match = TRUE,n=bthomax+1)
-	forSplinewit=derivatives(edu_witgAge,term='s(cbcl_scr_syn_withdep_r)',partial_match = TRUE,n=bwitmax+1)
-	forSplinesoc=derivatives(edu_socgAge,term='s(cbcl_scr_syn_social_r)',partial_match = TRUE,n=bsocmax+1)
-	forSplineatt=derivatives(edu_attgAge,term='s(cbcl_scr_syn_attention_r)',partial_match = TRUE,n=battmax+1)
-	forSplinerul=derivatives(edu_rulgAge,term='s(cbcl_scr_syn_rulebreak_r)',partial_match = TRUE,n=brulmax+1)
-	forSplineagg=derivatives(edu_agggAge,term='s(cbcl_scr_syn_aggressive_r)',partial_match = TRUE,n=baggmax+1)
-	# print out fit derivatives
-	edu_pDeriv[b,1:(bpmax+1)]=forSplinep$derivative
-	edu_intDeriv[b,1:(bimax+1)]=forSplineint$derivative
-	edu_extDeriv[b,1:(bemax+1)]=forSplineext$derivative
-	edu_somDeriv[b,1:(bsommax+1)]=forSplinesom$derivative
-	edu_anxDeriv[b,1:(banxmax+1)]=forSplineanx$derivative
-	edu_thoDeriv[b,1:(bthomax+1)]=forSplinetho$derivative
-	edu_witDeriv[b,1:(bwitmax+1)]=forSplinewit$derivative
-	edu_socDeriv[b,1:(bsocmax+1)]=forSplinesoc$derivative
-	edu_attDeriv[b,1:(battmax+1)]=forSplineatt$derivative
-	edu_rulDeriv[b,1:(brulmax+1)]=forSplinerul$derivative
-	edu_aggDeriv[b,1:(baggmax+1)]=forSplineagg$derivative
-	# both version of derivatives
-	forSplinep=derivatives(both_pgAge,term='s(cbcl_scr_syn_totprob_r)',partial_match = TRUE,n=bpmax+1)
-	forSplineint=derivatives(both_intgAge,term='s(cbcl_scr_syn_internal_r)',partial_match = TRUE,n=bimax+1)
-	forSplineext=derivatives(both_extgAge,term='s(cbcl_scr_syn_external_r)',partial_match = TRUE,n=bemax+1)
-	forSplinesom=derivatives(both_somgAge,term='s(cbcl_scr_syn_somatic_r)',partial_match = TRUE,n=bsommax+1)
-	forSplineanx=derivatives(both_anxgAge,term='s(cbcl_scr_syn_anxdep_r)',partial_match = TRUE,n=banxmax+1)
-	forSplinetho=derivatives(both_thogAge,term='s(cbcl_scr_syn_thought_r)',partial_match = TRUE,n=bthomax+1)
-	forSplinewit=derivatives(both_witgAge,term='s(cbcl_scr_syn_withdep_r)',partial_match = TRUE,n=bwitmax+1)
-	forSplinesoc=derivatives(both_socgAge,term='s(cbcl_scr_syn_social_r)',partial_match = TRUE,n=bsocmax+1)
-	forSplineatt=derivatives(both_attgAge,term='s(cbcl_scr_syn_attention_r)',partial_match = TRUE,n=battmax+1)
-	forSplinerul=derivatives(both_rulgAge,term='s(cbcl_scr_syn_rulebreak_r)',partial_match = TRUE,n=brulmax+1)
-	forSplineagg=derivatives(both_agggAge,term='s(cbcl_scr_syn_aggressive_r)',partial_match = TRUE,n=baggmax+1)
-	# print out fit derivatives
-	both_pDeriv[b,1:(bpmax+1)]=forSplinep$derivative
-	both_intDeriv[b,1:(bimax+1)]=forSplineint$derivative
-	both_extDeriv[b,1:(bemax+1)]=forSplineext$derivative
-	both_somDeriv[b,1:(bsommax+1)]=forSplinesom$derivative
-	both_anxDeriv[b,1:(banxmax+1)]=forSplineanx$derivative
-	both_thoDeriv[b,1:(bthomax+1)]=forSplinetho$derivative
-	both_witDeriv[b,1:(bwitmax+1)]=forSplinewit$derivative
-	both_socDeriv[b,1:(bsocmax+1)]=forSplinesoc$derivative
-	both_attDeriv[b,1:(battmax+1)]=forSplineatt$derivative
-	both_rulDeriv[b,1:(brulmax+1)]=forSplinerul$derivative
-	both_aggDeriv[b,1:(baggmax+1)]=forSplineagg$derivative
 	# print out max of unconverted versions to anchor em later
 	pMax[b]=bpmax
 	intMax[b]=bimax
@@ -501,24 +429,24 @@ for (b in 1:10000){
 # SAVEOUT
 # save out INCOME versions
 outdf=data.frame(pMax,intMax,extMax,somMax,anxMax,thoMax,witMax,socMax,attMax,rulMax,aggMax)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_sRE_inc.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_Poly_sRE_inc.rds')
 outdf=data.frame(pDeriv,intDeriv,extDeriv,somDeriv,anxDeriv,thoDeriv,witDeriv,socDeriv,attDeriv,rulDeriv,aggDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_sRE_inc.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_Poly_sRE_inc.rds')
 outdf=data.frame(pFit,intFit,extFit,somFit,anxFit,thoFit,witFit,socFit,attFit,rulFit,aggFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_sRE_inc.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_Poly_sRE_inc.rds')
 # save out EDUCATION versions: derivatives
 outdf=data.frame(edu_pDeriv,edu_intDeriv,edu_extDeriv,edu_somDeriv,edu_anxDeriv,edu_thoDeriv,edu_witDeriv,edu_socDeriv,edu_attDeriv,edu_rulDeriv,edu_aggDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_sRE_edu.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_Poly_sRE_edu.rds')
 # education versions: fit
 outdf=data.frame(edu_pFit,edu_intFit,edu_extFit,edu_somFit,edu_anxFit,edu_thoFit,edu_witFit,edu_socFit,edu_attFit,edu_rulFit,edu_aggFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_sRE_edu.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_Poly_sRE_edu.rds')
 # save out BOTH versions: derivatives
 outdf=data.frame(both_pDeriv,both_intDeriv,both_extDeriv,both_somDeriv,both_anxDeriv,both_thoDeriv,both_witDeriv,both_socDeriv,both_attDeriv,both_rulDeriv,both_aggDeriv)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_sRE_incEdu.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDerivBoots_Poly_sRE_incEdu.rds')
 # both versions: fit
 outdf=data.frame(both_pFit,both_intFit,both_extFit,both_somFit,both_anxFit,both_thoFit,both_witFit,both_socFit,both_attFit,both_rulFit,both_aggFit)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_sRE_incEdu.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_Poly_sRE_incEdu.rds')
 # save out adjusted R^2s: income, education, and both
 outdf=data.frame(pAdjR2,intAdjR2,extAdjR2,somAdjR2,anxAdjR2,thoAdjR2,witAdjR2,socAdjR2,attAdjR2,rulAdjR2,aggAdjR2,edu_pAdjR2,edu_intAdjR2,edu_extAdjR2,edu_somAdjR2,edu_anxAdjR2,edu_thoAdjR2,edu_witAdjR2,edu_socAdjR2,edu_attAdjR2,edu_rulAdjR2,edu_aggAdjR2,both_pAdjR2,both_intAdjR2,both_extAdjR2,both_somAdjR2,both_anxAdjR2,both_thoAdjR2,both_witAdjR2,both_socAdjR2,both_attAdjR2,both_rulAdjR2,both_aggAdjR2)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpAdjR2Boots_sRE_incEdu.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpAdjR2Boots_Poly_sRE_incEdu.rds')
 print('done with g~p fit bootstrapping!')

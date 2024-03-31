@@ -174,7 +174,7 @@ masterdf$poverty=0
 masterdf$poverty[masterdf$Pov_v2==1]=1
 masterdf$poverty=as.factor(masterdf$poverty)
 # loop over manual bootstrap
-for (b in 1:1000){
+for (b in 1:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -228,17 +228,17 @@ for (b in 1:1000){
 	# set age to to median for predict df, also set child symptom score to median for predict df
 	#####################################
         # set age to to median for predict df, +1 to max values because 0-max sequence is 1 > max in length.
-        predictDFp=data.frame(eachPcount,rep(median(masterdf$interview_age),bpmax+1),rep('site13',bpmax+1))
-        predictDFint=data.frame(eachIntcount,rep(median(masterdf$interview_age),bimax+1),rep('site13',bimax+1))
-        predictDFext=data.frame(eachExtcount,rep(median(masterdf$interview_age),bemax+1),rep('site13',bemax+1))
-        predictDFsom=data.frame(eachSomcount,rep(median(masterdf$interview_age),bsommax+1),rep('site13',bsommax+1))
-        predictDFanx=data.frame(eachAnxcount,rep(median(masterdf$interview_age),banxmax+1),rep('site13',banxmax+1))
-        predictDFtho=data.frame(eachThocount,rep(median(masterdf$interview_age),bthomax+1),rep('site13',bthomax+1))
-        predictDFwit=data.frame(eachWitcount,rep(median(masterdf$interview_age),bwitmax+1),rep('site13',bwitmax+1))
-        predictDFsoc=data.frame(eachSoccount,rep(median(masterdf$interview_age),bsocmax+1),rep('site13',bsocmax+1))
-        predictDFatt=data.frame(eachAttcount,rep(median(masterdf$interview_age),battmax+1),rep('site13',battmax+1))
-        predictDFrul=data.frame(eachRulcount,rep(median(masterdf$interview_age),brulmax+1),rep('site13',brulmax+1))
-        predictDFagg=data.frame(eachAggcount,rep(median(masterdf$interview_age),baggmax+1),rep('site13',baggmax+1))
+        predictDFp=data.frame(eachPcount,rep(median(masterdf$interview_age),bpmax+1),rep('site16',bpmax+1))
+        predictDFint=data.frame(eachIntcount,rep(median(masterdf$interview_age),bimax+1),rep('site16',bimax+1))
+        predictDFext=data.frame(eachExtcount,rep(median(masterdf$interview_age),bemax+1),rep('site16',bemax+1))
+        predictDFsom=data.frame(eachSomcount,rep(median(masterdf$interview_age),bsommax+1),rep('site16',bsommax+1))
+        predictDFanx=data.frame(eachAnxcount,rep(median(masterdf$interview_age),banxmax+1),rep('site16',banxmax+1))
+        predictDFtho=data.frame(eachThocount,rep(median(masterdf$interview_age),bthomax+1),rep('site16',bthomax+1))
+        predictDFwit=data.frame(eachWitcount,rep(median(masterdf$interview_age),bwitmax+1),rep('site16',bwitmax+1))
+        predictDFsoc=data.frame(eachSoccount,rep(median(masterdf$interview_age),bsocmax+1),rep('site16',bsocmax+1))
+        predictDFatt=data.frame(eachAttcount,rep(median(masterdf$interview_age),battmax+1),rep('site16',battmax+1))
+        predictDFrul=data.frame(eachRulcount,rep(median(masterdf$interview_age),brulmax+1),rep('site16',brulmax+1))
+        predictDFagg=data.frame(eachAggcount,rep(median(masterdf$interview_age),baggmax+1),rep('site16',baggmax+1))
         # set colnames so predict can work
         colnames(predictDFp)=c('cbcl_scr_syn_totprob_r','interview_age','site')
         colnames(predictDFint)=c('cbcl_scr_syn_internal_r','interview_age','site')
@@ -501,18 +501,18 @@ for (b in 1:1000){
 # SAVEOUT
 # median absolute error differences
 outdf=data.frame(pDiffMAE,intDiffMAE,extDiffMAE,somDiffMAE,anxDiffMAE,thoDiffMAE,witDiffMAE,socDiffMAE,attDiffMAE,rulDiffMAE,aggDiffMAE)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_poverty_MAE_sRE_1k.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpBoots_poverty_MAE_sRE.rds')
 # save out all difference in AIC vectors, differences in adjusted R^2 vectors
 # cbcl
 outdf=data.frame(pDiff,intDiff,extDiff,somDiff,anxDiff,thoDiff,witDiff,socDiff,attDiff,rulDiff,aggDiff,pDiffAdj,intDiffAdj,extDiffAdj,somDiffAdj,anxDiffAdj,thoDiffAdj,witDiffAdj,attDiffAdj,rulDiffAdj,aggDiffAdj)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbcl_sRE_1k.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbcl_sRE.rds')
 
 # save out pseudo versions for comparison if needed
 # cbcl
 outdf=data.frame(pDiffPseudo,intDiffPseudo,extDiffPseudo,somDiffPseudo,anxDiffPseudo,thoDiffPseudo,witDiffPseudo,socDiffPseudo,attDiffPseudo,rulDiffPseudo,aggDiffPseudo,pDiffAdjPseudo,intDiffAdjPseudo,extDiffAdjPseudo,somDiffAdjPseudo,anxDiffAdjPseudo,thoDiffAdjPseudo,witDiffAdjPseudo,attDiffAdjPseudo,rulDiffAdjPseudo,aggDiffAdjPseudo)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbclPseudo_sRE_1k.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpDiffBoots_cbclPseudo_sRE.rds')
 # save out poverty and nonpoverty fits - cbcl
 outdf=data.frame(pFitPov,pFitNonPov,intFitPov,intFitNonPov,extFitPov,extFitNonPov,somFitPov,somFitNonPov,anxFitPov,anxFitNonPov,thoFitPov,thoFitNonPov,witFitPov,witFitNonPov,socFitPov,socFitNonPov,attFitPov,attFitNonPov,rulFitPov,rulFitNonPov,aggFitPov,aggFitNonPov)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_cbcl_pNp_sRE_1k.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gpFitBoots_cbcl_pNp_sRE.rds')
 
 print('done with g~p fit bootstrapping!')

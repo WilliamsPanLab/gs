@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#SBATCH --job-name=Fig1Fin
+#SBATCH --job-name=1_Boots_Poly_siteRE_incEdu
 #SBATCH --time=7-00:00:00
 #SBATCH -p leanew1  # Queue names you can submit to
 #SBATCH -n 1
@@ -10,4 +10,4 @@
 #SBATCH --mail-type=ALL
 # ------------------------------------------
 module load R/4.1
-Rscript Fig1_Boots_CvSC.R
+Rscript Fig1_Boots_Poly_siteRE_incEdu.R
