@@ -195,7 +195,12 @@ for (b in 1:1000){
 	subjects_pintAbove = sample(unqSubjs$subjectkey, nsubjects_intAbove)
 	subjects_pextAbove = sample(unqSubjs$subjectkey, nsubjects_extAbove)
 	# sample pbelow from remaining subjects (pseudobelow)
-
+	remainingSubjects_pp = setdiff(unqSubjs$subjectkey, subjects_ppAbove)
+	remainingSubjects_pint = setdiff(unqSubjs$subjectkey, subjects_pintAbove)
+	remainingSubjects_pext = setdiff(unqSubjs$subjectkey, subjects_pextAbove)
+	subjects_ppBelow = sample(remainingSubjects_pp, nsubjects_pBelow)
+	subjects_pintBelow = sample(remainingSubjects_pint, nsubjects_intBelow)
+	subjects_pextBelow = sample(remainingSubjects_pext, nsubjects_extBelow)
 	#subjects_psomAbove = sample(unqSubjs$subjectkey, nsubjects_somAbove)
 	#subjects_panxAbove = sample(unqSubjs$subjectkey, nsubjects_anxAbove)
 	#subjects_pthoAbove = sample(unqSubjs$subjectkey, nsubjects_thoAbove)
@@ -208,6 +213,9 @@ for (b in 1:1000){
 	bootSamp$ppAbove = 0
 	bootSamp$pintAbove = 0
 	bootSamp$pextAbove = 0
+	bootSamp$ppBelow=0
+	bootSamp$pintBelow=0
+	bootSamp$pextBelow=0
 	#bootSamp$psomAbove = 0
 	#bootSamp$panxAbove = 0
 	#bootSamp$pthoAbove = 0
@@ -220,6 +228,9 @@ for (b in 1:1000){
 	bootSamp$ppAbove[bootSamp$subjectkey %in% subjects_ppAbove] = 1
 	bootSamp$pintAbove[bootSamp$subjectkey %in% subjects_pintAbove] = 1
 	bootSamp$pextAbove[bootSamp$subjectkey %in% subjects_pextAbove] = 1
+	bootSamp$ppBelow[bootSamp$subjectkey %in% subjects_ppBelow] = 1
+	bootSamp$pintBelow[bootSamp$subjectkey %in% subjects_pintBelow] = 1
+	bootSamp$pextBelow[bootSamp$subjectkey %in% subjects_pextBelow] = 1
 	#bootSamp$psomAbove[bootSamp$subjectkey %in% subjects_psomAbove] = 1
 	#bootSamp$panxAbove[bootSamp$subjectkey %in% subjects_panxAbove] = 1
 	#bootSamp$pthoAbove[bootSamp$subjectkey %in% subjects_pthoAbove] = 1
@@ -228,13 +239,14 @@ for (b in 1:1000){
 	#bootSamp$pattAbove[bootSamp$subjectkey %in% subjects_pattAbove] = 1
 	#bootSamp$prulAbove[bootSamp$subjectkey %in% subjects_prulAbove] = 1
 	#bootSamp$paggAbove[bootSamp$subjectkey %in% subjects_paggAbove] = 1
+
 	# turn into pAboveDf and pBelowDf: need to select on subj IDs to avoid capturing mid tertile
 	pAboveDF = bootSamp[bootSamp$ppAbove == 1,]
-	pBelowDF = bootSamp[bootSamp$ppAbove == 0,]
+	pBelowDF = bootSamp[bootSamp$ppBelow == 1,]
 	intAboveDF = bootSamp[bootSamp$pintAbove == 1,]
-	intBelowDF = bootSamp[bootSamp$pintAbove == 0,]
+	intBelowDF = bootSamp[bootSamp$pintBelow == 1,]
 	extAboveDF = bootSamp[bootSamp$pextAbove == 1,]
-	extBelowDF = bootSamp[bootSamp$pextAbove == 0,]
+	extBelowDF = bootSamp[bootSamp$pextBelow == 1,]
 	#somAboveDF = bootSamp[bootSamp$psomAbove == 1,]
 	#somBelowDF = bootSamp[bootSamp$psomAbove == 0,]
 	#anxAboveDF = bootSamp[bootSamp$panxAbove == 1,]
@@ -288,14 +300,15 @@ for (b in 1:1000){
 	#attBetaDiff[b]=attBelowBeta-attAboveBeta
 	#rulBetaDiff[b]=rulBelowBeta-rulAboveBeta
 	#aggBetaDiff[b]=aggBelowBeta-aggAboveBeta
+
 	# now use bootstrap sample to record clin beta and subclin betas for this iteration
 	# make real clin vs. subclin split based on thresholds
 	pClinDF=bootSamp[bootSamp$cbcl_scr_syn_totprob_r>CvSC$Pc,]
-	pSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_totprob_r<CvSC$Pbc,]
+	pSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_totprob_r<=CvSC$Pbc,]
 	intClinDF=bootSamp[bootSamp$cbcl_scr_syn_internal_r>CvSC$Ic,]
-	intSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_internal_r<CvSC$Ibc,]
+	intSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_internal_r<=CvSC$Ibc,]
 	extClinDF=bootSamp[bootSamp$cbcl_scr_syn_external_r>CvSC$Ec,]
-	extSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_external_r<CvSC$Ebc,]
+	extSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_external_r<=CvSC$Ebc,]
 	#somClinDF=bootSamp[bootSamp$cbcl_scr_syn_somatic_r>CvSC$SomC,]
 	#somSubclinDF=bootSamp[bootSamp$cbcl_scr_syn_somatic_r<CvSC$SomBc,]
 	#anxClinDF=bootSamp[bootSamp$cbcl_scr_syn_anxdep_r>CvSC$AnxC,]
