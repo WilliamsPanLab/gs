@@ -164,6 +164,9 @@ for (b in 1:1000){
 	subjects_pAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_totprob_r > CvSC$Pc]
 	subjects_intAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_internal_r > CvSC$Ic]
 	subjects_extAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_external_r > CvSC$Ec]
+	subjects_pBelow = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_totprob_r <= CvSC$Pbc]
+	subjects_intBelow = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_internal_r <= CvSC$Ibc]
+	subjects_extBelow = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_external_r <= CvSC$Ebc]
 	#subjects_somAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_somatic_r > CvSC$SomC]
 	#subjects_anxAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_anxdep_r > CvSC$AnxC]
 	#subjects_thoAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_thought_r > CvSC$ThoC]
@@ -176,6 +179,9 @@ for (b in 1:1000){
 	nsubjects_pAbove = length(subjects_pAbove)
 	nsubjects_intAbove = length(subjects_intAbove)
 	nsubjects_extAbove = length(subjects_extAbove)
+	nsubjects_pBelow = length(subjects_pBelow)
+	nsubjects_intBelow = length(subjects_intBelow)
+	nsubjects_extBelow = length(subjects_extBelow)
 	#nsubjects_somAbove = length(subjects_somAbove)
 	#nsubjects_anxAbove = length(subjects_anxAbove)
 	#nsubjects_thoAbove = length(subjects_thoAbove)
@@ -188,6 +194,8 @@ for (b in 1:1000){
 	subjects_ppAbove = sample(unqSubjs$subjectkey, nsubjects_pAbove)
 	subjects_pintAbove = sample(unqSubjs$subjectkey, nsubjects_intAbove)
 	subjects_pextAbove = sample(unqSubjs$subjectkey, nsubjects_extAbove)
+	# sample pbelow from remaining subjects (pseudobelow)
+
 	#subjects_psomAbove = sample(unqSubjs$subjectkey, nsubjects_somAbove)
 	#subjects_panxAbove = sample(unqSubjs$subjectkey, nsubjects_anxAbove)
 	#subjects_pthoAbove = sample(unqSubjs$subjectkey, nsubjects_thoAbove)
@@ -220,7 +228,7 @@ for (b in 1:1000){
 	#bootSamp$pattAbove[bootSamp$subjectkey %in% subjects_pattAbove] = 1
 	#bootSamp$prulAbove[bootSamp$subjectkey %in% subjects_prulAbove] = 1
 	#bootSamp$paggAbove[bootSamp$subjectkey %in% subjects_paggAbove] = 1
-	# turn into pAboveDf and pBelowDf
+	# turn into pAboveDf and pBelowDf: need to select on subj IDs to avoid capturing mid tertile
 	pAboveDF = bootSamp[bootSamp$ppAbove == 1,]
 	pBelowDF = bootSamp[bootSamp$ppAbove == 0,]
 	intAboveDF = bootSamp[bootSamp$pintAbove == 1,]
