@@ -159,7 +159,7 @@ for (b in 1:1000){
                 bootSamp <- rbind(bootSamp, subject_obs)
         }
 	# ############ ######## sample split based on randomly sampling subjects, not rows
-	unqSubjs=bootSamp[duplicated(bootSamp$subjectkey),]
+	unqSubjs=bootSamp[!duplicated(bootSamp$subjectkey),]
         # get counts of # in clinical threshold for this boot
 	subjects_pAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_totprob_r > CvSC$Pc]
 	subjects_intAbove = unqSubjs$subjectkey[unqSubjs$cbcl_scr_syn_internal_r > CvSC$Ic]
@@ -198,6 +198,7 @@ for (b in 1:1000){
 	remainingSubjects_pp = setdiff(unqSubjs$subjectkey, subjects_ppAbove)
 	remainingSubjects_pint = setdiff(unqSubjs$subjectkey, subjects_pintAbove)
 	remainingSubjects_pext = setdiff(unqSubjs$subjectkey, subjects_pextAbove)
+	# pull pseudobelow from remaining subjects to not include people in both psuedogroups
 	subjects_ppBelow = sample(remainingSubjects_pp, nsubjects_pBelow)
 	subjects_pintBelow = sample(remainingSubjects_pint, nsubjects_intBelow)
 	subjects_pextBelow = sample(remainingSubjects_pext, nsubjects_extBelow)
