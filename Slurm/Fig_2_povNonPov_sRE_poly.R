@@ -174,7 +174,7 @@ masterdf$poverty=0
 masterdf$poverty[masterdf$Pov_v2==1]=1
 masterdf$poverty=as.factor(masterdf$poverty)
 # loop over manual bootstrap
-for (b in 1:1000){
+for (b in 1:10000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)

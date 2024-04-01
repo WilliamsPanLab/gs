@@ -147,7 +147,7 @@ Extdiff=ExtsubBeta-ExtClinBeta
 #Ruldiff=RulsubBeta-RulClinBeta
 #Aggdiff=AggsubBeta-AggClinBeta
 # for each permutation
-for (b in 1:1000){
+for (b in 1:10000){
 	print(b)
 	# get subjects to include in this bootstrap
         BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -366,11 +366,11 @@ extBetaDiff[10001]=Extdiff
 #outdf=data.frame(pBetaDiff,intBetaDiff,extBetaDiff,somBetaDiff,anxBetaDiff,thoBetaDiff,witBetaDiff,socBetaDiff,attBetaDiff,rulBetaDiff,aggBetaDiff)
 #saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_diffs_1k.rds')
 outdf=data.frame(pBetaDiff,intBetaDiff,extBetaDiff)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_diffs_1k.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_diffs.rds')
 
 # save out all bootstrapped betas in one dataframe
 #outdf=data.frame(pClinBeta,pSubclinBeta,intClinBeta,intSubclinBeta,extClinBeta,extSubclinBeta,somClinBeta,somSubclinBeta,anxClinBeta,anxSubclinBeta,thoClinBeta,thoSubclinBeta,witClinBeta,witSubclinBeta,socClinBeta,socSubclinBeta,attClinBeta,attSubclinBeta,rulClinBeta,rulSubclinBeta,aggClinBeta,aggSubclinBeta)
 outdf=data.frame(pClinBeta,pSubclinBeta,intClinBeta,intSubclinBeta,extClinBeta,extSubclinBeta)
-saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_bootBetas_1k.rds')
+saveRDS(outdf,'/oak/stanford/groups/leanew1/users/apines/data/gp/gp_CvSC_bootBetas.rds')
 print('done with g~p fit bootstrapping!')
 
