@@ -489,6 +489,11 @@ paste0(parentDemo_TSVSubjs,' remain')
 includedSubjects$PD=0
 includedSubjects[includedSubjects$subj %in% unique(masterdf$subjectkey),]$PD=1
 
+```
+
+```{r}
+# after finding the kid with flawed cognitive data
+
 #########################
 #########################
 #########################
@@ -590,26 +595,88 @@ masterdf_pub_filtered$stage <- ifelse(masterdf_pub_filtered$pds_p_ss_male_catego
 # proceed with single-observation per-subject modeling, i.e., no bootstraps
 masterdf_pub=masterdf_pub_filtered[masterdf_pub_filtered$eventname=='baseline_year_1_arm_1',]
 
-# evaluate impact of including puberty measure on g ~ p + age
+### evaluate impact of including puberty measure on g ~ total problems + age
 fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage,data=masterdf_pub)
 reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4),data=masterdf_pub)
 
-# evaluate impact of including puberty measure on g ~ p + age + income
-fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage+s(income,k=4),data=masterdf_pub)
-reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(income,k=4),data=masterdf_pub)
+# 99th percentile
+p99=quantile(masterdf$cbcl_scr_syn_totprob_r,.99)
 
-fullMod=gam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+stage+s(income,k=4),data=masterdf_pub)
-reducedMod=gam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+s(income,k=4),data=masterdf_pub)
+effect_range <- with(data, seq(0, p99), length.out = 100)
+pred_data <- data.frame(cbcl_scr_syn_totprob_r = effect_range)
+pred_data$interview_age=mean(masterdf_pub$interview_age)
+# modal stage
+pred_data$stage=1
+pred_data$stage=as.factor(pred_data$stage)
 
-fullMod=gam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+stage+s(income,k=4),data=masterdf_pub)
-reducedMod=gam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+s(income,k=4),data=masterdf_pub)
+pred_data$full_pred <- predict(fullMod, newdata = pred_data)
+pred_data$reduced_pred <- predict(reducedMod, newdata = pred_data)
 
-# evaluate impact of including puberty measure on g ~ p + age + edu
-#fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage+s(parental_education,k=4),data=masterdf_pub)
-#reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(parental_education,k=4),data=masterdf_pub)
-# evaluate impact of including puberty measure on g ~ p + age + edu + income
-#fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+stage+s(parental_education,k=4)+s(income,k=4),data=masterdf_pub)
-#reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4)+s(parental_education,k=4)+s(income,k=4),data=masterdf_pub)
+# plot it out
+ggplot() +
+  geom_line(data = pred_data, aes(x = cbcl_scr_syn_totprob_r, y = full_pred), colour = "blue", size = 1) +
+  geom_line(data = pred_data, aes(x = cbcl_scr_syn_totprob_r, y = reduced_pred), colour = "red", size = 1) + labs(x = "cbcl_scr_syn_totprob_r", y = "g", title = paste("Total Problems")) +
+    theme_minimal()
+
+
+### int
+fullMod=gam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4)+stage,data=masterdf_pub)
+reducedMod=gam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4),data=masterdf_pub)
+
+# 99th percentile
+i99=quantile(masterdf$cbcl_scr_syn_internal_r,.99)
+
+effect_range <- with(data, seq(0, i99), length.out = 100)
+pred_data <- data.frame(cbcl_scr_syn_internal_r = effect_range)
+pred_data$interview_age=mean(masterdf_pub$interview_age)
+# modal stage
+pred_data$stage=1
+pred_data$stage=as.factor(pred_data$stage)
+
+pred_data$full_pred <- predict(fullMod, newdata = pred_data)
+pred_data$reduced_pred <- predict(reducedMod, newdata = pred_data)
+
+# plot it out
+ggplot() +
+  geom_line(data = pred_data, aes(x = cbcl_scr_syn_internal_r, y = full_pred), colour = "blue", size = 1) +
+  geom_line(data = pred_data, aes(x = cbcl_scr_syn_internal_r, y = reduced_pred), colour = "red", size = 1) + labs(x = "cbcl_scr_syn_internal_r", y = "g", title = paste("Internalizing")) +
+    theme_minimal()
+
+
+### ext
+fullMod=gam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4)+stage,data=masterdf_pub)
+reducedMod=gam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4),data=masterdf_pub)
+
+# 99th percentile
+e99=quantile(masterdf$cbcl_scr_syn_external_r,.99)
+
+effect_range <- with(data, seq(0, e99), length.out = 100)
+pred_data <- data.frame(cbcl_scr_syn_external_r = effect_range)
+pred_data$interview_age=mean(masterdf_pub$interview_age)
+# modal stage
+pred_data$stage=1
+pred_data$stage=as.factor(pred_data$stage)
+
+pred_data$full_pred <- predict(fullMod, newdata = pred_data)
+pred_data$reduced_pred <- predict(reducedMod, newdata = pred_data)
+
+# plot it out
+ggplot() +
+  geom_line(data = pred_data, aes(x = cbcl_scr_syn_external_r, y = full_pred), colour = "blue", size = 1) +
+  geom_line(data = pred_data, aes(x = cbcl_scr_syn_external_r, y = reduced_pred), colour = "red", size = 1) + labs(x = "cbcl_scr_syn_external_r", y = "g", title = paste("Externalizing")) +
+    theme_minimal()
+
+
+### and model just for g and pubertal status
+
+model <- gam(g ~ s(interview_age, k=4), data=masterdf_pub)
+plotdf=data.frame(residuals(model))
+plotdf$stage=masterdf_pub$stage
+ggplot(plotdf, aes(x = stage, y = residuals.model.)) +
+  geom_boxplot() +
+  labs(x = "Stage", y = "g") +
+  scale_x_discrete(labels = c("prepuberty", "early puberty", "mid puberty", "late puberty", "post puberty")) +
+  theme_minimal(base_size=20)
 ```
 
 ```{r}
@@ -634,7 +701,6 @@ bpm$interview_age<-as.numeric(bpm$interview_age)/12
 # Remove rows containing 777 or 999 in any column
 bpm <- bpm[!apply(bpm, 1, function(row) any(row %in% c(777, 999))), ]
 
-
 # recreate internalizing
 bpm$bpInt=as.numeric(bpm$bpm_9_y)+as.numeric(bpm$bpm_11_y)+as.numeric(bpm$bpm_12_y)+as.numeric(bpm$bpm_13_y)+as.numeric(bpm$bpm_18_y)+as.numeric(bpm$bpm_19_y)
 # recreate externalizing
@@ -643,6 +709,10 @@ bpm$bpExt=as.numeric(bpm$bpm_2_y)+as.numeric(bpm$bpm_6_y)+as.numeric(bpm$bpm_7_y
 bpm$bpAtt=as.numeric(bpm$bpm_1_y)+as.numeric(bpm$bpm_3_y)+as.numeric(bpm$bpm_4_y)+as.numeric(bpm$bpm_5_y)+as.numeric(bpm$bpm_10_y)+as.numeric(bpm$bpm_14_y)
 # recreate total problems
 bpm$bpTot=as.numeric(bpm$bpm_1_y)+as.numeric(bpm$bpm_2_y)+as.numeric(bpm$bpm_3_y)+as.numeric(bpm$bpm_4_y)+as.numeric(bpm$bpm_5_y)+as.numeric(bpm$bpm_6_y)+as.numeric(bpm$bpm_7_y)+as.numeric(bpm$bpm_8_y)+as.numeric(bpm$bpm_9_y)+as.numeric(bpm$bpm_10_y)+as.numeric(bpm$bpm_11_y)+as.numeric(bpm$bpm_12_y)+as.numeric(bpm$bpm_13_y)+as.numeric(bpm$bpm_14_y)+as.numeric(bpm$bpm_15_y)+as.numeric(bpm$bpm_16_y)+as.numeric(bpm$bpm_17_y)+as.numeric(bpm$bpm_18_y)+as.numeric(bpm$bpm_19_y)
+
+# Remove NA entry
+bpm <- bpm[!is.na(bpm$bpTot),]
+
 
 # merge and count losses
 masterdf_BPM<-merge(masterdf,bpm,by=c('subjectkey','eventname','interview_age','sex'))
@@ -653,12 +723,71 @@ includedSubjects[includedSubjects$subj %in% unique(masterdf_BPM$subjectkey),]$BP
 # print data volume
 bpmSubjs=length(unique(masterdf_BPM$subjectkey))
 print(bpmSubjs)
-dif=cbclSubjsBoth-parentDemo_TSVSubjs
+dif=parentDemo_TSVSubjs-bpmSubjs
 print(paste0(dif,' participants lost from BPM merge'))
 
 # included subjs df
 includedSubjects$BPM=0
 includedSubjects[includedSubjects$subj %in% unique(masterdf_BPM$subjectkey),]$BPM=1
+
+```
+
+```{r}
+# BPM robustness analysis - total problems
+### total problems
+fullMod=gam(g~s(bpTot,k=4)+s(interview_age,k=4),data=masterdf_BPM)
+reduced=gam(g~s(interview_age,k=4),data=masterdf_BPM)
+# explicitly test sig
+anova.gam(fullMod,reduced,test='Chisq')
+
+### internalizing
+fullMod=gam(g~s(bpInt,k=4)+s(interview_age,k=4),data=masterdf_BPM)
+reduced=gam(g~s(interview_age,k=4),data=masterdf_BPM)
+# explicitly test sig
+anova.gam(fullMod,reduced,test='Chisq')
+
+### externalizing
+fullMod=gam(g~s(bpExt,k=4)+s(interview_age,k=4),data=masterdf_BPM)
+reduced=gam(g~s(interview_age,k=4),data=masterdf_BPM)
+# explicitly test sig
+anova.gam(fullMod,reduced,test='Chisq')
+# 99th percentile
+e99=quantile(masterdf_BPM$bpExt,.99)
+
+# plot out residuals 
+plotdf<-data.frame(masterdf_BPM$bpExt)
+plotdf$residuals<-reduced$residuals
+
+# plot it out
+ggplot(data = plotdf, aes(x = masterdf_BPM.bpExt, y = residuals)) +
+  geom_point()+
+  geom_smooth(method="gam",formula=y~s(x,bs="tp",fx=TRUE,k=4))+
+  labs(x = "BPM Externalizing", y = "g") +
+    theme_minimal()+xlim(c(0,e99))
+
+```
+
+```{r}
+# BPM robustness analysis - internal
+
+```
+
+```{r}
+# BPM robustness analysis - external
+
+```
+
+```{r}
+
+# evaluate impact of including bpm vs. cbcl
+fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4),data=masterdf_BPM)
+reducedMod=gam(g~s(bpTot,k=4)+s(interview_age,k=4),data=masterdf_BPM)
+# int
+fullMod=gam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4),data=masterdf_BPM)
+reducedMod=gam(g~poly(bpInt,2)+s(interview_age,k=4),data=masterdf_BPM)
+# ext
+fullMod=gam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4),data=masterdf_BPM)
+reducedMod=gam(g~s(bpExt,k=4)+s(interview_age,k=4),data=masterdf_BPM)
 ```
 
 ```{r}
