@@ -205,6 +205,10 @@ paste('aggr. nonlin:',AIC(aggAge)<AIC(aggAgeL))
 ```
 
 ```{r}
+
+
+# no longer basis of sample splits, consider retaining for reference
+
 # pull clinical cutoff from master df: t scores > 65 = borderline clinical, 69 = clinical
 # https://onlinelibrary.wiley.com/doi/epdf/10.1002/mrdd.20071
 # https://aseba.org/wp-content/uploads/2019/02/cbclprofile.pdf
@@ -214,19 +218,22 @@ masterdfP_c<-masterdf[masterdf$cbcl_scr_syn_totprob_t==69,]
 Pbc=mean(masterdfP_bc$cbcl_scr_syn_totprob_r)
 Pc=mean(masterdfP_c$cbcl_scr_syn_totprob_r)
 
+PTL=quantile(masterdf$cbcl_scr_syn_totprob_r,0.33)
+PTH=quantile(masterdf$cbcl_scr_syn_totprob_r,0.67)
+
 # reference linear model
 plotdf<-data.frame(masterdf$g,masterdf$cbcl_scr_syn_totprob_r,masterdf$interview_age)
 colnames(plotdf)<-c('g','cbcl_scr_syn_totprob_r','interview_age')
-modelforresids<-gam(g~s(interview_age),data=plotdf)
+modelforresids<-lm(g~interview_age,data=plotdf)
 plotdf$resids<-modelforresids$residuals
 
-basic=ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=60)+
+basic=ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=40)+
     geom_point(alpha=0)+
-    geom_smooth(method = "lm",formula = y~x,color='gray') +
-    scale_fill_viridis_c(option = "inferno") +
+    geom_smooth(method = "lm",formula = y~x,color='gray',size=2) +
+    scale_fill_viridis_c(option = "inferno",limits=c(0,140)) +
     ylim(c(-3.9,4.7)) +
     theme_minimal(base_size=35) + 
-    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    ylab(expression(italic(g)))+xlab('Total Problems')+
     geom_vline(xintercept = Pbc, linetype = "dashed")+
     geom_vline(xintercept = Pc, linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
@@ -244,17 +251,17 @@ cor.test(plotdf$cbcl_scr_syn_totprob_r,plotdf$resids)
 # r^2 full
 cor.test(plotdf$cbcl_scr_syn_totprob_r,plotdf$resids)$estimate^2
 # rclinical
-clindf<-masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_r)>Pc,]
+clindf<-masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_r)>PTH,]
 # same covarying for age
-modelforresids<-gam(g~s(interview_age),data=clindf)
+modelforresids<-lm(g~interview_age,data=clindf)
 clindf$resids<-modelforresids$residuals
 cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)
 # r^2 clinical
 cor.test(clindf$cbcl_scr_syn_totprob_r,clindf$resids)$estimate^2
 # rsubclinical
-sclindf<-masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_r)<Pbc,]
+sclindf<-masterdf[as.numeric(masterdf$cbcl_scr_syn_totprob_r)<=PTL,]
 # same covarying for age
-modelforresids<-gam(g~s(interview_age),data=sclindf)
+modelforresids<-lm(g~interview_age,data=sclindf)
 sclindf$resids<-modelforresids$residuals
 cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)
 # r^2 subclinical
@@ -266,16 +273,16 @@ cor.test(sclindf$cbcl_scr_syn_totprob_r,sclindf$resids)$estimate^2
 # plot out clinical and subclinical with line of best fit, covarying for age
 plotdf<-data.frame(clindf$g,clindf$cbcl_scr_syn_totprob_r,clindf$interview_age)
 colnames(plotdf)<-c('g','cbcl_scr_syn_totprob_r','interview_age')
-modelforresids<-gam(g~s(interview_age),data=plotdf)
+modelforresids<-lm(g~interview_age,data=plotdf)
 plotdf$resids<-modelforresids$residuals
-# clinical
+# high tertile
 ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=30)+
     geom_point(alpha=0)+
-    geom_smooth(method = "lm",formula = y~x,color='gray') +
-    scale_fill_viridis_c(option = "inferno") +
+    geom_smooth(method = "lm",formula = y~x,color='gray',size=3) +
+    scale_fill_viridis_c(option = "inferno",limits = c(0, 140)) +
     ylim(c(-3.9,4.7)) +
     theme_minimal(base_size=35) + 
-    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    ylab(expression(italic(g)))+xlab('Total Problems')+
     geom_vline(xintercept = Pbc, linetype = "dashed")+
     geom_vline(xintercept = min(clindf$cbcl_scr_syn_totprob_r), linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
@@ -288,19 +295,21 @@ lmforBeta
 # subclinical
 plotdf<-data.frame(sclindf$g,sclindf$cbcl_scr_syn_totprob_r,sclindf$interview_age)
 colnames(plotdf)<-c('g','cbcl_scr_syn_totprob_r','interview_age')
-modelforresids<-gam(g~s(interview_age),data=plotdf)
+modelforresids<-lm(g~interview_age,data=plotdf)
 plotdf$resids<-modelforresids$residuals
 ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bins=40)+
     geom_point(alpha=0)+
-    geom_smooth(method = "lm",formula = y~x,color='gray') +
-    scale_fill_viridis_c(option = "inferno") +
+    geom_smooth(method = "lm",formula = y~x,color='gray',size=4) +
+    scale_fill_viridis_c(option = "inferno",limits = c(0, 140)) +
     ylim(c(-3.9,4.7)) +
     theme_minimal(base_size=35) + 
-    ylab(expression(italic(g)))+xlab(expression(italic(p)))+
+    ylab(expression(italic(g)))+xlab('Total Problems')+
     geom_vline(xintercept = Pbc, linetype = "dashed")+
     geom_vline(xintercept = min(clindf$cbcl_scr_syn_totprob_r), linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
     scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))
+
+# save out at 750 x 800
 
 lmforBeta<-lm(resids~cbcl_scr_syn_totprob_r,data=plotdf)
 lmforBeta
@@ -326,7 +335,7 @@ library(dplyr)
 
 # Calculate percentiles and create a new column for grouping
 percentile_df <- plotdf %>%
-  mutate(percentile_group = cut_interval(cbcl_scr_syn_totprob_r, n = 4, labels = FALSE))
+  mutate(percentile_group = cut_number(cbcl_scr_syn_totprob_r, n = 3, labels = FALSE))
 
 # Calculate beta values for each percentile group
 corr_values <- list()
@@ -381,7 +390,7 @@ anim_save(
 # insert subclinical vs. clincal bootstrapped betas as horizontal box-and-whiskers,consider adding permuted vs. median observed difference
 ### ∆∆∆∆∆∆∆∆
 # actual beta fits are under gp_CvSC_bootBetas
-Fits1=readRDS('~/Downloads/gp_CvSC_bootBetas_1k.rds')
+Fits1=readRDS('~/Downloads/gp_CvSC_bootBetas_1k (1).rds')
 Fits2=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas2.rds')
 Fits3=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas3.rds')
 Fits4=readRDS('~/Desktop/g_p/gp_CvSC_bootBetas4.rds')
@@ -392,7 +401,7 @@ Fits1[6001:8000,]=Fits4[6001:8000,]
 Fits1[8001:10000,]=Fits5[8001:10000,]
 
 # get differences in betas between real and permuted clinical groups
-Diffs1=readRDS('~/Downloads/gp_CvSC_bootBetas_1k.rds')
+Diffs1=readRDS('~/Downloads/gp_CvSC_diffs_1k (1).rds')
 Diffs2=readRDS('~/Desktop/g_p/gp_CvSC_diffs2.rds')
 Diffs3=readRDS('~/Desktop/g_p/gp_CvSC_diffs3.rds')
 Diffs4=readRDS('~/Desktop/g_p/gp_CvSC_diffs4.rds')
@@ -408,21 +417,25 @@ Diffs1[8001:10000,]=Diffs5[8001:10000,]
 # make horizontal box and whiskers for betas from clinical and subclincal for each scale
 # denote significance using observed beta difference vs. permutations
 
+
+# temp
+Fits1=Fits1[1:1000,]
+
 # P
 FitsP_long <- Fits1 %>%
   select(pSubclinBeta,pClinBeta) %>%
   tidyr::gather(key = "Variable", value = "Value")
 # create cleaner labels for plot
 FitsP_long <- FitsP_long %>%
-  mutate(Labels = factor(ifelse(Variable == 'pSubclinBeta', 'Subclinical', 'Clinical')))
+  mutate(Labels = factor(ifelse(Variable == 'pSubclinBeta', 'Lowest Tert.', 'Highest Tert.')))
 # re order for plot
-FitsP_long$Labels <- factor(FitsP_long$Labels, levels = c("Subclinical", "Clinical"))
+FitsP_long$Labels <- factor(FitsP_long$Labels, levels = c("Lowest Tert.", "Highest Tert."))
 # get median values
-medianClin=median(FitsP_long$Value[FitsP_long$Labels=='Clinical'])
-medianSClin=median(FitsP_long$Value[FitsP_long$Labels=='Subclinical'])
+medianClin=median(FitsP_long$Value[FitsP_long$Labels=='Highest Tert.'])
+medianSClin=median(FitsP_long$Value[FitsP_long$Labels=='Lowest Tert.'])
 FitsP_long$Median=NULL
-FitsP_long$Median[FitsP_long$Labels=='Clinical']=medianClin
-FitsP_long$Median[FitsP_long$Labels=='Subclinical']=medianSClin
+FitsP_long$Median[FitsP_long$Labels=='Highest Tert.']=medianClin
+FitsP_long$Median[FitsP_long$Labels=='Lowest Tert.']=medianSClin
 # Plotting both pClinBeta and pSubclinBeta in the same horizontal boxplot
 ggplot(FitsP_long, aes(x = Labels, y = Value, fill = Median)) +
   geom_boxplot() +
@@ -431,7 +444,7 @@ ggplot(FitsP_long, aes(x = Labels, y = Value, fill = Median)) +
     low = "blue", mid = "white", high = "red",
     midpoint = 0, limits = c(-0.1, 0.1)
   )+
-  labs(title = expression(paste("\u03B2 for ", italic("p")))) +
+  labs(title = expression(paste("\u03B2 for Total Problems"))) +
   theme_minimal(base_size = 26)+theme(axis.title.y = element_blank())
 
 # saved at 700 width 300 height
@@ -443,15 +456,15 @@ FitsInt_long <- Fits1 %>%
   tidyr::gather(key = "Variable", value = "Value")
 # create cleaner labels for plot
 FitsInt_long <- FitsInt_long %>%
-  mutate(Labels = factor(ifelse(Variable == 'intSubclinBeta', 'Subclinical', 'Clinical')))
+  mutate(Labels = factor(ifelse(Variable == 'intSubclinBeta', 'Lowest Tert.', 'Highest Tert.')))
 # re order for plot
-FitsInt_long$Labels <- factor(FitsInt_long$Labels, levels = c("Subclinical", "Clinical"))
+FitsInt_long$Labels <- factor(FitsInt_long$Labels, levels = c("Lowest Tert.", "Highest Tert."))
 # get median values
-medianClin=median(FitsInt_long$Value[FitsInt_long$Labels=='Clinical'])
-medianSClin=median(FitsInt_long$Value[FitsInt_long$Labels=='Subclinical'])
+medianClin=median(FitsInt_long$Value[FitsInt_long$Labels=='Highest Tert.'])
+medianSClin=median(FitsInt_long$Value[FitsInt_long$Labels=='Lowest Tert.'])
 FitsInt_long$Median=NULL
-FitsInt_long$Median[FitsInt_long$Labels=='Clinical']=medianClin
-FitsInt_long$Median[FitsInt_long$Labels=='Subclinical']=medianSClin
+FitsInt_long$Median[FitsInt_long$Labels=='Highest Tert.']=medianClin
+FitsInt_long$Median[FitsInt_long$Labels=='Lowest Tert.']=medianSClin
 # Plotting both pClinBeta and pSubclinBeta in the same horizontal boxplot
 ggplot(FitsInt_long, aes(x = Labels, y = Value, fill = Median)) +
   geom_boxplot() +
@@ -460,7 +473,7 @@ ggplot(FitsInt_long, aes(x = Labels, y = Value, fill = Median)) +
     low = "blue", mid = "white", high = "red",
     midpoint = 0, limits = c(-0.1, 0.1)
   )+
-  labs(title = expression(paste("\u03B2 for Int."))) +
+  labs(title = expression(paste("\u03B2 for Internalizing"))) +
   theme_minimal(base_size = 26)+theme(axis.title.y = element_blank())
 
 
@@ -471,15 +484,15 @@ FitsExt_long <- Fits1 %>%
   tidyr::gather(key = "Variable", value = "Value")
 # create cleaner labels for plot
 FitsExt_long <- FitsExt_long %>%
-  mutate(Labels = factor(ifelse(Variable == 'extSubclinBeta', 'Subclinical', 'Clinical')))
+  mutate(Labels = factor(ifelse(Variable == 'extSubclinBeta', 'Lowest Tert.', 'Highest Tert.')))
 # re order for plot
-FitsExt_long$Labels <- factor(FitsExt_long$Labels, levels = c("Subclinical", "Clinical"))
+FitsExt_long$Labels <- factor(FitsExt_long$Labels, levels = c("Lowest Tert.", "Highest Tert."))
 # get median values
-medianClin=median(FitsExt_long$Value[FitsExt_long$Labels=='Clinical'])
-medianSClin=median(FitsExt_long$Value[FitsExt_long$Labels=='Subclinical'])
+medianClin=median(FitsExt_long$Value[FitsExt_long$Labels=='Highest Tert.'])
+medianSClin=median(FitsExt_long$Value[FitsExt_long$Labels=='Lowest Tert.'])
 FitsExt_long$Median=NULL
-FitsExt_long$Median[FitsExt_long$Labels=='Clinical']=medianClin
-FitsExt_long$Median[FitsExt_long$Labels=='Subclinical']=medianSClin
+FitsExt_long$Median[FitsExt_long$Labels=='Highest Tert.']=medianClin
+FitsExt_long$Median[FitsExt_long$Labels=='Lowest Tert.']=medianSClin
 # Plotting both pClinBeta and pSubclinBeta in the same horizontal boxplot
 ggplot(FitsExt_long, aes(x = Labels, y = Value, fill = Median)) +
   geom_boxplot() +
@@ -488,7 +501,7 @@ ggplot(FitsExt_long, aes(x = Labels, y = Value, fill = Median)) +
     low = "blue", mid = "white", high = "red",
     midpoint = 0, limits = c(-0.1, 0.1)
   )+
-  labs(title = expression(paste("\u03B2 for Ext."))) +
+  labs(title = expression(paste("\u03B2 for Externalizing"))) +
   theme_minimal(base_size = 26)+theme(axis.title.y = element_blank())
 
 
