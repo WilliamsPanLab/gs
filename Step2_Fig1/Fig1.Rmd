@@ -536,18 +536,10 @@ for (i in 1:3){
 ```{r}
 ### P boots plot with overlaid linear fit
 # load in data
-Fits1=readRDS('~/Downloads/gpFitBoots_sRE_1k (1).rds')
-Fits2=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr2.rds')
-Fits3=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr3.rds')
-Fits4=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr4.rds')
-Fits5=readRDS('~/Desktop/g_p/gpFitBoots_cbclasr5.rds')
-Fits1[2001:4000,]=Fits2[2001:4000,]
-Fits1[4001:6000,]=Fits3[4001:6000,]
-Fits1[6001:8000,]=Fits4[6001:8000,]
-Fits1[8001:10000,]=Fits5[8001:10000,]
+Fits=readRDS('~/Downloads/gpR1/gpFitBoots_Poly_sRE_incEdu.rds')
 
 # extract p factor
-PFits=Fits1[1:1000,1:162]
+PFits=Fits[,1:162]
 MaxP=find_furthest_nonzero(PFits)
 # melt data for plotting each line
 data_melt <- melt(t(PFits))
@@ -561,7 +553,7 @@ percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_
 data_melt$CI <- 0
   
 # Prepare CIs for insertion
-CIs <- data.frame(rep(seq(0, 161), 2), c(rep(1001, 162), rep(1002, 162)), percentiles_long$YValue, rep(1, (162*2)))
+CIs <- data.frame(rep(seq(0, 161), 2), c(rep(10001, 162), rep(10002, 162)), percentiles_long$YValue, rep(1, (162*2)))
 colnames(CIs) <- colnames(data_melt)
   
 # Add CIs
@@ -572,7 +564,7 @@ data_melt2$CI <- as.factor(data_melt2$CI)
   
 
 # add in var2, only length of 80
-fit_data$Var2=rep(1003,80)
+fit_data$Var2=rep(10003,80)
 
 # get 99th percentile for plotting
 p99=quantile(masterdf$cbcl_scr_syn_totprob_r,.99)
@@ -593,67 +585,21 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 
 ```
 
-```{r}
-# withdrawn depression for k - note WitBC and WitC derived chunks below
-WFits=Fits1[,288:304]
-MaxW=find_furthest_nonzero(WFits)
-# melt data for plotting each line
-data_melt <- melt(t(WFits))
-data_melt$Var1 <- rep(seq(0, 16), nrow(WFits))
-# Calculate percentiles
-percentiles <- WFits %>%
-summarise(across(everything(), quantile, probs = c(0.01, 0.99), na.rm = TRUE))
-percentiles_long <- tidyr::pivot_longer(percentiles, cols = everything(), names_to = "Percentile", values_to = "YValue")
-
-# Add CI column
-data_melt$CI <- 0
-  
-# Prepare CIs for insertion
-CIs <- data.frame(rep(seq(0, 16), 2), c(rep(10001, 17), rep(10002,17)), percentiles_long$YValue, rep(1, (17*2)))
-colnames(CIs) <- colnames(data_melt)
-  
-# Add CIs
-data_melt2 <- rbind(data_melt, CIs)
-  
-# Convert CI column to factor
-data_melt2$CI <- as.factor(data_melt2$CI)
-  
-
-# add in var2, only length of 80
-fit_data$Var2=rep(10003,16)
-
-# saved out at 600x600
-
-# Plotting the lines
-ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
-  geom_line(aes(alpha = CI, color = Var2), show.legend = FALSE) +
-  scale_color_viridis_c(option = "inferno", direction = -1) +
-  scale_alpha_manual(values = c(0.01, 1), guide = FALSE) + ylim(c(-1.5,1.5)) +
-  theme_minimal(base_size=35) + 
-  ylab(expression(italic(g)))+xlab('Withdrawn Depression')+
-  geom_vline(xintercept = WitBc, linetype = "dashed")+
-  geom_vline(xintercept = WitC, linetype = "dashed")+
-  theme(panel.border = element_rect(color = "black", fill = NA, size = 1)) +
-  scale_x_continuous(limits = c(0,MaxW),expand = expansion(mult = c(0, 0)))
-```
-
 
 
 ```{r}
-# set Fits1 to Fits for simplicity
-Fits=Fits1
 # find mean shape and plot it: p
-PFits=Fits[1:1000,1:162]
-IFits=Fits[1:1000,163:214]
-EFits=Fits[,181:228]
-SomFits=Fits[,229:242]
-AnxFits=Fits[,243:268]
-ThoFits=Fits[,269:287]
-WitFits=Fits[,288:304]
-SocFits=Fits[,305:322]
-AttFits=Fits[,323:342]
-RulFits=Fits[,343:361]
-AggFits=Fits[,362:394]
+PFits=Fits[,1:162]
+IFits=Fits[,163:214]
+EFits=Fits[,215:262]
+SomFits=Fits[,263:279]
+AnxFits=Fits[,280:305]
+ThoFits=Fits[,306:328]
+WitFits=Fits[,329:345]
+SocFits=Fits[,346:363]
+AttFits=Fits[,364:383]
+RulFits=Fits[,384:402]
+AggFits=Fits[,403:435]
 
 # set to 99th percentile for accuracy
 MaxP=quantile(masterdf$cbcl_scr_syn_totprob_r,.99)
@@ -720,13 +666,13 @@ AggBc=mean(as.numeric(masterdfAgg_bc$cbcl_scr_syn_aggressive_r))
 AggC=mean(as.numeric(masterdfAgg_c$cbcl_scr_syn_aggressive_r))
 
 # actually plot em
-plot_bootstraps(PFits,161,expression(italic(p)),MaxP,Pbc,Pc)
+plot_bootstraps(PFits,161,'Total Problems',MaxP,Pbc,Pc)
 plot_bootstraps(IFits,51,'Internalizing',MaxI,Ibc,Ic)
 plot_bootstraps(EFits,47,'Externalizing',MaxE,Ebc,Ec)
 # for supplemental figure
-plot_bootstraps(SomFits,13,"Somatic",MaxSom,SomBc,SomC)
+plot_bootstraps(SomFits,16,"Somatic",MaxSom,SomBc,SomC)
 plot_bootstraps(AnxFits,25,'Anxious Depression',MaxAnx,AnxBc,AnxC)
-plot_bootstraps(ThoFits,18,'Thought',MaxTho,ThoBc,ThoC)
+plot_bootstraps(ThoFits,22,'Thought',MaxTho,ThoBc,ThoC)
 plot_bootstraps(WitFits,16,"Withdrawn Depression",MaxWit,WitBc,WitC)
 plot_bootstraps(SocFits,17,'Social',MaxSoc,SocBc,SocC)
 ###
@@ -758,8 +704,8 @@ for (i in 1:(ncol(PFits) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -772,7 +718,7 @@ dervPlotDf$seq=1:(dim(dervPlotDf)[1])
 ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     theme(panel.spacing = unit(-.01,"cm")) +
     scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+
-    xlim(c(0,MaxP))+xlab(expression(italic('p')))+
+    xlim(c(0,MaxP))+xlab('Total Problems')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
     scale_x_continuous(limits = c(0,MaxP),expand = expansion(mult = c(0, 0)))
@@ -796,8 +742,8 @@ for (i in 1:(ncol(IFits) - 1)) {
 positive_counts <- colSums(Int_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Int_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>990
-negative_countsSig=negative_counts>990
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(Int_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -834,8 +780,8 @@ for (i in 1:(ncol(EFits) - 1)) {
 positive_counts <- colSums(Ext_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Ext_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(Ext_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -872,8 +818,8 @@ for (i in 1:(ncol(SomFits) - 1)) {
 positive_counts <- colSums(Som_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Som_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(Som_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -910,8 +856,8 @@ for (i in 1:(ncol(AnxFits) - 1)) {
 positive_counts <- colSums(AnxDep_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(AnxDep_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(AnxDep_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -927,7 +873,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     xlim(c(0,MaxAnx))+xlab('Anxious Depression')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-    scale_x_continuous(limits = c(0,MaxAnx),expand = expansion(mult = c(0, 0)))
+    scale_x_continuous(limits = c(0,MaxAnx),expand = expansion(mult = c(0, 0)),n.breaks = 4)
+# saved at 420 x 200 for extra xlabel space
 ########################
 
 # Thought
@@ -948,8 +895,8 @@ for (i in 1:(ncol(ThoFits) - 1)) {
 positive_counts <- colSums(Thought_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Thought_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(Thought_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -965,7 +912,7 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
     xlim(c(0,MaxTho))+xlab('Thought')+
     guides(fill=FALSE)+
     theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-    scale_x_continuous(limits = c(0,MaxTho),expand = expansion(mult = c(0, 0)))
+    scale_x_continuous(limits = c(0,MaxTho),expand = expansion(mult = c(0, 0)),n.breaks = 3)
 ########################
 
 # Withdrawn depression
@@ -986,8 +933,8 @@ for (i in 1:(ncol(WitFits) - 1)) {
 positive_counts <- colSums(WithDep_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(WithDep_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(WithDep_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1001,6 +948,8 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
       guides(fill=FALSE)+
       theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
       scale_x_continuous(limits = c(0,MaxWit),expand = expansion(mult = c(0, 0)),breaks = seq(0, MaxWit, by = 2))
+# saved at 480 x 210 for x-axis label space
+
 
 # Social
 Soc_derivative_matrix <- matrix(0, nrow = nrow(SocFits), ncol = ncol(SocFits) - 1)
@@ -1020,8 +969,8 @@ for (i in 1:(ncol(SocFits) - 1)) {
 positive_counts <- colSums(Soc_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Soc_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(Soc_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1055,8 +1004,8 @@ for (i in 1:(ncol(AttFits) - 1)) {
 positive_counts <- colSums(Att_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Att_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 data <- apply(Att_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -1089,8 +1038,8 @@ for (i in 1:(ncol(RulFits) - 1)) {
 positive_counts <- colSums(Rul_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Rul_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 data <- apply(Rul_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -1123,8 +1072,8 @@ for (i in 1:(ncol(AggFits) - 1)) {
 positive_counts <- colSums(Agg_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Agg_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9900
+negative_countsSig=negative_counts>9900
 data <- apply(Agg_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -1143,43 +1092,6 @@ ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
 
 ```
 
-```{r}
-# and extended withdep for k
-# Withdrawn depression
-WithDep_derivative_matrix <- matrix(0, nrow = nrow(WitFits), ncol = ncol(WitFits) - 1)
-# Calculate the derivative for each column
-for (i in 1:(ncol(WitFits) - 1)) {
-  # Calculate the differences in x (assuming a constant difference)
-  dx <- 1
-  # Calculate the differences in y (predicted values)
-  dy <- WitFits[, i + 1] - WitFits[, i]
-  # Calculate the derivatives (slopes)
-  derivatives <- dy / dx
-  # Store the derivatives in the derivative matrix
-  WithDep_derivative_matrix[, i] <- derivatives
-}
-# calc sig dervs
-# get straightfoward of segment where 99% is over 0 or under
-positive_counts <- colSums(WithDep_derivative_matrix > 0, na.rm = TRUE)
-negative_counts <- colSums(WithDep_derivative_matrix < 0, na.rm = TRUE)
-# find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
-# make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
-data <- apply(WithDep_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
-dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
-#dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
-#dervPlotDf$sig_deriv=0
-dervPlotDf$sig_deriv[dervPlotDf$sig_derivMask]=dervPlotDf$data[dervPlotDf$sig_derivMask]
-dervPlotDf$seq=1:(dim(dervPlotDf)[1])
-ggplot(data=dervPlotDf) + geom_raster(aes(x = seq, y = .5, fill = sig_deriv))+
-      theme(panel.spacing = unit(-.01,"cm")) +
-      scale_fill_gradientn(colors = my_palette(100),limits = c(min(-.1),max(0.1)))+theme_minimal(base_size = 35)+xlim(c(0,13))+xlab('Withdrawn Depression')+
-      guides(fill=FALSE)+
-      theme(axis.title.y = element_blank(),axis.text.y=element_blank())+theme(panel.border = element_rect(color = "black", fill = NA, size = 1))+
-      scale_x_continuous(limits = c(0,13),expand = expansion(mult = c(0, 0)),breaks = seq(0, 13, by = 2))
-
-```
 
 ```{r}
 # New data for prediction
