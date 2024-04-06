@@ -21,7 +21,7 @@ knitr::opts_chunk$set(fig.width=12, fig.height=12)
 ```{r}
 ### P boots plot with overlaid linear fit
 # load in data
-Fits=readRDS('~/Downloads/gpR1/gpFitBoots_sRE_SH2.rds')
+Fits=readRDS('~/Downloads/gpR1/gpFitBoots_sRE_SH1.rds')
 
 # extract p factor
 PFits=Fits[,1:162]
@@ -74,17 +74,17 @@ ggplot(data = data_melt2, aes(x = Var1, y = value, group = Var2)) +
 
 ```{r}
 # find mean shape and plot it: p
-PFits=Fits[,1:128]
-IFits=Fits[,129:180]
-EFits=Fits[,181:228]
-SomFits=Fits[,229:242]
-AnxFits=Fits[,243:268]
-ThoFits=Fits[,269:285]
-WitFits=Fits[,286:299]
-SocFits=Fits[,300:316]
-AttFits=Fits[,317:336]
-RulFits=Fits[,337:355]
-AggFits=Fits[,356:386]
+PFits=Fits[,1:162]
+IFits=Fits[,163:213]
+EFits=Fits[,214:260]
+SomFits=Fits[,261:277]
+AnxFits=Fits[,278:299]
+ThoFits=Fits[,300:322]
+WitFits=Fits[,323:339]
+SocFits=Fits[,340:357]
+AttFits=Fits[,358:377]
+RulFits=Fits[,378:395]
+AggFits=Fits[,396:428]
 
 # set to 99th percentile for accuracy
 MaxP=quantile(masterdf$cbcl_scr_syn_totprob_r,.99)
