@@ -151,21 +151,21 @@ AggBc=mean(as.numeric(masterdfAgg_bc$cbcl_scr_syn_aggressive_r))
 AggC=mean(as.numeric(masterdfAgg_c$cbcl_scr_syn_aggressive_r))
 
 # actually plot em
-plot_bootstraps(PFits,161,'Total Problems',MaxP,Pbc,Pc)
-plot_bootstraps(IFits,50,'Internalizing',MaxI,Ibc,Ic)
-plot_bootstraps(EFits,46,'Externalizing',MaxE,Ebc,Ec)
+plot_bootstraps(PFits,127,'Total Problems',MaxP,Pbc,Pc)
+plot_bootstraps(IFits,51,'Internalizing',MaxI,Ibc,Ic)
+plot_bootstraps(EFits,47,'Externalizing',MaxE,Ebc,Ec)
 # for supplemental figure
-plot_bootstraps(SomFits,16,"Somatic",MaxSom,SomBc,SomC)
-plot_bootstraps(AnxFits,21,'Anxious Depression',MaxAnx,AnxBc,AnxC)
-plot_bootstraps(ThoFits,22,'Thought',MaxTho,ThoBc,ThoC)
-plot_bootstraps(WitFits,16,"Withdrawn Depression",MaxWit,WitBc,WitC)
-plot_bootstraps(SocFits,17,'Social',MaxSoc,SocBc,SocC)
+plot_bootstraps(SomFits,13,"Somatic",MaxSom,SomBc,SomC)
+plot_bootstraps(AnxFits,25,'Anxious Depression',MaxAnx,AnxBc,AnxC)
+plot_bootstraps(ThoFits,16,'Thought',MaxTho,ThoBc,ThoC)
+plot_bootstraps(WitFits,13,"Withdrawn Depression",MaxWit,WitBc,WitC)
+plot_bootstraps(SocFits,16,'Social',MaxSoc,SocBc,SocC)
 ###
 # re-run with MaxAtt instead
 ###
 plot_bootstraps(AttFits,19,'Attention',MaxAtt,AttBc,AttC)
-plot_bootstraps(RulFits,17,'Rule Breaking',MaxRul,RulBc,RulC)
-plot_bootstraps(AggFits,32,'Aggression',MaxAgg,AggBc,AggC)
+plot_bootstraps(RulFits,18,'Rule Breaking',MaxRul,RulBc,RulC)
+plot_bootstraps(AggFits,30,'Aggression',MaxAgg,AggBc,AggC)
 ```
 
 ```{r}
@@ -189,8 +189,8 @@ for (i in 1:(ncol(PFits) - 1)) {
 positive_counts <- colSums(P_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(P_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9000
+negative_countsSig=negative_counts>9000
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(P_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -227,8 +227,8 @@ for (i in 1:(ncol(IFits) - 1)) {
 positive_counts <- colSums(Int_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Int_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9000
-negative_countsSig=negative_counts>9000
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(Int_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -265,8 +265,8 @@ for (i in 1:(ncol(EFits) - 1)) {
 positive_counts <- colSums(Ext_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Ext_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9000
-negative_countsSig=negative_counts>9000
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(Ext_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -303,8 +303,8 @@ for (i in 1:(ncol(SomFits) - 1)) {
 positive_counts <- colSums(Som_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Som_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9000
-negative_countsSig=negative_counts>9000
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(Som_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -341,8 +341,8 @@ for (i in 1:(ncol(AnxFits) - 1)) {
 positive_counts <- colSums(AnxDep_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(AnxDep_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9000
-negative_countsSig=negative_counts>9000
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(AnxDep_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -380,8 +380,8 @@ for (i in 1:(ncol(ThoFits) - 1)) {
 positive_counts <- colSums(Thought_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Thought_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9000
-negative_countsSig=negative_counts>9000
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(Thought_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -418,8 +418,8 @@ for (i in 1:(ncol(WitFits) - 1)) {
 positive_counts <- colSums(WithDep_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(WithDep_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9000
-negative_countsSig=negative_counts>9000
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(WithDep_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -454,8 +454,8 @@ for (i in 1:(ncol(SocFits) - 1)) {
 positive_counts <- colSums(Soc_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Soc_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9000
-negative_countsSig=negative_counts>9000
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 # make dataframe: 50th percentile of derivatives accompanied by posSig and NegSig vector
 data <- apply(Soc_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
@@ -489,8 +489,8 @@ for (i in 1:(ncol(AttFits) - 1)) {
 positive_counts <- colSums(Att_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Att_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9000
-negative_countsSig=negative_counts>9000
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 data <- apply(Att_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -523,8 +523,8 @@ for (i in 1:(ncol(RulFits) - 1)) {
 positive_counts <- colSums(Rul_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Rul_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9500
-negative_countsSig=negative_counts>9500
+positive_countsSig=positive_counts>9000
+negative_countsSig=negative_counts>9000
 data <- apply(Rul_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
 dervPlotDf$sig_derivMask=dervPlotDf[,2]+dervPlotDf[,3]>0
@@ -557,8 +557,8 @@ for (i in 1:(ncol(AggFits) - 1)) {
 positive_counts <- colSums(Agg_derivative_matrix > 0, na.rm = TRUE)
 negative_counts <- colSums(Agg_derivative_matrix < 0, na.rm = TRUE)
 # find where each is 99% or greater
-positive_countsSig=positive_counts>9000
-negative_countsSig=negative_counts>9000
+positive_countsSig=positive_counts>9500
+negative_countsSig=negative_counts>9500
 data <- apply(Agg_derivative_matrix, 2, function(x) quantile(x, probs = 0.5))
 
 dervPlotDf<-data.frame(data,positive_countsSig,negative_countsSig)
