@@ -602,7 +602,7 @@ reducedMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4),data=masterd
 # 99th percentile
 p99=quantile(masterdf$cbcl_scr_syn_totprob_r,.99)
 
-effect_range <- with(data, seq(0, p99), length.out = 100)
+effect_range <- with(masterdf_pub, seq(0, p99), length.out = 100)
 pred_data <- data.frame(cbcl_scr_syn_totprob_r = effect_range)
 pred_data$interview_age=mean(masterdf_pub$interview_age)
 # modal stage
@@ -626,7 +626,7 @@ reducedMod=gam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4),data=master
 # 99th percentile
 i99=quantile(masterdf$cbcl_scr_syn_internal_r,.99)
 
-effect_range <- with(data, seq(0, i99), length.out = 100)
+effect_range <- with(masterdf_pub, seq(0, i99), length.out = 100)
 pred_data <- data.frame(cbcl_scr_syn_internal_r = effect_range)
 pred_data$interview_age=mean(masterdf_pub$interview_age)
 # modal stage
@@ -650,7 +650,7 @@ reducedMod=gam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4),data=master
 # 99th percentile
 e99=quantile(masterdf$cbcl_scr_syn_external_r,.99)
 
-effect_range <- with(data, seq(0, e99), length.out = 100)
+effect_range <- with(masterdf_pub, seq(0, e99), length.out = 100)
 pred_data <- data.frame(cbcl_scr_syn_external_r = effect_range)
 pred_data$interview_age=mean(masterdf_pub$interview_age)
 # modal stage
@@ -766,30 +766,6 @@ ggplot(data = plotdf, aes(x = masterdf_BPM.bpExt, y = residuals)) +
     theme_minimal()+xlim(c(0,e99))
 
 ```
-
-```{r}
-# BPM robustness analysis - internal
-
-```
-
-```{r}
-# BPM robustness analysis - external
-
-```
-
-```{r}
-
-# evaluate impact of including bpm vs. cbcl
-fullMod=gam(g~s(cbcl_scr_syn_totprob_r,k=4)+s(interview_age,k=4),data=masterdf_BPM)
-reducedMod=gam(g~s(bpTot,k=4)+s(interview_age,k=4),data=masterdf_BPM)
-# int
-fullMod=gam(g~s(cbcl_scr_syn_internal_r,k=4)+s(interview_age,k=4),data=masterdf_BPM)
-reducedMod=gam(g~poly(bpInt,2)+s(interview_age,k=4),data=masterdf_BPM)
-# ext
-fullMod=gam(g~s(cbcl_scr_syn_external_r,k=4)+s(interview_age,k=4),data=masterdf_BPM)
-reducedMod=gam(g~s(bpExt,k=4)+s(interview_age,k=4),data=masterdf_BPM)
-```
-
 ```{r}
 # Calculate the mean of g for each site
 mean_g_per_site <- aggregate(g ~ site, data = masterdf, FUN = mean, na.action = na.omit)
@@ -835,7 +811,7 @@ alph_order <- c("Asian", "Black", "Hispanic", "Missing", "Other", "White")
 my_colors <- c("red", "orange", "blue", "gray", "green","yellow")
 
 # preset x-axis names
-x_labs=c("CBCL", "CBCL (2x)","Grades (2x)","ASR","ACS","Cognitive data (2x)","One sibling","Demographics")
+#x_labs=c("CBCL", "CBCL (2x)","Grades (2x)","ASR","ACS","Cognitive data (2x)","One sibling","Demographics")
 
 #
 ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
@@ -844,7 +820,7 @@ ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
   scale_fill_manual(values = my_colors, breaks = alph_order) +
   theme_bw(base_size = 30) + 
   labs(y = "Children", fill = "Race/Ethnicity", title = "Alluvial Consort Chart") +
-  scale_x_discrete(labels = x_labs) +
+  #scale_x_discrete(labels = x_labs) +
   theme(axis.title.x = element_blank())
 # saved at 2400x1000
 
