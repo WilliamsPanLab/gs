@@ -283,7 +283,7 @@ ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bin
     theme_minimal(base_size=35) + 
     ylab(expression(italic(g)))+xlab('Total Problems')+
     geom_vline(xintercept = Pbc, linetype = "dashed")+
-    geom_vline(xintercept = min(clindf$cbcl_scr_syn_totprob_r), linetype = "dashed")+
+    geom_vline(xintercept = Pc, linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
     scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))
 
@@ -304,7 +304,7 @@ ggplot(data = plotdf,aes(x = cbcl_scr_syn_totprob_r, y = resids)) + geom_hex(bin
     theme_minimal(base_size=35) + 
     ylab(expression(italic(g)))+xlab('Total Problems')+
     geom_vline(xintercept = Pbc, linetype = "dashed")+
-    geom_vline(xintercept = min(clindf$cbcl_scr_syn_totprob_r), linetype = "dashed")+
+    geom_vline(xintercept = Pc, linetype = "dashed")+
     theme(legend.position = "bottom",panel.border = element_rect(color = "black", fill = NA, size = 1),legend.margin = margin(-25, 0, 0, 0, "pt"),legend.key.width = unit(2.5,"cm"))+
     scale_x_continuous(limits = c(0,128),expand = expansion(mult = c(0, 0)))
 
@@ -541,7 +541,7 @@ ggplot(df_melted, aes(x = value)) +
 ```{r}
 ### P boots plot with overlaid linear fit
 # load in data
-Fits=readRDS('~/Downloads/gpR1/gpFitBoots_Poly_sRE_inc.rds')
+Fits=readRDS('~/Downloads/gpR1/gpFitBoots_sRE_SH1.rds')
 
 # extract p factor
 PFits=Fits[,1:162]
