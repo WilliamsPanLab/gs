@@ -138,7 +138,7 @@ masterdf$poverty[masterdf$INR>2]=3
 masterdf$poverty[masterdf$INR>4]=4
 masterdf$poverty=log(as.numeric(masterdf$INR))
 # loop over manual bootstrap
-for (b in 8001:10000){
+for (b in 6001:8000){
 	print(b)
 	# get subjects to include in this bootstrap
 	BootSubjs=sample(subjs,numSubjs,replace=T)
@@ -401,14 +401,14 @@ for (b in 8001:10000){
 	aggFitPov4[b,1:(baggmax+1)]=forFitagg
 }
 # SAVEOUT fits for pov 0
-saveRDS(data.frame(pFitPov0,intFitPov0,extFitPov0,somFitPov0,anxFitPov0,thoFitPov0,witFitPov0,socFitPov0,attFitPov0,rulFitPov0,aggFitPov0),file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov0_fancy_numlogPov5.rds')
+saveRDS(data.frame(pFitPov0,intFitPov0,extFitPov0,somFitPov0,anxFitPov0,thoFitPov0,witFitPov0,socFitPov0,attFitPov0,rulFitPov0,aggFitPov0),file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov0_fancy_numlogPov4.rds')
 # SAVEOUT fits for pov 1
-saveRDS(data.frame(pFitPov1,intFitPov1,extFitPov1,somFitPov1,anxFitPov1,thoFitPov1,witFitPov1,socFitPov1,attFitPov1,rulFitPov1,aggFitPov1),file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov1_fancy_numlogPov5.rds')
+saveRDS(data.frame(pFitPov1,intFitPov1,extFitPov1,somFitPov1,anxFitPov1,thoFitPov1,witFitPov1,socFitPov1,attFitPov1,rulFitPov1,aggFitPov1),file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov1_fancy_numlogPov4.rds')
 # SAVEOUT fits for pov 2
-saveRDS(data.frame(pFitPov2,intFitPov2,extFitPov2,somFitPov2,anxFitPov2,thoFitPov2,witFitPov2,socFitPov2,attFitPov2,rulFitPov2,aggFitPov2),file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov2_fancy_numlogPov5.rds')
+saveRDS(data.frame(pFitPov2,intFitPov2,extFitPov2,somFitPov2,anxFitPov2,thoFitPov2,witFitPov2,socFitPov2,attFitPov2,rulFitPov2,aggFitPov2),file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov2_fancy_numlogPov4.rds')
 # SAVEOUT fits for pov 3
-saveRDS(data.frame(pFitPov3,intFitPov3,extFitPov3,somFitPov3,anxFitPov3,thoFitPov3,witFitPov3,socFitPov3,attFitPov3,rulFitPov3,aggFitPov3),file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov3_fancy_numlogPov5.rds')
+saveRDS(data.frame(pFitPov3,intFitPov3,extFitPov3,somFitPov3,anxFitPov3,thoFitPov3,witFitPov3,socFitPov3,attFitPov3,rulFitPov3,aggFitPov3),file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov3_fancy_numlogPov4.rds')
 # SAVEOUT fits for pov 4
-saveRDS(data.frame(pFitPov4,intFitPov4,extFitPov4,somFitPov4,anxFitPov4,thoFitPov4,witFitPov4,socFitPov4,attFitPov4,rulFitPov4,aggFitPov4,file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov4_fancy_numlogPov5.rds')
+saveRDS(data.frame(pFitPov4,intFitPov4,extFitPov4,somFitPov4,anxFitPov4,thoFitPov4,witFitPov4,socFitPov4,attFitPov4,rulFitPov4,aggFitPov4),file='/oak/stanford/groups/leanew1/users/apines/data/gp/FitsPov4_fancy_numlogPov4.rds')
 
 print('done with g~p fit bootstrapping!')
