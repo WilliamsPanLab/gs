@@ -265,6 +265,10 @@ AggC=mean(as.numeric(masterdfAgg_c$cbcl_scr_syn_aggressive_r))
 ```{r}
 ### poverty (INR) bootstrap plots. First digit (FitsPov0) is level of poverty, last digit (1.rds) is bootstrap iterations (1-2k, 2k-4k, 4k-6k, etc.)
 
+
+##### FIX SO FITS ISN'T BEING OVERWRITEN
+
+
 ### re-merge the 5, update indices to pull values from
 Fits1=readRDS('~/Downloads/gpR1/FitsPov0_fancy_numlogPov1.rds')
 Fits2=readRDS('~/Downloads/gpR1/FitsPov0_fancy_numlogPov2.rds')
@@ -272,10 +276,10 @@ Fits3=readRDS('~/Downloads/gpR1/FitsPov0_fancy_numlogPov3.rds')
 Fits4=readRDS('~/Downloads/gpR1/FitsPov0_fancy_numlogPov4.rds')
 Fits5=readRDS('~/Downloads/gpR1/FitsPov0_fancy_numlogPov5.rds')
 Fits=Fits1[1:2000,]
-Fits=Fits2[2001:4000,]
-Fits=Fits3[4001:6000,]
-Fits=Fits4[6001:8000,]
-Fits=Fits5[8001:10000,]
+Fits[2001:4000,]=Fits2[2001:4000,]
+Fits[4001:6000,]=Fits3[4001:6000,]
+Fits[6001:8000,]=Fits4[6001:8000,]
+Fits[8001:10000,]=Fits5[8001:10000,]
 
 PFits0=Fits[,1:162]
 IFits0=Fits[,163:214]
@@ -297,10 +301,10 @@ Fits3=readRDS('~/Downloads/gpR1/FitsPov1_fancy_numlogPov3.rds')
 Fits4=readRDS('~/Downloads/gpR1/FitsPov1_fancy_numlogPov4.rds')
 Fits5=readRDS('~/Downloads/gpR1/FitsPov1_fancy_numlogPov5.rds')
 Fits=Fits1[1:2000,]
-Fits=Fits2[2001:4000,]
-Fits=Fits3[4001:6000,]
-Fits=Fits4[6001:8000,]
-Fits=Fits5[8001:10000,]
+Fits[2001:4000,]=Fits2[2001:4000,]
+Fits[4001:6000,]=Fits3[4001:6000,]
+Fits[6001:8000,]=Fits4[6001:8000,]
+Fits[8001:10000,]=Fits5[8001:10000,]
 
 PFits1=Fits[,1:162]
 IFits1=Fits[,163:214]
@@ -322,10 +326,10 @@ Fits3=readRDS('~/Downloads/gpR1/FitsPov2_fancy_numlogPov3.rds')
 Fits4=readRDS('~/Downloads/gpR1/FitsPov2_fancy_numlogPov4.rds')
 Fits5=readRDS('~/Downloads/gpR1/FitsPov2_fancy_numlogPov5.rds')
 Fits=Fits1[1:2000,]
-Fits=Fits2[2001:4000,]
-Fits=Fits3[4001:6000,]
-Fits=Fits4[6001:8000,]
-Fits=Fits5[8001:10000,]
+Fits[2001:4000,]=Fits2[2001:4000,]
+Fits[4001:6000,]=Fits3[4001:6000,]
+Fits[6001:8000,]=Fits4[6001:8000,]
+Fits[8001:10000,]=Fits5[8001:10000,]
 
 PFits2=Fits[,1:162]
 IFits2=Fits[,163:214]
@@ -347,10 +351,10 @@ Fits3=readRDS('~/Downloads/gpR1/FitsPov3_fancy_numlogPov3.rds')
 Fits4=readRDS('~/Downloads/gpR1/FitsPov3_fancy_numlogPov4.rds')
 Fits5=readRDS('~/Downloads/gpR1/FitsPov3_fancy_numlogPov5.rds')
 Fits=Fits1[1:2000,]
-Fits=Fits2[2001:4000,]
-Fits=Fits3[4001:6000,]
-Fits=Fits4[6001:8000,]
-Fits=Fits5[8001:10000,]
+Fits[2001:4000,]=Fits2[2001:4000,]
+Fits[4001:6000,]=Fits3[4001:6000,]
+Fits[6001:8000,]=Fits4[6001:8000,]
+Fits[8001:10000,]=Fits5[8001:10000,]
 
 PFits3=Fits[,1:162]
 IFits3=Fits[,163:214]
@@ -372,10 +376,10 @@ Fits3=readRDS('~/Downloads/gpR1/FitsPov4_fancy_numlogPov3.rds')
 Fits4=readRDS('~/Downloads/gpR1/FitsPov4_fancy_numlogPov4.rds')
 Fits5=readRDS('~/Downloads/gpR1/FitsPov4_fancy_numlogPov5.rds')
 Fits=Fits1[1:2000,]
-Fits=Fits2[2001:4000,]
-Fits=Fits3[4001:6000,]
-Fits=Fits4[6001:8000,]
-Fits=Fits5[8001:10000,]
+Fits[2001:4000,]=Fits2[2001:4000,]
+Fits[4001:6000,]=Fits3[4001:6000,]
+Fits[6001:8000,]=Fits4[6001:8000,]
+Fits[8001:10000,]=Fits5[8001:10000,]
 
 PFits4=Fits[,1:162]
 IFits4=Fits[,163:214]
