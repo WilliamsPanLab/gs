@@ -1,8 +1,8 @@
-# Figure 1: Non-linear fits to cbcl subscales
+# Figure 1: Linear fits to cbcl subscales
 
-Here, the goal is to submit 10k iterations of non-linear fits of g to cbcl subscales on sherlock (our computing cluser, slurm-based). So we'll take masterdf from the sample construction step and run 10,000 [bootstraps](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)) to gauge model consistency over different permutations of participants. Because we have repeated measures (2x), we need to take care to remove entire participants for each bootstrap, not just observations.
+Here, the goal is to submit 10k iterations of linear fits of g to cbcl subscales on sherlock (our computing cluser, slurm-based) across symtpom tertiles. So we'll take masterdf from the sample construction step and run 10,000 [bootstraps](https://en.wikipedia.org/wiki/Bootstrapping_(statistics)) to gauge model consistency over different permutations of participants. Because we have repeated measures (2x), we need to take care to remove entire participants for each bootstrap, not just observations.
 
-These analyses take place over three scripts: [sample construction](https://github.com/WilliamsPanLab/gp/tree/master/Step1_SampleConstruction) (this is the previous step), [Fig1_Boots.R](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/Fig1_Boots.R), and then plotting the values derived from the bootstrapping ([Fig1.md/.rmd](https://github.com/WilliamsPanLab/gp/blob/master/Step2_Fig1/Fig1.md))
+These analyses take place over three scripts: [sample construction](https://github.com/WilliamsPanLab/gs/tree/master/Step1_SampleConstruction) (this is the previous step), [Fig1_Boots.R](https://github.com/WilliamsPanLab/gs/blob/master/Slurm/Fig1_Boots_CvSC.R), and then plotting the values derived from the bootstrapping ([Fig1.md/.rmd](https://github.com/WilliamsPanLab/gs/blob/master/Step2_Fig1/Figure1.md))
 
 ## Bootstrapping/computational steps (assuming sample construction is done)
 
