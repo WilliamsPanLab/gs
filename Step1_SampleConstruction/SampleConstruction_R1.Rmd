@@ -361,7 +361,6 @@ paste0(participantsTSVSubjs,' remain')
 ```
 
 ```{r,warning=FALSE}
-
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 ## Chunk 10: higher-resolution demographics     ##
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
@@ -529,7 +528,7 @@ saveRDS(df_group2,'~/gp_SH2_masterdf.rds')
 
 ```{r}
 ###################∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-##  Chunk 11 saves out tertile thresholds for boots  ##
+##  Chunk 12 saves out tertile thresholds for boots  ##
 ###################∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 # pull out tertile thresholds from masterdf: bc is the cutoff for the 1st/2nd tertile, c is the cutoff for the 2nd/3rd tertile
 Pbc=quantile(masterdf$cbcl_scr_syn_totprob_r,0.33)
@@ -563,7 +562,7 @@ saveRDS(data.frame(Pbc,Pc,Ibc,Ic,Ebc,Ec,AnxBc,AnxC,ThoBc,ThoC,WitBc,WitC,SomBc,S
 ```{r}
 # with puberty data
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-###   Chunk 12    processes     puberty    data   ###
+###   Chunk 13    processes     puberty    data   ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 pub=read.delim('~/Downloads/Package_1226771/abcd_ssphp01.txt')
 pub=pub[pub$eventname!='1_year_follow_up_y_arm_1',]
@@ -682,7 +681,7 @@ ggplot(plotdf, aes(x = stage, y = residuals.model.)) +
 ```{r}
 # with BPM
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-###   Chunk 13    processes     BPM    data   ###
+###   Chunk 14    processes     BPM    data   ###
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 ### LOAD in BPM
@@ -730,9 +729,6 @@ print(paste0(dif,' participants lost from BPM merge'))
 includedSubjects$BPM=0
 includedSubjects[includedSubjects$subj %in% unique(masterdf_BPM$subjectkey),]$BPM=1
 
-```
-
-```{r}
 # BPM robustness analysis - total problems
 ### total problems
 fullMod=gam(g~s(bpTot,k=4)+s(interview_age,k=4),data=masterdf_BPM)
@@ -786,7 +782,7 @@ ggplot(site_stats, aes(x = site, y = g, size = n)) +
 
 ```{r, echo=FALSE, fig.dim = c(25, 7)}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-#### Chunk 15 plots data missingness      ######
+#### Chunk 16 plots data missingness      ######
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # melt the plot df to get in proper format
@@ -828,7 +824,7 @@ ggplot(plotdf2, aes(x = variable, stratum = RaceEthn, alluvium = subj)) +
 
 ```{r}
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
-#### Chunk 16 plots  missingness as pie charts #
+#### Chunk 17 plots  missingness as pie charts #
 ###########∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆∆##############
 
 # can overlay two pie charts: starting raceEth Comp and Ending. Tuck into area that is pink now
