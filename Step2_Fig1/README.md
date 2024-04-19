@@ -9,29 +9,26 @@ These analyses take place over three scripts: [sample construction](https://gith
 1. Port masterdf over to your computer cluster (in Stanford's case, Sherlock) with the scp. Subsequent steps are in Fig1_Boots_CvSC.R, which is called to be sbatched (slurm equivalent of SGE qsub) by [this script](https://github.com/WilliamsPanLab/gp/blob/master/Slurm/sbatch_Fig1.sh)
 2. module load R/4.1 on sherlock and open R (terminal)
 3. Load needed master dataframe
-5. Glean number of subjects for bootstrapping purposes later
-6. Convert all Child Behavioral Checklist scores of interest to numeric
-7. Initialize output vectors: we're running a looooong for-loop but initializing the values will make it slightly faster. Initialize them as 0s for 
-  A) Linear vs. non-linear stat tests
-  B) True maximum values for each subscale in the ABCD study (after QC)
-  C) predictied derivatives, note we get an entire range of values for each iteration!
-  D) predicted fits (from which the derivatives are derived)
-  E) Maximum values for each subscale for each iteration
-8. Now we can actually begin bootstrap. We will run this 10k instead of 1k times, so that we can calculate significance to a greater degree of accuracy.
-9. Perform the bootstrap for each iteration. Recall that we need entire participants in/out for each iteration. We shouldn't be pulling one observation from one participant out and retaining the other inside of a bootstrap. We'll make a new dataframe by first randomly sampling participants, and then looping through each randomly sampled PTID and populating the bootstrap dataframe with that participant's data iteratively
-10. Now we can derive our maximum values for each iteration
-11. (labeled I in-script). Formally test for non-linearity. This fits a linear and a purely non-linear spline. Usually splines combine linear and non-linear fits, but here we distill solely the non-linear component to significance test whether or not there is a significant non-linear component to the fit. 
-12. (labeled II in-script) Now we derive the spline fits for this bootstrap for each CBCL subscale with bam.
-13. To interrogate each model fit, we examine the predicted value for each # of symptoms for each subscale. Each # of symptoms is reconstructed with seq by 1 to the maximum value of that bootstrap iteration
-14. We need to make a pseudodataframe with the median age populated throughout to see what the rest of our model fit looks like given a constant age, as age is a major factor in cognitive scores in youth.
-15. After fixing column names, we use the predict function, which takes in the fit model and the psuedodataframe
-16. Now we printout the fit. Note we are only printing the the maximum value of each subscale in this iteration: we can't really extrapolate past that well. This will lead to 0's in iteration where participants with the highest cbcl subscale scores are not selected, which we will deal with in post-processing.
-17. Now we will derive the derivatives of each fit, that is the pointwise slope of the fit across the range of number of reported symptoms.
-18. Same spiel as the fit: print out to maximum bootstrap-specific value
-19. And save the maxmimum bootstrap-specific value
-20. saveout all the data as .rds files
+4. Glean number of subjects for bootstrapping purposes later
+5. Convert all Child Behavioral Checklist scores of interest to numeric
+6. Initialize output vectors: we're running a looooong for-loop but initializing the values will make it slightly faster. Initialize them as 0s for 
+  A) Difference in betas for g~symptoms for total problems, internalizing, externalizing
+  B) Actual betas derived for the three relationships
+  C) Betas in the high symptom tertile for three relaitonships
+  D) Betas in the low symptom tertile for three relaitonships
+7. Derive the non-bootstrapped, full data value betas (full, high and low symptoms) for our best guess of the centerpoint across the three symptom classes.
+8. Use these to get the true beta differences across tertiles
+9. Now we can actually begin bootstrap. We will run this 10k instead of 1k times, so that we can calculate significance to a greater degree of accuracy.
+10. Perform the bootstrap for each iteration. Recall that we need entire participants in/out for each iteration. We shouldn't be pulling one observation from one participant out and retaining the other inside of a bootstrap. We'll make a new dataframe by first randomly sampling participants, and then looping through each randomly sampled PTID and populating the bootstrap dataframe with that participant's data iteratively
+11. Now we get the number of participants above and below our symptom tertile thresholds (derived from full sample) for accurate resampling of pseudo-tertiles (matched n).
+12. Randomly assign to pseudotertiles based on n above and below (non-overlapping)
+13. Derive beta coefficients for full bootstrap resample as well as in pseudotertiles
+14. Calculate difference in pseudotertile betas for null distribution
+15. Get actual tertile beta coefficients
+16. Save out true values as 10,001st in beta differences
+17. saveout all the data as .rds files
 
-## Upon completion, we should have gpBoots.rds, gpDerivBoots.rds, and gpFitBoots.rds for use in the subsequent plotting script
+## Upon completion, we should have gp_CvSC_diffs.rds for g~symptom betas across full samples, tertiles, pseudotertiles, and real and permuted beta differences for our three symptom classes. Full symptom class granularity is commented out but available.
 
 ## Plotting steps (assuming above .rds files are derived and locally available)
 
