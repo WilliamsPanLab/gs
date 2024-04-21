@@ -319,12 +319,15 @@ library(lme4)
 masterdf$subjectkey<-as.factor(masterdf$subjectkey)
 modelAll<-lme(g~interview_age+cbcl_scr_syn_totprob_r,random=~1|subjectkey,data=masterdf)
 summary(modelAll)
-# model just clinical
+intervals(modelAll,level=.95)$fixed
+# model just high severity
 modelClin<-lme(g~interview_age+cbcl_scr_syn_totprob_r,random=~1|subjectkey,data=clindf)
 summary(modelClin)
-# model just subclinical
+intervals(modelClin,level=.95)$fixed
+# model just low severity
 modelSClin<-lme(g~interview_age+cbcl_scr_syn_totprob_r,random=~1|subjectkey,data=sclindf)
 summary(modelSClin)
+intervals(modelSClin,level=.95)$fixed
 ```
 
 ```{r}
