@@ -1,4 +1,4 @@
-This is the main page hosting the code repository and replication guide for "The relationship between psychiatric symptoms and cognition depends on symptom severity". For clarity, analyses and replication guides are broken up into 3 sections. In the spirit of useful reductionism, general cognition is referred to as *g* throughout, and general psychopathology is referred to as *p* throughout. 
+This is the main page hosting the code repository and replication guide for "Psychiatric Symptoms, Cognition, and Symptom Severity in Children", previously titled "The relationship between psychiatric symptoms and cognition depends on symptom severity". For clarity, analyses and replication guides are broken up into 3 sections. In the spirit of useful reductionism, general cognition is referred to as *g* throughout, and general psychopathology is referred to as *p* throughout. 
 
 For each step, a detailed walk-through is linked.
 
@@ -7,5 +7,7 @@ For each step, a detailed walk-through is linked.
 [Step 2](https://github.com/WilliamsPanLab/gp/tree/master/Step2_Fig1) corresponds to figure 1, and executes bootstrap iterations to reveal the linear, symptom-tertile-dependent relationships between *g* and symptoms.
 
 [Step 3](https://github.com/WilliamsPanLab/gp/tree/master/Step3_Fig2) corresponds to figure 2, and executes bootstraps to interrogate nonlinear associations formally rather than by deriving separate linear models across the mental health spectrum.
+
+Our manuscript can be found [here](https://jamanetwork.com/journals/jamapsychiatry/fullarticle/2822689)
 
 Many thanks to the ABCD families and study teams.
